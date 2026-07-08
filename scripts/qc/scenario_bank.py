@@ -396,7 +396,14 @@ BANK: list[Scenario] = [
         turns=["our dog Biscuit was put down two weeks ago. my kids said goodbye but I didn't really. I want one more morning walk with him",
                "the loop around the reservoir. he always pulled until the bench, then walked perfect. tennis ball obsessed",
                "ready"],
-        note="Small grief treated as real grief; the bench detail must appear and matter."),
+        note="Small grief treated as real grief; the bench detail must appear and matter. "
+             "DEFECT (beat9 0708 old run): OPEN had 'You are here now, with me.' — narrator-as-companion "
+             "phrase in the opening. Fix: OPEN_PROMPT MOVE 1 extended to ban narrator-companion phrases "
+             "('with me', 'join me here', 'we are here', 'come with me'). "
+             "QUALITY NOTE: bench detail appeared ✓ but script had significant thematic cycling and "
+             "body degeneration in back half — same n115 quality floor problem as other scenarios. "
+             "The time-travel mechanism ('With every deep exhalation, one second will drop into Biscuit's "
+             "world') is clunky. Watch after n154 promotion."),
     Scenario("imag-vague-open", "imagination", "robustness", "low",
         turns=["I don't know. somewhere not here.",
                "warm I guess. quiet.",
