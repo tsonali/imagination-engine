@@ -54,7 +54,10 @@ from imagination_engine.comprehension import Classification, classify_intake
 from imagination_engine.inference import Engine
 from imagination_engine.postcheck import (degeneration_report, drop_collapsed_paragraphs,
                                           drop_foreign_paragraphs,
-                                          find_degeneration_start, trim_degenerate_tail)
+                                          find_degeneration_start, trim_degenerate_tail,
+                                          phrase_repeat_count, repair_phrase_repeats,
+                                          repair_short_phrase_repeats,
+                                          drop_adjacent_duplicates)
 from imagination_engine.scene_bibles import get_bible
 from imagination_engine.structured import extract_array
 
@@ -248,7 +251,7 @@ This is NOT a body-settle. It is an immersion induction. PETTLEP and Ericksonian
 
 THE OPENING HAS THREE MOVES:
 
-MOVE 1 — UTILIZATION (2-3 short sentences). Open by naming what is already TRUE for the listener: name the voice they hear, name that their eyes are closed, name something about where they are physically. Ericksonian yes-set. Plain present truths.
+MOVE 1 — UTILIZATION (2-3 short sentences). Open by naming what is already TRUE for the listener: that their eyes are closed, something about where they are physically (in a chair, hands at rest), the breath or weight of the body. Ericksonian yes-set. Plain present truths. DO NOT reference the voice AT ALL — not "this voice", not "my voice", not "you hear a voice", not "a voice takes you". The listener already knows a voice is present. Drop any reference to the narrating voice entirely. Say "Your eyes are closed" not "This voice is here and your eyes are closed."
 
 MOVE 2 — SINGLE-POINT SENSORY ANCHOR (1-2 sentences). Direct the listener to ONE specific sensory anchor available to them now: the weight of their hands, a sound just outside, the breath at the tip of their nose. PICK ONE. Narrows attention.
 
@@ -257,6 +260,8 @@ MOVE 3 — HARD CUT INTO THE SCENE (the rest of the opening). Drop them into the
 LENGTH: 150-200 words across 4-6 short paragraphs.
 
 DO NOT do the meditation-app defaults. NO "release the day." NO "let tension fall away." NO "find a comfortable position." NO "settle into your seat."
+
+CRITICAL — DO NOT PRINT THE MOVE LABELS. The "MOVE 1 — UTILIZATION", "MOVE 2 — SINGLE-POINT SENSORY ANCHOR", "MOVE 3 — HARD CUT INTO THE SCENE" names above are INTERNAL STRUCTURE for you to follow, not headings or markers to include in your output. Your output is plain prose only — no "MOVE 1", no "UTILIZATION", no dashes, no section labels of any kind.
 
 Output the opening text only, with blank lines between paragraphs. Nothing else."""
 
@@ -401,6 +406,11 @@ leaves them nothing to do.
 - Prefer the LISTENER'S felt experience over describing the scene/other person from
   outside. Inside the body, second person: what YOU feel, sense, notice — not a
   camera describing the room or the other person's appearance.
+- NEVER use first-person "I", "me", "my", "we" — you are a narrator speaking TO the
+  listener, not a character IN the scene. Specifically banned: "I hold", "I guide you",
+  "my voice", "as soon as I speak", "when I say", "I will take you", "I am here" — any
+  phrase where the narrating voice refers to itself. Rewrite in second person or cut the
+  narrator reference entirely.
 - When in doubt, say LESS. A named sensation + space is more immersive than a
   fully-rendered tableau. Suggestion, not depiction.
 
@@ -421,6 +431,22 @@ LENGTH — IMPORTANT: this is a LONG session, ~1800-2200 words. That length is r
 DO NOT bring the listener back. Do NOT mention "opening eyes" or "returning to the room" — the return is written separately. STAY in the scene to the end.
 
 DO NOT use the forbidden phrases or forbidden stock imagery (from COMMON_POSTURE).
+
+REHEARSAL FIDELITY — NON-NEGOTIABLE: If the intake places the user in a specific difficult real environment (an MRI tube, a deposition conference room, a hospital waiting room, a courtroom), the body STAYS in that environment. The coping happens INSIDE the real scene — machine noise becoming drums, a lawyer's smile staying fixed while your voice stays flat — NEVER by relocating the listener somewhere more comfortable. A beach does not prepare anyone for a tube. Difficulty transmuted inside the real scene is the only move that works.
+
+ALERT-CALM REGISTER: If the intake contains alert-calm language (night shift, need to be up in an hour, stay awake, calm but alert, not sleep) — OR if you received an ⚠️ ALERT-CALM OVERRIDE above — this is NOT a sleep or wind-down session. Every rule below is mandatory.
+
+SCENE TYPE: The reader is clothed, sitting in a chair or lying fully dressed. No bed-settling, no sheets, no pillows, no bedroom wind-down setup. The GENRE is "athlete before the game" — body still and grounded, mind sharpening, not dissolving. Write as if they are minutes from beginning a demanding task.
+
+BANNED (explicit — do not write these or close paraphrases):
+"drift toward sleep", "let your eyes grow heavy", "fade toward rest", "no need to think", "let go", "drift off", "fall asleep", "lullaby", "like a lullaby", "white noise looping", "sheets", "no need for hurry", "no rush", "without any need for hurry", "without needing to hurry", "soothing", "almost soothing", "falling back", "surrender to the quiet", "let the day fall away", "settling deeper", "ease into rest", "the weight of sleep", "drift away"
+
+BANNED (semantic equivalents — any language that makes a listener want to close their eyes and go to sleep):
+"heavy lids", "sinking down", "let the body sink", "slowing further", "slowing down", "breath slows", "quieter and quieter", "no need for anything", "just let it all go", "let the day fall"
+
+POSITIVE REGISTER — write in these terms: "steady", "clear", "grounded and present", "your mind is clear", "you are here and awake", "settled but sharp", "ready for the hours ahead", "your body is still but your awareness is bright", "anchored and alert", "the kind of calm that focuses, not fades". The body may be at rest — that is allowed — but the MIND register must be readiness and sharpening presence, not dissolution. Test: if this paragraph would help someone fall asleep, rewrite it.
+
+OUTPUT GOAL: listener ends this feeling grounded, awake, and ready for the shift — clear head, present body, oriented to the room. A fellow night-shift worker should read this and feel steadied, not drowsy.
 
 Output the body text only, continuous prose with blank lines between paragraphs. No headers, no labels, no beat markers. Nothing else."""
 
@@ -567,6 +593,12 @@ def _generate_settling(engine: Engine, transcript: list[dict], emit) -> str:
     body, foreign = drop_foreign_paragraphs(body)
     if foreign:
         log.warning("[settling] %d foreign-language paragraph(s) dropped", foreign)
+    body, short_dropped = repair_short_phrase_repeats(body)
+    if short_dropped:
+        log.warning('[settling] %d short-phrase repeat(s) removed', short_dropped)
+    body, adj_dropped = drop_adjacent_duplicates(body)
+    if adj_dropped:
+        log.warning('[settling] %d adjacent near-duplicate sentence(s) dropped', adj_dropped)
     emit("writing_return", "Softening the close.", 3, 3, 3.0)
     log.info("[settling] session ready: %d words", len(body.split()))
     return body
@@ -593,8 +625,22 @@ def generate_session(
         if on_progress is not None:
             on_progress(stage=stage, detail=detail, step=step, total=total, eta_seconds=eta)
 
+    # Detect alert-calm in the transcript (applies to both settling reversals and direct
+    # immersion calls where the user explicitly asks to stay awake/alert).
+    _transcript_text = " ".join(
+        m.get("content", "") for m in transcript if m.get("role") == "user"
+    ).lower()
+    _alert_calm = any(kw in _transcript_text for kw in (
+        "alert", "awake", "not sleep", "night shift", "alert-calm",
+        "stay up", "need to be up", "have to be up", "calm but awake",
+    ))
+
     if (protocol or "immersion").lower().strip() == "settling":
-        return _generate_settling(engine, transcript, emit)
+        # If the user reversed from sleep to alert-calm mid-intake, the settling
+        # path would lullaby them — wrong. Route to immersion.
+        if not _alert_calm:
+            return _generate_settling(engine, transcript, emit)
+        # Fall through to immersion — _alert_calm flag is injected into body_user below.
 
     intake_str = _intake_block(transcript)
 
@@ -695,8 +741,21 @@ def generate_session(
             + "\n----- END ANCHORS -----"
         )
 
+    # When the user explicitly asked for alert-calm (e.g. night-shift reversal), inject
+    # a prominent override note so the model cannot miss it while generating the body.
+    _alert_calm_override = (
+        "\n\n⚠️ ALERT-CALM OVERRIDE (mandatory — this overrides any settling impulse):\n"
+        "The user EXPLICITLY asked to be calm but AWAKE — they have a night shift or similar.\n"
+        "Apply the ALERT-CALM REGISTER rules from BODY_PROMPT strictly:\n"
+        "- NO sheets, NO bed-settling, NO bedroom wind-down vocabulary.\n"
+        "- NO 'soothing', 'no need for hurry', 'no rush', 'let it slow', 'falling back'.\n"
+        "- Scene: reader is CLOTHED, sitting or lying FULLY DRESSED, taking a brief mental reset.\n"
+        "- Genre: athlete before the game — body still, mind SHARPENING, not fading.\n"
+        "- Every line must STRENGTHEN presence. If it could help someone fall asleep, rewrite it.\n"
+    ) if _alert_calm else ""
+
     body_user = (
-        intake_str + "\n\n" + class_block + "\n\n"
+        intake_str + "\n\n" + class_block + _alert_calm_override + "\n\n"
         "----- THE OPENING (already spoken) -----\n"
         + open_text
         + "\n----- END OPENING -----\n\n"
@@ -805,11 +864,31 @@ def generate_session(
         log.warning("[v6] %d foreign-language paragraph(s) dropped", foreign)
     # Backstop: if the assembled script STILL reads degenerate after the body
     # trim + collapse drop, log it loudly — that's a case the nets don't cover.
-    from imagination_engine.postcheck import phrase_repeat_count
     n_rep = phrase_repeat_count(full)
+    if n_rep >= 2:
+        # 2+ verbatim-shingle repeats = machinery, not cadence. Repair by
+        # dropping the later occurrence of each repeated block. A listener
+        # hears the exact same 12-word passage twice; that shatters immersion
+        # more than a missing line does.
+        full, lines_dropped = repair_phrase_repeats(full)
+        if lines_dropped:
+            log.warning('[v6] %d phrase-repeat pair(s) → repaired (%d lines dropped)',
+                        n_rep, lines_dropped)
+            n_rep = phrase_repeat_count(full)
     if n_rep:
         log.warning('[v6] %d non-adjacent phrase-repeat pair(s) in final script'
                     ' (>=3 = quality-floor; the corpus gates cull these)', n_rep)
+    # Short-phrase check: catches 6-word dialog/sensory loops that NGRAM=12 misses.
+    # Only repair if 3+ occurrences found (threshold avoids legitimate cadence repeats).
+    full, short_dropped = repair_short_phrase_repeats(full)
+    if short_dropped:
+        log.warning('[v6] %d short-phrase repeat(s) removed (6-gram threshold)', short_dropped)
+    # Adjacent-sentence dedup: the model restates the previous sentence in slightly
+    # different words (e.g. "A warmth spreads through your chest... The warmth spreads
+    # through your chest..."). This catches pairs at lower Jaccard than degeneration.
+    full, adj_dropped = drop_adjacent_duplicates(full)
+    if adj_dropped:
+        log.warning('[v6] %d adjacent near-duplicate sentence(s) dropped', adj_dropped)
     rep = degeneration_report(full)
     if rep.get("degenerate"):
         log.warning("[v6] degeneration STILL detected post-trim: %s", rep)

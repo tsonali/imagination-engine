@@ -14,11 +14,11 @@ ADAPTERS="$DATA/adapters"
 mkdir -p "$ADAPTERS"
 
 # Conservative config to fit 14B-4bit LoRA in 16GB unified memory:
-#   - tune only the top layers (--num-layers 8), batch 1, capped sequence length.
-# If it OOMs: drop --num-layers to 4, --max-seq-length to 1024, or switch MODEL to
-# mlx-community/Qwen2.5-7B-Instruct-4bit to validate the pipeline first.
-# OOM fix (iter-100 crash was the val pass blowing past 16GB): shorter sequences are
-# the biggest memory lever, fewer tuned layers, smaller + less frequent validation.
+#   - tune only the top layers (--num-layers 6), batch 1, capped sequence length.
+# OOM history: 2026-07-08 — n130 (130 gold) introduced 2703-token training examples;
+#   training hung reproducibly at iter 200-300 on both runs. Fix: reduced max-seq-length
+#   from 1024→768 and val-batches from 8→4. This cuts peak memory ~25% on long batches.
+# If still OOMing: drop --num-layers to 4, or reduce max-seq-length further to 512.
 python -m mlx_lm lora \
   --model "$MODEL" \
   --train \
@@ -26,12 +26,12 @@ python -m mlx_lm lora \
   --fine-tune-type lora \
   --num-layers 6 \
   --batch-size 1 \
-  --max-seq-length 1024 \
+  --max-seq-length 768 \
   --iters 1500 \
   --learning-rate 1e-5 \
   --steps-per-report 25 \
   --steps-per-eval 300 \
-  --val-batches 8 \
+  --val-batches 4 \
   --save-every 200 \
   --adapter-path "$ADAPTERS"
 

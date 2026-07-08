@@ -11,6 +11,7 @@ Design rationale: see `docs/decisions-log.md` (Scope reframe entry,
 from __future__ import annotations
 
 import logging
+import re
 import time
 import uuid
 from dataclasses import dataclass, field
@@ -251,9 +252,10 @@ class IntakeManager:
             chunks.append(chunk)
         response = "".join(chunks).strip()
 
-        ready = READY_MARKER in response
+        ready = READY_MARKER.lower() in response.lower()
         if ready:
-            response = response.replace(READY_MARKER, "").strip()
+            # Strip the marker case-insensitively (model sometimes emits [Ready])
+            response = re.sub(re.escape(READY_MARKER), "", response, flags=re.IGNORECASE).strip()
             # Defensive: model sometimes emits only the marker without the
             # handoff sentence. Always give the user a real transition line.
             if not response:

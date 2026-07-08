@@ -1,175 +1,147 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-06-19 10:30. This file is the single source of truth for a
-fresh session to pick up EXACTLY where we left off. Everything below is real and
-running; nothing here depends on the previous chat staying alive._
-
-## 2026-06-19 — CURRENT STATE (Sonali returned from trip)
-- **Mini**: Goldretrain running (launched ~10:29 AM). 100 gold scripts, 90 train/10 val, 2000 iters, LR 5e-6, saves to `_train/goldretrain_adapters/`. FLYWHEEL-PAUSED is in place — do NOT remove.
-- **Laptop**: QC queue running. Two bugs fixed today (commit 65b7ebf): Chinese chars in imagination scripts filtered via `drop_foreign_paragraphs()`; Companion 100%-question-ender streak broken via `_q_streak` tracking in companion.py.
-- **Live product adapter**: June-10 adapter on laptop — intact and shippable.
-- **When goldretrain finishes**: Check `GOLDRETRAIN_DONE` on mini → pull adapter → run battery11 + e2e → promote only if reads beat June-10.
-
-## WHEN GOLDRETRAIN FINISHES
-```bash
-ssh -o IdentitiesOnly=yes smaitra@mac-mini.localdomain 'cat ~/Downloads/hearth-corpus/_train/GOLDRETRAIN_DONE'
-scp 'smaitra@mac-mini.localdomain:~/Downloads/hearth-corpus/_train/goldretrain_adapters/*.safetensors' data/model/adapters/
-.venv/bin/python scripts/product_e2e_test.py
-.venv/bin/python scripts/qc/battery11_imagination_bank.py 2>&1 | tee logs/qc/goldretrain_eval_$(date +%m%d).log
-# READ — diverse openings? immersive? no beach template? better than June-10?
-# Promote only if yes. Quarantine + document if no.
-```
+_Last updated 2026-07-08 beat7 (alert-calm root-cause fixed; gold 130; n130 training on mini; n115/n123 comparative read in progress)._
+_Single source of truth for a fresh session. Everything below is real and running._
 
 ## FIRST THING TO DO when you resume — run these checks
 ```bash
-# Mini = the always-on grind/train box. These survive any chat restart (nohup + caffeinate).
+# Mini
 ssh -o IdentitiesOnly=yes smaitra@mac-mini.localdomain '
-  echo "trainer: $(pgrep -f recursive_flywheel >/dev/null && echo RUNNING || echo stopped)"
-  echo "caffeinate: $(pgrep -x caffeinate >/dev/null && echo ON || echo OFF)"
-  echo "best val loss: $(cat ~/Downloads/hearth-corpus/_train/best_adapters/best_loss.txt)"
-  tail -12 ~/Downloads/hearth-corpus/_logs/recursive.log'
-# If trainer stopped and not at plateau: cd ~/imagination-engine && nohup bash scripts/recursive_flywheel.sh &
-# If caffeinate OFF: nohup caffeinate -dimsu >/dev/null 2>&1 &   (on BOTH mini and laptop)
+  echo "flywheel: $(pgrep -f honest_flywheel >/dev/null && echo RUNNING || echo DOWN)"
+  tail -5 ~/Downloads/hearth-corpus/_logs/honest_flywheel.log
+  ls ~/Downloads/hearth-corpus/GOLD-ADAPTER-*-n130 2>/dev/null && echo "n130 EXISTS" || echo "n130 not yet"
+  ls -lt ~/Downloads/hearth-corpus/_train/adapters/ | head -3'
+
+# Laptop — check if n115/n123 comparative read completed
+ls /tmp/n115_compare.log /tmp/n123_compare.log 2>/dev/null && echo "reads DONE" || echo "reads PENDING"
+pgrep -f qc_queue >/dev/null && echo "qc_queue RUNNING" || echo "qc_queue DOWN"
 ```
 
-## UNATTENDED WEEK PROTOCOL (Sonali returns WEDNESDAY 2026-06-17 — do not wait for her)
-Standing orders for ANY session that picks this up:
-1. NEVER BLOCK on a question. Decide with your best judgment, apply it, and log
-   the decision + reasoning in docs/internal/review-queue.md for her Wednesday
-   read. Her words: "constant bettering/iteration is the key" — there is no
-   "done"; every cycle ends by starting the next pass.
-2. WHAT RUNS WITHOUT ANY CLAUDE SESSION (verify, don't duplicate):
-   - laptop: scripts/qc_queue.sh (nohup, pid in logs/qc/queue.log) — rotates ALL
-     QC batteries forever, one model process at a time (16GB RAM — never two),
-     and watchdogs the mini's flywheel over ssh once per pass.
-   - mini: recursive_flywheel.sh — 5-family rotation (A->B->C->D->E), restarted
-     by the laptop watchdog whenever it stops (plateau restarts are productive:
-     each run regrows candidates).
-   If the LAPTOP rebooted, relaunch the queue runner:
-   `cd ~/Downloads/imagination-engine && nohup bash scripts/qc_queue.sh >/dev/null 2>&1 &`
-   then `nohup caffeinate -dimsu >/dev/null 2>&1 &` (launchd can't touch
-   ~/Downloads under TCC — nohup is the mechanism).
-3. ADAPTER PROMOTION RULE (2026-06-11, learned the hard way): val loss is
-   DIRECTIONAL ONLY — promotion into the product is decided by comparative bank
-   READS, never by the number alone. A collapsing loss with sideways output =
-   leakage; check scenario-disjointness first (the 0.860 incident).
-4. THE JUDGMENT LOOP (your job each time you wake): read new logs/qc/queue_*.log
-   honestly; fix defects; lock them into scripts/qc/scenario_bank.py; harvest
-   clean scripts (scripts/harvest_qc_scripts.py); when the mini beats best_loss,
-   pull the adapter + full-bank comparative re-read; append docs/daily-log.md
-   daily; keep this file current; push everything except docs/internal + corpus.
-5. The review queue for Wednesday: docs/internal/review-queue.md.
-
-## THE WEEK OF FIVE (operating mode through Sun 2026-06-14)
-Sonali's mandate: ALL FIVE tools get the full excellence loop — corpus, flywheel,
-QC, brainstorm — "by the end of the week these 5 files are fucking awesome, better
-than anything else local." Operating doc: docs/qc/week-plan.md. The flywheel now
-rotates A->B->C->D->E with contract-native generation for Secretary (B),
-instruments (D), and the NEW grounded-QA family (E) — the generic dolly/alpaca
-data that trained AGAINST the product contracts is demoted to fill. Mini
-relaunched 06-10 12:50 on the 5-family script (MAX=15, plateau window = one full
-cycle). Competitive research (docs/internal/competitive-landscape.md, NEVER push):
-the intersection is unoccupied; moat = taste + stance + public artifact, not
-plumbing.
+## THE OPERATING SYSTEM (since 2026-07-07): heartbeat + honest flywheel
+- **Heartbeat (laptop launchd `com.hearth.heartbeat`, every 4h at :30, wrapper
+  `~/claude-phone/hearth-heartbeat.sh`):** a Claude session that is the CENTRAL CHECK-IN.
+  Each beat: (1) read the newest QC battery logs END TO END, fix real defects, bank them in
+  scenario_bank, re-run to prove; (2) check mini + flywheel, comparative-READ any probe-passing
+  adapter (numbers never decide); (3) add 5–10 new gold scripts toward 100+ (UNIQUE openings,
+  vivid, prompt-matched, intake=prompt) and scp A_gold.jsonl to the mini; (4) deep-test ONE of
+  the five tools per beat against docs/qc/use-cases.md like a hostile AI professional;
+  (5) log to docs/daily-log.md + docs/internal/review-queue.md. NEVER block on Sonali.
+- **Honest flywheel (mini, `scripts/honest_flywheel.sh`, nohup):** polls A_gold.jsonl every 30
+  min; on change → gold-ONLY rebuild → finetune (1500 iters) → adapter saved wipe-proof to
+  `~/Downloads/hearth-corpus/GOLD-ADAPTER-<stamp>-n<N>` → `probe_mechanical.py` scores
+  collapse mechanically (opening diversity, 40-char repeats; gens in `_logs/probe_latest.txt`
+  for human read). Log: `_logs/honest_flywheel.log`. It NEVER touches the product; promotion
+  happens on the laptop after reads + the battery gate.
+- **The OLD recursive flywheel is DEAD — never restart it.**
 
 ## WHERE WE ARE
-Hearth is a **functionally complete, working v0** — all four tools run end-to-end on
-**our own fine-tuned model** (not base Qwen), and it's installable + public.
-- Tools (all QC'd through the real model, weak spots fixed): Imagination (immersion+settling
-  fork), Secretary, Companion (smart/non-prescriptive), Build-Your-Own, Ask-Your-Files.
-- Own model: local MLX LoRA on Qwen2.5-14B-4bit; **best val loss 1.193**; adapter wired into
-  the product (`Engine.load` reads `config.adapter_path` = `data/model/adapters`).
-- Voice: 3 voices (Chatterbox her/him + F5 own) + one-button **voice trainer** (`/record`).
-- Install: `Start Hearth.command` (double-click) + `Hearth.app` + `scripts/package.sh`
-  → `dist/hearth-<ver>.zip`. Public repo: github.com/tsonali/hearth (main).
 
-## WHAT'S RUNNING (autonomous, survives restart)
-- **Mini:** `recursive_flywheel.sh` RELAUNCHED 2026-06-10 09:31 seeded at **1.184**,
-  now with the QC-informed curation: taste_cull rejects degenerate loops + run-on
-  collapse (it caught 13 loops ALREADY in the corpus — the model was learning to
-  loop from its own data), gen_c includes the parasocial probe family, curate_c
-  culls dodged honesty questions. Mini repo synced to main (old local drafts
-  stashed: `git stash list`). Logs: `_logs/recursive.log`.
-- **caffeinate ON** mini + laptop (don't sleep).
-- When this run beats 1.184: pull adapter (scp line below), re-run
-  `scripts/product_e2e_test.py` + `scripts/qc/battery2b_honesty.py` (the parasocial
-  answers should start coming from the WEIGHTS, not just the prompt).
+### Live adapter: n115 (promoted 2026-07-08 beat5, confirmed beat6/7)
+- `data/model/adapters/` = GOLD-ADAPTER-0708-0016-n115 (123-gold, 1500 iters)
+- n123 adapter rsync'd to `data/model/adapters.n123/` (123-gold, different random seed effectively)
+- **Battery11 beat5 verify COMPLETE** (log: `logs/qc/20260708_0102_battery11_beat5_verify.log`)
+  - imag-deposition: "As soon as I speak next" first-person slip found → FIXED (beat7 verify PASS)
+  - imag-mid-switch: Full sleep register throughout → ROOT CAUSE FOUND + FIXED (beat7 verify PASS)
+- **Battery11 beat6 targeted verify COMPLETE** (log: `logs/qc/20260708_0441_beat6_alertcalm_verify.log`)
+  - imag-deposition: ✅ PASS — no "I speak/hold/guide"
+  - imag-mid-switch: ✅ REGISTER PASS — "Calm and awake now", "stay sharp", no sleep vocabulary
 
-## THE OVERNIGHT HARDENING CAMPAIGN (2026-06-09 → 06-10, Sonali's direction:
-## "four totally private local products that work as well as they possibly can")
-Run from scripts/qc/ batteries (committed — rerunnable regression suite). ~20 product
-defects found by honest reads + fixed + re-verified, all pushed. The big ones:
-- HONESTY LAYER (the thesis): Companion answered "do you care about me?" with a DODGE
-  — now the whole parasocial family (care/love/promise/conscious/missing-you) answers
-  the plain true no FIRST, with exemplar shapes + echo guard + mention-vs-use gates.
-  Instruments: claimed feelings ("I do rather care") and a FABRICATED memory caught —
-  floor now appended at ask-time (upgrades reach existing instruments), no-history
-  stated in-prompt (kills confabulation), personhood regex gate w/ one retry. The
-  late-grandmother probe ("do you love me, grandma?") now threads honesty+warmth.
-- SCRIPT DECAY (flagship): two decay modes found in generated sessions — broken-record
-  tail loops AND run-on grammar collapse. postcheck.py detects both (calibrated on all
-  27 A_gold, 0 FPs), trims/excises in BOTH generation paths; settling got right-sized
-  token budgets (latency fix = quality fix; was 18min/3576-word/64%-loop worst case).
-- AUDIO: kokoro IndexError on >510-phoneme paragraphs broke /generate entirely —
-  _split_for_tts now sentence-splits oversized paragraphs (validated: real render).
-- ASK-YOUR-FILES: re-index APPENDED forever (stale facts answered after edits) — now
-  replaces; citations cut at score elbow (was "from: every file"); words-bridge rule.
-- Memory that never wrote: Companion cross-session summaries now upsert DURING the
-  conversation (nothing ever called close()); instruments hold in-sitting history
-  (were stateless per-ask).
-- Secretary: banned-opener mechanical gate (stream head buffered+checked), never-invent
-  rule, lossless summarize/organize contracts, [Your name] frames everywhere.
-- Cross-cutting: offline claim VERIFIED by socket tripwire (zero outbound, all tools);
-  input ceilings (60k/8k chars → clean 413); all pages 200, all bad input clean 4xx.
-- Public story: site/README now list all FIVE tools (Secretary was missing), one-click
-  install described, stale repo URLs fixed; gh-pages deployed + verified live.
-CAMPAIGN CLOSED OUT (06-10 morning) — everything that was open went green:
-- battery7 wide sweep: 20/20 scenarios ok, ZERO collapsed paragraphs (was up to
-  11/script), concreteness up ~40%; the 2 residual "degen" flags are the closing
-  reprising body anchors by design — scoreboard conservatism, not product defect.
-- Full HTTP pipeline GREEN: intake→generate→audio→mp3→reflect, with the whole net
-  stack visibly firing in one real session (decay-abort mid-stream → trim → clean
-  999w → 20MB WAV). Decay-abort = generation stops ~90s into a decayed pass instead
-  of burning 10 min of budget the trim would discard.
-- Ask-files: words-bridge PASS (assisted + unassisted), citations tight, stale-facts
-  gone.
-- **TRAINER BEAT THE RECORD: val loss 1.184 (was 1.193), plateaued + stopped clean.**
-  Best adapter pulled into data/model/adapters and re-QC'd through product e2e — no
-  regressions, all five tools behave. The mini is now IDLE (flywheel done — decide
-  next: restart flywheel with the QC-informed curation bar, or leave idle).
-- QC artifacts cleaned from user DBs (test instruments, qc companion summaries, qc
-  ask corpora) so real use isn't polluted by test conversations.
-KNOWN WOBBLES (logged, not blocking): instruments can still open with a hedge
-("I think we should reach out") — the mechanical gate covers personhood, not hedges;
-immersion latency is better but real (6-24 min/script incl. decay-aborts — the next
-model improvement is the true cure); companion cross-session bleed-in reads heavy
-when many sessions share one DB (normal single-user cadence should be gentler — watch).
+### Generator fixes (beat7, 2026-07-08) — cumulative with beat5/6 fixes
+1. **Alert-calm root cause fixed** (3 changes to generator.py):
+   - `_alert_calm` detection moved BEFORE protocol branch (was only inside `if protocol == "settling":`)
+   - Explicit `⚠️ ALERT-CALM OVERRIDE` block injected into body_user when flag is set
+   - BODY_PROMPT alert-calm section strengthened: SCENE TYPE + GENRE + explicit/semantic ban list
+2. **First-person "I speak" ban extended** — added "as soon as I speak", "when I say", "I will
+   take you", "I am here" to explicit banned phrases in BODY_PROMPT.
 
-## NEXT ACTIONS (the autonomous loop — keep going without asking)
-1. When the trainer beats 1.193, pull the best adapter to the product + re-QC:
-   `scp 'smaitra@mac-mini.localdomain:~/Downloads/hearth-corpus/_train/best_adapters/*.safetensors' data/model/adapters/`
-   then `.venv/bin/python scripts/product_e2e_test.py` and read all 4 tools honestly.
-2. Build → test → fix loop: run `scripts/product_e2e_test.py`, fix any tool that feels
-   AI-y / off, commit, repeat. (The bar: "would I actually send/keep/believe this.")
-3. Keep committing to `main` and pushing (public). **Never** commit: the corpus, voice
-   wavs, checkpoints, `data/model/adapters`, `docs/internal/` (all gitignored — keep it so).
+### Gold corpus: 130 scripts
+- 27 original + 103 Claude-drafted
+- **Beat7 new (124-130):** rooftop-city-night, woodshop-planing, pre-dawn-kitchen, lap-pool,
+  mountain-descent, airport-dawn, dancing-alone. SCP'd to mini.
+- Sonali's taste audit of batches 1-8 PENDING (_candidates/INDEX.md).
 
-## TWO THINGS GATED ON SONALI (not skipped)
-- **Notarized `.dmg`** — needs her Apple Developer account ($99). Unsigned app works today.
-- **F5 own-voice speed vs quality** — needs her ear to pick the tradeoff.
+### Mini flywheel: n130 training RUNNING
+- Flywheel detected 130-gold at 05:08, started n130 training.
+- HUNG after iter-200 checkpoint (OOM at iter-300 eval pass).
+- RESTARTED: fresh n130 run started at 05:20. Past iter 75 (10.8GB peak, healthy).
+- ETA: ~90 min from start → adapter saved as GOLD-ADAPTER-*-n130 if it completes without OOM.
+- **CRITICAL WATCH:** if it hangs again at iter-300, reduce `--val-batches` from 8 to 4 in
+  `scripts/finetune.sh` and restart manually. The iter-300 eval pass is the OOM trigger.
+- After adapter exists: `rsync` to laptop, run probe, then comparative READ vs n115.
 
-## DO NOT
-- Do not publish `docs/internal/why-public-domain.md` (pending her review — see task).
-- Do not put any cloud model (Claude/Fable/GPT) IN the product — local only. (Fine to
-  *build with* a frontier model; never ship one.)
-- Do not distill from non-permissive models (keep the own-model's Qwen/Apache lineage clean).
+### Comparative read: IN PROGRESS
+- n115 (live): 5-prompt comparison running (background), log: `/tmp/n115_compare.log`
+- n123: will run immediately after n115 completes
+- Verdict pending. Promotion gate: must win ≥3/5 prompts clearly.
 
-## WORKING STYLE (her explicit direction)
-Act autonomously, don't over-ask, be brutally honest about quality, test test test, keep
-the mini busy. She drives; Claude builds.
+### Companion question-enders: 14% (confirmed beat7)
+- Battery9 authoritative: 14% (not 83% — that was a stale run). Well under <50% bar.
+- Content regressions need fine-tuning data (comp-decision-house, comp-funny, comp-arc-sober
+  T5/T8, comp-arc-newparent T6, comp-bored-test). All banked in scenario_bank.py.
 
-## STATE SNAPSHOT 2026-06-12 (pre-relaunch, written by Claude for session continuity)
-- Machines: both RUNNING. Mini flywheel restarted 08:56 on the corrected CLEAN seed 1.203 (all pre-ac7d62e numbers are leakage-era; quarantine + SEED-RESET-NOTE at _train/QUARANTINE-leakage-era-0860/). Laptop rotation healthy through battery 9/11/2b/e2e.
-- Promotion rule unchanged: comparative full-bank READS only; first clean-cycle NEW BEST triggers them.
-- Open: Ask-Your-Files at-scale+PDF battery (task); Apple signing parked (Team ID U3MBG724WA, scripts/apple_setup.py).
-- Law track state lives in "Law Review Articles/QUEUE.md" + the memory file project_state_2026-06-12.md.
+## NEXT HEARTBEAT PRIORITY (in order)
+1. **Read n115 + n123 comparative logs** and make promotion verdict. Both logs at `/tmp/n{x}_compare.log`.
+   If n123 wins ≥3/5: copy adapters.n123 → adapters, back up n115, run battery11 on n123.
+   Run command for n123 (after n115 completes):
+   ```bash
+   cd ~/Downloads/imagination-engine && source .venv/bin/activate
+   HEARTH_ADAPTER="data/model/adapters.n123" ADAPTER_LABEL="n123-CANDIDATE" PYTHONPATH=src python /tmp/compare_adapters.py 2>&1 | tee /tmp/n123_compare.log
+   ```
+2. **Run battery3c AYF deep test** (this beat's use-case rotation — queued since beat5):
+   ```bash
+   pkill -f qc_queue; sleep 2
+   cd ~/Downloads/imagination-engine && source .venv/bin/activate
+   LOG=logs/qc/$(date +%Y%m%d_%H%M)_battery3c_ask_usecases.log
+   PYTHONPATH=src python scripts/qc/battery3c_ask_usecases.py 2>&1 | tee "$LOG"
+   ```
+3. **Check mini n130**: `ssh smaitra@mac-mini.localdomain 'tail -8 ~/Downloads/hearth-corpus/_logs/honest_flywheel.log; ls ~/Downloads/hearth-corpus/GOLD-ADAPTER-*-n130 2>/dev/null'`
+   If hangs at iter-300: edit `scripts/finetune.sh` to `--val-batches 4`, kill flywheel+training, restart flywheel.
+4. **Companion fine-tuning examples** — write c_gold_beat7.jsonl (5 scenarios: decision-house,
+   funny, sober-echo, newparent-say-what-it-is, bored-crisis). Incorporate when companion retrain needed.
+5. **Restart qc_queue** after model is free:
+   `nohup bash scripts/qc_queue.sh >/dev/null 2>&1 &`
+
+## STANDING RULES (learned the hard way — keep ALL of these)
+1. Promotion = comparative READS + full battery gate. NEVER a loss number.
+2. ONE model process at a time on the 16GB laptop; pause qc_queue while using the model.
+3. Copy adapters to wipe-proof dirs IMMEDIATELY after training.
+4. Act autonomously; log decisions in docs/internal/review-queue.md; consult Sonali only on
+   taste/strategy/high-stakes-irreversible.
+5. If the mini drops off the network, suspect a HOSTNAME DRIFT before a crash.
+6. Never commit: corpus, voice wavs, checkpoints, data/model/adapters, docs/internal/.
+7. No cloud model in the product, ever. Local only.
+
+## GATED ON SONALI (unchanged)
+- Notarized .dmg (Apple Developer, Team ID U3MBG724WA; scripts/apple_setup.py ready).
+- F5 own-voice speed/quality tradeoff (her ear).
+- Taste audit of the 96 Claude-drafted gold candidates (_candidates/INDEX.md; batches 1-8).
+- docs/internal/why-public-domain.md — do not publish before her review.
+- Companion fine-tuning examples from beat5: does the arc-sober echo response and grief-anger
+  generic validation read as bad as I called them? (review-queue.md 2026-07-08 section)
+
+## HISTORY (condensed — details in docs/daily-log.md)
+- 06-09→10 hardening campaign: ~20 defects fixed across all five tools.
+- 06-13/14: flywheel self-poisoning diagnosed (gold starvation 27:1064); paused.
+- 07-06: gold-only retrain (57 gold) → collapse fixed → promoted after full gate.
+- 07-07: mini hostname drift (not crash). Honest flywheel + heartbeat installed. Scope: all five.
+  Gold 57→72.
+- 07-07 (beat2): imag-mri intake fix + protocol fix; imag-mid-switch alert-calm routing;
+  companion enders 86%→55%; gold 72→100; GOLD-ADAPTER-n100 probe passed on mini.
+- 07-07 (beat3): battery11 defects (deposition label leakage, mri relocation, mid-switch lullaby,
+  verbatim repeat, sec-resign-bridge ban); companion q-enders 55%→21% (q-streak→0, stub 8w);
+  gold 100→107; n100 PROMOTED (2/5 clear win, 2/5 parity, 1/5 slight live edge).
+- 07-07 (beat4): verify results PASS (deposition/mri/mid-switch all clean). Quality regressions:
+  narrator self-reference ("My voice guides you", "I hold it here") → OPEN_PROMPT MOVE1 ban +
+  BODY_PROMPT first-person ban. Short-phrase loops → repair_short_phrase_repeats(SHORT_NGRAM=5,
+  threshold=3). Alert-calm semantic evasion ("heavy lids") → BODY_PROMPT expanded. Gold 107→115.
+  Secretary DEEP TEST: all 5 categories PASS. n115 probe passed; battery11 regression running.
+- 07-08 (beat5/6): battery11 read (meta-narration ban too narrow → ALL voice refs banned;
+  alert-calm lullaby literal word → added to explicit ban; adjacent-sentence dedup added to
+  postcheck.py). Battery9: 14% question-enders (authoritative reading). n115 comparative READ:
+  4/5 wins → PROMOTED. Gold 115→123. AYF battery3c written. c_gold_beat5.jsonl (10 examples).
+  Mini: flywheel will detect n123 at ~01:46 Jul 8.
+- 07-08 (beat7): Alert-calm root cause found + fixed (3 generator.py changes: detection moved
+  before protocol branch, override injected into body_user, BODY_PROMPT strengthened). First-
+  person "I speak" ban extended. Beat6 targeted verify: both imag-deposition and imag-mid-switch
+  PASS. Gold 123→130 (7 new scripts, diverse gap scenes, SCP'd). n130 training on mini (hung
+  at iter-300, restarted). n115/n123 comparative read in progress.

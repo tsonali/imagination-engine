@@ -137,12 +137,17 @@ def _b_summarize(text, instruction, tone, style):
         "- <key point>\n"
         "- <key point>\n"
         "(as many points as needed)\n\n"
+        "LOSSLESS NUMBER RULE: Before writing the summary, scan the source text for "
+        "every concrete number (dollar amounts, percentages, counts, dates, headcounts, "
+        "timeframes). Every one of them MUST appear verbatim somewhere in your bullet "
+        "points — no paraphrasing ('at current burn rate' when the text says '$380K/month' "
+        "is WRONG). A bullet point that needs a number to be actionable MUST include the "
+        "number. The only acceptable omissions are pleasantries and repeated mentions of "
+        "the same number already in the summary.\n\n"
         "Every decision, every CONDITION attached to a decision ('yes, but only "
-        "if...'), every deadline, and every open question MUST survive into the "
-        "points — a summary that loses a condition or a commitment is wrong, not "
-        "short. Drop only pleasantries and repetition. Keep relative dates AS THE "
-        "SOURCE SAYS THEM ('the 6th') — never attach a month or year the source "
-        "didn't state.\n\n"
+        "if...'), every deadline, and every open question MUST also survive — "
+        "a condition or commitment lost is wrong. Keep relative dates AS THE "
+        "SOURCE SAYS THEM — never attach a month or year the source didn't state.\n\n"
         + (f"FOCUS: {instruction}\n\n" if instruction.strip() else "")
         + f"TEXT:\n{text}"
     )
@@ -254,14 +259,24 @@ class Assistant:
                 break
         if _BANNED_OPENERS.search("".join(head)):
             log.warning("secretary[%s]: banned filler opener — regenerating once", task_key)
-            stream = gen("\n\nIMPORTANT: do NOT open with filler ('I hope this email "
-                         "finds you well', 'I hope you're doing well', 'I wanted to "
-                         "reach out'). After any greeting line, start with the substance.")
+            stream = gen("\n\nIMPORTANT: do NOT open with any filler greeting — "
+                         "this means 'I hope this email/letter/message finds you well', "
+                         "'I hope you are/you're doing well', 'I wanted to reach out', "
+                         "'I trust this email finds you', or any equivalent pleasantry. "
+                         "After any greeting line (Dear X / Hi X), write the substance immediately.")
             head = []
             for piece in stream:
                 head.append(piece)
                 if sum(len(p) for p in head) >= _HEAD_CHARS:
                     break
+            # If the regen STILL produced a banned opener (model is stubborn),
+            # surgically drop the offending line rather than losing the whole output.
+            if _BANNED_OPENERS.search("".join(head)):
+                combined = "".join(head)
+                lines = combined.splitlines(keepends=True)
+                clean = [ln for ln in lines if not _BANNED_OPENERS.search(ln)]
+                head = ["".join(clean).lstrip("\n")]
+                log.warning("secretary[%s]: regen still had banned opener — line stripped", task_key)
         yield "".join(head)
         yield from stream
 

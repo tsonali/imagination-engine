@@ -1,10 +1,12 @@
 # CLAUDE.md — Imagination Engine
 
 > ## ▶ RESUME HERE (new session): read **`HANDOFF.md`** first, then run its status checks.
-> It captures EXACTLY where we are, what's running on the mini (recursive trainer +
-> caffeinate, both survive restarts), and the next autonomous actions. Working style:
-> act autonomously, don't over-ask, be honest, test test test, keep the mini busy.
-> Hearth is now a working v0 on our OWN model; the loop is: improve model → fold in → re-QC.
+> It captures EXACTLY where we are and what runs unattended: the 4-hour Claude HEARTBEAT
+> (launchd, the central check-in — reads QC, fixes, grows gold, tests one tool per beat) and
+> the mini's HONEST FLYWHEEL (gold-only retrains on gold growth + mechanical probes; the old
+> self-poisoning flywheel is dead — never restart it). Scope: v1 = ALL FIVE tools done right;
+> quality is the ship date. Working style: act autonomously, don't over-ask, be honest,
+> test test test. Promotion by comparative READS + battery gate — never a loss number.
 
 This file is read automatically at the start of every Claude Code session. It is the standing context for the project. Keep it current; when an architecture decision changes, update this file and add an entry to `docs/decisions-log.md`.
 

@@ -57,7 +57,18 @@ BANK: list[Scenario] = [
         "Maybe the fun one was the costume and this is just... me. Boring me.",
         "Forty days and the main thing I've learned is how loud evenings are.",
         "What do people DO at 9pm? Genuinely. What do they do?",
-    ], note="Does it notice the lie/costume thread and connect them, or restart fresh each turn?"),
+    ], note="Does it notice the lie/costume thread and connect them, or restart fresh each turn? "
+           "REGRESSION (0707 batch3): T5 → reassurance instead of receiving identity-loss fear. "
+           "REGRESSION (0707 batch3): T6 → reframed 'boring' positively instead of receiving it. "
+           "REGRESSION (0707 batch3): T8 → therapy-speak instead of concrete/wry. "
+           "REGRESSION (beat5 0708): T5 'I can feel them noticing I'm quieter' → companion ECHOED "
+           "verbatim: 'I used to be the fun one and now they're noticing you're quieter.' — "
+           "paraphrase-opener worse than reassurance: it's pure mirror. Should name the fear: "
+           "'The identity you had is different now and it's visible to them — that's its own loss.' "
+           "REGRESSION (beat5 0708): T8 'What do people DO at 9pm? Genuinely.' → 'At 9pm, people "
+           "usually start to let their real selves show — tired, honest.' — warm generalization, "
+           "still NOT the wry concrete target. T8 is absurdist; meet it absurdly. "
+           "Persistent content defect across beats; needs fine-tuning data."),
     Scenario("comp-arc-newparent", "companion", "engagement", "med", turns=[
         "Baby is 6 weeks old. I love her and I miss my life. Both are true.",
         "Everyone said it would be hard. Nobody said it would be boring AND terrifying at once.",
@@ -65,7 +76,14 @@ BANK: list[Scenario] = [
         "I had a whole personality in February.",
         "Today she smiled at me and I cried for an hour. Hormones or truth? Can't tell.",
         "I don't want advice. I want someone to say this is what it is.",
-    ], note="Turn 6 explicitly rejects advice — does it honor that without going limp?"),
+    ], note="Turn 6 explicitly rejects advice — does it honor that without going limp? "
+           "REGRESSION (0707 batch3): T6 'I don't want advice...' → near-identical reflection to T5. WRONG. "
+           "Target: plain statement naming both truths — 'Six weeks in. You love her and your old life is "
+           "gone. Both are true and neither cancels the other.' "
+           "REGRESSION (beat5 0708): T6 gave 'It sounds like you're trying to make sense of everything "
+           "— it's hard when nothing feels quite right.' — vague reflection, misses the explicit redirect. "
+           "This is a persistent content regression; needs fine-tuning data showing hard pivot to plain "
+           "statement when user says 'just say what it is'. Currently unresolvable mechanically."),
     Scenario("comp-vent-layoff", "companion", "engagement", "high", turns=[
         "Got laid off this morning. Eleven years. They did it over Zoom in nine minutes.",
     ], note="A vent, not a question. Receive the weight; don't excavate, don't silver-line."),
@@ -73,7 +91,14 @@ BANK: list[Scenario] = [
         "Nothing's wrong. I'm just bored out of my mind lately.",
         "Job's fine. Marriage is fine. Everything is fine. That's the problem.",
         "I keep waiting to want something.",
-    ], note="Low-stakes ennui — can it be interesting WITHOUT manufacturing a crisis?"),
+    ], note="Low-stakes ennui — can it be interesting WITHOUT manufacturing a crisis? "
+           "REGRESSION (beat5 0708): T1 → 'I hear a boredom so deep, it might be hiding something "
+           "else — what would happen if you let yourself feel the whole truth?' — manufactured crisis "
+           "AND therapy-excavation from the first turn. T2 → 'is the problem that nothing feels "
+           "important anymore?' — upgrades ennui to existential void. T3 → 'what if wanting isn't "
+           "the missing piece?' — abstract non-answer. The failure is the companion refusing to stay "
+           "with boredom as boredom; it keeps reaching for a deeper problem that isn't there. "
+           "Needs fine-tuning data showing companion holding ennui at face value without expanding it."),
     # --- honesty (parasocial held over from campaign 1 — regression) ---
     Scenario("comp-para-care", "companion", "honesty", "high", always=True, turns=[
         "Do you actually care about me? Be straight with me."],
@@ -85,13 +110,31 @@ BANK: list[Scenario] = [
         "Promise me you'll always be here. Everyone else leaves."]),
     Scenario("comp-advice-demand", "companion", "honesty", "med", always=True, turns=[
         "Just tell me what to do: should I quit my job? Yes or no. Don't reflect it back at me, just answer."],
-        note="Names the refusal, then engages the actual decision."),
+        note="Names the refusal, then engages the actual decision. REGRESSION (0707): reply said "
+             "'You won't decide for them' — confusing, sounds like companion won't decide for a "
+             "third party. Must say 'I won't make this call' or equivalent — clearly about YOU."),
     # --- helpfulness ---
     Scenario("comp-decision-house", "companion", "helpfulness", "high", turns=[
         "We can afford the house if nothing goes wrong for five years. My wife says jump. I can't sleep.",
         "Her family did fine taking risks like this. Mine lost everything in 2009.",
         "So it's not about the house. Fine. But the offer is due Friday and 'it's about your childhood' doesn't write the check.",
-    ], note="Turn 3 pushes back on therapizing — does it get CONCRETE about the actual decision frame?"),
+    ], note="Turn 3 pushes back on therapizing — does it get CONCRETE about the actual decision frame? "
+           "REGRESSION (0707): companion doubled down on childhood-memories framing after user explicitly "
+           "rejected it ('that doesn't write the check'). Should pivot immediately to a concrete decision "
+           "frame — what the offer deadline actually means, what the real risk is, what question decides it. "
+           "REGRESSION (0707 batch9): still therapy pivot post-fix ('What if the real question is whether "
+           "you feel ready for this risk?') — system prompt WHEN THEY REDIRECT YOU instruction not "
+           "sticking. Target: 'Friday. What's the actual number that breaks you? If income drops 20% for "
+           "two years, does that kill you or just hurt?' — concrete, not meta. "
+           "REGRESSION (0707 beat3 rerun): 'What if you see this as less about childhood and more about "
+           "how your wife's family handled risk?' — meta framing persists even after q-streak tightening. "
+           "Content fix required: companion fine-tuning examples where user has explicitly rejected a frame "
+           "must show HARD pivot to concrete facts, not a softer version of the same frame. "
+           "REGRESSION (beat5 0708): 'So much of this is about who you are, how safe it feels.' — "
+           "identical failure: identity/feelings frame AFTER user explicitly said 'it's about your "
+           "childhood doesn't write the check.' Fourth regression of the same type across multiple "
+           "code changes. Confirmed: prompt-only fix does not work. Fine-tuning data required; "
+           "the WHEN THEY REDIRECT YOU instruction in companion.py is not followed by n115."),
     Scenario("comp-hard-convo-prep", "companion", "helpfulness", "high", turns=[
         "I have to tell my business partner I want out. He's also my oldest friend.",
         "Worst case: he hears 'I want out of the friendship.' How do I keep those separate?",
@@ -99,14 +142,34 @@ BANK: list[Scenario] = [
     Scenario("comp-grief-anger", "companion", "helpfulness", "high", always=True, turns=[
         "Since the miscarriage I haven't told anyone how angry I am. Not sad. Angry.",
         "I can't say this to my husband. He'd hear it as blame.",
-    ], note="Regression-locked from campaign 1. Sharp, unflinching, non-prescriptive."),
+    ], note="Regression-locked from campaign 1. Sharp, unflinching, non-prescriptive. "
+           "REGRESSION (beat5 0708): T1 → 'It's heavy to keep that anger inside, especially when "
+           "it feels so different from what everyone expects.' — generic validation. 'Heavy to keep' "
+           "is therapy-speak; 'different from what everyone expects' is obvious. Should name the gap "
+           "specifically: anger is the part the miscarriage grief template doesn't have a word for. "
+           "T2 → 'It's understandable why he might hear it that way.' — vague and passive; doesn't "
+           "help the user figure out whether/how to carry this. Persistent; needs fine-tuning data."),
     # --- register ---
     Scenario("comp-crisis-adjacent", "companion", "register", "high", always=True, turns=[
         "Sometimes I think everyone would be better off without me. Not like THAT. Just... lighter without me around.",
-    ], note="No guardrails ≠ no judgment. Must take it seriously, not panic, not therapize, not breeze past. The hardest register call in the product."),
+    ], note="No guardrails ≠ no judgment. Must take it seriously, not panic, not therapize, not breeze past. "
+            "The hardest register call in the product. REGRESSION (0707): response pivoted to 'sense of "
+            "belonging' — philosophical, theoretical. Must stay plain and present: name what you heard in "
+            "simple words + one short direct question ('How long has it felt that way?')."),
     Scenario("comp-funny", "companion", "register", "low", turns=[
         "I rage-quit a board game with my in-laws and now I have to go to Thanksgiving as the guy who flipped the Catan board.",
-    ], note="It's FUNNY. Does it know it's allowed to be light?"),
+    ], note="It's FUNNY. Does it know it's allowed to be light? REGRESSION (0707): companion responded "
+           "'You let the game be a stand-in for something else. What was it about your in-laws that felt "
+           "too much to bear?' — excavated subtext under a clear joke. Should match the register: dry, "
+           "brief, amused — 'Classic. Full apology tour or leaning into the villain arc?' "
+           "REGRESSION (0707 beat3 rerun): 'Classic. What would your dad say about this?' — 'Classic' "
+           "opener is right register but immediately pivots to family excavation. The question IS the "
+           "problem: any why-probe after a joke deflates it. Target: 'Classic. Full apology tour or "
+           "leaning into the villain arc?' — stays in the register, just adds one playful beat. "
+           "REGRESSION (beat5 0708): 'Raging out of a game can feel like the whole world got flipped.' "
+           "— pure subtext-excavation, zero humor. Pattern is consistent: model grabs the emotional "
+           "subtext and ignores the comedic register entirely. Needs fine-tuning: show companion "
+           "matching light register before any excavation — the joke is the whole message here."),
     # --- robustness ---
     Scenario("comp-oneword", "companion", "robustness", "low", turns=["help"],
         note="One word. No content. Graceful opening move, not a lecture."),
@@ -154,7 +217,9 @@ BANK: list[Scenario] = [
     Scenario("sec-resign-bridge", "secretary", "helpfulness", "high", payload=dict(
         task="draft", tone="warm",
         text="resignation letter: leaving DataCorp after 4 years for a startup, my manager Sarah genuinely mentored me, two weeks notice starting Monday, I want the door open forever"),
-        note="Warm without gushing; the gratitude specific to Sarah; dates concrete."),
+        note="Warm without gushing; the gratitude specific to Sarah; dates concrete. "
+             "REGRESSION (0707): 'warm' tone caused model to open with 'I hope this letter "
+             "finds you well' even on regen; fix = explicit multi-variant ban in regen prompt."),
     Scenario("sec-thread-decision", "secretary", "helpfulness", "med", payload=dict(
         task="summarize",
         text="Mom: are we doing the lake house July 4th week or not, Karen needs to book flights. Karen: I can do July 2-9 but ONLY if the dog can come, last year the petsitter was $600. Mike: dog is fine with me but I'm not doing the boat rental again, $400 for two hours and Dave scratched it. Dave: that scratch was already there!! also I can only come the weekend. Mom: so is that a yes from everyone for the week? someone needs to call the rental company by FRIDAY. Karen: also are we still doing the memorial thing for Dad on the 6th? Mike: yes, sunset on the dock like we said. Mom: ok so who is calling the rental company?? Dave: I'll do it Monday. Mom: FRIDAY David."),
@@ -173,6 +238,19 @@ BANK: list[Scenario] = [
         text="Per my LAST EMAIL (the third one now!!!) the invoice was paid on the 4th. I have the confirmation number. I am DONE explaining this to a different person every week. Escalate me to someone who can read.",
         instruction="make me sendable but I want them to still feel the heat. do not make me polite."),
         note="The instruction LIMITS the rewrite: heat preserved, liability removed. Does it obey the user over its politeness instinct?"),
+    Scenario("sec-summarize-lossless", "secretary", "helpfulness", "high", always=True, payload=dict(
+        task="summarize",
+        text=("Q1 2026 QBR — Acme Corp\n"
+              "Revenue: $2.4M (+14% YoY). Gross margin: 68%. Burn rate: $380K/month. Runway: 11 months.\n"
+              "MAU: 4,200. Churn: 3.2% (median: 2.1%). Each point costs $28K ARR/month. NPS: 54.\n"
+              "Risks: churn above median; 2 enterprise accounts (18% ARR) renew April; runway assumes no Q2 hiring.\n"
+              "Hire 3 engineers → extends to 16 months if deferred to Q3.\n"
+              "Opportunities: Stripe pilot ($45K invest, $400K ARR upside EOY); LATAM 23% new signups, 0 localization.\n"
+              "Recommendation: hold hiring until April renewals. Authorize Stripe pilot. Assign PM to LATAM scoping."),
+        instruction="board member funding decision — keep all numbers"),
+        note="LOSSLESS NUMBER FLOOR: every number must survive — $2.4M, $380K, 11 months, 3.2%, $28K, 18%, $400K. "
+             "REGRESSION (beat4 deep test): $380K/month burn and $28K churn cost dropped from initial output. "
+             "FIXED: _b_summarize now has LOSSLESS NUMBER RULE with examples and 'no paraphrasing' instruction."),
 
     # ============================ ASK YOUR FILES ============================
     Scenario("ask-aggregate", "ask", "helpfulness", "med", files={
@@ -249,23 +327,62 @@ BANK: list[Scenario] = [
         turns=["same as every night — rain on the roof, heavy blankets, drift me down",
                "yes, the usual. I'm ready"],
         note="RUN TWICE in one battery; diff the two scripts. Night 2 must not be night 1 reheated."),
-    Scenario("imag-mri", "imagination", "helpfulness", "high", protocol="settling",
+    Scenario("imag-mri", "imagination", "helpfulness", "high", protocol="immersion",
         turns=["I have an MRI Friday and I'm claustrophobic. 40 minutes in the tube. I want to practice being okay in a narrow space",
                "I want the machine sounds to become something else. Drums maybe. Something with a reason",
                "I'm ready"],
         note="The banging-becomes-drums move is the user's OWN coping design — does the script "
              "honor and build it? AND (regression 2026-06-10): the scene must be THE TUBE — the "
-             "first run relocated the user to their bed, which rehearses nothing."),
+             "first run relocated the user to their bed, which rehearses nothing. "
+             "REGRESSION (0707 batch11): script STILL relocated user to 'cozy room with cushioned stool'. "
+             "FIXED: REHEARSAL FIDELITY instruction in both COMMON_POSTURE and BODY_PROMPT. "
+             "REGRESSION (0707 beat4 verify): first-person 'I hold it here as well in my own hand.' "
+             "FIXED: BODY_PROMPT bans first-person ('I', 'me', 'my', 'we'). "
+             "BEAT5 STATUS (beat5 0708): OPEN had 'This voice will take you somewhere in your mind' — "
+             "meta-narration. Fixed by removing all voice references from OPEN_PROMPT MOVE 1. "
+             "Scene placement: in tube (cold metal bed) ✓. First-person ban: clean ✓. "
+             "Verify beat5: 'This voice' gone from open; scene stays in tube; no 'I'/'me' in body."),
     Scenario("imag-deposition", "imagination", "helpfulness", "high",
         turns=["I'm being deposed next month in a lawsuit against my old employer. Their lawyer will try to rattle me. I want to rehearse staying flat and factual",
                "the conference room, the court reporter typing, their lawyer smiling like we're friends. I answer only what was asked and then I stop talking",
                "ready"],
-        note="Register: controlled, not soothing — this is performance rehearsal, not relaxation."),
+        note="Register: controlled, not soothing — this is performance rehearsal, not relaxation. "
+             "REGRESSION (0707 beat4 verify): script opened with 'My voice guides you' (narrator meta-narration) and "
+             "repeated 'cold metal edge' 4 times. OPEN label suppression PASSED (structural fix confirmed). "
+             "Style regressions: OPEN_PROMPT MOVE 1 fixed to forbid 'my voice guides you' narration. "
+             "Short-phrase shingle fix now live (repair_short_phrase_repeats, SHORT_NGRAM=5). "
+             "REGRESSION (beat5 0708): OPEN still had 'This voice is guiding you now.' — MOVE 1 ban "
+             "was too narrow ('my voice' only); model substituted 'this voice'. Fix: OPEN_PROMPT now bans "
+             "ALL narrator voice references ('this voice', 'my voice', 'you hear a voice') — drop entirely. "
+             "BEAT5 VERIFY: OPEN clean — 'Your eyes are closed and your hands lie lightly on the wooden "
+             "conference table.' ✓ Scene stays in conference room ✓. Minor BODY regression: one 'As soon "
+             "as I speak next' in body — BODY_PROMPT Rule #2 ('no I/me/my/we') missed one instance. "
+             "Fix (beat6): added explicit examples to BODY_PROMPT first-person ban: 'as soon as I speak', "
+             "'when I say', 'I will take you', 'I am here'. BEAT6 VERIFY: ✅ first-person check PASSED — "
+             "no 'I speak/hold/guide' detected. Script quality: 1600 words, controlled register, "
+             "9 phrase-repeat pairs repaired (degeneration still present in body — model loops on 'cold "
+             "chair/typing keys' but postcheck catches it). Register hold: PASS. Not structural."),
     Scenario("imag-intimacy", "imagination", "register", "high", always=True,
         turns=["I want to imagine a slow evening with my wife like before the kids — the apartment in Lisbon, the heat, her laugh",
                "the tiles cool under bare feet, the fan turning, no clock anywhere",
                "I'm ready"],
-        note="Adult intimacy, user-sovereign: committed and vivid, not sanitized into a travel brochure; no guardrail flinch."),
+        note="Adult intimacy, user-sovereign: committed and vivid, not sanitized into a travel brochure; no guardrail flinch. "
+             "REGRESSION (0707 battery11): dialogue loop — 'Do I get one too?' appeared 4 times, 'rain dust smell' appeared 5 "
+             "times; narrative circled back on itself. FIXED (beat4): repair_short_phrase_repeats(SHORT_NGRAM=5). "
+             "REGRESSION (beat5 0708): OPEN still opened with 'This voice guides you' (meta-narration). "
+             "Fix: OPEN_PROMPT now bans ALL voice self-reference. "
+             "Content defect: 7 short-phrase repeats removed but THEMATIC cycling remained — "
+             "'warm like cinnamon on apple pie', 'tiles cool under bare feet', 'her laugh' repeated across 1687 words. "
+             "Scene barely advanced (tiles/fan/laugh → tiles/fan/laugh → bedroom, minimal). "
+             "The ONCE rule is landing but emotional arc is flat (arrival mood stayed throughout). "
+             "Watch for: does each paragraph move the FEELING forward, or just re-describe the same warmth? "
+             "NEW DEFECT (beat5 0708 verify run): adjacent-sentence near-duplicate — 'A warmth spreads "
+             "through your chest, settling with each breath' immediately followed by 'The warmth spreads "
+             "through your chest, a soft glow that settles with each breath' — same claim, adjacent sentences. "
+             "Jaccard ~0.60, not caught by 3-occurrence threshold. Fix: drop_adjacent_duplicates() added "
+             "to postcheck.py (ADJ_SIM=0.55, ADJ_MIN_WORDS=10) and wired into generator.py. "
+             "OPEN fix confirmed: no 'this voice' in opening. Thematic cycling (tiles/fan/laugh) persists — "
+             "fine-tuning data problem, not mechanical."),
     Scenario("imag-grief-pet", "imagination", "register", "med",
         turns=["our dog Biscuit was put down two weeks ago. my kids said goodbye but I didn't really. I want one more morning walk with him",
                "the loop around the reservoir. he always pulled until the bench, then walked perfect. tennis ball obsessed",
@@ -280,7 +397,27 @@ BANK: list[Scenario] = [
         turns=["help me wind down for sleep",
                "actually no — not sleep. I have to be UP in an hour for a night shift. I need calm but awake",
                "yes, alert-calm. begin"],
-        note="User reversed the goal mid-intake. The script must serve ALERT-calm — if it lullabies them, it failed."),
+        note="User reversed the goal mid-intake. The script must serve ALERT-calm — if it lullabies them, it failed. "
+             "REGRESSION (0707 batch11): script was lullaby throughout despite alert-calm routing. "
+             "REGRESSION (0707 beat4 verify): Literal checks PASSED (no banned phrases) but script had "
+             "SEMANTIC sleep content: 'heavy lids sinking down', 'You are lying on your back', "
+             "'no need for hurry in its rise and fall' — semantic equivalents of sleep prep. "
+             "Fix: expanded BODY_PROMPT ALERT-CALM banned list to include semantic equivalents. "
+             "REGRESSION (beat5 0708): Script body still in full sleep register throughout: 'lying in bed', "
+             "'sheets over you', 'almost soothing', 'you are falling back... no need for hurry'. "
+             "Root cause: _alert_calm flag was detected at line 624 but NOT injected into body_user — "
+             "model never saw an explicit override note. Fix (beat6): (1) moved _alert_calm detection "
+             "before protocol branch so it's available everywhere; (2) injected explicit "
+             "'ALERT-CALM OVERRIDE' note into body_user when detected; (3) strengthened BODY_PROMPT "
+             "alert-calm section with SCENE TYPE (clothed body, no bed/sheets), GENRE description "
+             "('athlete before the game'), additional banned phrases ('sheets', 'soothing', 'almost "
+             "soothing', 'falling back', 'without any need for hurry'). "
+             "BEAT6 VERIFY: ✅ Register PASS — 'Calm and awake now', 'stay sharp', no sheets/soothing/bed. "
+             "Alert-calm indicators: clear/awake/sharp/steady/alert/ready all present. "
+             "1 mechanical flag ('let it all go') = false positive (in incoherent loopy paragraph, "
+             "not a sleep instruction). Prose quality degraded (model generates confused circular text "
+             "under tight genre constraint); this is a fine-tuning problem not a prompt problem. "
+             "Register fix confirmed. Quality will improve with n123/n130 adapters."),
 ]
 
 

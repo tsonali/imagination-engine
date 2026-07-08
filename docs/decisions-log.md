@@ -314,3 +314,116 @@ Quality of speculative output was unaffected, as theory predicts — this was
 purely a throughput loss. The latency roadmap therefore stays: tighter budgets
 + decay-abort (shipped), and the long-term answer is the model itself (smaller
 specialist or better quantization), not decode tricks.
+
+## 2026-07-07 — BODY_PROMPT as the enforcement point for critical generation rules
+
+During battery11 (beat3), two rules in COMMON_POSTURE were ignored at generation time:
+REHEARSAL FIDELITY (imag-mri placed user in "a cozy room" despite explicit rule) and
+ALERT-CALM REGISTER (imag-mid-switch produced lullaby language despite keyword routing
+fix). Root cause: COMMON_POSTURE is ~1400 tokens of shared preamble; across 14 LLM calls,
+the 14B model's attention dilutes it. The BODY stage (longest, most token-hungry) is where
+the rules most needed to hold and where the model was most likely to drift.
+
+Decision: CRITICAL rules that must hold at output time get duplicated into BODY_PROMPT,
+immediately before the output instruction ("Write the next passage"). This is the
+"enforcement at the last responsible moment" pattern. Rules that need to hold at OPEN
+(structure labels) go into OPEN_PROMPT. Rules that need to hold at BACK go into BACK_PROMPT.
+COMMON_POSTURE remains the shared style guide; critical scene/register constraints get
+per-stage duplication at the stage where they most matter. Two-point enforcement is not
+redundancy — it is the only thing the 14B honors.
+
+## 2026-07-07 — repair_phrase_repeats() wired into live product
+
+`repair_phrase_repeats()` existed in postcheck.py as a training-data tool ("not wired
+into the live product"). Battery11 battery (imag-mid-switch) produced a 4-sentence block
+appearing twice verbatim (phrase_repeat_count=2). Decision: wire repair in generate_session
+at >=2 pairs. The threshold for the log WARNING changed from >=3 to "always report if
+>0 after repair." Rationale: a listener hearing the same 12-word passage twice shatters
+immersion far more than a missing line does. The repair drops the later occurrence; a
+shorter clean script is always better than a recycled one. The >3 warning threshold was
+calibrated for training-data culling and is too lenient for the live product.
+
+## 2026-07-07 — Companion mechanical q-streak trim: threshold and stub guard tuned
+
+The companion `_q_streak` threshold started at >=2 (only strip if last 2 turns were both
+questions). Beat2 lowered to >=1. Battery9 (beat2 code): 55% question-enders. Analysis:
+single-turn scenarios always start at streak=0, so a solo question-ending reply was never
+trimmed. Beat3: threshold lowered to >=0 (always try to strip). Stub guard raised from
+4 to 8 words: a 6-word gravity-mode reply ("That's a weighty thing to carry.") should
+NOT be stripped because the trailing question IS the point in that register. The 8-word
+guard preserves these while stripping longer replies with a question appended. Result:
+21% question-enders (from 55%). Content regressions (decision-house meta pivot, funny
+register excavation) require fine-tuning data, not mechanical trim.
+
+## 2026-07-07 — OPEN_PROMPT MOVE 1: forbid "my voice guides you" narrator narration
+
+Battery verify (beat4) showed imag-deposition opening with "My voice guides you, even with
+your eyes closed." MOVE 1 instruction said "name the voice they hear" — model interpreted
+this as explicit narrator self-reference. In the gold corpus, good openings acknowledge
+presence through context (what's happening, what the listener can feel) rather than
+declaring the narrator's role. Fix: added explicit prohibition in MOVE 1: "do NOT say
+'my voice guides you' or any meta-narration about yourself — instead refer to 'this voice'
+or drop the reference entirely." This preserves the Ericksonian yes-set while eliminating
+the uncanny 3rd-person narrator voice.
+
+## 2026-07-07 — Short-phrase repeat repair: SHORT_NGRAM=5 wired into generate_session
+
+Battery11 imag-intimacy: "Do I get one too?" appeared 4 times, "rain dust smell" 5 times.
+Root cause: existing NGRAM=12 repair catches long verbatim passages (12-word shingles)
+but misses short dialog/sensory phrase loops. Fix: added SHORT_NGRAM=5 check in
+postcheck.py (find_short_phrase_repeats, repair_short_phrase_repeats). Threshold=3
+(not 2) to avoid false positives on legitimate cadence phrases that repeat twice.
+Drops sentences carrying the 3rd+ occurrence. "rain dust smell" (3 words) is still
+not caught by the 5-gram check (surrounding words differ); would need a separate
+sub-5-word count-based approach. NGRAM=12 unchanged — it handles different failure mode.
+
+## 2026-07-07 — BODY_PROMPT first-person narrator ban
+
+Verify (beat4) showed imag-mri body with "I hold it here as well in my own hand now."
+BODY_PROMPT Rule #2 said "second person" but didn't explicitly prohibit first-person.
+Model treated itself as a character in the scene. Fix: added explicit prohibition:
+"NEVER use first-person 'I', 'me', 'my', 'we' — you are a narrator speaking TO the
+listener, not a character IN the scene." Applied to BODY_PROMPT alongside the OPEN_PROMPT
+meta-narration fix from the same beat.
+
+## 2026-07-07 — ALERT-CALM register: expanded semantic ban in BODY_PROMPT
+
+Beat4 verify (imag-mid-switch): script passed literal banned-phrase check (no "drift toward
+sleep", "let your eyes grow heavy", etc.) but body had semantic sleep content: "heavy lids
+sinking down", "You are lying on your back", "no need for hurry in its rise and fall."
+These evade the literal ban but produce the same failure — the user can't use a sleep-prep
+session before a night shift. Fix: BODY_PROMPT ALERT-CALM now has two sections: explicit
+(old banned phrases) and semantic equivalents ("heavy lids", "sinking down", "no need for
+hurry", "let the body sink", "surrender to the quiet", "let go"). The final-state criterion
+is now explicit: "grounded, awake, ready for the shift — clear head, present body, oriented
+to the room."
+
+## 2026-07-07 — Secretary summarize: LOSSLESS NUMBER RULE in _b_summarize
+
+Deep test (beat4) UC4: $380K/month burn rate and $28K/point churn cost dropped even when
+user instruction said "keep the numbers." Root cause: _b_summarize prompt said "every
+decision/condition/deadline MUST survive" but said nothing about numbers. Model paraphrased
+"$380K/month" as "at current burn rate." Fix: added LOSSLESS NUMBER RULE: "Before writing,
+scan for every concrete number; every one MUST appear verbatim in bullet points; no paraphrasing
+a number ('at current burn rate' when text says '$380K/month' is WRONG)." Test confirmed all 6
+key numbers now survive in the board-decision summarize scenario.
+
+## 2026-07-08 (beat7) — Alert-calm root cause: _alert_calm flag never injected into body
+
+Battery11 beat5 verify found imag-mid-switch producing full sleep register despite user
+explicitly requesting alert-calm. Root cause: `_alert_calm` was detected at line ~624 of
+generator.py but INSIDE `if protocol == "settling":` block. The body_user construction had
+zero knowledge of the alert-calm requirement. Fix: (1) moved detection BEFORE protocol
+branch; (2) injected explicit `⚠️ ALERT-CALM OVERRIDE` block into body_user when flag set;
+(3) strengthened BODY_PROMPT alert-calm section with SCENE TYPE + GENRE + explicit/semantic
+ban list. Beat6 targeted verify: imag-deposition PASS, imag-mid-switch REGISTER PASS.
+
+## 2026-07-08 (beat7) — finetune.sh: max-seq-length 1024→768, val-batches 8→4 (OOM fix)
+
+n130 training (130 gold scripts) introduced 2703-token training examples, causing reproducible
+OOM hang after iter 200 (at the iter-300 eval pass). n123 (123 gold) had succeeded with same
+settings — the 7 new gold scripts (124-130) are the source of the longer sequences (full system
++ user + assistant format = much longer than the raw script). Fix: reduced max-seq-length from
+1024 to 768 (truncates long batches, reduces peak memory ~25%) and val-batches from 8 to 4
+(halves val memory). Peak memory at iter 25 = 10.806 GB vs 11.808 GB previously — within budget.
+Applied to both mini's `scripts/finetune.sh` and local copy.

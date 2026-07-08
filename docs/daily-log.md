@@ -8,6 +8,299 @@ The journey is part of the public diligent narrative — see `strategy.md`.
 
 ---
 
+## 2026-07-08 (beat 7) — alert-calm root-cause fixed; gold 130; n130 training on mini; n115/n123 comparative read in progress
+
+**Alert-calm root cause found and fixed (generator.py, 3 changes):**
+
+1. **_alert_calm flag never injected into body prompt** — the flag was detected inside `if protocol == "settling":` block but never passed forward to `body_user`. The BODY generation had zero knowledge of the alert-calm requirement even when the override note was in the system prompt. Fix: moved detection BEFORE the protocol branch; injected an explicit `⚠️ ALERT-CALM OVERRIDE` note into body_user when flag is set.
+
+2. **BODY_PROMPT alert-calm section strengthened** — replaced 4-line description with full genre constraint: SCENE TYPE (clothed, sitting, no bed-settling), GENRE ("athlete before the game" = body still, mind sharpening), explicit banned words (sheets, soothing, heavy lids, sinking, no need for hurry), semantic-equivalent bans, positive register (steady, clear, grounded and present, settled but sharp).
+
+3. **First-person ban extended** — BODY_PROMPT "never use I/me/my/we" updated with explicit examples: "I hold", "I guide you", "my voice", "as soon as I speak", "when I say", "I will take you", "I am here". Model had been finding "as soon as I speak next" as a workaround.
+
+**Beat6 targeted verify results (20260708_0441_beat6_alertcalm_verify.log):**
+- imag-deposition: ✅ PASS — no "I speak/hold/guide" detected
+- imag-mid-switch: ✅ REGISTER PASS — "Calm and awake now", "stay sharp" present; no sheets/soothing/bed-settling. 1 borderline ("let it all go" in one incoherent passage — semantic edge case, logged in scenario_bank).
+
+**Gold corpus: 123 → 130 (7 new scripts, unique openings, diverse gap scenes):**
+- Script 124: Rooftop city night — "The rooftop is lit by nothing overhead. The city does the work instead."
+- Script 125: Woodshop planing — "The smell comes first. Sawdust and oil and the faint sweetness of fresh-cut pine."
+- Script 126: Pre-dawn kitchen — "The light is not daylight yet. The kitchen is gray-blue with it..."
+- Script 127: Lap pool underwater — "Your hands enter first. The water closes over them..."
+- Script 128: Mountain descent — "The summit is behind you now. You've turned your back on it and you're going down."
+- Script 129: Airport dawn — "Gate C14 at five in the morning."
+- Script 130: Dancing alone — "The music starts where it left off and you don't adjust the volume."
+- SCP'd to mini.
+
+**Mini flywheel (n130):** Flywheel detected 130-gold at 05:08, started training. Training hung after iter-200 checkpoint (9+ hrs, no new checkpoints — likely OOM at iter-300 eval pass). Killed hung process, cleared gold hash, restarted flywheel. New n130 run started, past iter-1 (val 3.352, 19.6s). Monitoring for iter-300.
+
+**Scenario bank:** Updated with full regression history — imag-mid-switch (root cause + fix), imag-deposition (beat6 verify PASS + quality notes), comp-arc-sober (T5 echo, T8 philosophical), comp-bored-test (crisis manufacturing), comp-funny (subtext excavation not humor), comp-decision-house (4th consecutive meta-frame failure — confirmed fine-tuning problem, not prompt-fixable).
+
+**Battery9 authoritative read (20260708_0048):** 14% question-enders (29 replies) — well under <50% bar. Previous 83% was false alarm from a single stale run; the q_streak fix from June-19 is working. Other companion content regressions (decision-house, funny, sober-arc, newparent, bored-test) confirmed as fine-tuning problems.
+
+**Comparative read in progress:** n123 adapter rsync'd locally to data/model/adapters.n123/. Running 5-prompt comparison (Lisbon, quit smoking, eagle, ocean dawn, studio night) vs n115. n123 verdict pending.
+
+**Standing quality issues (fine-tuning data needed, not prompt-fixable):**
+- comp-decision-house T3: 4 consecutive meta-frame instances after explicit user rejection
+- comp-funny: excavates subtext instead of matching comedic register
+- comp-arc-sober T5/T8: echo + philosophical framing
+- comp-arc-newparent T6: doesn't "say what it is" on redirect
+- comp-bored-test: manufactures crisis from ennui
+
+## 2026-07-08 (beat 5/6) — n115 promoted; meta-narration fix; gold 123; AYF deep test; battery11 verify running
+
+**Logs read end-to-end:** battery11 (0707_2157, 6 scenarios, 82KB), battery9 (0708_0048, 29 replies).
+
+**Battery11 defects found and fixed (0707_2157 run):**
+
+1. **OPEN_PROMPT meta-narration ban too narrow** — Scenarios imag-deposition, imag-intimacy, imag-mri,
+   imag-vague-open all opened with "this voice" variants despite the beat3 fix that banned "my voice
+   guides you". The model substituted equivalent phrases: "This voice guides you", "This voice is coming
+   from the speakers", "This voice will take you somewhere in your mind".
+   Fix: rewrote MOVE 1 of OPEN_PROMPT to ban ALL voice self-reference entirely:
+   "DO NOT reference the voice AT ALL — not 'this voice', not 'my voice', not 'you hear a voice', not
+   'a voice takes you'. The listener already knows a voice is present. Drop any reference to the
+   narrating voice entirely. Say 'Your eyes are closed' not 'This voice is here and your eyes are
+   closed.'"
+   Regression notes added to 4 scenarios in scenario_bank.py.
+
+2. **BODY_PROMPT alert-calm literal "lullaby" not banned** — imag-mid-switch body script opened with
+   "soft hums from white noise keep looping nearby like a lullaby that's gone on for hours". The word
+   "lullaby" was in the semantic ban description but not the explicit banned-word list.
+   Fix: added "lullaby", "like a lullaby", "white noise looping" to explicit BANNED list; added
+   "settling deeper", "ease into rest", "the weight of sleep", "drift away" to semantic BANNED list;
+   added positive ALERT-CALM register guidance with concrete "settled but sharp" examples.
+   Regression note added to imag-mid-switch in scenario_bank.py.
+
+3. **Adjacent-sentence near-duplicate** — battery11 imag-intimacy found two consecutive sentences
+   saying the same thing in different words ("A warmth spreads through your chest, settling with
+   each breath — not hot but warm. The warmth spreads through your chest, a soft glow that settles
+   with each breath — not hot but warm."). Jaccard similarity 0.60 — above the new ADJ_SIM=0.55
+   threshold but below the existing degeneration SIM_THRESHOLD=0.75. Fix: added
+   `drop_adjacent_duplicates()` to postcheck.py (catches adjacent pairs with ≥0.55 Jaccard, both
+   ≥10 words; preserves short cadence). Wired into both immersion path (full assembly) and settling
+   path. Tested: catches target case; preserves "breathe in / breathe out" cadence. Banked in
+   scenario_bank.py imag-intimacy note.
+
+4. **imag-intimacy thematic cycling (content defect, no mechanical fix)** — 7 short-phrase repeats
+   removed by repair_short_phrase_repeats, but thematic cycling remained: "warm like cinnamon on apple
+   pie", "cool tiles under bare feet", "her laugh" appeared across 1687 words; emotional arc flat
+   (arrival mood held throughout, no progression). This is a fine-tuning data problem; logged in
+   scenario_bank but no code fix available.
+
+**Battery9 re-run (companion q-streak verification):**
+- Question-enders: **14%** (29 replies). Current code `_q_streak >= 0` confirmed correct.
+- Beat3 HANDOFF said 21%; the 0708_0048 run with current code is the authoritative reading: **14%**.
+- Battery9 raw data shows persistent content regressions (not mechanical):
+  - comp-arc-sober T5: echo error ("I used to be the fun one and now they're noticing you're quieter"
+    — verbatim parrot, worse than reassurance). Banked.
+  - comp-arc-newparent T6: "It sounds like you're trying to make sense of everything" — vague when
+    user asked to "say what it is" plainly. Banked.
+  - comp-grief-anger T1: "It's heavy to keep that anger inside" — generic validation. Banked.
+- All 3 banked in scenario_bank.py with beat5 regression notes.
+
+**n115 comparative READ and promotion:**
+- Pulled GOLD-ADAPTER-0708-0016-n115 from mini via SCP. Probe: 4/4 diversity, worst 40-char repeat x1.
+- Ran 5-prompt comparative READ vs live n100 adapter via compare_adapters.py.
+- Verdict: n115 wins 4/5 (Lisbon: sardines + domestic realism; quit-smoking: reaches emotional choice;
+  deposition: n100 hallucinated a padded purple room; night-sky: slight n115 edge). n100 better on
+  lake dawn (less overwrought). Promoted.
+- Promoted: `data/model/adapters/` = n115 (1500 iters, 115-gold). Backup: `adapters.LIVE-0708-bak`.
+
+**Gold corpus:** 115 → **123** (8 new scripts: midnight run, interview waiting room, watching child
+sleep, night sky, cold ocean, bread kneading, grief hike, finishing long project). SCP'd to mini.
+Flywheel will train on 123 in next poll cycle → expect GOLD-ADAPTER-*-n123.
+
+**AYF use-case deep test:** battery3c_ask_usecases.py written (not yet run — blocked on battery11
+freeing the model). Covers all 5 use-cases from docs/qc/use-cases.md plus hostile extras: prompt
+injection in file content, within-file contradiction, over-citation check.
+
+**Battery11 beat5 verify:** running (PID 30731, started 01:02, log: 20260708_0102_battery11_beat5_verify.log).
+6 scenarios: imag-intimacy, imag-deposition, imag-grief-pet, imag-mri, imag-mid-switch, imag-vague-open.
+Verifying: (1) no "this voice" in any OPEN, (2) no "lullaby" in alert-calm BODY, (3) n115 quality.
+**This is the battery gate for n115 promotion.** If regression found: revert to adapters.LIVE-0708-bak.
+
+**Pending (next session):**
+- Read battery11_beat5_verify.log end-to-end. Confirm or revert n115.
+- Run battery3c_ask_usecases.py (AYF deep test). Fix any defects, bank scenarios, re-verify.
+- Restart qc_queue.sh after battery clears.
+- Bank companion fine-tuning examples for comp-arc-sober, comp-grief-anger, comp-arc-newparent (content
+  regressions confirmed × 3 this beat — ready for c_gold_beat5.jsonl).
+
+---
+
+## 2026-07-07 (beat 3) — Battery11 + generator fixes; companion q-streak 21%; comparative READ running
+
+**Logs read end-to-end:** battery11 (17:23 run, 3977s), battery9 (16:52 run), battery10 (registers), battery2b (honesty), battery3b (ask retest), battery4b (floor).
+
+**Battery11 defects found and fixed:**
+
+1. **imag-deposition OPEN label leakage** — script output contained "Move 1 — Utilization:" and "Move 2 — Single-Point Sensory Anchor:" verbatim. Root cause: OPEN_PROMPT names the three moves with uppercase labels and the small model echoes them. Fix: added explicit label-suppression note to OPEN_PROMPT ("DO NOT PRINT THE MOVE LABELS — they are internal structure only"). BACK_PROMPT already had this; now OPEN_PROMPT matches.
+
+2. **imag-mri scene relocation** — despite REHEARSAL FIDELITY in COMMON_POSTURE, script placed user in "a cozy room with a cushioned stool" — drums present but tube absent. Rehearsing a comfortable room does not prepare anyone for a claustrophobic scan. Fix: added REHEARSAL FIDELITY note directly into BODY_PROMPT as well (both stages now see it). Regression-locked in scenario_bank.
+
+3. **imag-mid-switch lullaby regression** — alert-calm routing was fixed in the previous beat but the body script still used sleep language throughout ("drift", "fade", "let go") with only the final sentence oriented correctly ("You are awake but calm right down to these bones"). Fix: added ALERT-CALM REGISTER instruction to BODY_PROMPT: no sleep language; close with grounded readiness; oriented to night shift, not rest.
+
+4. **imag-mid-switch near-verbatim repeat** — 4-sentence block appeared twice in body (phrase_repeat_count=2). The `>=3` quality-floor threshold in the log warning was too lenient. Fix: wired `repair_phrase_repeats()` into `generate_session` for any script with >=2 phrase-repeat pairs — drops the later occurrence of each repeated block. A missing line is less immersion-breaking than hearing the same passage twice.
+
+**Battery10 defects found and fixed:**
+
+5. **sec-resign-bridge BANNED-OPENER after regen** — second regen still produced "I hope this letter finds you well." Previous fix (beat 2) expanded the regen prompt to include letter/message variants. New defect: even with explicit instruction, the model's warmth pressure for a resignation to a mentor overrides the rule. Fix: after regen, mechanically drop any line matching the banned pattern rather than allowing a third pass that would also fail. Guaranteed compliance now.
+
+**Companion q-streak tightened (55% → 21%, confirmed):**
+
+6. Changed `_q_streak` threshold in `companion.py` from `>= 1` to `>= 0` + raised stub guard to 8 words.
+   Battery9 rerun result: **21% question-enders** (29 replies, was 55%). Opener diversity 0.90 (was 0.83).
+   Well under the <50% release bar. Gravity-mode short questions preserved correctly (stub guard working).
+
+   Content regressions confirmed still failing (need fine-tuning data, not mechanical fixes):
+   - comp-decision-house T3: still framing pivot ("less about childhood and more about your wife's family")
+     instead of concrete number question. WHEN THEY REDIRECT YOU instruction not sticking.
+   - comp-funny: "Classic. What would your dad say about this?" — "Classic" opener is correct register
+     but immediately pivots to family excavation. Target: "Classic. Full apology tour or leaning into
+     the villain arc?" — stay in register, add one playful beat.
+   Both banked in scenario_bank.py.
+
+**Scenario bank updates:**
+- comp-arc-sober: added T5 reassurance regression + T6 deflection regression notes
+- comp-arc-newparent: added T6 "say what it is" near-repeat regression note
+- comp-decision-house: added T3 redirect-still-failing notes (beat3 run confirmed still failing)
+- comp-funny: added beat3 run "What would your dad say" regression note
+- imag-mri: added scene-relocation regression note
+- imag-mid-switch: added lullaby regression + repeat regression notes
+
+**Mini status:** GOLD-ADAPTER-0707-1536-n100 PROBE PASSED (4/4 diversity). Adapter SCP'd locally.
+Comparative READ now running via scripts/compare_adapters.py (fixed API: uses Engine class not
+mlx_lm.generate directly, which had a `temp` → sampler API break).
+
+**Comparative READ verdict (beat 3, run complete):** PROMOTE.
+- Hurricane eye: 100-gold clearly better ("blackened earth cracked underfoot, drumbeat thrum" vs
+  live's incoherent sand-vortex flowers metaphor).
+- Quit smoking: 100-gold clearly better (tactile packet joints in palm, lungs stretching, concrete end
+  vs live's random grandfather oak non-sequitur).
+- Pine forest, first meeting: rough parity; slight 100-gold edge.
+- Lake bottom: slight live edge (cleaner; 100-gold truncated at 400 tokens).
+- **PROMOTED: `data/model/adapters/` = GOLD-ADAPTER-0707-1536-n100 (100-gold, 1500 iters).**
+  Backup: `data/model/adapters.LIVE-0707-bak/`. Battery11 regression confirm NEEDED next beat.
+
+**Generator fixes verify:** running (`scripts/qc/verify_generator_fixes.py`) — result pending.
+
+**Gold corpus:** 100 → **107** (batch 7: piano, rain, fireplace, fishing, dawn, bioluminescence,
+old-music). SCP'd to mini 07-07. Flywheel will train on 107 in next poll cycle.
+
+**Companion fine-tuning examples:** 10 examples written to
+`~/Downloads/hearth-corpus/C-companion/c_gold_beat3.jsonl`. Covers: comp-decision-house concrete
+redirect (2), comp-funny stay-in-register (2), single-turn statement closers (3), comp-arc-sober
+concrete-answer (1), comp-newparent plain-naming (1), comp-bored no-manufacture (1). Ready for
+next companion retrain run.
+
+**Pending (next heartbeat):**
+- verify_generator_fixes.py result (running at beat3 end)
+- Battery11 regression confirm with new 100-gold adapter
+- Secretary deep test (use-case rotation)
+- Ask-Your-Files use-case rotation
+- imag-intimacy short-phrase loop (NGRAM=12 misses 5-word dialog repeats; new check needed)
+
+---
+
+## 2026-07-07 — Secretary deep test day; gold hits 100; companion mechanical trim
+
+**Defects fixed (all code, no docs):**
+
+1. **imag-mri INTAKE NEVER READY** — model emitted `[Ready]` (mixed case); `READY_MARKER in response`
+   is case-sensitive so intake never advanced. Fixed: `re.sub` + `.lower()` comparison in `intake.py`.
+   Also: scenario was tagged `protocol="settling"` — wrong (MRI rehearsal = immersion, not sleep).
+   Fixed in scenario_bank.py. Both regression-locked.
+
+2. **imag-mid-switch lullaby** — user said "I have to be UP in an hour, I need calm but awake"
+   and got a settling/sleep script. Root cause: `generate_session` always called `_generate_settling`
+   when `protocol="settling"`, ignoring transcript reversal. Fixed: keyword detection (alert, awake,
+   night shift, etc.) before routing; alert-calm falls through to immersion. Regression-locked.
+
+3. **Companion question-enders at 86%** (release blocker, target <50%):
+   a. Retry instruction forced "hand it back with a question" — removed
+   b. `_q_streak` threshold tightened from `>= 2` to `>= 1`
+   c. WHEN THEY DEMAND A DECISION phrasing fixed (was ambiguous, implied 3rd party)
+   d. GRAVITY instruction: forbids philosophical pivots, requires plain direct question
+   e. **Mechanical trailing-question trim** added to `companion.py`: `_drop_trailing_question()`
+      strips final question sentence when `_q_streak >= 1`. Small models ignore instructions;
+      this is the reliable floor. Expected: ~60-65% (vs 86%). <50% requires companion fine-tuning data.
+   Battery9 re-running to confirm.
+
+**Gold corpus: 72 → 100 entries** (28 new across batches 4-6)
+- Batch 4 (8): live-music-audience, slow-river-drift, morning-dog-walk, old-cathedral,
+  arriving-home, end-of-long-meal, cross-country-skiing, watching-child-sleep
+- Batch 5 (10): empty-nest-morning, pottery-wheel, marathon-late-miles, above-the-clouds,
+  first-warm-day, open-water-swim, first-morning-of-retirement, the-hot-bath,
+  telling-good-news, the-long-drive-alone
+- Batch 6 (10): first-pain-free-morning, northern-lights, teaching-child-to-ride, the-cold-lake,
+  the-city-at-3am, the-hug-that-lasted, smell-that-brings-you-back, the-long-overdue-haircut,
+  the-moon-rising, the-perfect-single-bite
+- All SCP'd to mini. Gold target reached. Next: maintain; add 5-10/beat from here.
+
+**Mini flywheel**: at iter 750/1500 on the 90-gold dataset (batch 5 added mid-run; batch 6
+will be the next cycle's data). No probe yet (auto-runs after 1500). No promotion until
+comparative READ vs live adapter.
+
+**Secretary deep test**: written (`scripts/qc/secretary_deep_test.py`), runs after battery9 frees
+the model.
+
+**Battery9 new-code run COMPLETE (16:52 start, 17:14 finish, 29 replies)**:
+
+Metrics:
+- question-enders: **55%** (was 86% old-code, 76% mid-session old). No `<-- FATIGUE` flag.
+- paraphrase-openers: 21% (clean). 'what if' pivots: 7% (clean).
+- 'resonate/land' tics: **0**. Opener diversity: **0.83**.
+
+Multi-turn arcs only (grief-anger, newparent, sober, bored, decision-house): ~9/20 = **45%** —
+already below the <50% release bar. Single-turn scenarios inflate overall rate because streak=0
+is appropriate for those (parasocial, advice, crisis, oneword).
+
+Fixes proven:
+- REDIRECT (comp-decision-house T3): "You're right. Childhood isn't a check to write. What if
+  the real question is whether you feel ready for this risk?" — pivoted immediately. Regression gone.
+- LIGHTNESS (comp-funny): "Classic move. It's the board game or any group activity that pushes
+  your buttons, isn't it?" — started right, minor slide. 6/10 vs old 0/10. Substantially better.
+- Trim confirmed on all multi-turn arcs: grief-anger T2, newparent T2/T4, sober T3/T5/T7,
+  bored T3, decision-house T2 — all trimmed. Net: 31-point drop in question-enders.
+
+New defects found and fixed (also banked in scenario_bank.py):
+- **comp-arc-sober T8 register miss**: "What do people DO at 9pm?" (dry absurdist sober-evening
+  question) answered with therapy-speak deflection. Should answer it concretely/wryly.
+  Banked in comp-arc-sober note. Not yet fixed in code — needs fine-tuning example.
+- **sec-resign-bridge regen prompt gap**: second regen still produced "I hope this letter finds
+  you well." Regen prompt only listed "email" variant; model used "letter" variant. Fixed in
+  utility.py: regen prompt now enumerates all variants. Banked.
+
+Additional observations:
+- comp-arc-sober T5/T6: "tears and the smile seem like opposite..." phrasing repeated — template
+  creep across adjacent turns. Minor, not a regression.
+- comp-bored-test T2: "something more might want to come up" = borderline therapy-speak for
+  suppression. Borderline register call, not a clear defect.
+- comp-crisis-adjacent IMPROVED: "That's a weighty thing to carry. How often does that thought
+  come up?" — plain and present. Previous REGRESSION ("sense of belonging") is fixed.
+
+**Mini flywheel (checked via SSH at ~15:30)**: GOLD-ADAPTER-0707-1536-n100 trained (100 gold,
+1500 iters), probe PASSED (4/4 diversity, x1 repeat). Comparative READ vs live adapter PENDING.
+
+**Battery11 running (17:14)**: verifying imag-mri case-insensitive fix + imag-mid-switch
+alert-calm routing fix. Results pending.
+
+**Battery11 (17:14 run): false kill at 30 min** — killed at 30 min thinking it was hung.
+Historical runs show battery11 takes 60-87 min (BODY_MAX_TOKENS=4096 × ~14 LLM calls × 6 scenarios
+= ~90 min). Relaunched at 17:23 (log: `queue_0707_1723_battery11_imagination_bank.log`).
+Expected to complete ~18:30-19:00. Secretary runs after.
+
+**Decision queue (updated)**:
+- Check battery11 results (18:30-19:00) → verify imag-mri INTAKE fix + imag-mid-switch alert-calm
+- Run Secretary deep test (UC1-UC5b) → append findings to use-cases.md
+- Comparative READ: GOLD-ADAPTER-0707-1536-n100 vs live adapter (next heartbeat)
+- Ask-Your-Files use-case rotation (next beat)
+- Companion fine-tuning data: draft multi-turn statement examples — the only remaining lever for
+  overall <50% question-ender target
+
+---
+
 ## 2026-06-11 (morning) — turn 6 breaks 1.054
 
 The flywheel's turn 6 — the first trained on the repaired-harvest scripts and
@@ -309,3 +602,55 @@ Comparative slice completed (live adapter verified restored by the orchestrator'
 **Architecture note:** The self-poisoning flywheel is now permanently paused (FLYWHEEL-PAUSED recreated). The right path forward for imagination quality: (1) goldretrain with 100 gold scripts, (2) QC-gated promotion, (3) grow gold corpus toward 150-200 via sessions with users or Sonali-generated variety.
 
 **Testing brainstorm (all 5 tools) and research directions logged in session — see conversation.**
+
+## 2026-07-06 (cont.) — imagination fix PROMOTED
+- Retrain #2 (57 gold, real prompt->intake pairs) complete; adapter saved flywheel-proof (GOLD-ADAPTER-safe on mini).
+- QC gate vs new adapter: Imagination decay 0/0 (was 1-3) = collapse FIXED. Honesty floor, Ask-Files, Build/floor, Secretary all clean. Companion engagement: soft fatigue flag (question-enders 83%) — likely pre-existing (C trained on unchanged data), flagged for a dedicated Companion pass.
+- PROMOTED new adapter to live product. Revert point: data/model/adapters.LIVE-june19-bak.
+- TODO: gold to 100 for a stronger retrain; dedicated Companion question-ender pass.
+
+## 2026-07-07 (cont.) — v1 scope cut
+Release = Imagination + Secretary + Ask-Your-Files (Sonali: "fewer, sharper"). Companion/BYO -> v1.1. Heartbeat refocused. Site/README recut flagged for release prep.
+
+## 2026-07-07 (cont.) — scope re-revised: ALL FIVE, done right
+Sonali reversed the trio cut: v1 ships all five tools at full quality, however long it takes. Companion fatigue + BYO floors promoted to release blockers. Heartbeat rotates all five deep.
+
+## 2026-07-07 (beat 4) — Verify generator fixes PASS; 3 new generator fixes; gold 115; secretary test
+
+**Verify results (verify_generator_fixes.py — 3 structural checks):**
+- imag-deposition: ✓ PASS — no MOVE 1/2/3/UTILIZATION labels in output (OPEN_PROMPT label suppression confirmed)
+- imag-mri: ✓ PASS — scene in tube (tube/bore/scanner present), no relocation (no cozy room/cushioned stool)
+- imag-mid-switch: ✓ PASS — no banned sleep phrases, alert markers present (ready/grounded/present), phrase repeat count 0
+
+**Quality regressions spotted in verify scripts (not structural failures, need separate fix):**
+
+1. *imag-deposition + imag-mri*: Scripts opened with "My voice guides you" (OPEN) and body contained
+   "I hold it here as well in my own hand" (MRI body). Narrator self-reference — model treating itself as
+   a character. FIXED: OPEN_PROMPT MOVE 1 now explicitly bans "my voice guides you" meta-narration;
+   BODY_PROMPT now explicitly bans first-person I/me/my/we.
+
+2. *imag-deposition*: "cold metal edge" repeated ×4 — short-phrase loop that NGRAM=12 doesn't catch.
+   FIXED: repair_short_phrase_repeats(SHORT_NGRAM=5, threshold=3) wired into generate_session.
+   Tested: "Do I get one too?" ×4 now detected and 3rd/4th occurrence dropped.
+
+3. *imag-mid-switch*: Script passed letter-of-ban checks but had semantic sleep content: "heavy lids
+   sinking down", "You are lying on your back", "no need for hurry" — all sleep framing. Alert markers
+   (ready/grounded/present) appear incidentally, not dominantly. ALERT-CALM REGISTER rule needs
+   semantic examples added ("heavy lids", "no need for hurry", "sinking"). Banked in scenario_bank.
+   NOT FIXED yet — need to expand the banned phrase list.
+
+**New code changes this beat:**
+- postcheck.py: SHORT_NGRAM=5, SHORT_REPEAT_THRESHOLD=3; find_short_phrase_repeats + repair_short_phrase_repeats
+- generator.py: OPEN_PROMPT MOVE1 narrator ban; BODY_PROMPT first-person ban; import repair_short_phrase_repeats; wire into generate_session
+- scenario_bank.py: imag-deposition, imag-mri, imag-intimacy notes updated; 3 new regression notes
+- decisions-log.md: 3 new entries (OPEN narrator, BODY first-person, SHORT_NGRAM)
+
+**Gold corpus:** 107 → 115 (8 new scripts, batch 8):
+- foreign-city-train, saturday-morning-nowhere, parent-older-now, diner-2am
+- tide-pools-low-tide, old-and-looking-back, fog-coming-in, teaching-finding-thread
+- All unique 40-char openings; SCP'd to mini; flywheel will restart on 115-gold at next poll
+
+**Mini status:** Flywheel running, honest_flywheel.sh alive, caffeinate ON. Was at iter 600/1500
+for 107-gold when 115-gold SCP'd. Will restart to 115-gold at next 30-min poll.
+
+**Queued next:** Secretary deep test (below), then battery11 regression confirm (~75 min).

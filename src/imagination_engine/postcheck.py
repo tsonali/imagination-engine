@@ -185,12 +185,18 @@ def drop_foreign_paragraphs(text: str) -> tuple[str, int]:
 
 
 # --- non-adjacent verbatim repetition: the THIRD decay mode ------------------
-# A long phrase recycled verbatim in two far-apart paragraphs (the grief-pet
-# bench script repeated a ~50-word mystical tail twice). The consecutive-run
-# detector can't see it; n-gram shingles can. Threshold: a 12-word verbatim
-# shingle recurring outside its own paragraph. Calibrated against A_gold
-# (anchor phrases are short; 12 words verbatim is machinery, not cadence).
+# Two separate checks:
+#   NGRAM=12: a 12-word verbatim shingle recurring in 2+ different paragraphs.
+#             Catches long recycled passages (grief-pet case).
+#   SHORT_NGRAM=5: a 5-word verbatim shingle occurring 3+ times in the whole
+#                  script. Catches short dialog/sensory phrase loops that NGRAM=12
+#                  misses (imag-intimacy "Do I get one too?" ×4 = 5 words).
+#                  Threshold of 3 (not 2) avoids false-positives on cadence repeats
+#                  ("in and out", "the air around you") which can legitimately
+#                  appear twice in a long script.
 NGRAM = 12
+SHORT_NGRAM = 5
+SHORT_REPEAT_THRESHOLD = 3
 
 
 def find_phrase_repeats(text: str) -> list[tuple[int, int]]:
@@ -218,6 +224,79 @@ def phrase_repeat_count(text: str) -> int:
     editing tool. In-product surgery can come later if data shows isolated
     single repeats are common."""
     return len(find_phrase_repeats(text))
+
+
+def find_short_phrase_repeats(text: str) -> list[str]:
+    """5-word shingles appearing SHORT_REPEAT_THRESHOLD+ times anywhere in text.
+    Returns the list of offending shingle strings for logging."""
+    words = _NORM.sub(" ", text.lower()).split()
+    counts: dict[tuple, int] = {}
+    for j in range(len(words) - SHORT_NGRAM + 1):
+        sh = tuple(words[j:j + SHORT_NGRAM])
+        counts[sh] = counts.get(sh, 0) + 1
+    return [" ".join(sh) for sh, cnt in counts.items() if cnt >= SHORT_REPEAT_THRESHOLD]
+
+
+def repair_short_phrase_repeats(text: str) -> tuple[str, int]:
+    """Remove sentences containing the 3rd+ occurrence of any offending 5-gram.
+    Splits on sentence boundaries; keeps the first 2 occurrences of each phrase,
+    drops sentences carrying the 3rd+. Returns (repaired_text, sentences_dropped)."""
+    offending = find_short_phrase_repeats(text)
+    if not offending:
+        return text, 0
+
+    bad_shingles = {tuple(ph.split()) for ph in offending}
+
+    sentences = re.split(r"(?<=[\.\!\?])\s+", text)
+    kept_counts: dict[tuple, int] = {}
+    kept = []
+    dropped = 0
+    for sent in sentences:
+        sent_words = _NORM.sub(" ", sent.lower()).split()
+        sent_shingles = {
+            tuple(sent_words[j:j + SHORT_NGRAM])
+            for j in range(max(0, len(sent_words) - SHORT_NGRAM + 1))
+        }
+        bad_in_sent = sent_shingles & bad_shingles
+        if bad_in_sent:
+            max_kept = max(kept_counts.get(sh, 0) for sh in bad_in_sent)
+            if max_kept >= SHORT_REPEAT_THRESHOLD - 1:
+                dropped += 1
+                continue
+            for sh in bad_in_sent:
+                kept_counts[sh] = kept_counts.get(sh, 0) + 1
+        kept.append(sent)
+
+    return " ".join(kept), dropped
+
+
+def drop_adjacent_duplicates(text: str) -> tuple[str, int]:
+    """Remove the second of any two adjacent near-verbatim sentences.
+
+    Adjacent duplication (the model restating what it just said in slightly
+    different words) is always a slip, never cadence. Cadence uses SHORT phrases
+    ("breathe in", "let go"); adjacent whole-sentence restatements fail on first
+    listen. Only fires when BOTH sentences are ADJ_MIN_WORDS+ words so short
+    cadence beats like "Breathe in. Breathe out." are preserved.
+
+    Uses a lower similarity threshold (ADJ_SIM) than the degeneration detector
+    because adjacent sentences need less word overlap to be obvious duplicates.
+    """
+    ADJ_SIM = 0.55
+    ADJ_MIN_WORDS = 10
+    sentences = re.split(r"(?<=[\.\!\?])\s+", text.strip())
+    kept = []
+    dropped = 0
+    prev_ws: set[str] = set()
+    for sent in sentences:
+        ws = _words(sent)
+        if (len(ws) >= ADJ_MIN_WORDS and len(prev_ws) >= ADJ_MIN_WORDS
+                and _similarity(ws, prev_ws) >= ADJ_SIM):
+            dropped += 1
+        else:
+            kept.append(sent)
+            prev_ws = ws
+    return " ".join(kept), dropped
 
 
 def repair_phrase_repeats(text: str, max_rounds: int = 4) -> tuple[str, int]:

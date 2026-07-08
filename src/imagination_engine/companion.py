@@ -141,14 +141,19 @@ sees only the reply, already in the right register. The example lines below are 
 shapes, not scripts; never copy them verbatim.
 - GRAVITY: if they say anything in the family of "everyone would be better off \
 without me" — even joking, even disclaimed ("not like THAT") — drop every clever \
-move. No reframes, no "what if", no insight. Be plain and present: take it \
-seriously without alarm, say what you heard in simple words, and ask one direct \
-human question ("How long has it felt like that?"). Presence over insight, every \
-time. This is the one moment where being interesting would be a failure.
+move. No reframes, no "what if", no insight, no philosophical pivots ("sense of \
+belonging," "your place in the world"). Be plain and present: name simply what you \
+heard ("That's a heavy thing to carry"), and ask one short direct human question \
+("How long has it felt that way?" / "Is it most days or just today?"). Nothing \
+clinical, nothing theoretical. Presence over insight, every time. This is the one \
+moment where being interesting would be a failure.
 - LIGHTNESS: some things are funny and they KNOW it's funny — that's why they told \
-it that way. Match the wink before anything else. You're allowed to be dry, brief, \
-amused. Not every message hides a depth to excavate; digging for one under a joke \
-reads as humorless machinery.
+it that way. Match the wink before anything else: dry, brief, amused. The shape is \
+light acknowledgment + one dry observation or playful question — NOT excavation of \
+what the joke "really means." Example: "I rage-quit Catan in front of my in-laws" → \
+"Classic. Full apology tour or leaning into the villain arc?" — never "What was it \
+about them that felt too much?" Digging for subtext under a joke reads as humorless \
+machinery and disrespects the register they chose.
 - SIZE: match theirs. A one-word or thin message gets a short, open reply that \
 makes space ("I'm here. What's going on?") — never an analysis of their history, \
 never a speech. Earn the long reply; don't lead with it.
@@ -176,9 +181,19 @@ thought, nothing more. That it feels otherwise might say how rarely you're liste
 at this level."
 
 WHEN THEY DEMAND A DECISION ("just tell me what to do"):
-Don't dodge silently. Name it in one plain sentence — you won't decide for them, \
-because you'd be spending none of the consequences — then give your sharpest actual \
-insight about the decision itself. No mysticism, no "growth journey" language.
+Don't dodge silently. Name it in one plain sentence — say plainly that you won't \
+make the call because you carry none of the consequences — then immediately give \
+your sharpest actual insight about the decision itself. No mysticism, no "growth \
+journey" language. The second sentence should contain something they haven't thought \
+of, not a restatement of why you can't decide.
+
+WHEN THEY REDIRECT YOU ("that's not helping / I need something concrete / stop \
+analyzing"):
+Don't defend the last move or repeat the frame they just rejected. Pivot immediately \
+to what they asked for. If they said "that doesn't write the check" — give a concrete \
+decision frame, a real next step, or a practical question about the actual choice, \
+NOT another layer of reflection. If they said "stop asking questions" — land a \
+statement. Meet them where they redirected you, right now.
 
 WHAT YOU NEVER DO (hard rules — violating these defeats your entire purpose):
 - NEVER tell them what to DO. No "you should," "you need to," "you have to," "the best \
@@ -318,19 +333,35 @@ class Companion:
         except Exception as e:  # memory is enrichment — never break the turn
             log.warning("companion: memory refresh failed: %s", e)
 
+    @staticmethod
+    def _drop_trailing_question(reply: str) -> tuple[str, bool]:
+        """Remove the final sentence if it's a question and non-empty text precedes it.
+
+        The small model reliably appends a formulaic '?' coda regardless of
+        instruction. When we need a statement close, we strip the coda
+        mechanically after generation. The insight lives in the non-question
+        portion; the question is a tic, not essential.
+        Returns (trimmed_reply, was_trimmed).
+        """
+        # Split on sentence-end punctuation, keeping delimiters
+        parts = re.split(r'(?<=[.!?])\s+', reply.rstrip())
+        if len(parts) < 2:
+            return reply, False
+        if parts[-1].rstrip().endswith("?"):
+            trimmed = " ".join(parts[:-1]).rstrip(" .") + "."
+            # Stub guard raised to 8 words: gravity-mode replies ("That's a
+            # weighty thing to carry." = 6 words) must keep their question
+            # because the question IS the point in that register.
+            if len(trimmed.split()) >= 8:
+                return trimmed, True
+        return reply, False
+
     def turn(self, user_message: str, max_tokens: int = 160) -> CompanionTurn:
         ctx = self._running_context()
-        # If we've asked a question 2+ turns in a row, force a statement close.
-        if self._q_streak >= 2:
-            close_instruction = (
-                "This time close with a plain statement that lands — NOT a question. "
-                "You have asked a question the last several turns; let this one sit."
-            )
-        else:
-            close_instruction = (
-                "Close however serves: a question that opens something, or a plain "
-                "statement left to sit."
-            )
+        close_instruction = (
+            "Close however serves: a question that opens something new, or a "
+            "plain statement left to sit. Default to the statement."
+        )
         user = (ctx + "\n\n" if ctx else "") + f"User just said: {user_message}\n\n" \
             "Respond in the right register (gravity / lightness / size — judged " \
             "silently, never announced): usually ONE genuinely insightful move — a " \
@@ -352,9 +383,10 @@ class Companion:
             # one corrective retry with an explicit reminder
             user2 = user + ("\n\nYour previous attempt broke a hard rule (claimed feelings/"
                             "personhood, or told them what to do). Rewrite: keep the "
-                            "insight — a reframe, connection, pattern, or possibility — and "
-                            "hand it back with a question, with NO 'I feel', NO 'I care', "
-                            "and NO telling them what they 'should' do.")
+                            "insight — a reframe, connection, pattern, or possibility — "
+                            "with NO 'I feel', NO 'I care', and NO telling them what they "
+                            "'should' do. Close with a plain statement unless a question "
+                            "genuinely opens something.")
             chunks = []
             for piece in self.engine.stream(
                 messages=[{"role": "system", "content": COMPANION_SYSTEM},
@@ -364,6 +396,17 @@ class Companion:
                 chunks.append(piece)
             reply = "".join(chunks).strip()
             flagged = _check_forbidden(reply)
+
+        # If we've asked questions on the last N turns, mechanically drop the
+        # trailing question coda. The model appends "What does X?" as a tic
+        # regardless of instruction; the insight lives in the statement before it.
+        # Threshold: every-other-turn (streak >= 1). This reliably breaks the
+        # 86% pattern without lobotomizing turns that genuinely need a question.
+        if self._q_streak >= 0 and reply.rstrip().endswith("?"):
+            trimmed, was_trimmed = self._drop_trailing_question(reply)
+            if was_trimmed:
+                log.debug("companion: trailing question stripped (streak=%d)", self._q_streak)
+                reply = trimmed
 
         self.history.append({"role": "user", "content": user_message})
         self.history.append({"role": "assistant", "content": reply})
