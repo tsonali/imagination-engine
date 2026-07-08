@@ -78,12 +78,12 @@ else:
                find("A-imagination", "A_silver_curated.jsonl") or find("A-imagination", "A_silver.jsonl")]
 for f in a_files:
     for r in jl(f):
-        t = clean(r.get("text", ""))
+        t = clean(r.get("text", "") or r.get("script", ""))
         if len(t.split()) < 120: continue
         user = r.get("intake") or random.choice(A_USER)
         rec = msg("A", user, t)
         pool["A"].append(rec)
-        if r.get("tier") == "gold":   # weight gold higher
+        if r.get("tier") == "gold" or "script" in r:   # weight gold higher (both old/new format)
             pool["A"].append(rec); pool["A"].append(rec)
 
 # ---------- C: companion (prefer curated gold) ----------
