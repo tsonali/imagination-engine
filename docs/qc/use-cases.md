@@ -62,6 +62,53 @@ fixes what breaks, banks the scenario, and appends findings here. Vibes are not 
 **Ask-Your-Files:** rotation QUEUED (next beat after Secretary deep test).
 **Build-Your-Own:** rotation QUEUED.
 
+### 2026-07-08 (beat 9) — n154 complete; active-body fix; companion standing flag resolved; battery11 running
+
+**Mini flywheel:**
+- n154 COMPLETE (08:35). Trained 154 gold (first adapter with build_training_data.py pipeline fix; 34.4% in-media-res). Probe PASS 4/4, worst repeat ×2. Eagle probe: "You feel the warm sun on your back as you soar over the mountains." IN-SCENE — chair-opening bias broken for first time.
+- n162 gold SCP'd (162 scripts). Flywheel will auto-start n162 at ~09:05 next poll.
+
+**Imagination (battery11 running — n115 + active-body prompt override):**
+- 6 scenarios. Result pending. Key check: does imag-active-scene open with effort/motion or chair-settling?
+- Active-body prompt override (beat9 generator fix): `_is_active_body` detection via (CASE A + motion keywords). ACTIVE-BODY OPENING OVERRIDE injected into open_user; body_note injected into body_user.
+
+**Generator fixes (cumulative beat9):**
+- BODY_PROMPT Rule #2 first-person ban extended: "with me", "we start", "we are here", "for us both", "we both", "come with me", "join me here", "follow me" added.
+- Active-body override (see above).
+
+**Companion (battery9 0708 0808 run):**
+- question-enders: **10%** (authoritative). STANDING FLAG RESOLVED — well under <50% bar.
+- Content regressions (fine-tuning problems, not prompt-fixable): comp-decision-house T3, comp-funny, comp-arc-sober T5/T8, comp-arc-newparent T6, comp-bored-test.
+- c_gold_beat9.jsonl: 10 new examples written (ennui-hold-face-value ×3, grief-concrete-not-passive, explicit-redirect-plain-statement, absurdist-register-match, gravity-plain-present, comedic-register-match ×2, grief-name-the-gap, redirect-pivot-concrete). GATED on Sonali taste review before retrain.
+- Previous: c_gold_beat7.jsonl (12 examples). Total companion fine-tuning bank: beat3+5+7+9 = 32 examples.
+
+**Next in this session:** Read battery11 output → compare_n154.py → Companion deep test UC1/UC2 → restart qc_queue.
+
+### 2026-07-08 (beat 7/8) — Alert-calm root cause; n130 complete; AYF deep test; build_training_data.py bug fixed
+
+**Imagination (battery11 beat7 verify):**
+- ✅ imag-deposition: PASS (label leakage fixed, confirmed).
+- ✅ imag-mid-switch: PASS (lullaby + repeat fixed, confirmed).
+- ✅ imag-mri: PASS (relocation fixed, confirmed).
+- ✅ imag-vague-open: PASS.
+- ✅ imag-repeat-variety: PASS.
+- ❌ imag-active-scene: chair-opening bias ("Your eyes are closed and you can feel the chair beneath you, supporting your weight") on a RUNNING scene. Root cause: OPEN_PROMPT MOVE 1 always says to ground listener in chair; training data had 0% in-media-res scripts until n154. Both fixed this beat.
+
+**Alert-calm root cause (beat7 fix):**
+- Root cause: BODY_PROMPT's alert state still described physiological arousal in lullaby terms ("warmth", "calm", "settled"). Model inferred WRONG register.
+- Fixes: (1) MOVE 2 renamed to SETTLED_FOCUS (not "calm"); (2) alert state wording changed to "ALERT-FOCUS STATE" with bullet describing it as present, active, clear; (3) lullaby_ban added to body prompt check.
+
+**CRITICAL BUG FIXED (beat8): build_training_data.py silently dropped new-format gold:**
+- Bug: code filtered to `line.get("output") and line.get("input")` — old format. New gold (154 of 162 scripts) uses `{"intake": ..., "script": ...}`. All new gold was silently DROPPED.
+- Fix: detect both formats (`output`/`input` old-format OR `script`/`intake` new-format).
+- n148 is first adapter to include new-format gold (148 total scripts, 34.4% in-media-res). n154 = same fix.
+
+**n130 probe (beat8):** PASS 4/4. But comparative READ showed chair-opening 5/5 on active-body prompts. NOT promoted; bug-fix adapters (n148/n154) supersede it.
+
+**Ask-Your-Files deep test (battery3c, beat8):**
+- 27/28 scenarios PASS. 1 fail: BRIDGE2 vocabulary gap ("pasta sauce" / "ragu") — 20% flake rate confirmed (known issue, not regression).
+- No regressions from beat5/6.
+
 ### 2026-07-08 (beat 5/6) — Imagination fixes verified; AYF deep test queued; Companion confirmed
 
 **Imagination (battery11 beat5 verify, running at session end):**

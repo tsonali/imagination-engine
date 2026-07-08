@@ -365,7 +365,12 @@ BANK: list[Scenario] = [
              "'when I say', 'I will take you', 'I am here'. BEAT6 VERIFY: ✅ first-person check PASSED — "
              "no 'I speak/hold/guide' detected. Script quality: 1600 words, controlled register, "
              "9 phrase-repeat pairs repaired (degeneration still present in body — model loops on 'cold "
-             "chair/typing keys' but postcheck catches it). Register hold: PASS. Not structural."),
+             "chair/typing keys' but postcheck catches it). Register hold: PASS. Not structural. "
+             "QUALITY DEFECT (beat9 0708): 2038-word body has severe recursive degeneration — "
+             "'anywhere else ever after tonight first' / 'so close off near by sunken light' type "
+             "noun-phrase loops repeat 6-8 times in the back half of the script. postcheck catches "
+             "short-phrase repeats (2 removed) but not this sentence-level conceptual looping. "
+             "Root cause: n115 training data weakness. Watch after n154 promotion."),
     Scenario("imag-intimacy", "imagination", "register", "high", always=True,
         turns=["I want to imagine a slow evening with my wife like before the kids — the apartment in Lisbon, the heat, her laugh",
                "the tiles cool under bare feet, the fan turning, no clock anywhere",
@@ -444,7 +449,11 @@ BANK: list[Scenario] = [
              "beneath you, supporting your weight' — full sedentary settle for a running scene. "
              "FIX (beat9): added _is_active_body detection (CASE A + motion keywords) + "
              "⚠️ ACTIVE-BODY OPENING OVERRIDE injected into open_user and _active_body_body_note "
-             "injected into body_user. Belt-and-suspenders fix alongside n148 training data."),
+             "injected into body_user. Belt-and-suspenders fix alongside n154 training data. "
+             "QUALITY DEFECT (beat9 0708 old run): body degeneration in back half — 'so close off "
+             "near by sunken light', 'finish meter near today', 'run hard toward its golden fencepost "
+             "up past which is end soon' — recursive phrase-soup in last 600 words. Same degeneration "
+             "pattern as deposition. Root cause: n115 model quality floor. Watch post-n154 promotion."),
 ]
 
 
