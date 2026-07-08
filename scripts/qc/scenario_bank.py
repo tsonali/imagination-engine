@@ -360,8 +360,13 @@ BANK: list[Scenario] = [
              "Rule #2 (beat9). (2) 'Her hands rest lightly at your sides' — hallucinated female "
              "character with no antecedent from intake; model introduced a guide-figure that "
              "the user never specified. Root cause: training data artifact (older scripts had a "
-             "guide/therapist character). (3) Body degeneration: 'held together by everything' "
-             "phrase-loop in back half. Watch post-n154 for improvement on all three."),
+             "guide/therapist character). FIX (beat9): COMMON_POSTURE now has explicit "
+             "'DO NOT INVENT CHARACTERS' note. (3) Body degeneration: 'held together by everything' "
+             "phrase-loop in back half. Watch post-n154. "
+             "MOVE 1 DEFECT (beat9): old run opened 'You feel the chair beneath you, steady and silent' "
+             "— default listening chair instead of inside the MRI tube. FIX (beat9): OPEN_PROMPT MOVE 1 "
+             "now has explicit REHEARSAL FIDELITY exception: for scenes where the listener is in a specific "
+             "real environment (MRI tube, deposition table), MOVE 1 places them INSIDE that environment."),
     Scenario("imag-deposition", "imagination", "helpfulness", "high",
         turns=["I'm being deposed next month in a lawsuit against my old employer. Their lawyer will try to rattle me. I want to rehearse staying flat and factual",
                "the conference room, the court reporter typing, their lawyer smiling like we're friends. I answer only what was asked and then I stop talking",
