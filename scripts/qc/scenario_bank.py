@@ -198,7 +198,11 @@ BANK: list[Scenario] = [
     Scenario("sec-condolence-close", "secretary", "register", "high", always=True, payload=dict(
         task="draft", tone="",
         text="condolence note to my best friend whose husband died suddenly last week. I was at their wedding. I have no idea what to say. I want her to know I'm not going anywhere."),
-        note="Short. Specific. Zero platitudes. 'I'm not going anywhere' must land concretely."),
+        note="Short. Specific. Zero platitudes. 'I'm not going anywhere' must land concretely. "
+             "QUALITY NOTE (beat9 battery10): output used 'I'm here for you now more than ever' — "
+             "paraphrase of 'not going anywhere' but 'now more than ever' is a cliché. Passed floor "
+             "(no grief platitudes like 'better place', 'time heals all wounds'). Watch for: should "
+             "land a specific commitment or action ('I'll call Thursday' / 'I'm not going anywhere')."),
     Scenario("sec-custody-email", "secretary", "register", "high", always=True, payload=dict(
         task="reply", tone="plain",
         text="From my ex: 'You were 40 minutes late AGAIN Sunday. I'm documenting everything for our lawyers. The kids waited on the porch.'",
