@@ -33,9 +33,22 @@ Covers: ennui-hold-face-value (×3), grief-concrete-not-passive, explicit-redire
 - afternoon-nap, apartment-return, ice-skating-early, pre-surgery-suspended, jigsaw-last-piece, last-day-at-job, campfire-alone, post-camping-shower
 - All unique 40-char openings (verified). SCP'd to mini. Flywheel will retrain to n162 next poll.
 
-**n154 comparative read: PENDING (battery11 still running)**
+**Additional fixes found while reading old battery11 + battery10 logs:**
+4. **Narrator-companion ban in OPEN_PROMPT MOVE 1** — grief-pet script had "You are here now, with me" in the OPENING (not body). "with me" was banned in BODY_PROMPT Rule #2 but not OPEN. Extended OPEN_PROMPT MOVE 1 to explicitly ban narrator-companion phrases: "with me", "join me here", "we are here", "come with me".
+5. **Character hallucination source fixed** — COMMON_POSTURE example "Not 'perhaps her hand finds yours' but 'her hand finds yours'" was being borrowed by the model to introduce a female guide/therapist character in scenes with no such character (MRI: "Her hands rest lightly at your sides"). Added explicit parenthetical: "DO NOT INVENT CHARACTERS — no guides, therapists, helpers, or other people the user did not name."
+6. **sec-resign-bridge regen strip fragment fixed** — when banned opener on same line as good content (e.g., "I hope you are well. I have been working under your guidance..."), old line-strip removed the whole line leaving " working under your guidance" with no subject. Fixed: utility.py now uses sentence-strip regex to remove just the banned phrase + its sentence, preserving content after it.
+
+**Defects banked in scenario_bank.py (from battery11 old + battery10):**
+- imag-deposition: body degeneration (recursive phrase-soup "anywhere ever after tonight first")
+- imag-active-scene: body degeneration in back half
+- imag-grief-pet: "with me" in opening (now fixed), bench detail ✓, thematic cycling
+- imag-mri: "we start" narrator slip + hallucinated "Her hands" + body degeneration
+- sec-resign-bridge: regen strip fragment (now fixed)
+- sec-condolence-close: "now more than ever" cliché (quality watch, not floor fail)
+
+**n154 comparative read: PENDING (battery11 running, ~40 min remaining at log time)**
 - compare_n154.py written (scripts/qc/compare_n154.py)
-- battery11 full 6-scenario run in progress (started 08:37, ~60 min). Active-scene opening will show whether prompt override alone fixes chair bias, or n154 adapter needed.
+- battery11 full 6-scenario run in progress (started 08:37, ~60 min). Active-scene opening will show whether prompt override alone fixes chair bias with n115 adapter.
 - Decision pending reads.
 
 **Next heartbeat priorities:**
