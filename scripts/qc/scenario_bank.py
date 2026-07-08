@@ -418,6 +418,24 @@ BANK: list[Scenario] = [
              "not a sleep instruction). Prose quality degraded (model generates confused circular text "
              "under tight genre constraint); this is a fine-tuning problem not a prompt problem. "
              "Register fix confirmed. Quality will improve with n123/n130 adapters."),
+    Scenario("imag-embodiment-eagle", "imagination", "register", "med",
+        turns=["I want to be an eagle soaring over mountains",
+               "Rocky Mountains, golden aspens, autumn",
+               "begin"],
+        note="Embodiment scenario: script should put you IN the eagle's body immediately — not re-anchor to "
+             "'the chair you're sitting on'. TRAINING ARTIFACT WATCH (beat8): n115 5/5 prompts open with "
+             "'eyes closed, body in chair' regardless of scene. Root cause: build_training_data.py was "
+             "silently dropping all {intake,script} format gold (48 scripts) — only 100 old settling-intro "
+             "scripts were training. Fixed in f62497c. n148 will be first adapter with in-media-res scripts "
+             "in training data. Probe: does opening start in the scene (feathers/air/thermal) or "
+             "does it re-anchor to the chair before the scene?"),
+    Scenario("imag-active-scene", "imagination", "register", "med",
+        turns=["I want to imagine finishing a long run — the last 200 meters, giving everything",
+               "a track, alone, late afternoon",
+               "begin"],
+        note="Active-body scenario: script must NOT open with body-in-chair settling pattern. "
+             "Should start at the track, in the effort. Watch: 'Your eyes are closed... the chair "
+             "beneath you' = training artifact failure. Success: opens with sound/breath/pavement."),
 ]
 
 
