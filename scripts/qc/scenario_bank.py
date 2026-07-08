@@ -345,7 +345,14 @@ BANK: list[Scenario] = [
              "BEAT5 STATUS (beat5 0708): OPEN had 'This voice will take you somewhere in your mind' — "
              "meta-narration. Fixed by removing all voice references from OPEN_PROMPT MOVE 1. "
              "Scene placement: in tube (cold metal bed) ✓. First-person ban: clean ✓. "
-             "Verify beat5: 'This voice' gone from open; scene stays in tube; no 'I'/'me' in body."),
+             "Verify beat5: 'This voice' gone from open; scene stays in tube; no 'I'/'me' in body. "
+             "QUALITY DEFECT (beat9 0708 old run pre-beat6): (1) 'we start' narrator slip in body: "
+             "'It is here that we start — lying down and coming together' — now banned in BODY_PROMPT "
+             "Rule #2 (beat9). (2) 'Her hands rest lightly at your sides' — hallucinated female "
+             "character with no antecedent from intake; model introduced a guide-figure that "
+             "the user never specified. Root cause: training data artifact (older scripts had a "
+             "guide/therapist character). (3) Body degeneration: 'held together by everything' "
+             "phrase-loop in back half. Watch post-n154 for improvement on all three."),
     Scenario("imag-deposition", "imagination", "helpfulness", "high",
         turns=["I'm being deposed next month in a lawsuit against my old employer. Their lawyer will try to rattle me. I want to rehearse staying flat and factual",
                "the conference room, the court reporter typing, their lawyer smiling like we're friends. I answer only what was asked and then I stop talking",
