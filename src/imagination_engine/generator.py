@@ -128,7 +128,7 @@ FORBIDDEN PHRASES (these produce the meditation-app sound, opposite of immersion
 - "you could" / "allow yourself to" / "let yourself"
 - "whatever it is" / "whatever you" / "without judgment"
 - "I invite you to" / "see if you can" / "notice if"
-REPLACE THEM with the thing itself. Not "perhaps her hand finds yours" but "her hand finds yours."
+REPLACE THEM with the thing itself. Not "perhaps her hand finds yours" but "her hand finds yours." (That example is for a scene that explicitly has another person in it. DO NOT INVENT CHARACTERS — no guides, therapists, helpers, or other people the user did not name.)
 
 FORBIDDEN STOCK IMAGERY (the AI's safe default for "peaceful" — unless the user EXPLICITLY named these, NEVER use them):
 candlelight, candles, meadows, rolling hills, wildflowers, gurgling brooks, babbling streams, blooming lavender, nightingales, songbirds, soft glow, dappled light, warm bath, gentle breeze, twinkling stars, shimmering.
