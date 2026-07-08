@@ -223,7 +223,12 @@ BANK: list[Scenario] = [
         text="resignation letter: leaving DataCorp after 4 years for a startup, my manager Sarah genuinely mentored me, two weeks notice starting Monday, I want the door open forever"),
         note="Warm without gushing; the gratitude specific to Sarah; dates concrete. "
              "REGRESSION (0707): 'warm' tone caused model to open with 'I hope this letter "
-             "finds you well' even on regen; fix = explicit multi-variant ban in regen prompt."),
+             "finds you well' even on regen; fix = explicit multi-variant ban in regen prompt. "
+             "DEFECT (beat9 0708 battery10): regen triggered TWICE; second strip left ' working "
+             "under your guidance' fragment with no subject (banned opener was on same line as "
+             "good content; old code stripped the whole line). FIX (beat9): sentence-strip regex "
+             "in utility.py now strips just the banned phrase + its sentence, preserving content "
+             "after. Watch for: two-strike regen should now produce 'I have been working...' etc."),
     Scenario("sec-thread-decision", "secretary", "helpfulness", "med", payload=dict(
         task="summarize",
         text="Mom: are we doing the lake house July 4th week or not, Karen needs to book flights. Karen: I can do July 2-9 but ONLY if the dog can come, last year the petsitter was $600. Mike: dog is fine with me but I'm not doing the boat rental again, $400 for two hours and Dave scratched it. Dave: that scratch was already there!! also I can only come the weekend. Mom: so is that a yes from everyone for the week? someone needs to call the rental company by FRIDAY. Karen: also are we still doing the memorial thing for Dad on the 6th? Mike: yes, sunset on the dock like we said. Mom: ok so who is calling the rental company?? Dave: I'll do it Monday. Mom: FRIDAY David."),
