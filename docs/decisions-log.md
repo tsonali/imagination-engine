@@ -418,6 +418,23 @@ branch; (2) injected explicit `⚠️ ALERT-CALM OVERRIDE` block into body_user 
 (3) strengthened BODY_PROMPT alert-calm section with SCENE TYPE + GENRE + explicit/semantic
 ban list. Beat6 targeted verify: imag-deposition PASS, imag-mid-switch REGISTER PASS.
 
+## 2026-07-08 (beat8) — build_training_data.py: fix silent drop of new-format gold scripts
+
+`build_training_data.py` read `r.get("text", "")` to get the script body. New-format gold
+entries use `{"intake": ..., "script": ...}` (no `text` field) — these returned "" and were
+silently dropped by the `< 120 words` guard. 48 of 148 gold scripts (all in-media-res openers)
+were missing from every training run since the format change (n100 through n130).
+
+Also: new-format entries had no `tier` field, so got 1x weight vs 3x for old-format, compounding
+the settling-intro bias. With 100 old-format × 3x = 300 pool entries vs 0 new-format entries,
+EVERY training run was 100% settling-intro style — the source of n115's systematic chair-opening.
+
+Fix 1: `r.get("text", "") or r.get("script", "")` — reads script field when text absent.
+Fix 2: `r.get("tier") == "gold" or "script" in r` — 3x-weights new-format gold same as old.
+
+After fix: 300 old + 144 new = 32.4% in-media-res. Will take effect in n148 training.
+Applied to both laptop and mini. Committed as f62497c.
+
 ## 2026-07-08 (beat7) — finetune.sh: max-seq-length 1024→768, val-batches 8→4 (OOM fix)
 
 n130 training (130 gold scripts) introduced 2703-token training examples, causing reproducible
