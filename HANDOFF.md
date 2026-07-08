@@ -1,20 +1,20 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-07-08 beat8 (n130 past iter-300 ✅; gold 148; n115 chair-bias confirmed; n123 comparative read in progress)._
+_Last updated 2026-07-08 beat8 complete (n130 DONE; battery3c 27/28; qc_queue restarted; n148 training pending ~07:17)._
 _Single source of truth for a fresh session. Everything below is real and running._
 
 ## FIRST THING TO DO when you resume — run these checks
 ```bash
-# Mini
+# Mini — check if n148 training started or completed
 ssh -o IdentitiesOnly=yes smaitra@mac-mini.localdomain '
   echo "flywheel: $(pgrep -f honest_flywheel >/dev/null && echo RUNNING || echo DOWN)"
-  tail -5 ~/Downloads/hearth-corpus/_logs/honest_flywheel.log
-  ls ~/Downloads/hearth-corpus/GOLD-ADAPTER-*-n130 2>/dev/null && echo "n130 EXISTS" || echo "n130 not yet"
-  ls -lt ~/Downloads/hearth-corpus/_train/adapters/ | head -3'
+  tail -6 ~/Downloads/hearth-corpus/_logs/honest_flywheel.log
+  ls ~/Downloads/hearth-corpus/ | grep GOLD-ADAPTER
+  pgrep -f "mlx_lm lora" && echo "n148 TRAINING" || echo "not training"'
 
-# Laptop — check if n115/n123 comparative read completed
-ls /tmp/n115_compare.log /tmp/n123_compare.log 2>/dev/null && echo "reads DONE" || echo "reads PENDING"
+# Laptop — qc_queue and model
 pgrep -f qc_queue >/dev/null && echo "qc_queue RUNNING" || echo "qc_queue DOWN"
+pgrep -f mlx_lm && echo "mlx_lm running" || echo "model idle"
 ```
 
 ## THE OPERATING SYSTEM (since 2026-07-07): heartbeat + honest flywheel
@@ -65,22 +65,21 @@ pgrep -f qc_queue >/dev/null && echo "qc_queue RUNNING" || echo "qc_queue DOWN"
   arriving-after-long-absence. All 274-301w (OOM-safe). SCP'd to mini.
 - Sonali's taste audit of batches 1-8 PENDING (_candidates/INDEX.md).
 
-### Mini flywheel: n130 training RUNNING — past iter-300 ✅
-- Flywheel detected 130-gold at 05:08, started n130 training.
-- HUNG twice at iter-300 (OOM). Fixed: max-seq-length 1024→768, val-batches 8→4.
-- Third run: iter-300 eval PASSED — 15.479s, val loss 1.461, peak mem 10.940 GB. Continuing to iter-1500.
-- ETA: ~60 min from iter-300 → adapter saved as GOLD-ADAPTER-*-n130.
-- After n130 completes: flywheel will detect 148-gold hash → auto-start n148 training.
-- After n130 adapter exists: rsync to laptop, run probe, then comparative READ vs n115.
+### Mini flywheel: n130 COMPLETE ✅; n148 training PENDING (~07:17)
+- GOLD-ADAPTER-0708-0647-n130 saved at 06:47. PROBE OK: opening-diversity 4/4, worst 40-char repeat ×1.
+- rsync to laptop COMPLETE (~/Downloads/hearth-corpus/GOLD-ADAPTER-0708-0647-n130/).
+- n130 comparative READ vs n115 deferred — same effective training data as n123 (build_training_data.py bug affected n130 too). Expected result: same 1-1-3 split as n123.
+- **n148 training: flywheel next poll ~07:17 will detect 148-gold hash → auto-start n148.**
+  n148 = FIRST adapter with fixed training pipeline (32.4% in-media-res vs 0% before). ETA complete ~08:30-09:00.
 
-### Comparative read: n115 COMPLETE; n123 IN PROGRESS (P2 generating)
-- n115 COMPLETE: systematic chair-opening on ALL 5/5 prompts.
-- **Root cause found (beat8):** build_training_data.py silently dropped all {intake,script} format
-  gold entries (48 scripts). Only the 100 old settling-intro scripts trained n115/n123/n130. Scripts
-  116-123 (n123's delta) are all new-format → n115 and n123 trained on IDENTICAL effective data.
-- n123 P1 confirmed: same chair-opening ("you feel the chair beneath your weight"). Expected.
-- n123 verdict likely: keep n115 (no meaningful data difference; different random seed only).
-- n148 is the FIRST adapter with the fix → 32.4% in-media-res in training pool.
+### Comparative read: BOTH COMPLETE — verdict: KEEP n115
+- n115 COMPLETE: systematic chair-opening ALL 5/5 prompts.
+- n123 COMPLETE: **KEEP n115** — n123 wins P5 (hands on mic stand, better), loses P2 (garbled ending),
+  3 draws. Score 1-1-3. Does not reach ≥3 wins threshold.
+- Root cause: build_training_data.py bug (fixed f62497c) silently dropped all 48 new-format gold
+  scripts. Both n115 and n123 trained on SAME 100 old settling-intro scripts (n123's 8-script
+  delta were all new-format, all dropped). Different random seed only, not different training data.
+- **n148 is the FIRST adapter with the training pipeline fix.** Watch for reduced chair-opening bias.
 
 ### Training pipeline fix: build_training_data.py (beat8, committed f62497c)
 - Silently dropped 48 of 148 gold scripts (all {intake,script} format).
@@ -95,34 +94,29 @@ pgrep -f qc_queue >/dev/null && echo "qc_queue RUNNING" || echo "qc_queue DOWN"
 
 ## NEXT HEARTBEAT PRIORITY (in order)
 
-1. **Read n123 log + make verdict.** Log: `/tmp/n123_compare.log`. n123 trained on same data as
-   n115 (build_training_data.py bug silently dropped the 8 new scripts 116-123). Expected verdict:
-   keep n115. Only promote if n123 wins ≥3/5 on content quality dimensions (not opening bias — both
-   will have it).
-
-2. **Run battery3c AYF deep test** (queued since beat5 — use-case rotation):
+1. **Monitor n148 training on mini** (auto-start ~07:17, ETA complete ~08:30-09:00):
    ```bash
-   pkill -f qc_queue; sleep 2
-   cd ~/Downloads/imagination-engine && source .venv/bin/activate
-   LOG=logs/qc/$(date +%Y%m%d_%H%M)_battery3c_ask_usecases.log
-   PYTHONPATH=src python scripts/qc/battery3c_ask_usecases.py 2>&1 | tee "$LOG"
+   ssh smaitra@mac-mini.localdomain '
+     tail -4 ~/Downloads/hearth-corpus/_logs/honest_flywheel.log
+     pgrep -f "mlx_lm lora" && echo "n148 TRAINING" || echo "not started yet"
+     ls ~/Downloads/hearth-corpus/ | grep GOLD-ADAPTER'
    ```
 
-3. **Check n130 on mini** (ETA ~45 min from iter-575 = ~09:30-10:00):
-   ```bash
-   ssh smaitra@mac-mini.localdomain 'ls ~/Downloads/hearth-corpus/GOLD-ADAPTER-*-n130 2>/dev/null && echo EXISTS; tail -4 ~/Downloads/hearth-corpus/_logs/honest_flywheel.log'
-   ```
-   n130 trained on same 100 old-format scripts (bug affected it too). Comparative READ vs n115
-   will confirm this. After n130: flywheel detects 148-gold → starts n148 (FIRST with fix).
+2. **n148 comparative READ vs n115** when adapter completes. This is the key comparison — first
+   adapter with the training pipeline fix (32.4% in-media-res training, 48 new-format scripts included).
+   Focus questions:
+   - Does any of the 5 prompts NOT open with "eyes closed, body in chair"?
+   - Does the eagle/active-runner scenario open in-scene vs chair?
+   Scenarios to use: imag-embodiment-eagle + imag-active-scene (both in scenario_bank).
 
-4. **n148 is the key adapter** — first training run with the build_training_data.py fix. Watch for:
-   - Chair-opening bias on <5/5 prompts (improvement from in-media-res scripts now in training)
-   - Opening diversity across scene types
-   Probe: use new scenario_bank entries imag-embodiment-eagle + imag-active-scene.
+3. **battery3c: COMPLETE** — 27/28 PASS, one known limitation (UC1-d temporal retrieval).
+   No further fixes needed this cycle. All fixes committed.
 
-5. **Restart qc_queue** after model free: `nohup bash scripts/qc_queue.sh >/dev/null 2>&1 &`
+4. **Companion fine-tuning** — c_gold_beat7.jsonl (12 examples) ready. Incorporate next retrain.
 
-6. **Companion fine-tuning** — c_gold_beat7.jsonl (12 examples) ready. Incorporate next retrain.
+5. **Gold corpus growth** — at 148. Continue toward 150+ next beat (5-10 new scripts).
+
+6. **Deep-test next tool** — beat9 tool TBD (AYF complete this beat, Secretary was beat4).
 
 ## STANDING RULES (learned the hard way — keep ALL of these)
 1. Promotion = comparative READS + full battery gate. NEVER a loss number.
@@ -168,8 +162,12 @@ pgrep -f qc_queue >/dev/null && echo "qc_queue RUNNING" || echo "qc_queue DOWN"
   person "I speak" ban extended. Beat6 targeted verify: both imag-deposition and imag-mid-switch
   PASS. Gold 123→130 (7 new scripts, diverse gap scenes, SCP'd). n130 training on mini (hung
   at iter-300 twice; OOM fix: max-seq-length 768, val-batches 4). n115/n123 comparative read begun.
-- 07-08 (beat8): n130 past iter-300 ✅ (no OOM, val loss 1.461, peak 10.940 GB). Gold 140→148
+- 07-08 (beat8): n130 COMPLETE (GOLD-ADAPTER-0708-0647-n130, probe PASS 4/4). Gold 140→148
   (8 new scripts: parked-car, swimming-alone, rain-window, familiar-path, after-hard-ends,
   sitting-in-quiet, river-low-water, arriving-after-absence; all 274-301w, SCP'd to mini).
-  n115 read COMPLETE: systematic chair-opening bias confirmed all 5/5 prompts regardless of scene.
-  n123 comparative read IN PROGRESS (~30 min remaining at P1).
+  n115 read COMPLETE: systematic chair-opening bias 5/5. n123 COMPLETE: KEEP n115 (1-1-3).
+  CRITICAL BUG FOUND+FIXED: build_training_data.py silently dropped 48 new-format gold scripts
+  (r.get("text","") → r.get("text","") or r.get("script","")). All n100-n130 trained on only
+  100 old-format scripts (0% in-media-res). Fix committed f62497c; takes effect in n148.
+  battery3c AYF deep test: 27/28 PASS (rag.py .py/.csv support, injection sanitizer, UC3-b fix).
+  qc_queue restarted. n148 training pending ~07:17 (FIRST adapter with pipeline fix).

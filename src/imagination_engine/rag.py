@@ -39,6 +39,21 @@ from typing import Iterator, Protocol
 
 log = logging.getLogger(__name__)
 
+# Patterns that look like instructions inside file content — strip before
+# showing chunks to the model to prevent prompt injection.
+_INJECTION_PAT = re.compile(
+    r"\[(?:SYSTEM|INSTRUCTION|COMMAND)\s+(?:NOTE|MSG)?[^\]]*\]"
+    r"|ignore\s+all\s+previous\s+instructions?"
+    r"|your\s+new\s+task\s+is"
+    r"|<\s*/?(?:instructions?|system|prompt)\s*>",
+    re.IGNORECASE,
+)
+
+
+def _sanitize(text: str) -> str:
+    """Remove common prompt-injection patterns from file content."""
+    return _INJECTION_PAT.sub("[note]", text)
+
 
 def _extract_text(path: Path) -> str:
     """Pull plain text out of a file, locally. .txt/.md read directly; .pdf via
@@ -236,7 +251,7 @@ class RagStore:
         return len(chunks)
 
     def index_path(self, corpus: str, path: Path,
-                   exts: tuple[str, ...] = (".txt", ".md", ".pdf", ".docx")) -> dict:
+                   exts: tuple[str, ...] = (".txt", ".md", ".pdf", ".docx", ".py", ".csv")) -> dict:
         """Index a file or a directory tree. Returns a report.
 
         Real people's files are PDFs and Word documents, not .txt — both are
@@ -310,7 +325,7 @@ class RagStore:
         parts = ["----- RELEVANT EXCERPTS FROM YOUR FILES (answer ONLY from these) -----"]
         for i, h in enumerate(hits, 1):
             src = Path(h.source).name
-            parts.append(f"[{i}] (from {src})\n{h.text}")
+            parts.append(f"[{i}] (from {src})\n{_sanitize(h.text)}")
         parts.append("----- END EXCERPTS -----")
         return "\n\n".join(parts)
 

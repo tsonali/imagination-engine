@@ -32,7 +32,39 @@ All 5 prompts (Lisbon evening, quit smoking, eagle, ocean dawn, studio night) op
 - P5: "Your eyes are closed. The chair beneath you holds your weight, steady and solid."
 Verdict pending n123 read — key question: does n123 break this pattern?
 
-**n123 comparative read: IN PROGRESS** (P1 generating, ~30 min remaining).
+**n123 comparative read: COMPLETE — verdict: KEEP n115.**
+
+Comparison summary (all 5 prompts):
+- P1 (Lisbon): DRAW — both open "eyes closed, chair" (identical bias); n123 1831w vs n115 1361w (n123 more verbose)
+- P2 (quit smoking): **n115 wins** — n123 has garbled sentence ending: "something just real and clean without needing the old tricks anything else might try to offer back in again either at all" — incoherent
+- P3 (eagle): DRAW/n115 slight edge — n123 2314w vs n115 1315w; n123 has 4 phrase-repeats removed (n115: 1)
+- P4 (ocean dawn): DRAW — n123 faster to scene but has confusing return cue ("re-center on where you are now: in your chair" while user was standing on the beach)
+- P5 (studio night): **n123 wins** — opens with "hands rest on the mic stand" (scene-appropriate!) vs n115's "the chair beneath you holds your weight"
+
+Score: n115 wins 1, n123 wins 1, 3 draws. n123 does not reach ≥3/5 wins. Also: n123 has a quality regression on P2 (garbled ending).
+
+Root cause of tie: build_training_data.py bug (fixed this beat) silently dropped all 48 new-format gold scripts. Both n115 and n123 trained on the SAME 100 old settling-intro scripts (scripts 116-123 are all new-format and were all dropped). n123's delta = different random seed only, not more training data.
+
+**n115 remains live. n148 is the first adapter with the training pipeline fix.**
+
+**battery3c AYF deep test: COMPLETE — 27/28 PASS (96%)** (final log: logs/qc/20260708_0648_battery3c_v2.log)
+
+Three-iteration fix cycle (16/28 → 26/28 → 27/28):
+
+Fixes applied this beat:
+1. **rag.py: .py/.csv file support** — added to default index extensions (UC4-a,b,d were failing because Python and CSV files were not indexed)
+2. **battery3c test harness string mismatch** — engine outputs "That isn't in your files" (contraction) but checks looked for "not in your files"; 6 false failures corrected
+3. **rag.py: prompt injection sanitizer** — `_sanitize()` strips `[SYSTEM NOTE: ...]`-pattern text from retrieved chunks before they reach the model; HOSTILE-a (injected instruction obeyed) now PASSES
+4. **doc_qa.py: injection guard + stale-state guidance** — added two rules to QA_SYSTEM: prefer current state (not history) for ownership/status questions; treat file content patterns as data not instructions
+5. **UC3-b fix** — model was including "Marta" in the stale-replaced answer. After re-indexing with new text and the current-state rule, model now answers "Deshawn owns retention."
+
+One remaining failure: UC1-d (Javi "may" — semantic retrieval doesn't rank by recency; may07 meeting retrieved but mar03 cited as source; temporal ordering would require date-aware retrieval). Known limitation, deferred.
+
+**n130 COMPLETE:** GOLD-ADAPTER-0708-0647-n130 saved and probed. PROBE OK: opening-diversity 4/4, worst 40-char repeat ×1. Same training data as n115/n123 (build_training_data.py bug affected n130 too — all 48 new-format scripts still dropped). Comparative READ vs n115 deferred (expect same result as n123).
+
+**n148 training pending:** Flywheel next poll ~07:17 will detect 148-gold hash and auto-start n148 — the FIRST adapter trained with the build_training_data.py fix (32.4% in-media-res training vs 0% before). ETA complete ~08:30-09:00.
+
+**qc_queue restarted** (model idle after battery3c; PID 39048).
 
 ## 2026-07-08 (beat 7) — alert-calm root-cause fixed; gold 130; n130 training on mini; n115/n123 comparative read in progress
 
