@@ -270,13 +270,21 @@ class Assistant:
                 if sum(len(p) for p in head) >= _HEAD_CHARS:
                     break
             # If the regen STILL produced a banned opener (model is stubborn),
-            # surgically drop the offending line rather than losing the whole output.
+            # strip just the banned sentence (not the whole line) so that content
+            # on the same line after the banned phrase is preserved.
             if _BANNED_OPENERS.search("".join(head)):
                 combined = "".join(head)
-                lines = combined.splitlines(keepends=True)
-                clean = [ln for ln in lines if not _BANNED_OPENERS.search(ln)]
-                head = ["".join(clean).lstrip("\n")]
-                log.warning("secretary[%s]: regen still had banned opener — line stripped", task_key)
+                # Strip the banned phrase + any text up to the next sentence end.
+                # Pattern: banned phrase + everything until period/newline (or end).
+                _STRIP_SENT = re.compile(
+                    r"(?i)(i hope (this (email|message|letter) finds you|"
+                    r"you('?re| are) (doing )?well)|"
+                    r"i wanted to (reach out|touch base)|"
+                    r"i trust this (email|message) finds you)[^.\n]*[.\n]?\s*"
+                )
+                combined = _STRIP_SENT.sub("", combined).lstrip("\n")
+                head = [combined]
+                log.warning("secretary[%s]: regen still had banned opener — sentence stripped", task_key)
         yield "".join(head)
         yield from stream
 
