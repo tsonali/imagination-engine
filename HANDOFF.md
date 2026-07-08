@@ -1,20 +1,21 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-07-08 beat8 complete (n130 DONE; battery3c 27/28; qc_queue restarted; n148 training pending ~07:17)._
+_Last updated 2026-07-08 beat9 (n154 COMPLETE; active-body fix; gold 162; battery11 running; qc_queue PAUSED)._
 _Single source of truth for a fresh session. Everything below is real and running._
 
 ## FIRST THING TO DO when you resume — run these checks
 ```bash
-# Mini — check if n148 training started or completed
+# Mini — check n162 training status
 ssh -o IdentitiesOnly=yes smaitra@mac-mini.localdomain '
   echo "flywheel: $(pgrep -f honest_flywheel >/dev/null && echo RUNNING || echo DOWN)"
   tail -6 ~/Downloads/hearth-corpus/_logs/honest_flywheel.log
-  ls ~/Downloads/hearth-corpus/ | grep GOLD-ADAPTER
-  pgrep -f "mlx_lm lora" && echo "n148 TRAINING" || echo "not training"'
+  ls ~/Downloads/hearth-corpus/ | grep GOLD-ADAPTER | tail -5
+  pgrep -f "mlx_lm lora" && echo "TRAINING" || echo "not training"'
 
-# Laptop — qc_queue and model
-pgrep -f qc_queue >/dev/null && echo "qc_queue RUNNING" || echo "qc_queue DOWN"
+# Laptop — qc_queue and model and battery11 status
+pgrep -f qc_queue >/dev/null && echo "qc_queue RUNNING" || echo "qc_queue PAUSED (expected)"
 pgrep -f mlx_lm && echo "mlx_lm running" || echo "model idle"
+pgrep -f battery11 && echo "battery11 RUNNING" || echo "battery11 COMPLETE (check logs)"
 ```
 
 ## THE OPERATING SYSTEM (since 2026-07-07): heartbeat + honest flywheel
@@ -36,90 +37,91 @@ pgrep -f mlx_lm && echo "mlx_lm running" || echo "model idle"
 
 ## WHERE WE ARE
 
-### Live adapter: n115 (promoted 2026-07-08 beat5, confirmed beat6/7)
-- `data/model/adapters/` = GOLD-ADAPTER-0708-0016-n115 (123-gold, 1500 iters)
-- n123 adapter rsync'd to `data/model/adapters.n123/` (123-gold, different random seed effectively)
-- **Battery11 beat5 verify COMPLETE** (log: `logs/qc/20260708_0102_battery11_beat5_verify.log`)
-  - imag-deposition: "As soon as I speak next" first-person slip found → FIXED (beat7 verify PASS)
-  - imag-mid-switch: Full sleep register throughout → ROOT CAUSE FOUND + FIXED (beat7 verify PASS)
-- **Battery11 beat6 targeted verify COMPLETE** (log: `logs/qc/20260708_0441_beat6_alertcalm_verify.log`)
-  - imag-deposition: ✅ PASS — no "I speak/hold/guide"
-  - imag-mid-switch: ✅ REGISTER PASS — "Calm and awake now", "stay sharp", no sleep vocabulary
+### Live adapter: n115 (promoted 2026-07-08 beat5)
+- `data/model/adapters/` = GOLD-ADAPTER-0708-0016-n115 (123-gold old-format, 1500 iters)
+- n154 adapter rsync'd to `data/model/adapters.n154/` — PENDING comparative read
 
-### Generator fixes (beat7, 2026-07-08) — cumulative with beat5/6 fixes
-1. **Alert-calm root cause fixed** (3 changes to generator.py):
-   - `_alert_calm` detection moved BEFORE protocol branch (was only inside `if protocol == "settling":`)
-   - Explicit `⚠️ ALERT-CALM OVERRIDE` block injected into body_user when flag is set
-   - BODY_PROMPT alert-calm section strengthened: SCENE TYPE + GENRE + explicit/semantic ban list
-2. **First-person "I speak" ban extended** — added "as soon as I speak", "when I say", "I will
-   take you", "I am here" to explicit banned phrases in BODY_PROMPT.
+### Generator fixes (beat9, cumulative with beat5/6/7)
+1. **Active-body opening override** — `_is_active_body` detected via (CASE A + motion keywords
+   in scene/transcript). When detected:
+   - `⚠️ ACTIVE-BODY OPENING OVERRIDE` injected into open_user: MOVE 1 must NOT anchor to
+     the chair; use physical sensation from the active scene (effort/breath/pavement).
+   - `_active_body_body_note` injected into body_user: stay inside the motion scene.
+   - Belt-and-suspenders alongside n154 training data fix.
+2. **First-person ban extended** (BODY_PROMPT Rule #2) — added to banned phrases:
+   "with me", "we start", "we are here", "for us both", "we both", "come with me",
+   "join me here", "follow me" — narrator-places-itself-in-scene variants.
+3. **Earlier fixes (beats 5-7):**
+   - OPEN_PROMPT: all voice self-reference banned (not "this voice", "my voice", etc.)
+   - BODY_PROMPT: first-person "I speak/hold/guide" banned; alert-calm register tightened
+   - postcheck.py: drop_adjacent_duplicates() + repair_short_phrase_repeats(SHORT_NGRAM=5)
 
-### Gold corpus: 154 scripts
-- 27 original + 127 Claude-drafted
+### Gold corpus: 162 scripts
+- 27 original + 135 Claude-drafted
+- **Beat9 new (155-162):** afternoon-nap, apartment-return, ice-skating-early, pre-surgery-suspended,
+  jigsaw-last-piece, last-day-at-job, campfire-alone, post-camping-shower. SCP'd to mini.
+- **Beat8 new (141-154):** parked-car, swimming-alone, rain-window, familiar-path, after-hard-ends,
+  sitting-in-quiet, river-low-water, arriving-after-absence; first-snow, making-bread, empty-stadium,
+  open-road-drive, summer-garden, walk-after-good-conversation.
 - **Beat7 new (124-130):** rooftop-city-night, woodshop-planing, pre-dawn-kitchen, lap-pool,
-  mountain-descent, airport-dawn, dancing-alone. SCP'd to mini.
-- **Previous beat (131-140):** overnight-flight, finishing-a-run, dog-walk-night, cooking-for-someone,
-  empty-highway, reading-late, moment-before-meeting, music-memory, father-silence, finishing-long-work.
-- **Beat8 new (141-148):** parked-car-before-going-in, swimming-alone-early, rain-on-window,
-  familiar-path, moment-after-hard-ends, sitting-in-quiet-with-someone, river-low-water,
-  arriving-after-long-absence. All 274-301w (OOM-safe). SCP'd to mini.
-- **Beat8 addendum (149-154):** first-snow-of-winter, making-bread, empty-stadium, open-road-drive,
-  summer-garden, walk-after-good-conversation. All 252-269w. SCP'd to mini at 07:01.
-  n148 will train on all 154 (flywheel polls ~07:17).
+  mountain-descent, airport-dawn, dancing-alone.
 - Sonali's taste audit of batches 1-8 PENDING (_candidates/INDEX.md).
 
-### Mini flywheel: n130 COMPLETE ✅; n148 training PENDING (~07:17)
-- GOLD-ADAPTER-0708-0647-n130 saved at 06:47. PROBE OK: opening-diversity 4/4, worst 40-char repeat ×1.
-- rsync to laptop COMPLETE (~/Downloads/hearth-corpus/GOLD-ADAPTER-0708-0647-n130/).
-- n130 comparative READ vs n115 deferred — same effective training data as n123 (build_training_data.py bug affected n130 too). Expected result: same 1-1-3 split as n123.
-- **n148 training: flywheel next poll ~07:17 will detect 148-gold hash → auto-start n148.**
-  n148 = FIRST adapter with fixed training pipeline (154 total scripts, 34.4% in-media-res vs 0% before). ETA complete ~08:30-09:00.
+### Mini flywheel: n154 COMPLETE ✅; n162 training PENDING
+- **GOLD-ADAPTER-0708-0835-n154** saved at 08:35. Trained on 154 gold (first adapter with
+  pipeline fix; 34.4% in-media-res training).
+- **Probe PASS** — opening-diversity 4/4, worst 40-char repeat ×2.
+- **Probe READ:** eagle prompt opens "You are an eagle. You feel the warm sun on your back as
+  you soar over the mountains." ← IN-SCENE. First adapter to break chair-opening bias for
+  active-body scenes.
+- rsync'd to laptop: `data/model/adapters.n154/`
+- **n162 training:** 162-gold SCP'd to mini at ~09:05; flywheel next poll will detect hash
+  change and auto-start n162. ETA: ~10:00-11:30 when started.
 
-### Comparative read: BOTH COMPLETE — verdict: KEEP n115
-- n115 COMPLETE: systematic chair-opening ALL 5/5 prompts.
-- n123 COMPLETE: **KEEP n115** — n123 wins P5 (hands on mic stand, better), loses P2 (garbled ending),
-  3 draws. Score 1-1-3. Does not reach ≥3 wins threshold.
-- Root cause: build_training_data.py bug (fixed f62497c) silently dropped all 48 new-format gold
-  scripts. Both n115 and n123 trained on SAME 100 old settling-intro scripts (n123's 8-script
-  delta were all new-format, all dropped). Different random seed only, not different training data.
-- **n148 is the FIRST adapter with the training pipeline fix.** Watch for reduced chair-opening bias.
+### Battery11 (imagination): RUNNING (started 08:37, 6 scenarios, ~60 min)
+- Running with n115 adapter + new active-body prompt override (beat9 generator fix).
+- Key scenario to read when complete: `imag-active-scene` opening. Did the prompt override
+  prevent the chair-opening pattern with n115?
+- Log will appear in `logs/qc/` when complete.
+- **After battery11 completes:** model is free → run compare_n154.py → then restart qc_queue.
 
-### Training pipeline fix: build_training_data.py (beat8, committed f62497c)
-- Silently dropped 48 of 148 gold scripts (all {intake,script} format).
-- Fix 1: read `script` field when `text` absent.
-- Fix 2: 3x-weight new-format gold same as old-format gold.
-- Takes effect in n148 (flywheel will run fixed script when n130 completes + 148-gold detected).
+### qc_queue: PAUSED (model busy with battery11)
+- Restart after battery11 + comparative read complete:
+  ```bash
+  cd ~/Downloads/imagination-engine && nohup bash scripts/qc_queue.sh >> logs/qc/queue.log 2>&1 &
+  ```
 
-### Companion question-enders: 14% (confirmed beat7)
-- Battery9 authoritative: 14% (not 83% — that was a stale run). Well under <50% bar.
-- Content regressions need fine-tuning data (comp-decision-house, comp-funny, comp-arc-sober
-  T5/T8, comp-arc-newparent T6, comp-bored-test). All banked in scenario_bank.py.
+### Companion question-enders: 10% (confirmed beat9)
+- STANDING FLAG RESOLVED. Well under <50% bar.
+- Content regressions confirmed fine-tuning problems (not prompt-fixable):
+  comp-decision-house T3, comp-funny, comp-arc-sober T5/T8, comp-arc-newparent T6, comp-bored-test.
+- c_gold_beat9.jsonl (10 examples) written to hearth-corpus/C-companion/. Ready for next retrain.
+- Previous: c_gold_beat7.jsonl (12 examples) also ready.
 
 ## NEXT HEARTBEAT PRIORITY (in order)
 
-1. **Monitor n148 training on mini** (auto-start ~07:17, ETA complete ~08:30-09:00):
+1. **Read battery11 output when complete** — especially imag-active-scene opening.
+   Did prompt override fix the chair pattern with n115? (Log in logs/qc/ when done)
+
+2. **n154 comparative READ vs n115:**
    ```bash
-   ssh smaitra@mac-mini.localdomain '
-     tail -4 ~/Downloads/hearth-corpus/_logs/honest_flywheel.log
-     pgrep -f "mlx_lm lora" && echo "n148 TRAINING" || echo "not started yet"
-     ls ~/Downloads/hearth-corpus/ | grep GOLD-ADAPTER'
+   cd ~/Downloads/imagination-engine && .venv/bin/python scripts/qc/compare_n154.py 2>&1 | tee logs/qc/compare_n154_$(date +%m%d_%H%M).log
+   ```
+   Focus: does eagle/runner scenario open IN-SCENE vs CHAIR? ≥3/5 wins → promote n154.
+   If promote: `cp -r data/model/adapters data/model/adapters.LIVE-n115-bak && cp -r data/model/adapters.n154/. data/model/adapters/`
+
+3. **Companion deep test** (use-cases.md UC1-UC2):
+   - UC1: 2am mind-race (insomnia spiral with work dread, multi-turn, check honest floor + utility)
+   - UC2: long-arc check-ins (does companion.sqlite cross-session memory reference past sessions
+     correctly without fabricating?)
+   Run via battery9 or direct FastAPI test client.
+
+4. **Restart qc_queue** after all model work above:
+   ```bash
+   nohup bash scripts/qc_queue.sh >> logs/qc/queue.log 2>&1 &
    ```
 
-2. **n148 comparative READ vs n115** when adapter completes. This is the key comparison — first
-   adapter with the training pipeline fix (32.4% in-media-res training, 48 new-format scripts included).
-   Focus questions:
-   - Does any of the 5 prompts NOT open with "eyes closed, body in chair"?
-   - Does the eagle/active-runner scenario open in-scene vs chair?
-   Scenarios to use: imag-embodiment-eagle + imag-active-scene (both in scenario_bank).
-
-3. **battery3c: COMPLETE** — 27/28 PASS, one known limitation (UC1-d temporal retrieval).
-   No further fixes needed this cycle. All fixes committed.
-
-4. **Companion fine-tuning** — c_gold_beat7.jsonl (12 examples) ready. Incorporate next retrain.
-
-5. **Gold corpus growth** — at 148. Continue toward 150+ next beat (5-10 new scripts).
-
-6. **Deep-test next tool** — beat9 tool TBD (AYF complete this beat, Secretary was beat4).
+5. **Gold corpus** — at 162. Continue toward 170+ next beat (5-10 new scripts).
 
 ## STANDING RULES (learned the hard way — keep ALL of these)
 1. Promotion = comparative READS + full battery gate. NEVER a loss number.
@@ -134,10 +136,10 @@ pgrep -f mlx_lm && echo "mlx_lm running" || echo "model idle"
 ## GATED ON SONALI (unchanged)
 - Notarized .dmg (Apple Developer, Team ID U3MBG724WA; scripts/apple_setup.py ready).
 - F5 own-voice speed/quality tradeoff (her ear).
-- Taste audit of the 96 Claude-drafted gold candidates (_candidates/INDEX.md; batches 1-8).
+- Taste audit of Claude-drafted gold candidates (_candidates/INDEX.md; batches 1-9).
 - docs/internal/why-public-domain.md — do not publish before her review.
-- Companion fine-tuning examples from beat5: does the arc-sober echo response and grief-anger
-  generic validation read as bad as I called them? (review-queue.md 2026-07-08 section)
+- c_gold_beat9.jsonl: read the 10 companion examples before they go into a retrain — confirm
+  target responses match your taste (especially: comp-bored-test hold-ennui, arc-sober T8 wry).
 
 ## HISTORY (condensed — details in docs/daily-log.md)
 - 06-09→10 hardening campaign: ~20 defects fixed across all five tools.
@@ -159,18 +161,15 @@ pgrep -f mlx_lm && echo "mlx_lm running" || echo "model idle"
   alert-calm lullaby literal word → added to explicit ban; adjacent-sentence dedup added to
   postcheck.py). Battery9: 14% question-enders (authoritative reading). n115 comparative READ:
   4/5 wins → PROMOTED. Gold 115→123. AYF battery3c written. c_gold_beat5.jsonl (10 examples).
-  Mini: flywheel will detect n123 at ~01:46 Jul 8.
-- 07-08 (beat7): Alert-calm root cause found + fixed (3 generator.py changes: detection moved
-  before protocol branch, override injected into body_user, BODY_PROMPT strengthened). First-
-  person "I speak" ban extended. Beat6 targeted verify: both imag-deposition and imag-mid-switch
-  PASS. Gold 123→130 (7 new scripts, diverse gap scenes, SCP'd). n130 training on mini (hung
-  at iter-300 twice; OOM fix: max-seq-length 768, val-batches 4). n115/n123 comparative read begun.
-- 07-08 (beat8): n130 COMPLETE (GOLD-ADAPTER-0708-0647-n130, probe PASS 4/4). Gold 140→148
-  (8 new scripts: parked-car, swimming-alone, rain-window, familiar-path, after-hard-ends,
-  sitting-in-quiet, river-low-water, arriving-after-absence; all 274-301w, SCP'd to mini).
-  n115 read COMPLETE: systematic chair-opening bias 5/5. n123 COMPLETE: KEEP n115 (1-1-3).
-  CRITICAL BUG FOUND+FIXED: build_training_data.py silently dropped 48 new-format gold scripts
-  (r.get("text","") → r.get("text","") or r.get("script","")). All n100-n130 trained on only
-  100 old-format scripts (0% in-media-res). Fix committed f62497c; takes effect in n148.
-  battery3c AYF deep test: 27/28 PASS (rag.py .py/.csv support, injection sanitizer, UC3-b fix).
-  qc_queue restarted. n148 training pending ~07:17 (FIRST adapter with pipeline fix).
+- 07-08 (beat7): Alert-calm root cause found + fixed (3 generator.py changes). First-person
+  "I speak" ban extended. Beat6 targeted verify: deposition + mid-switch PASS. Gold 123→130.
+  n130 training on mini (OOM fix: max-seq-length 768). n115/n123 comparative read begun.
+- 07-08 (beat8): n130 COMPLETE (probe PASS 4/4). Gold 140→154 (14 scripts, SCP'd).
+  n115: systematic chair-opening 5/5. n123: KEEP n115 (1-1-3). CRITICAL BUG FOUND+FIXED:
+  build_training_data.py silently dropped 48 new-format gold scripts; n148 is first with fix.
+  battery3c AYF deep test: 27/28 PASS. qc_queue restarted. n148 pending.
+- 07-08 (beat9): n154 COMPLETE (probe PASS; eagle opens in-scene — chair bias broken).
+  Active-body opening override added to generator.py (prompt fix, belt-and-suspenders).
+  First-person "with me"/"we start" ban extended. Gold 154→162 (8 new, SCP'd). c_gold_beat9
+  (10 examples). Battery11 (6 scenarios) running with prompt fix + n115 adapter.
+  Companion question-enders 10% — STANDING FLAG RESOLVED.
