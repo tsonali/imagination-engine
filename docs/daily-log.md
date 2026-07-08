@@ -8,7 +8,7 @@ The journey is part of the public diligent narrative — see `strategy.md`.
 
 ---
 
-## 2026-07-08 (beat 8) — n130 past iter-300 (no OOM); gold 140→148; n115 bias confirmed; n123 comparative read in progress
+## 2026-07-08 (beat 8) — n130 DONE; battery3c 27/28; gold 140→154; n148 pending
 
 **n130 training (mini) — iter-300 PASSED:** Third run with max-seq-length=768, val-batches=4. Iter-300 eval ran in 15.479s, val loss 1.461, peak mem 10.940 GB — no OOM. Training continuing to iter-1500. Previous two runs both OOM'd at iter-300; the fix holds. GOLD-ADAPTER-n130 will auto-save when complete; flywheel will then detect 148-gold hash and queue n148 training.
 
@@ -65,6 +65,15 @@ One remaining failure: UC1-d (Javi "may" — semantic retrieval doesn't rank by 
 **n148 training pending:** Flywheel next poll ~07:17 will detect 148-gold hash and auto-start n148 — the FIRST adapter trained with the build_training_data.py fix (32.4% in-media-res training vs 0% before). ETA complete ~08:30-09:00.
 
 **qc_queue restarted** (model idle after battery3c; PID 39048).
+
+**Gold corpus: 148 → 154 (6 new scripts, beat8 addendum, all 252-269w):**
+- Script 149: First snow of winter — "It started while you weren't watching."
+- Script 150: Making bread — "The dough is under your hands."
+- Script 151: Empty stadium before the crowd — "The seats are empty."
+- Script 152: Driving toward something good — "The road is yours this morning."
+- Script 153: Summer garden at its fullest — "It's fuller than you expected."
+- Script 154: Walk after a good conversation — "You're walking and you're still in it."
+- SCP'd to mini at 07:01. Flywheel will detect new hash at ~07:17 → n148 trains on all 154.
 
 ## 2026-07-08 (beat 7) — alert-calm root-cause fixed; gold 130; n130 training on mini; n115/n123 comparative read in progress
 

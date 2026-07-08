@@ -54,8 +54,8 @@ pgrep -f mlx_lm && echo "mlx_lm running" || echo "model idle"
 2. **First-person "I speak" ban extended** — added "as soon as I speak", "when I say", "I will
    take you", "I am here" to explicit banned phrases in BODY_PROMPT.
 
-### Gold corpus: 148 scripts
-- 27 original + 121 Claude-drafted
+### Gold corpus: 154 scripts
+- 27 original + 127 Claude-drafted
 - **Beat7 new (124-130):** rooftop-city-night, woodshop-planing, pre-dawn-kitchen, lap-pool,
   mountain-descent, airport-dawn, dancing-alone. SCP'd to mini.
 - **Previous beat (131-140):** overnight-flight, finishing-a-run, dog-walk-night, cooking-for-someone,
@@ -63,6 +63,9 @@ pgrep -f mlx_lm && echo "mlx_lm running" || echo "model idle"
 - **Beat8 new (141-148):** parked-car-before-going-in, swimming-alone-early, rain-on-window,
   familiar-path, moment-after-hard-ends, sitting-in-quiet-with-someone, river-low-water,
   arriving-after-long-absence. All 274-301w (OOM-safe). SCP'd to mini.
+- **Beat8 addendum (149-154):** first-snow-of-winter, making-bread, empty-stadium, open-road-drive,
+  summer-garden, walk-after-good-conversation. All 252-269w. SCP'd to mini at 07:01.
+  n148 will train on all 154 (flywheel polls ~07:17).
 - Sonali's taste audit of batches 1-8 PENDING (_candidates/INDEX.md).
 
 ### Mini flywheel: n130 COMPLETE ✅; n148 training PENDING (~07:17)
@@ -70,7 +73,7 @@ pgrep -f mlx_lm && echo "mlx_lm running" || echo "model idle"
 - rsync to laptop COMPLETE (~/Downloads/hearth-corpus/GOLD-ADAPTER-0708-0647-n130/).
 - n130 comparative READ vs n115 deferred — same effective training data as n123 (build_training_data.py bug affected n130 too). Expected result: same 1-1-3 split as n123.
 - **n148 training: flywheel next poll ~07:17 will detect 148-gold hash → auto-start n148.**
-  n148 = FIRST adapter with fixed training pipeline (32.4% in-media-res vs 0% before). ETA complete ~08:30-09:00.
+  n148 = FIRST adapter with fixed training pipeline (154 total scripts, 34.4% in-media-res vs 0% before). ETA complete ~08:30-09:00.
 
 ### Comparative read: BOTH COMPLETE — verdict: KEEP n115
 - n115 COMPLETE: systematic chair-opening ALL 5/5 prompts.
