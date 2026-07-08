@@ -8,6 +8,32 @@ The journey is part of the public diligent narrative — see `strategy.md`.
 
 ---
 
+## 2026-07-08 (beat 8) — n130 past iter-300 (no OOM); gold 140→148; n115 bias confirmed; n123 comparative read in progress
+
+**n130 training (mini) — iter-300 PASSED:** Third run with max-seq-length=768, val-batches=4. Iter-300 eval ran in 15.479s, val loss 1.461, peak mem 10.940 GB — no OOM. Training continuing to iter-1500. Previous two runs both OOM'd at iter-300; the fix holds. GOLD-ADAPTER-n130 will auto-save when complete; flywheel will then detect 148-gold hash and queue n148 training.
+
+**Gold corpus: 140 → 148 (8 new scripts, beat8, all 274-301w):**
+- Script 141: Parked car before going in — "The engine is off but the dashboard is still warm."
+- Script 142: Swimming alone, early pool — "The pool is yours."
+- Script 143: Rain on a window — "Rain on the glass."
+- Script 144: Walking a familiar path — "You know this ground."
+- Script 145: Moment after something hard ends — "It's over."
+- Script 146: Sitting with someone in quiet — "They're just there."
+- Script 147: River at low water, late summer — "The river is lower than it should be."
+- Script 148: Arriving after a long absence — "You recognize it immediately."
+- All intentionally short (274-301w) to avoid 2703-token training examples. SCP'd to mini.
+
+**n115 comparative read COMPLETE — systematic opening bias confirmed:**
+All 5 prompts (Lisbon evening, quit smoking, eagle, ocean dawn, studio night) open with "eyes closed" + body/hands in a chair. Even the eagle embodiment ("the chair you're sitting on is beneath you — now let that weight sink into it") — the model re-anchors to chair before any scene. This is a training artifact: the settling protocol's body-scan has leaked into every opening regardless of intake content.
+- P1: "Your eyes are closed, and your body is in a chair."
+- P2: "Your eyes are closed, and the weight of your hands is resting on the deck chair."
+- P3: "Your eyes are closed. Your hands rest comfortably by your sides... the chair you're sitting on is beneath you"
+- P4: "Your eyes are closed. Your body is at rest, your hands resting in the lap of a chair."
+- P5: "Your eyes are closed. The chair beneath you holds your weight, steady and solid."
+Verdict pending n123 read — key question: does n123 break this pattern?
+
+**n123 comparative read: IN PROGRESS** (P1 generating, ~30 min remaining).
+
 ## 2026-07-08 (beat 7) — alert-calm root-cause fixed; gold 130; n130 training on mini; n115/n123 comparative read in progress
 
 **Alert-calm root cause found and fixed (generator.py, 3 changes):**

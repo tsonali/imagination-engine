@@ -1,6 +1,6 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-07-08 beat7 (alert-calm root-cause fixed; gold 130; n130 training on mini; n115/n123 comparative read in progress)._
+_Last updated 2026-07-08 beat8 (n130 past iter-300 ✅; gold 148; n115 chair-bias confirmed; n123 comparative read in progress)._
 _Single source of truth for a fresh session. Everything below is real and running._
 
 ## FIRST THING TO DO when you resume — run these checks
@@ -54,25 +54,31 @@ pgrep -f qc_queue >/dev/null && echo "qc_queue RUNNING" || echo "qc_queue DOWN"
 2. **First-person "I speak" ban extended** — added "as soon as I speak", "when I say", "I will
    take you", "I am here" to explicit banned phrases in BODY_PROMPT.
 
-### Gold corpus: 130 scripts
-- 27 original + 103 Claude-drafted
+### Gold corpus: 148 scripts
+- 27 original + 121 Claude-drafted
 - **Beat7 new (124-130):** rooftop-city-night, woodshop-planing, pre-dawn-kitchen, lap-pool,
   mountain-descent, airport-dawn, dancing-alone. SCP'd to mini.
+- **Previous beat (131-140):** overnight-flight, finishing-a-run, dog-walk-night, cooking-for-someone,
+  empty-highway, reading-late, moment-before-meeting, music-memory, father-silence, finishing-long-work.
+- **Beat8 new (141-148):** parked-car-before-going-in, swimming-alone-early, rain-on-window,
+  familiar-path, moment-after-hard-ends, sitting-in-quiet-with-someone, river-low-water,
+  arriving-after-long-absence. All 274-301w (OOM-safe). SCP'd to mini.
 - Sonali's taste audit of batches 1-8 PENDING (_candidates/INDEX.md).
 
-### Mini flywheel: n130 training RUNNING
+### Mini flywheel: n130 training RUNNING — past iter-300 ✅
 - Flywheel detected 130-gold at 05:08, started n130 training.
-- HUNG after iter-200 checkpoint (OOM at iter-300 eval pass).
-- RESTARTED: fresh n130 run started at 05:20. Past iter 75 (10.8GB peak, healthy).
-- ETA: ~90 min from start → adapter saved as GOLD-ADAPTER-*-n130 if it completes without OOM.
-- **CRITICAL WATCH:** if it hangs again at iter-300, reduce `--val-batches` from 8 to 4 in
-  `scripts/finetune.sh` and restart manually. The iter-300 eval pass is the OOM trigger.
-- After adapter exists: `rsync` to laptop, run probe, then comparative READ vs n115.
+- HUNG twice at iter-300 (OOM). Fixed: max-seq-length 1024→768, val-batches 8→4.
+- Third run: iter-300 eval PASSED — 15.479s, val loss 1.461, peak mem 10.940 GB. Continuing to iter-1500.
+- ETA: ~60 min from iter-300 → adapter saved as GOLD-ADAPTER-*-n130.
+- After n130 completes: flywheel will detect 148-gold hash → auto-start n148 training.
+- After n130 adapter exists: rsync to laptop, run probe, then comparative READ vs n115.
 
-### Comparative read: IN PROGRESS
-- n115 (live): 5-prompt comparison running (background), log: `/tmp/n115_compare.log`
-- n123: will run immediately after n115 completes
-- Verdict pending. Promotion gate: must win ≥3/5 prompts clearly.
+### Comparative read: n115 COMPLETE (bias confirmed); n123 IN PROGRESS
+- n115 COMPLETE: log `/tmp/n115_compare.log`. **Systematic chair-opening bias on ALL 5 prompts.**
+  Every script opens with "eyes closed" + body in chair regardless of scene type (eagle, ocean,
+  studio). Settling protocol body-scan has leaked into every opening. This is a training artifact.
+- n123 IN PROGRESS (background): log `/tmp/n123_compare.log`. ~30 min remaining at P1.
+- Verdict pending. Key question: does n123 break the chair-opening pattern? Promotion = ≥3/5 clear wins.
 
 ### Companion question-enders: 14% (confirmed beat7)
 - Battery9 authoritative: 14% (not 83% — that was a stale run). Well under <50% bar.
@@ -80,26 +86,38 @@ pgrep -f qc_queue >/dev/null && echo "qc_queue RUNNING" || echo "qc_queue DOWN"
   T5/T8, comp-arc-newparent T6, comp-bored-test). All banked in scenario_bank.py.
 
 ## NEXT HEARTBEAT PRIORITY (in order)
-1. **Read n115 + n123 comparative logs** and make promotion verdict. Both logs at `/tmp/n{x}_compare.log`.
-   If n123 wins ≥3/5: copy adapters.n123 → adapters, back up n115, run battery11 on n123.
-   Run command for n123 (after n115 completes):
+1. **Read n123 comparative log** and make verdict vs n115. Key: does n123 break chair-opening bias?
+   Log: `/tmp/n123_compare.log`. If n123 wins ≥3/5 clear (especially opening diversity): promote.
+   Promote command:
    ```bash
-   cd ~/Downloads/imagination-engine && source .venv/bin/activate
-   HEARTH_ADAPTER="data/model/adapters.n123" ADAPTER_LABEL="n123-CANDIDATE" PYTHONPATH=src python /tmp/compare_adapters.py 2>&1 | tee /tmp/n123_compare.log
+   cd ~/Downloads/imagination-engine
+   cp -r data/model/adapters data/model/adapters.n115-backup
+   rsync -a --delete data/model/adapters.n123/ data/model/adapters/
    ```
-2. **Run battery3c AYF deep test** (this beat's use-case rotation — queued since beat5):
+   Then run battery11 on promoted adapter to gate.
+
+2. **Run battery3c AYF deep test** (use-case rotation, queued since beat5 — model must be free):
    ```bash
    pkill -f qc_queue; sleep 2
    cd ~/Downloads/imagination-engine && source .venv/bin/activate
    LOG=logs/qc/$(date +%Y%m%d_%H%M)_battery3c_ask_usecases.log
    PYTHONPATH=src python scripts/qc/battery3c_ask_usecases.py 2>&1 | tee "$LOG"
    ```
-3. **Check mini n130**: `ssh smaitra@mac-mini.localdomain 'tail -8 ~/Downloads/hearth-corpus/_logs/honest_flywheel.log; ls ~/Downloads/hearth-corpus/GOLD-ADAPTER-*-n130 2>/dev/null'`
-   If hangs at iter-300: edit `scripts/finetune.sh` to `--val-batches 4`, kill flywheel+training, restart flywheel.
-4. **Companion fine-tuning examples** — write c_gold_beat7.jsonl (5 scenarios: decision-house,
-   funny, sober-echo, newparent-say-what-it-is, bored-crisis). Incorporate when companion retrain needed.
-5. **Restart qc_queue** after model is free:
-   `nohup bash scripts/qc_queue.sh >/dev/null 2>&1 &`
+
+3. **Check n130 adapter on mini** (should complete ~60 min after iter-300):
+   ```bash
+   ssh smaitra@mac-mini.localdomain 'ls ~/Downloads/hearth-corpus/GOLD-ADAPTER-*-n130 2>/dev/null && echo EXISTS || echo STILL TRAINING; tail -4 ~/Downloads/hearth-corpus/_logs/honest_flywheel.log'
+   ```
+   If complete: rsync to laptop → probe_mechanical.py → comparative READ vs n115.
+
+4. **Chair-opening bias** — identify training source of the pattern. n115 body-in-chair on 5/5 prompts
+   is a defect requiring either: (a) n123/n130 already fixes it, or (b) add anti-chair-opening examples
+   to gold corpus. If n123 shares the bias: add 3-5 counter-examples to A_gold.jsonl and note in bank.
+
+5. **Restart qc_queue** after model is free: `nohup bash scripts/qc_queue.sh >/dev/null 2>&1 &`
+
+6. **Companion fine-tuning** — c_gold_beat7.jsonl (12 examples) written and ready. Incorporate when
+   companion retrain is scheduled.
 
 ## STANDING RULES (learned the hard way — keep ALL of these)
 1. Promotion = comparative READS + full battery gate. NEVER a loss number.
@@ -144,4 +162,9 @@ pgrep -f qc_queue >/dev/null && echo "qc_queue RUNNING" || echo "qc_queue DOWN"
   before protocol branch, override injected into body_user, BODY_PROMPT strengthened). First-
   person "I speak" ban extended. Beat6 targeted verify: both imag-deposition and imag-mid-switch
   PASS. Gold 123→130 (7 new scripts, diverse gap scenes, SCP'd). n130 training on mini (hung
-  at iter-300, restarted). n115/n123 comparative read in progress.
+  at iter-300 twice; OOM fix: max-seq-length 768, val-batches 4). n115/n123 comparative read begun.
+- 07-08 (beat8): n130 past iter-300 ✅ (no OOM, val loss 1.461, peak 10.940 GB). Gold 140→148
+  (8 new scripts: parked-car, swimming-alone, rain-window, familiar-path, after-hard-ends,
+  sitting-in-quiet, river-low-water, arriving-after-absence; all 274-301w, SCP'd to mini).
+  n115 read COMPLETE: systematic chair-opening bias confirmed all 5/5 prompts regardless of scene.
+  n123 comparative read IN PROGRESS (~30 min remaining at P1).
