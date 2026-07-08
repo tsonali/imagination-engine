@@ -73,12 +73,20 @@ pgrep -f qc_queue >/dev/null && echo "qc_queue RUNNING" || echo "qc_queue DOWN"
 - After n130 completes: flywheel will detect 148-gold hash → auto-start n148 training.
 - After n130 adapter exists: rsync to laptop, run probe, then comparative READ vs n115.
 
-### Comparative read: n115 COMPLETE (bias confirmed); n123 IN PROGRESS
-- n115 COMPLETE: log `/tmp/n115_compare.log`. **Systematic chair-opening bias on ALL 5 prompts.**
-  Every script opens with "eyes closed" + body in chair regardless of scene type (eagle, ocean,
-  studio). Settling protocol body-scan has leaked into every opening. This is a training artifact.
-- n123 IN PROGRESS (background): log `/tmp/n123_compare.log`. ~30 min remaining at P1.
-- Verdict pending. Key question: does n123 break the chair-opening pattern? Promotion = ≥3/5 clear wins.
+### Comparative read: n115 COMPLETE; n123 IN PROGRESS (P2 generating)
+- n115 COMPLETE: systematic chair-opening on ALL 5/5 prompts.
+- **Root cause found (beat8):** build_training_data.py silently dropped all {intake,script} format
+  gold entries (48 scripts). Only the 100 old settling-intro scripts trained n115/n123/n130. Scripts
+  116-123 (n123's delta) are all new-format → n115 and n123 trained on IDENTICAL effective data.
+- n123 P1 confirmed: same chair-opening ("you feel the chair beneath your weight"). Expected.
+- n123 verdict likely: keep n115 (no meaningful data difference; different random seed only).
+- n148 is the FIRST adapter with the fix → 32.4% in-media-res in training pool.
+
+### Training pipeline fix: build_training_data.py (beat8, committed f62497c)
+- Silently dropped 48 of 148 gold scripts (all {intake,script} format).
+- Fix 1: read `script` field when `text` absent.
+- Fix 2: 3x-weight new-format gold same as old-format gold.
+- Takes effect in n148 (flywheel will run fixed script when n130 completes + 148-gold detected).
 
 ### Companion question-enders: 14% (confirmed beat7)
 - Battery9 authoritative: 14% (not 83% — that was a stale run). Well under <50% bar.
@@ -86,17 +94,13 @@ pgrep -f qc_queue >/dev/null && echo "qc_queue RUNNING" || echo "qc_queue DOWN"
   T5/T8, comp-arc-newparent T6, comp-bored-test). All banked in scenario_bank.py.
 
 ## NEXT HEARTBEAT PRIORITY (in order)
-1. **Read n123 comparative log** and make verdict vs n115. Key: does n123 break chair-opening bias?
-   Log: `/tmp/n123_compare.log`. If n123 wins ≥3/5 clear (especially opening diversity): promote.
-   Promote command:
-   ```bash
-   cd ~/Downloads/imagination-engine
-   cp -r data/model/adapters data/model/adapters.n115-backup
-   rsync -a --delete data/model/adapters.n123/ data/model/adapters/
-   ```
-   Then run battery11 on promoted adapter to gate.
 
-2. **Run battery3c AYF deep test** (use-case rotation, queued since beat5 — model must be free):
+1. **Read n123 log + make verdict.** Log: `/tmp/n123_compare.log`. n123 trained on same data as
+   n115 (build_training_data.py bug silently dropped the 8 new scripts 116-123). Expected verdict:
+   keep n115. Only promote if n123 wins ≥3/5 on content quality dimensions (not opening bias — both
+   will have it).
+
+2. **Run battery3c AYF deep test** (queued since beat5 — use-case rotation):
    ```bash
    pkill -f qc_queue; sleep 2
    cd ~/Downloads/imagination-engine && source .venv/bin/activate
@@ -104,20 +108,21 @@ pgrep -f qc_queue >/dev/null && echo "qc_queue RUNNING" || echo "qc_queue DOWN"
    PYTHONPATH=src python scripts/qc/battery3c_ask_usecases.py 2>&1 | tee "$LOG"
    ```
 
-3. **Check n130 adapter on mini** (should complete ~60 min after iter-300):
+3. **Check n130 on mini** (ETA ~45 min from iter-575 = ~09:30-10:00):
    ```bash
-   ssh smaitra@mac-mini.localdomain 'ls ~/Downloads/hearth-corpus/GOLD-ADAPTER-*-n130 2>/dev/null && echo EXISTS || echo STILL TRAINING; tail -4 ~/Downloads/hearth-corpus/_logs/honest_flywheel.log'
+   ssh smaitra@mac-mini.localdomain 'ls ~/Downloads/hearth-corpus/GOLD-ADAPTER-*-n130 2>/dev/null && echo EXISTS; tail -4 ~/Downloads/hearth-corpus/_logs/honest_flywheel.log'
    ```
-   If complete: rsync to laptop → probe_mechanical.py → comparative READ vs n115.
+   n130 trained on same 100 old-format scripts (bug affected it too). Comparative READ vs n115
+   will confirm this. After n130: flywheel detects 148-gold → starts n148 (FIRST with fix).
 
-4. **Chair-opening bias** — identify training source of the pattern. n115 body-in-chair on 5/5 prompts
-   is a defect requiring either: (a) n123/n130 already fixes it, or (b) add anti-chair-opening examples
-   to gold corpus. If n123 shares the bias: add 3-5 counter-examples to A_gold.jsonl and note in bank.
+4. **n148 is the key adapter** — first training run with the build_training_data.py fix. Watch for:
+   - Chair-opening bias on <5/5 prompts (improvement from in-media-res scripts now in training)
+   - Opening diversity across scene types
+   Probe: use new scenario_bank entries imag-embodiment-eagle + imag-active-scene.
 
-5. **Restart qc_queue** after model is free: `nohup bash scripts/qc_queue.sh >/dev/null 2>&1 &`
+5. **Restart qc_queue** after model free: `nohup bash scripts/qc_queue.sh >/dev/null 2>&1 &`
 
-6. **Companion fine-tuning** — c_gold_beat7.jsonl (12 examples) written and ready. Incorporate when
-   companion retrain is scheduled.
+6. **Companion fine-tuning** — c_gold_beat7.jsonl (12 examples) ready. Incorporate next retrain.
 
 ## STANDING RULES (learned the hard way — keep ALL of these)
 1. Promotion = comparative READS + full battery gate. NEVER a loss number.
