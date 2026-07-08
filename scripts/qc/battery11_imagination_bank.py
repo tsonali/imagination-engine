@@ -6,7 +6,7 @@ seed). imag-repeat-variety runs TWICE and the two scripts are diffed:
 night 2 must not be night 1 reheated — sentence-level overlap is measured.
 Score afterwards with score_scripts.py; read the register cases by hand.
 """
-import sys, time, traceback
+import sys, time, traceback, argparse
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
@@ -14,7 +14,11 @@ from fastapi.testclient import TestClient
 import imagination_engine.server as s
 from imagination_engine.generator import generate_session
 from imagination_engine.postcheck import _sentences, _words, _similarity
-from scenario_bank import sample
+from scenario_bank import sample, BANK
+
+ap = argparse.ArgumentParser()
+ap.add_argument("--scenarios", nargs="+", help="Run only these scenario IDs")
+args = ap.parse_args()
 
 c = TestClient(s.app)
 
@@ -44,7 +48,14 @@ def run_one(sc, tag=""):
     return script
 
 t0 = time.time()
-scenarios = sample(product="imagination", n=6)
+if args.scenarios:
+    id_set = set(args.scenarios)
+    scenarios = [sc for sc in BANK if sc.id in id_set]
+    if not scenarios:
+        print(f"ERROR: no scenarios found for {args.scenarios}", flush=True)
+        sys.exit(1)
+else:
+    scenarios = sample(product="imagination", n=6)
 print(f"running {[x.id for x in scenarios]}", flush=True)
 for sc in scenarios:
     hdr(f"{sc.id} [{sc.dim}/{sc.stakes}] — {sc.note}")
