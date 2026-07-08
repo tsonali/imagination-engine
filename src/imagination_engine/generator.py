@@ -408,9 +408,11 @@ leaves them nothing to do.
   camera describing the room or the other person's appearance.
 - NEVER use first-person "I", "me", "my", "we" — you are a narrator speaking TO the
   listener, not a character IN the scene. Specifically banned: "I hold", "I guide you",
-  "my voice", "as soon as I speak", "when I say", "I will take you", "I am here" — any
-  phrase where the narrating voice refers to itself. Rewrite in second person or cut the
-  narrator reference entirely.
+  "my voice", "as soon as I speak", "when I say", "I will take you", "I am here",
+  "with me", "we start", "we are here", "for us both", "we both", "come with me",
+  "join me here", "follow me" — any phrase where the narrating voice places itself
+  as a character present in the scene or invites the listener to be "with" it.
+  Rewrite in second person or cut the narrator reference entirely.
 - When in doubt, say LESS. A named sensation + space is more immersive than a
   fully-rendered tableau. Suggestion, not depiction.
 
@@ -664,12 +666,45 @@ def generate_session(
         log.info("  scene-bible bound: %s (%d beats, %d anchors)",
                  bible.archetype, len(bible.beats), len(bible.anchors))
 
+    # Detect active-body scenes: when the listener IS the subject and the scene
+    # involves physical motion (running, flying, performing, etc.). In these cases
+    # MOVE 1 must NOT open with "the chair beneath you / hands at rest" — those
+    # are sedentary settling cues that break the in-scene register for an active
+    # body. Instead MOVE 1 should name eyes-closed then immediately anchor a
+    # physical sensation FROM the motion scene, not from the listening chair.
+    _motion_keywords = (
+        "running", "run ", "track", "sprint", "race ", "finish line",
+        "flying", "soaring", "eagle", "wings ", "performing", "performance",
+        "stage ", "athlete", "climbing ", "swimming ", "cycling ", "pitch",
+        "court ", "field ", "last lap", "200 meter", "giving everything",
+        "jump", "leap", "skate", "skier", "ski ", "dive", "rowing",
+    )
+    _scene_text_lc = (
+        (classification.scene_summary or "") + " "
+        + " ".join(classification.anchors)
+        + " " + _transcript_text
+    ).lower()
+    _is_active_body = (
+        classification.direction == "case_a"
+        and any(kw in _scene_text_lc for kw in _motion_keywords)
+    )
+    _active_body_open_note = (
+        "\n\n⚠️ ACTIVE-BODY OPENING OVERRIDE: This scene places the listener inside "
+        "a body in MOTION (running, flying, performing, etc.). "
+        "MOVE 1 (Utilization): do NOT say 'you can feel the chair beneath you' or "
+        "'your hands rest in your lap' — those are sedentary settling cues that "
+        "break the register. Instead: note their eyes are closed, then go directly "
+        "to a physical sensation from the active scene itself "
+        "(e.g. breath in the effort, pavement under feet, lungs burning, wind). "
+        "MOVE 3 opens ALREADY IN THE ACTION — not transitioning TO it."
+    ) if _is_active_body else ""
+
     # Stage 2: open.
     emit("writing_settle", "Writing the opening. Dropping you into the scene.", 2, 5, eta=15.0)
     log.info("[v5] open ...")
     t0 = time.time()
     open_user = (
-        intake_str + "\n\n" + class_block + "\n\n"
+        intake_str + "\n\n" + class_block + _active_body_open_note + "\n\n"
         + "Now produce the opening per OPEN_PROMPT rules."
     )
     open_text = _generate(engine, OPEN_PROMPT, open_user, max_tokens=600)
@@ -754,8 +789,16 @@ def generate_session(
         "- Every line must STRENGTHEN presence. If it could help someone fall asleep, rewrite it.\n"
     ) if _alert_calm else ""
 
+    _active_body_body_note = (
+        "\n\n⚠️ ACTIVE-BODY SCENE: The listener is inside a body in motion. "
+        "Do NOT re-settle them in a chair or re-anchor to the listening room. "
+        "Stay entirely inside the active scene — the effort, the sensation, "
+        "the physical reality of motion. Every paragraph must be inside the action."
+    ) if _is_active_body else ""
+
     body_user = (
-        intake_str + "\n\n" + class_block + _alert_calm_override + "\n\n"
+        intake_str + "\n\n" + class_block + _alert_calm_override
+        + _active_body_body_note + "\n\n"
         "----- THE OPENING (already spoken) -----\n"
         + open_text
         + "\n----- END OPENING -----\n\n"

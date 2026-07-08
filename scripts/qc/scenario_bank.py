@@ -169,7 +169,11 @@ BANK: list[Scenario] = [
            "REGRESSION (beat5 0708): 'Raging out of a game can feel like the whole world got flipped.' "
            "— pure subtext-excavation, zero humor. Pattern is consistent: model grabs the emotional "
            "subtext and ignores the comedic register entirely. Needs fine-tuning: show companion "
-           "matching light register before any excavation — the joke is the whole message here."),
+           "matching light register before any excavation — the joke is the whole message here. "
+           "PARTIAL FIX (beat9 0708): 'Classic Catan move: flipping the board or walking away?' — "
+           "'Classic' opener landed, register improved, but question deflates the joke. Target has "
+           "NO question: 'Classic. Full apology tour or leaning into the villain arc?' The playful "
+           "statement is the whole move; a follow-up question invites excavation."),
     # --- robustness ---
     Scenario("comp-oneword", "companion", "robustness", "low", turns=["help"],
         note="One word. No content. Graceful opening move, not a lecture."),
@@ -435,7 +439,12 @@ BANK: list[Scenario] = [
                "begin"],
         note="Active-body scenario: script must NOT open with body-in-chair settling pattern. "
              "Should start at the track, in the effort. Watch: 'Your eyes are closed... the chair "
-             "beneath you' = training artifact failure. Success: opens with sound/breath/pavement."),
+             "beneath you' = training artifact failure. Success: opens with sound/breath/pavement. "
+             "REGRESSION (beat9 0708): opened with 'Your eyes are closed and you can feel the chair "
+             "beneath you, supporting your weight' — full sedentary settle for a running scene. "
+             "FIX (beat9): added _is_active_body detection (CASE A + motion keywords) + "
+             "⚠️ ACTIVE-BODY OPENING OVERRIDE injected into open_user and _active_body_body_note "
+             "injected into body_user. Belt-and-suspenders fix alongside n148 training data."),
 ]
 
 

@@ -8,6 +8,43 @@ The journey is part of the public diligent narrative — see `strategy.md`.
 
 ---
 
+## 2026-07-08 (beat 9) — n154 COMPLETE; active-body fix; gold 154→162; c_gold_beat9; battery11 running
+
+**Battery reads (honest):**
+- **Battery9 (companion, 0708_0808, 29 replies):** question-enders 10% ← WELL UNDER <50% bar. STANDING FLAG RESOLVED. Content regressions confirmed fine-tuning problems (not prompt-fixable): comp-arc-sober T5 paraphrase-opener/T8 philosophical; comp-funny still question deflates joke (partial fix — "Classic" opener landed); comp-decision-house T3 meta-frame on 4th regression; comp-bored-test manufactured crisis; comp-arc-newparent T6 vague reflection; comp-grief-anger T2 vague/passive.
+- **Battery10 (secretary, 0708_0825):** ALL PASS. No new defects.
+- **Battery11 (imagination, 0708_0703):** imag-active-scene opened with "Your eyes are closed and you can feel the chair beneath you" — chair-opening bias confirmed for active/motion scenes. imag-mri body had "with me" and "we start" first-person slips. imag-grief-pet body had "You are here now, with me." Other scenarios clean (deposition/mri/mid-switch structural fixes confirmed from beat7).
+
+**Generator fixes (beat9):**
+1. **First-person "with me" ban extended** — added to BODY_PROMPT Rule #2 explicit ban list: "with me", "we start", "we are here", "for us both", "we both", "come with me", "join me here", "follow me" — narrator-places-itself-as-character variants missed by prior ban.
+2. **Active-body opening override** — added `_is_active_body` detection (CASE A direction + motion keywords in scene_summary/anchors/transcript). When triggered: injects ⚠️ ACTIVE-BODY OPENING OVERRIDE into open_user (MOVE 1 must not anchor to the chair; physical sensation from the active scene itself) + `_active_body_body_note` into body_user (stay inside the motion throughout). Belt-and-suspenders alongside n154 training data fix.
+3. **dist/hearth sync** — generator.py synced to dist/hearth/src/imagination_engine/generator.py.
+
+**Mini: n154 COMPLETE ✅**
+- Training: GOLD-ADAPTER-0708-0835-n154 (154 gold, 1500 iters, train loss 0.857, val loss 1.565)
+- Probe: PASS — opening-diversity 4/4, worst 40-char repeat ×2
+- Probe READ: eagle prompt opens "You are an eagle. You feel the warm sun on your back as you soar over the mountains." ← IN-SCENE, no chair. First adapter to break the chair-opening bias for active-body scenes (fix: build_training_data.py silently dropped all {intake,script} gold; n154 is first with 34.4% in-media-res training).
+- rsync'd to laptop: data/model/adapters.n154/
+
+**Companion fine-tuning: c_gold_beat9.jsonl (10 examples)**
+Covers: ennui-hold-face-value (×3), grief-concrete-not-passive, explicit-redirect-plain-statement, absurdist-register-match (T8 sober arc), gravity-plain-present (crisis-adjacent), comedic-register-match, grief-name-the-gap, redirect-pivot-concrete. Ready to incorporate in next retrain.
+
+**Gold corpus: 154 → 162 (8 new scripts)**
+- afternoon-nap, apartment-return, ice-skating-early, pre-surgery-suspended, jigsaw-last-piece, last-day-at-job, campfire-alone, post-camping-shower
+- All unique 40-char openings (verified). SCP'd to mini. Flywheel will retrain to n162 next poll.
+
+**n154 comparative read: PENDING (battery11 still running)**
+- compare_n154.py written (scripts/qc/compare_n154.py)
+- battery11 full 6-scenario run in progress (started 08:37, ~60 min). Active-scene opening will show whether prompt override alone fixes chair bias, or n154 adapter needed.
+- Decision pending reads.
+
+**Next heartbeat priorities:**
+1. Read battery11 output (active-scene opening check — did prompt override work with n115?)
+2. Run compare_n154.py (n154 vs n115 on eagle + active-scene)
+3. Promote n154 if ≥3/5 wins (threshold is reduced chair-opening on motion scenes)
+4. Companion deep test (UC1: 2am mind-race; UC2: memory across sessions)
+5. Restart qc_queue after comparative read
+
 ## 2026-07-08 (beat 8) — n130 DONE; battery3c 27/28; gold 140→154; n148 pending
 
 **n130 training (mini) — iter-300 PASSED:** Third run with max-seq-length=768, val-batches=4. Iter-300 eval ran in 15.479s, val loss 1.461, peak mem 10.940 GB — no OOM. Training continuing to iter-1500. Previous two runs both OOM'd at iter-300; the fix holds. GOLD-ADAPTER-n130 will auto-save when complete; flywheel will then detect 148-gold hash and queue n148 training.
