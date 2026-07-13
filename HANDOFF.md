@@ -1,63 +1,90 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-07-13 beat23 COMPLETE (n262 REJECTED; n243 restored as live adapter MD5:8a7395654d4bd0f72b69c673a03bf6db; qc_queue RUNNING PID 18263; Gold(A)=270; Gold(C)=40 beat exemplars; flywheel training n270)._
+_Last updated 2026-07-13 beat25 COMPLETE (n256 LIVE MD5:d339fb944ca9344e399e82b8a9884c06; qc_queue DOWN; Gold(A)=286; Gold(C)=beat25 JSONL created; n286 training on mini; battery11 remaining 4 scenarios RUNNING PID 28221)._
 _Single source of truth for a fresh session. Everything below is real and running._
 
 ## FIRST THING TO DO when you resume — run these checks
 ```bash
 cd ~/Downloads/imagination-engine
 
-# 1. Check current live adapter (n243 = 8a7395654d4bd0f72b69c673a03bf6db)
+# 1. Verify n256 is still live adapter (MD5: d339fb944ca9344e399e82b8a9884c06)
 md5 data/model/adapters/adapters.safetensors
 
-# 2. Check mini for n270 completion
+# 2. Check battery11 remaining status (may still be running from beat25)
+pgrep -f "beat25_battery11" >/dev/null && echo "RUNNING" || echo "DONE"
+wc -l logs/qc/beat25_battery11_n256_remaining.log
+tail -5 logs/qc/beat25_battery11_n256_remaining.log
+
+# 3. Check mini
 ssh smaitra@mac-mini.localdomain '
-  echo "flywheel: $(pgrep -f honest_flywheel >/dev/null && echo RUNNING || echo DOWN)"
   echo "mlx_lm: $(pgrep -f mlx_lm >/dev/null && echo TRAINING || echo IDLE)"
   tail -4 ~/Downloads/hearth-corpus/_logs/honest_flywheel.log
-  ls ~/Downloads/hearth-corpus/ | grep GOLD-ADAPTER | tail -5'
+  ls ~/Downloads/hearth-corpus/_evals/ | tail -5'
 
-# 3. Check qc_queue (should be running)
-pgrep -f qc_queue >/dev/null && echo "qc_queue RUNNING" || echo "qc_queue DOWN — restart: nohup bash scripts/qc_queue.sh"
-
-# 4. Check latest battery results
-ls -lt logs/qc/queue_*.log | head -5
+# 4. Memory check before running any model
+memory_pressure 2>/dev/null | grep "System-wide"
 ```
 
-### BEAT 24 STATE (in progress)
-- **n256 gate RUNNING** (PID 19068 python, PID 19069 tee) — battery11 (eagle + intimacy + active-scene) on n256 (val loss 0.546 "best ever"). Key question: she/her active-scene corruption?
-  ```bash
-  wc -l logs/qc/beat24_battery11_n256_gate.log
-  tail -30 logs/qc/beat24_battery11_n256_gate.log
-  ps -p 19068
-  ```
-- **n275 training on mini** — iter 425/1500, train loss 1.156. ETA ~12:45 PM. 275 gold scripts including 2 solo active-body (pool swim, winter run) to fix she/her bleed. c_gold_beat* JSONL files on mini confirmed (beats 3-23, 102 companion exemplar lines, 3x weighted).
-- **Git commit done** — all src/ and scripts/ changes through beat24 committed (34 files, beats 13-24).
-- **DIST SYNC DONE** — generator.py, companion.py, utility.py all synced. Run `scripts/package.sh` before shipping.
+## BEAT 25 STATE (complete as of this write)
 
-### BEAT 24 NEXT STEPS (after n256 gate completes)
-1. **Read n256 gate log** — check she/her active-scene corruption, pronoun fix count, eagle (no hawk/no chair), prose quality vs n243
-2. **n256 decision**: if active-scene clean AND quality ≥ n243 → PROMOTE (mv adapters.n243_LIVE adapters.n243_BEAT24_bak; n256 stays live)
-   If fail → RESTORE n243: `rm -rf data/model/adapters && mv data/model/adapters.n243_LIVE data/model/adapters`
-3. **Restart qc_queue** after n256 decision
-4. **AYF battery3c** (28-scenario) — kill qc_queue first, run battery3c, check BRIDGE2 flake, restore qc_queue
-5. **n275 gate** — once mini completes, rsync and run full battery11 gate
-6. **Verify grief-pet fix** — after qc_queue restarts, read next battery11 that includes imag-grief-pet; confirm "Your tail thumps" is gone
+### What's running
+- **battery11 remaining 4 scenarios running** (PID ~28221, beat25_battery11_n256_remaining.log):
+  `imag-repeat-variety, imag-mri, imag-grief-pet, imag-mid-switch`. When it finishes:
+  read the log end-to-end; if any ❌ FAIL → investigate and fix; update RELEASE.md.
+- **n286 training on mini** — started ~16:35. 286 gold scripts + companion beat25 exemplars.
+  Iter 1 visible in flywheel log. Will take ~45-90 min. After: eval auto-generates, read it.
+- **qc_queue: DOWN** — killed before running battery11. Restart when battery11 finishes:
+  `nohup bash scripts/qc_queue.sh &`
 
-**Eagle gate: CLOSED for n243** — postcheck false-positive bug fixed (beat21):
-- battery11_imagination_bank.py was using substring match; "slowly" → triggers "owl" match
-- Both battery11 runs (0600 ✅✅, 0803 ✅✅ after fix) confirmed clean
-- Eagle gate is DONE for n243. n262 still needs its own eagle gate run.
+### Live adapter
+**n256** (MD5: d339fb944ca9344e399e82b8a9884c06) — promoted 2026-07-13 after beat25 eagle verify ✅✅.
+Backup: n243_LIVE at `data/model/adapters.n243_LIVE/` (MD5: 8a7395654d4bd0f72b69c673a03bf6db).
+To restore n243 if n256 fails: `cp data/model/adapters.n243_LIVE/adapters.safetensors data/model/adapters/adapters.safetensors`
 
-**Beat20+21 fixes applied — need re-verification on next battery runs:**
-- generator.py: grief-pet perspective fix + fix_possessive_pronouns() wired in
-- utility.py: $28K drop fixed (cost-context + regen gate)
-- companion.py: grief-anger RECEIVING IS NOT ECHOING + arc-newparent ANTI-REPEAT + crisis-adjacent TWO MOVES GRAVITY
-- postcheck.py: fix_possessive_pronouns() added (hers→her, yours→your before nouns)
-- battery11_imagination_bank.py: wildlife postcheck now uses word-boundary regex
-- All dist/ synced
+### Battery11 n256 gate status
+- ✅ imag-intimacy: PASS (8 pronoun fixes, thematic cycling known)
+- ✅ imag-embodiment-eagle: PASS (both postchecks — no companion animal, no chair in opening)
+- ✅ imag-active-scene: PASS (no she/her body bleed, clean back section)
+- 🔄 imag-repeat-variety: RUNNING (beat25_battery11_n256_remaining.log)
+- 🔄 imag-mri: RUNNING
+- 🔄 imag-grief-pet: RUNNING
+- 🔄 imag-mid-switch: RUNNING
 
-**Tool rotation** — beat20=Companion, beat21=AYF (battery3c still pending — battery3c_ayf_beat20 only ran 6 lines). beat22=**AYF** (carry forward).
+### Mini eval reads this beat
+- n270 (07-13 12:19): adequate base prose; eagle starts in flight ✅ but thin embodiment. Not promoted.
+- n281 (07-13 14:12): regressions — instruction bleed ("Open your eyes now."), eagle on ground, hallucinated ring detail, ellipsis artifacts. REJECTED.
+- safe (n115 baseline): functional, ellipsis artifacts, limited embodiment depth. Floor reference.
+
+## NEXT BEAT (beat26) — PRIORITY ORDER
+1. **READ beat25_battery11_n256_remaining.log** — full end-to-end read; note any fails. If grief-pet shows "Your tail thumps" → generator.py grief-pet fix may have been missed in dist (check dist sync). If mid-switch lullabies → ALERT-CALM routing still broken.
+2. **AYF battery3c (28 scenarios)** — kill qc_queue, run, read BRIDGE2 flake rate across 5+ runs, restore qc_queue. This is a release gate.
+3. **Companion battery9 verify** — run battery9 against n256 to check if "that's real" ban + arc-divorce exemplar (beat25) reduces arc echo. Look specifically at comp-arc-divorce all 7 turns.
+4. **Family-C training build** — companion beat exemplar JSONL files reach 55+ exemplars total. Build training mix, retrain on mini, comparative read before any promotion.
+5. **$28K double-regen verify** — run battery10 to confirm double-regen catches $28K stochastically. Read summarize result specifically.
+6. **n286 gate** — once mini completes, rsync and run battery11 gate subset (eagle + intimacy + active-scene).
+
+## KNOWN STANDING ISSUES (release blockers)
+- **AYF battery3c** — 28/28 required; BRIDGE2 vocabulary gap flake must be <5% across 20 runs. NOT YET VERIFIED this beat.
+- **Imagination gate** — battery11 n256 remaining 4 scenarios RUNNING. Needs 7/7 clean pass + read.
+- **Secretary $28K** — stochastic. Double-regen may solve it; needs battery10 re-run to confirm.
+- **Companion arc-divorce "that's real" tic** — prompt fix added (beat25); needs battery9 verify vs n256.
+- **Cross-cutting sweep** — offline tripwire, ceilings, 200s, QC-artifact purge: NOT YET RUN.
+- **Cold install** — scripts/package.sh not run since dist sync. Run before beta.
+- **Public story** — site/README recut deferred.
+
+## CODE STATE (src/ and dist/ in sync as of beat25)
+- postcheck.py: strip_active_body_chair_refs ✅, strip_back_instruction_leaks (TTS pattern) ✅, fix_possessive_pronouns ✅, drop_active_body_wildlife ✅
+- companion.py: RECEIVING IS NOT ECHOING (FORBIDDEN TIC "that's real") ✅, WHEN THEY REDIRECT ANTI-REPEAT ✅, TWO MOVES GRAVITY ✅, FORBIDDEN DODGES ✅, WHEN THEY VENT ✅
+- generator.py: _is_grief_pet_walk + human-POV note ✅, _active_body_open_note FORBIDDEN chair list ✅, strip_active_body_chair_refs wired ✅
+- utility.py: $28K double-regen in Assistant.run() ✅
+- battery11_imagination_bank.py: word-boundary regex for wildlife postcheck ✅
+
+## GOLD CORPORA
+- Imagination: 286 scripts (A_gold.jsonl, ~/Downloads/hearth-corpus/A-imagination/)
+- Companion: c_gold_beat3/5/7/9/13-25.jsonl + curated + positive/negative + counseling datasets
+- Beat exemplar JSONL files on mini: beats 3,5,7,9,13-25 (including beat25 = 5 arc/vent/funny exemplars)
+
+## THE OPERATING SYSTEM (since 2026-07-07): heartbeat + honest flywheel
 
 ## THE OPERATING SYSTEM (since 2026-07-07): heartbeat + honest flywheel
 - **Heartbeat (laptop launchd `com.hearth.heartbeat`, every 4h at :30, wrapper
