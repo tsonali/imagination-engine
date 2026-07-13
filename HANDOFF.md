@@ -25,12 +25,14 @@ ls -lt logs/qc/queue_*.log | head -5
 ```
 
 ### BEAT 24 STATE (in progress)
-- **n256 gate RUNNING** (PID 19069) — battery11 (eagle + intimacy + active-scene) on n256 (val loss 0.546 "best ever"). Key question: she/her active-scene corruption?
+- **n256 gate RUNNING** (PID 19068 python, PID 19069 tee) — battery11 (eagle + intimacy + active-scene) on n256 (val loss 0.546 "best ever"). Key question: she/her active-scene corruption?
   ```bash
-  tail -20 logs/qc/beat24_battery11_n256_gate.log
-  ps -p 19069
+  wc -l logs/qc/beat24_battery11_n256_gate.log
+  tail -30 logs/qc/beat24_battery11_n256_gate.log
+  ps -p 19068
   ```
-- **n275 training on mini** — 275 gold scripts including 2 solo active-body (pool swim, winter run) to fix she/her bleed. ETA ~75 min from 11:05 AM (completes ~12:20 PM).
+- **n275 training on mini** — iter 425/1500, train loss 1.156. ETA ~12:45 PM. 275 gold scripts including 2 solo active-body (pool swim, winter run) to fix she/her bleed. c_gold_beat* JSONL files on mini confirmed (beats 3-23, 102 companion exemplar lines, 3x weighted).
+- **Git commit done** — all src/ and scripts/ changes through beat24 committed (34 files, beats 13-24).
 - **DIST SYNC DONE** — generator.py, companion.py, utility.py all synced. Run `scripts/package.sh` before shipping.
 
 ### BEAT 24 NEXT STEPS (after n256 gate completes)
