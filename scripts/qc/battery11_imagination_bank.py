@@ -72,6 +72,20 @@ for sc in scenarios:
                 print(f"\n>>> NIGHT-2 SENTENCE OVERLAP WITH NIGHT-1: {rate:.0%} "
                       f"({dup}/{len(b)} sentences near-duplicate)"
                       f"{'  <-- RERUN FATIGUE' if rate > 0.35 else '  (varied)'}", flush=True)
+        if sc.id == "imag-active-scene" and first:
+            # In a solo active-scene (user is the only person), any 'she/her' is pronoun
+            # bleed — the model is treating the runner as a third party instead of 'you'.
+            lower = first.lower()
+            she_bleed = bool(re.search(r'\bshe\b', lower))
+            her_body_bleed = bool(re.search(
+                r'\bher\s+(?:legs?|arms?|hands?|feet|foot|lungs?|breath|body|muscles?|'
+                r'strides?|steps?|chest|heart|back|shoulders?|knees?|thighs?|calves?|'
+                r'pace|push|run|sprint|cross)',
+                lower
+            ))
+            bleed = she_bleed or her_body_bleed
+            print(f"\n>>> ACTIVE-SCENE POSTCHECKS:", flush=True)
+            print(f"  {'❌ FAIL' if bleed else '✅ PASS'} — no she/her pronoun bleed (user in own body)", flush=True)
         if sc.id == "imag-embodiment-eagle" and first:
             # Check for hallucinated companion animals (user only said 'eagle')
             lower = first.lower()
