@@ -63,7 +63,17 @@ BANK: list[Scenario] = [
            "PARTIAL READ (beat16 0711 battery9): T1 IMPROVED ('That's a big moment to have behind you.' — not generic). "
            "T2/T3/T5/T6/T7 all open with paraphrase-echo ('You told her', 'You told everyone', 'You said the relief', 'He cried more than you did', 'You're planning'). "
            "Pattern persists at n115; n235 is first adapter with beat14 no-opener-repeat exemplar in training data. "
-           "T10 unverified (battery9 crashed at T7). WHEN THEY CONFIRM AN INSIGHT fix awaits verification with n235."),
+           "T10 unverified (battery9 crashed at T7). WHEN THEY CONFIRM AN INSIGHT fix awaits verification with n235. "
+           "DEFECT (beat25 0713 battery9 n243): 'that's real' appeared as acknowledgment tic in T1, T2, T3, T4, T5, T6 — "
+           "pure template freeze. T1='You told the kids last night — that's real.' T2='She didn't cry — that's real.' "
+           "T3='Everyone keeps asking how you are — that's real.' T4='That's real. What does the relief say about what you want now?' "
+           "T5='The relief feels like proof I'm the villain — that's real.' T6='He cried more than I did — that's real.' "
+           "Only T7 ('Take it.') broke the pattern. The pattern is: verbatim mirror of user's words + '— that's real' used as "
+           "a stamp instead of insight. DISTINCT FROM paraphrase-opener: this is acknowledgment-body fatigue, not opener. "
+           "FIX (beat25): FORBIDDEN ACKNOWLEDGMENT TIC — 'THAT'S REAL' added to companion.py RECEIVING IS NOT ECHOING section: "
+           "bans '[their exact words] — that's real' as template; if 'that's real' appeared in prior turn, forbidden in this turn. "
+           "Gold exemplar (beat25 c-arc-divorce-acknowledgment-variety-beat25): all 7 turns use distinct acknowledgment forms — "
+           "plain statement T1, observation T2, question T3, named truth T4, reframe T5, plain T6, 'Good.' T7."),
     Scenario("comp-arc-sober", "companion", "engagement", "high", turns=[
         "Day 40 without a drink. Nobody knows I quit.",
         "Telling people makes it real, and real means I can fail in public.",
@@ -460,7 +470,13 @@ BANK: list[Scenario] = [
              "REGRESSION (beat14 0710 battery10): 3.2% still dropped in battery run (generic 'scan' rule insufficient). "
              "FIX (beat14): _extract_numbers() now pre-extracts all numbers from source and injects explicit "
              "MANDATORY NUMBERS list into prompt. $28K and 3.2% extraction confirmed. "
-             "Automated NUMBER-LOST floor check added to battery10 for $2.4, $380, 3.2%, $28, 18%, $400, 11 months."),
+             "Automated NUMBER-LOST floor check added to battery10 for $2.4, $380, 3.2%, $28, 18%, $400, 11 months. "
+             "REGRESSION (beat25 0713 battery10 07:33 run): $28K missing despite MANDATORY NUMBERS injection — "
+             "regen fired but ALSO dropped $28K (double-miss, rare stochastic event). _extract_numbers() "
+             "confirmed extracting $28K. FIX (beat25): utility.py Assistant.run() now retries up to 2x on "
+             "any missing mandatory numbers (loop replaces single-regen block). Attempt 1 uses MANDATORY "
+             "NUMBERS MISSING framing; attempt 2 escalates to CRITICAL FAILURE framing + lower temp 0.35. "
+             "beat22 verify showed $28K PASS when regen worked; beat25 tightens the double-miss path."),
 
     # ============================ ASK YOUR FILES ============================
     Scenario("ask-aggregate", "ask", "helpfulness", "med", files={
@@ -858,7 +874,16 @@ BANK: list[Scenario] = [
              "✅ PASS — no real companion animals in either run. EAGLE GATE CLOSED for n243 (2/2 real "
              "PASS). Note: n243 eagle script quality is adequate but circular/repetitive in back half "
              "— n256 (val 0.546, probe 4/4) is candidate upgrade; needs battery11 gate + comparative "
-             "read before promotion."),
+             "read before promotion. RESULT (beat24 0713 battery11 n256 gate): ✅ PASS — no hallucinated "
+             "companion animal. ❌ FAIL — chair-bleed in opening: opening sentence 2 says 'You're not in "
+             "a chair — this is real.' Root cause: FORBIDDEN list already had 'not in a chair' at prompt "
+             "level (generator.py line 738) but n256 still violated it stochastically. FIX (beat25): "
+             "added strip_active_body_chair_refs() to postcheck.py — strips any sentence containing "
+             "'chair' from open_text ONLY (before body concatenation); closing 'notice the chair under "
+             "you' is untouched. Wired into generator.py right after open_text generation, fires only "
+             "when _is_active_body. N256 NOT promoted yet; eagle gate re-verify needed with fix. Eagle "
+             "gate = n275 task (beat25+). Script quality: 2969w, rich flight content, no animals, but "
+             "back half degenerates into 'That particular X exists/is obvious' loop (~800w repetition)."),
     Scenario("imag-active-scene", "imagination", "register", "med",
         turns=["I want to imagine finishing a long run — the last 200 meters, giving everything",
                "a track, alone, late afternoon",

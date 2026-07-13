@@ -438,6 +438,9 @@ _BACK_LEAK_PATTERNS = [
     re.compile(r"\bRe-room\b", re.IGNORECASE),
     re.compile(r"^Eyes open\b", re.IGNORECASE),
     re.compile(r"\bOne final line\b", re.IGNORECASE),
+    # Model occasionally hallucinates technical environment details — strip these.
+    re.compile(r"\bTTS output device\b", re.IGNORECASE),
+    re.compile(r"\btext.to.speech\b", re.IGNORECASE),
 ]
 
 
@@ -485,3 +488,28 @@ def drop_active_body_wildlife(text: str, tokens: tuple) -> tuple[str, int]:
         else:
             kept.append(s)
     return " ".join(kept), dropped
+
+
+_CHAIR_WORD = re.compile(r"\bchair\b", re.IGNORECASE)
+
+
+def strip_active_body_chair_refs(opening_text: str) -> tuple[str, int]:
+    """Strip sentences containing 'chair' from an active-body opening section.
+
+    The model sometimes generates 'You're not in a chair — this is real.'
+    (negative constraint bleed) in the opening despite explicit prohibition.
+    The FORBIDDEN list in _active_body_open_note covers this at prompt level,
+    but n256+ still violates it stochastically. This postprocessor catches it
+    at output time — applied only to open_text before body concatenation, so
+    the legitimate 'notice the chair under you' in the closing return is untouched.
+    Returns (cleaned_text, n_sentences_stripped).
+    """
+    sentences = re.split(r"(?<=[\.\!\?—])\s+", opening_text.strip())
+    kept = []
+    stripped = 0
+    for s in sentences:
+        if _CHAIR_WORD.search(s):
+            stripped += 1
+        else:
+            kept.append(s)
+    return " ".join(kept), stripped

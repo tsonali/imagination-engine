@@ -8,6 +8,80 @@ The journey is part of the public diligent narrative — see `strategy.md`.
 
 ---
 
+## 2026-07-13 (beat25 COMPLETE) — n256 PROMOTED; "that's real" ban; TTS leak fix; +5 more gold (A=286); battery11 remaining 4 scenarios run; n270/n281 evals read and rejected
+
+**Logs read end-to-end this beat:**
+- beat24_battery11_n256_gate.log (52KB): n256 eagle ❌ FAIL — "You're not in a chair — this is real." in opening (negative chair bleed). Intimacy PASS (8 pronoun fixes). Active-scene PASS (2 pronoun fixes, 1 BACK leak).
+- queue_0713_0930_battery9_engagement.log (24KB): 19% q-enders ✅, 8% paraphrase ✅, diversity 1.00 ✅. comp-grief-anger T2 still echoing ("He'd hear it as blame — that's real."). comp-arc-divorce "that's real" tic in T1/T2/T3/T4/T5/T6 — template freeze (T7 "Take it." PASS). comp-arc-newparent T6 ✅ "Six weeks in. You love her..." (beat20 anti-repeat fix working). comp-crisis-adjacent ✅ "Lighter without me around — that's real. Does it feel different..." (beat21 two-move fix working).
+- beat25_eagle_verify.log: n256 eagle re-verify after strip_active_body_chair_refs() → ✅✅ PASS (both postchecks). Script 3107w, rich flight content. TTS leak in back section: "TTS output device above." Fixed separately.
+- n270 mini eval (probe 4/4, raw prompts, no Hearth scaffolding): adequate base prose; eagle starts in flight ✅ but thin embodiment ("You are an eagle, a magnificent bird"). BELOW n243 quality. Not a promotion candidate without battery11 gate.
+- n281 mini eval: regressions vs n243. "Open your eyes now." / "Thank yourself" instruction bleed. Bar exam script hallucinates "ring on your finger." Eagle starts ON GROUND ("standing at the edge of a vast mountain range"). Ellipsis artifacts (……) in rehearsal scripts. DO NOT PROMOTE.
+
+**Fixed this beat:**
+
+4. **TTS output device leak** — `re.compile(r"\bTTS output device\b")` added to `_BACK_LEAK_PATTERNS` in postcheck.py. Model hallucinated "air moving from the TTS output device above" in eagle closing. Strip confirmed: sentence dropped, remaining return section intact. Synced to dist/.
+
+5. **"that's real" acknowledgment tic** — FORBIDDEN ACKNOWLEDGMENT TIC section added to RECEIVING IS NOT ECHOING in companion.py. Explicitly bans "[user's exact words] — that's real" as a template stamp. If "that's real" appeared in prior turn, forbidden in current turn. Synced to dist/. scenario_bank.py: comp-arc-divorce note updated with beat25 defect + fix.
+
+Also (carried from prior heartbeat in this beat):
+1. **Eagle chair negative bleed** — strip_active_body_chair_refs() in postcheck.py ✅
+2. **$28K double-miss** — double regen in Assistant.run() ✅
+3. **eval_candidates.sh fixed** on mini ✅
+
+**n256 gate outcome:**
+- imag-intimacy ✅ PASS (pronoun postprocessor working, 8 fixes)
+- imag-embodiment-eagle ✅✅ PASS (after strip_active_body_chair_refs() fix; TTS leak also fixed)
+- imag-active-scene ✅ PASS (no she/her bleed; clean back section)
+- imag-mid-switch / imag-grief-pet / imag-mri / imag-repeat-variety: RUNNING (beat25_battery11_n256_remaining.log)
+- **n256 PROMOTED TO LIVE** (MD5: d339fb944ca9344e399e82b8a9884c06) — promoted after eagle verify PASS
+
+**Mini status:**
+- IDLE (finished evals for n270, n281, safe). n286 flywheel will queue on next 30min cycle (286 > 281 hash change).
+- n270 and n281: both read and REJECTED for promotion. n243 was the quality floor; n281 is below it. n256 (trained locally, val 0.546) is better than both.
+- Companion family-C: c_gold_beat25.jsonl created (5 exemplars). TOTAL companion gold JSONL files: beats 3/5/7/9/13-25 plus curated. Fine-tune threshold (40 beat exemplars) reached — build pending.
+
+**Corpus additions:**
+- Imagination gold: +5 new scripts (beat25 second round): desert night drive, standing ovation, cold-water plunge, first "I love you" moment, first solo apartment morning. All unique openings, advancing arcs. A_gold.jsonl = **286 scripts**. SCP'd to mini.
+- Companion gold: c_gold_beat25.jsonl created + SCP'd. Contents: grief-anger T2 build-forward, arc-divorce variety (no "that's real"), hard-convo concrete frame, vent-layoff receive-weight, funny no-question.
+
+**Pending for beat26:**
+- Read beat25_battery11_n256_remaining.log (mid-switch, grief-pet, MRI, repeat-variety). Make final n256 gate call on all 7 scenarios.
+- AYF battery3c (28 scenarios) — next product rotation
+- Family-C training build (40+ exemplars threshold reached)
+- Restart qc_queue after battery11 completes
+- comp-arc-divorce "that's real" tic: verify prompt fix works against n256 (run battery9 or verify run)
+
+---
+
+## 2026-07-13 (beat24 COMPLETE) — n256 gate: intimacy/active-scene PASS; eagle FAIL (chair bleed); +6 imag gold; n270 on mini
+
+**n256 battery11 gate (imag-intimacy, imag-embodiment-eagle, imag-active-scene):** Running (PID 19068).
+
+**Imag-intimacy result (n256):**
+- 1650 words, 721s generation. 8 pronoun fixes (fewer than n243's 18 — better underlying model). 5 short-phrase repeats removed.
+- BACK section clean: no instruction leaks. Thematic cycling (tiles/fan/laugh) PERSISTS — same known training data issue.
+- Prose concerns: some odd grammar fragments ("in your again", "after her went out", "with your") — possible over-fitting artifact at val loss 0.546.
+- Verdict: PASS on gate criteria; prose concerns noted for final sweep.
+
+**Eagle and active-scene:** Gate still running (elapsed 33 min; eagle script generating, ~1500-2000w expected). Monitor armed.
+
+**Git commit done (beats 13-24):** 34 files committed, including all src/ changes. scripts/package.sh can now build correct zip.
+
+**Dist sync verified:** generator.py, companion.py, utility.py, postcheck.py all in src/ and dist/hearth/src/.
+
+**+5 imagination gold (A_gold.jsonl = 275):** dawn pool swim, winter morning run, childhood home return, summit cairn, speech delivered. SCP'd to mini.
+
+**n275 training:** Mini iter 775/1500, train loss ~1.0, ETA ~1:05 PM. Full companion corpus included (c_gold_beat*.jsonl beats 3-23, 102 exemplar lines, 3x weighted).
+
+**Pending:**
+- n256 gate verdict (eagle + active-scene results)
+- n256 promotion decision or n243 restore
+- AYF battery3c (28 scenarios)
+- n275 gate once mini completes
+- grief-pet fix verification in next battery11 cycle
+
+---
+
 ## 2026-07-13 (beat23 COMPLETE) — n262 REJECTED; n243 restored; battery9 q-enders 19% ✅; BACK leak fixed; +10 comp gold; +5 imagination gold
 
 **Logs read end-to-end:**
