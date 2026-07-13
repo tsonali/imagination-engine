@@ -133,7 +133,6 @@ and the result was READ honestly. Ship when everything is checked._
   **Question-enders: 83% → 19%** — standing release blocker RESOLVED. New defect: grief-anger T2 still
   echoes "He'd hear it as blame — that's real." (T1 improved; T2 prompt-unfixable). +5 beat22 companion
   gold = 30 total.
-- **2026-07-13 (beat24 IN PROGRESS):** n256 battery11 gate running (eagle + intimacy + active-scene; val loss 0.546 "best ever"). n275 training on mini (275 gold scripts, iter 275/1500 val 0.976, ETA ~12:15 PM). DIST SYNC: generator.py, companion.py, utility.py all out of sync with dist — now fixed; grief-pet fix was missing from dist. +5 imagination gold (A_gold.jsonl now 275): dawn pool swim, winter morning run, childhood home return, summit cairn, speech delivered. AYF battery3c pending after n256 gate.
 - **2026-07-13 (beat23 COMPLETE):** fix_possessive_pronouns() VERIFIED (18 fixes in intimacy run).
   BACK instruction leakage fixed (rewrote moves 3+4 + strip_back_instruction_leaks() postprocessor,
   8/8 tests PASS). +10 companion gold = **40 total** (FAMILY-C RETRAIN THRESHOLD REACHED). n262 adapter
@@ -143,6 +142,7 @@ and the result was READ honestly. Ship when everything is checked._
   n243 RESTORED as live adapter (MD5: 8a7395654d4bd0f72b69c673a03bf6db). qc_queue restarted.
   Battery9 0930 companion metrics: 19% q-enders ✅, 8% paraphrase-openers ✅, opener-diversity 1.00 ✅.
   +5 imagination gold (A_gold.jsonl now 270): marathon, Japanese garden, daughter's wedding, open mic, Moroccan riad.
+- **2026-07-13 (beat24 IN PROGRESS):** n256 battery11 gate running (eagle + intimacy + active-scene; val loss 0.546 "best ever"). n275 training on mini (275 gold scripts, iter 375/1500 val 1.425, ETA ~12:30 PM). DIST SYNC: generator.py, companion.py, utility.py all out of sync with dist — now fixed; grief-pet fix was missing from dist. +5 imagination gold (A_gold.jsonl now 275): dawn pool swim, winter morning run, childhood home return, summit cairn, speech delivered. All src/ changes committed to git (beats 13-24). AYF battery3c pending after n256 gate.
 
 ## LAUNCH PLAN (added 2026-07-13 — Sonali wants a public date)
 **Parallelize NOW (no model-gate dependency — do these on beats alongside adapter gating):**
