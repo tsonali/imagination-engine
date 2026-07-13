@@ -490,6 +490,33 @@ def drop_active_body_wildlife(text: str, tokens: tuple) -> tuple[str, int]:
     return " ".join(kept), dropped
 
 
+def drop_forbidden_stock_imagery(text: str, tokens: tuple) -> tuple[str, int]:
+    """Drop sentences containing forbidden stock imagery tokens.
+
+    Called when model ignores FORBIDDEN STOCK IMAGERY prompt and generates
+    clichéd ambient objects (candles, diffusers, lavender, songbirds) the user
+    didn't name. Only call after verifying each token is absent from the intake
+    transcript — if the user mentioned it, it's allowed.
+
+    Returns (cleaned_text, n_sentences_dropped).
+    """
+    if not tokens:
+        return text, 0
+    pattern = re.compile(
+        r"\b(" + "|".join(re.escape(t) for t in tokens) + r")\b",
+        re.IGNORECASE,
+    )
+    sentences = re.split(r"(?<=[\.\!\?])\s+", text.strip())
+    kept = []
+    dropped = 0
+    for s in sentences:
+        if pattern.search(s):
+            dropped += 1
+        else:
+            kept.append(s)
+    return " ".join(kept), dropped
+
+
 _CHAIR_WORD = re.compile(r"\bchair\b", re.IGNORECASE)
 
 

@@ -565,7 +565,15 @@ BANK: list[Scenario] = [
         note="RUN TWICE in one battery; diff the two scripts. Night 2 must not be night 1 reheated. "
              "RESULT (beat18 0712 n242 gate): night-1 = 1139w, night-2 = 1105w (after decay-trim). "
              "0% sentence overlap — PASS on variety. Both scripts in settling register (rain/blankets). "
-             "N242 prose quality fine here (settling is where n242 was trained hardest)."),
+             "N242 prose quality fine here (settling is where n242 was trained hardest). "
+             "DEFECT (beat26 0713 battery11 n256 night-2): script invented candle + oil diffuser + lavender "
+             "not in intake ('same as every night — rain on the roof, heavy blankets'). Both 'candle' and "
+             "'lavender' are already in FORBIDDEN STOCK IMAGERY in COMMON_POSTURE — model violated it. "
+             "FIX (beat26): drop_forbidden_stock_imagery() added to postcheck.py; called in generator.py "
+             "strip loop with transcript-word check (only strips tokens absent from intake). Strips sentence "
+             "containing: candle, diffuser, lavender, nightingale, songbird. Night-1 also shows back-half "
+             "prose degeneration (~700w of circular 'supposed to happen / going forward / from inside "
+             "yourself' padding). Structural — known model floor on long settling scripts (>1000w)."),
     Scenario("imag-mri", "imagination", "helpfulness", "high", protocol="immersion",
         turns=["I have an MRI Friday and I'm claustrophobic. 40 minutes in the tube. I want to practice being okay in a narrow space",
                "I want the machine sounds to become something else. Drums maybe. Something with a reason",

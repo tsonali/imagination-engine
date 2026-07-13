@@ -55,11 +55,13 @@ from imagination_engine.inference import Engine
 from imagination_engine.postcheck import (degeneration_report, drop_collapsed_paragraphs,
                                           drop_foreign_paragraphs, clean_ellipsis_breaks,
                                           clean_narrator_possessives, drop_active_body_wildlife,
+                                          drop_forbidden_stock_imagery,
                                           find_degeneration_start, trim_degenerate_tail,
                                           phrase_repeat_count, repair_phrase_repeats,
                                           repair_short_phrase_repeats,
                                           drop_adjacent_duplicates, fix_possessive_pronouns,
-                                          strip_back_instruction_leaks)
+                                          strip_back_instruction_leaks,
+                                          strip_active_body_chair_refs)
 from imagination_engine.scene_bibles import get_bible
 from imagination_engine.structured import extract_array
 
@@ -808,6 +810,15 @@ def generate_session(
     )
     open_text = _generate(engine, OPEN_PROMPT, open_user, max_tokens=600)
     log.info("  open: %.1fs, %d words", time.time() - t0, len(open_text.split()))
+    # Active-body chair bleed: even with explicit prompt prohibition, the model
+    # sometimes generates 'You're not in a chair — this is real.' in the opening.
+    # Strip any sentence containing 'chair' from open_text only (the closing
+    # legitimately says 'notice the chair under you' for grounding — untouched).
+    if _is_active_body:
+        open_text, chair_stripped = strip_active_body_chair_refs(open_text)
+        if chair_stripped:
+            log.warning('[v6] %d chair-ref sentence(s) stripped from active-body opening',
+                        chair_stripped)
 
     # Stage 3: plan beats — from the bound scene bible if we have one (the
     # human-authored dramatic structure IS the plan, which both binds the scene
@@ -1102,6 +1113,15 @@ def generate_session(
         if wildlife_dropped:
             log.warning('[v6] %d companion-wildlife sentence(s) dropped (active-body)',
                         wildlife_dropped)
+    # Forbidden stock imagery filter: model sometimes generates clichéd ambient objects
+    # (candles, oil diffusers, lavender) despite FORBIDDEN STOCK IMAGERY prompt instruction.
+    # Strip any sentence containing a forbidden token the user did NOT name in their intake.
+    _STOCK_FORBIDDEN = ("candle", "diffuser", "lavender", "nightingale", "songbird")
+    _stock_tokens = tuple(t for t in _STOCK_FORBIDDEN if t not in _transcript_text.lower())
+    if _stock_tokens:
+        full, stock_dropped = drop_forbidden_stock_imagery(full, _stock_tokens)
+        if stock_dropped:
+            log.warning('[v6] %d forbidden-stock-imagery sentence(s) dropped', stock_dropped)
     full, ellipsis_cleaned = clean_ellipsis_breaks(full)
     if ellipsis_cleaned:
         log.warning('[v6] %d inline ellipsis marker(s) cleaned', ellipsis_cleaned)

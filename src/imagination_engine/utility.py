@@ -320,20 +320,25 @@ class Assistant:
 
     def run(self, task_key: str, text: str, **kw) -> UtilityResult:
         out = "".join(self.stream(task_key, text, **kw)).strip()
-        # Post-check for summarize: if mandatory numbers were dropped, regen once with
-        # explicit call-out. Common failure: $28K cost-context figure alongside 3.2% churn.
+        # Post-check for summarize: if mandatory numbers were dropped, regen up to 2x.
+        # Common failure: $28K cost-context figure alongside 3.2% churn — drops even with
+        # MANDATORY NUMBERS in the initial prompt. Each regen attempt uses explicit callout;
+        # second attempt escalates with CRITICAL FAILURE framing.
         if task_key == "summarize":
             nums = _extract_numbers(text)
-            missing = [n for n in nums if n not in out]
-            if missing:
-                task = TASKS["summarize"]
-                system, user = task.build(
+            for attempt in range(2):
+                missing = [n for n in nums if n not in out]
+                if not missing:
+                    break
+                task_obj = TASKS["summarize"]
+                system, user = task_obj.build(
                     text, kw.get("instruction", ""),
                     kw.get("tone", ""), kw.get("style_sample", ""),
                 )
                 missing_str = ", ".join(missing)
+                severity = "CRITICAL FAILURE" if attempt else "MANDATORY NUMBERS MISSING"
                 extra = (
-                    f"\n\nCRITICAL — MANDATORY NUMBERS MISSING: A previous attempt dropped "
+                    f"\n\n{severity}: A previous attempt dropped "
                     f"these required numbers from the source — each MUST appear verbatim "
                     f"in your output: {missing_str}. "
                     "Include every one. For cost-context figures (e.g., 'each churn point "
@@ -345,12 +350,12 @@ class Assistant:
                         {"role": "user", "content": user},
                     ],
                     max_tokens=kw.get("max_tokens", 1200),
-                    temperature=0.4,
+                    temperature=0.35 if attempt else 0.4,
                 )).strip()
                 recovered = [n for n in missing if n in regen]
                 if len(recovered) >= len(missing) // 2 + 1:
-                    log.info("secretary[summarize]: regen recovered %d/%d missing numbers",
-                             len(recovered), len(missing))
+                    log.info("secretary[summarize]: attempt %d regen recovered %d/%d missing numbers",
+                             attempt + 1, len(recovered), len(missing))
                     out = regen
         return UtilityResult(task=task_key, output=out)
 
