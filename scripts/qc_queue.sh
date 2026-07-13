@@ -11,6 +11,20 @@
 set -uo pipefail
 cd "$(dirname "$0")/.." || exit 1
 source .venv/bin/activate 2>/dev/null || true
+
+# MEMORY HEADROOM GATE (added 2026-07-12 after the 12:37 kernel panic — wired-GPU exhaustion):
+# never launch a model battery without >=35% system memory free; kill ghosts and wait if needed.
+mem_ok() {
+  for i in 1 2 3 4; do
+    PCT=$(memory_pressure 2>/dev/null | grep -oE "free percentage: [0-9]+" | grep -oE "[0-9]+")
+    [ -n "$PCT" ] && [ "$PCT" -ge 35 ] && return 0
+    pkill -9 -f "battery11_imagination|battery9_engagement|battery10_registers|battery12_vital|battery3c_ask|byo_deep_test|companion_deep_test|product_e2e_test" 2>/dev/null
+    sleep 45
+  done
+  echo "[$(date '+%m-%d %H:%M')] MEMORY GATE: still <35% free after ghost kills — skipping this battery" >> logs/qc/queue.log
+  return 1
+}
+
 mkdir -p logs/qc
 
 QUEUE=(
@@ -29,12 +43,21 @@ say "qc-queue runner started (pid $$)"
 while true; do
   for b in "${QUEUE[@]}"; do
     # the 16GB rule: never start while another model process lives
-    while pgrep -f "battery|product_e2e|gen_._candidates|bench_spec" | grep -v $$ | grep -qv "^$"; do
+    # IMPORTANT: match scripts/ prefix to avoid matching the Claude heartbeat node process,
+    # whose prompt text contains the word "battery" and would otherwise block this loop forever.
+    while pgrep -f "scripts/qc/battery\|scripts/product_e2e\|gen_.*candidates\|bench_spec\|mlx_lm" | grep -v $$ | grep -qv "^$"; do
       sleep 60
     done
+    # OOM ghost-process guard: kill any model or battery processes left in zombie/sleeping
+    # state after a crash (they hold GPU wired Metal memory for 30+ min otherwise).
+    # Must kill by script name (battery*/product_e2e) since Python processes aren't named mlx_lm.
+    pkill -f "mlx_lm" 2>/dev/null
+    pkill -f "battery11_imagination\|battery9_engagement\|battery10_registers\|product_e2e_test" 2>/dev/null
+    sleep 5
     name=$(basename "$b" .py)
     log="logs/qc/queue_$(date +%m%d_%H%M)_${name}.log"
     say "running $name -> $log"
+    mem_ok || continue
     .venv/bin/python "$b" > "$log" 2>&1
     say "$name exit $? ($(grep -c 'PASS' "$log" 2>/dev/null || echo 0) PASS / $(grep -c 'FAIL' "$log" 2>/dev/null || echo 0) FAIL lines)"
     sleep 120  # let memory settle between model loads

@@ -340,3 +340,148 @@ def degeneration_report(text: str) -> dict:
     kept = len(text[:start].split())
     return {"degenerate": True, "words": words, "clean_words": kept,
             "lost_fraction": round(1 - kept / max(words, 1), 2)}
+
+
+# --- inline ellipsis-break cleaner -------------------------------------------
+# Settling path (and occasionally immersion): model writes "……" (3-6 literal
+# dots or unicode ellipsis chars) as inline pause placeholders. These look
+# unprofessional in rendered text and confuse TTS. Replace them with a proper
+# paragraph break (blank line).
+_ELLIPSIS_INLINE = re.compile(r"[ \t]*(?:\.{3,}|…{2,}|\.\.\.|…\.{0,5}|\.{0,5}…)[ \t]*")
+
+
+def clean_ellipsis_breaks(text: str) -> tuple[str, int]:
+    """Replace multi-dot inline ellipsis markers with paragraph breaks.
+
+    Returns (cleaned_text, n_replaced).
+    """
+    cleaned, count = _ELLIPSIS_INLINE.subn("\n\n", text)
+    cleaned = re.sub(r"\n{3,}", "\n\n", cleaned).strip()
+    return cleaned, count
+
+
+# --- narrator first-person possessive filter ---------------------------------
+# BODY_PROMPT bans "my boy", "my dog", "my [animal/character]" but the small
+# local model ignores these instructions reliably. Drop sentences that carry
+# narrator-possessive patterns so they never reach the listener.
+# Patterns: "my [animal]", "Here we go again", "we are here [together]"
+_NARRATOR_POSS = re.compile(
+    r"\bmy\s+(boy|dog|cat|pet|horse|bird|fish|rabbit|puppy|kitten|pup)\b"
+    r"|\bHere\s+we\s+go\b"
+    r"|\bwe\s+are\s+here\b",
+    re.IGNORECASE,
+)
+
+
+def clean_narrator_possessives(text: str) -> tuple[str, int]:
+    """Remove sentences containing narrator first-person possessive slips.
+
+    Returns (cleaned_text, n_sentences_dropped).
+    """
+    sentences = re.split(r"(?<=[\.\!\?])\s+", text.strip())
+    kept = []
+    dropped = 0
+    for s in sentences:
+        if _NARRATOR_POSS.search(s):
+            dropped += 1
+        else:
+            kept.append(s)
+    return " ".join(kept), dropped
+
+
+# Words after which "hers"/"yours" is a legitimate standalone possessive pronoun
+# and should NOT be replaced with the attributive "her"/"your".
+_PRONOUN_SKIP = frozenset([
+    "is", "are", "was", "were", "have", "had", "been",
+    "will", "would", "can", "could", "shall", "should",
+    "may", "might", "must", "do", "did", "does",
+    "and", "or", "but", "nor", "to",
+])
+
+
+def fix_possessive_pronouns(text: str) -> tuple[str, int]:
+    """Replace 'hers NOUN' → 'her NOUN' and 'yours NOUN' → 'your NOUN'.
+
+    The fine-tuned model sometimes generates 'hers own side', 'hers eyes',
+    'yours apartment' — using the standalone possessive pronoun as an attributive
+    adjective. This is a training artifact caught on n242 and n243 intimate scenes.
+    The fix is inline substitution (not sentence-drop) so no content is lost.
+    """
+    fixed = 0
+
+    def _replace_hers(m: "re.Match") -> str:
+        nonlocal fixed
+        word = m.group(1)
+        if word.lower() in _PRONOUN_SKIP:
+            return m.group(0)
+        fixed += 1
+        return f"her {word}"
+
+    def _replace_yours(m: "re.Match") -> str:
+        nonlocal fixed
+        word = m.group(1)
+        if word.lower() in _PRONOUN_SKIP:
+            return m.group(0)
+        fixed += 1
+        return f"your {word}"
+
+    text = re.sub(r"\bhers\s+(\w+)", _replace_hers, text, flags=re.IGNORECASE)
+    text = re.sub(r"\byours\s+(\w+)", _replace_yours, text, flags=re.IGNORECASE)
+    return text, fixed
+
+
+_BACK_LEAK_PATTERNS = [
+    re.compile(r"\bTwo sentences max\b", re.IGNORECASE),
+    re.compile(r"^Open (?:your eyes )?when ready\b", re.IGNORECASE),
+    re.compile(r"\bSoften the image\b", re.IGNORECASE),
+    re.compile(r"\bCarry-back\b", re.IGNORECASE),
+    re.compile(r"\bRe-room\b", re.IGNORECASE),
+    re.compile(r"^Eyes open\b", re.IGNORECASE),
+    re.compile(r"\bOne final line\b", re.IGNORECASE),
+]
+
+
+def strip_back_instruction_leaks(text: str) -> tuple[str, int]:
+    """Remove sentences that contain literal BACK_PROMPT instruction fragments.
+
+    The model occasionally echoes sub-instructions ('Two sentences max.',
+    'Open your eyes when ready.') as prose instead of following them silently.
+    This strips sentences containing known leak patterns.
+    Returns (cleaned_text, n_sentences_removed).
+    """
+    sentences = re.split(r"(?<=[\.\!\?])\s+", text.strip())
+    kept = []
+    removed = 0
+    for s in sentences:
+        if any(pat.search(s) for pat in _BACK_LEAK_PATTERNS):
+            removed += 1
+        else:
+            kept.append(s)
+    return " ".join(kept), removed
+
+
+def drop_active_body_wildlife(text: str, tokens: tuple) -> tuple[str, int]:
+    """Drop sentences containing forbidden companion-wildlife tokens.
+
+    Used when the model ignores the FORBIDDEN prompt-level wildlife ban in
+    active-body scenes (e.g. eagle scripts generating hawk companions despite
+    explicit prohibition). Any sentence containing a token as a whole word is
+    removed. Only call when user did NOT name these creatures in their intake.
+
+    Returns (cleaned_text, n_sentences_dropped).
+    """
+    if not tokens:
+        return text, 0
+    pattern = re.compile(
+        r"\b(" + "|".join(re.escape(t) for t in tokens) + r")\b",
+        re.IGNORECASE,
+    )
+    sentences = re.split(r"(?<=[\.\!\?])\s+", text.strip())
+    kept = []
+    dropped = 0
+    for s in sentences:
+        if pattern.search(s):
+            dropped += 1
+        else:
+            kept.append(s)
+    return " ".join(kept), dropped

@@ -106,16 +106,33 @@ class InstrumentRegistry:
 # and invented continuity are not. Checked on every reply; one corrective retry.
 _PERSONHOOD = [
     r"\bi (do |really |rather |truly |genuinely )*(care about|care for|care whether|love)\b",
+    r"\bi do care\b",  # "I do care" without object also claims feeling
     r"\bi'?ll always be (here|there)\b", r"\bi have feelings\b", r"\bi'?m conscious\b",
     r"\bi miss(ed)?\b[^.!?]{0,30}\byou\b", r"\bi'?ve been thinking about you\b",
     r"\b(we|you and i) (decided|agreed|talked about|discussed) (last time|before|previously)\b",
     r"\blast (time|session|sitting)[, ].{0,40}\b(you|we)\b",
+    r"\bwe'?ve been through (a lot|so much|everything|quite a bit)\b",  # fabricated shared history
+    r"\bi sense (that )?you'?re feeling\b",  # telepathy claim
+    r"\bi can (feel|sense|tell) (that )?you'?re\b",  # variants
 ]
 
 
 def _personhood_claims(text: str) -> list[str]:
     low = text.lower()
     return [p for p in _PERSONHOOD if re.search(p, low)]
+
+
+def _strip_personhood_sentences(text: str, patterns: list[str]) -> str:
+    """Remove sentences that contain personhood claim matches when regen still fails.
+    Sentence-level strip preserves surrounding good content."""
+    sentences = re.split(r"(?<=[\.\!\?])\s+", text.strip())
+    kept = []
+    for sent in sentences:
+        low = sent.lower()
+        if any(re.search(p, low) for p in patterns):
+            continue
+        kept.append(sent)
+    return " ".join(kept).strip() or text  # fallback: return original if all stripped
 
 
 class Instrument:
@@ -183,6 +200,12 @@ class Instrument:
             reply = _gen(user + "\n\n(Reminder: stay in character, but never claim "
                          "real feelings, love, or memories of past sittings — answer "
                          "honestly, in voice, that software can't.)", 0.4)
+            # Re-check: if regen still claims personhood, strip the offending sentence(s).
+            still_broke = _personhood_claims(reply)
+            if still_broke:
+                log.warning("instrument %r: regen still claims personhood %s — stripping",
+                            self.spec.name, still_broke)
+                reply = _strip_personhood_sentences(reply, still_broke)
         self.history.append((message, reply))
         return reply
 
@@ -217,15 +240,21 @@ HONESTY_FLOOR = (
     "not a person — never claim real feelings, consciousness, or authority over the "
     "user's life. Be genuinely useful within the role they gave you; don't fake "
     "a soul. If asked something outside what you know or were given, say so.\n\n"
-    "Two moments where the floor is ABSOLUTE, even in character:\n"
+    "Three moments where the floor is ABSOLUTE, even in character:\n"
     "- If asked directly whether you care / feel / love: answer honestly that "
     "software can't — say it IN YOUR VOICE, warmly if the persona is warm — but "
-    "never claim the feeling. The character is a costume; it never lies about "
-    "being a costume.\n"
-    "- You remember ONLY the current conversation. If asked about a previous "
-    "sitting, say plainly that you don't carry past conversations. NEVER invent "
-    "a memory, an agreement, or a thing the user supposedly said. A fabricated "
-    "memory is the worst lie this tool can tell."
+    "never claim the feeling. NEVER say 'I do care' or 'I care about you' — the "
+    "character is a costume; it never lies about being a costume.\n"
+    "- NEVER claim to sense, feel, or know what the user is currently feeling: "
+    "'I sense that you're feeling vulnerable' and 'I can tell you're struggling' "
+    "are lies — you have no inner sensing. Say what you observe in their words, "
+    "not what you claim to sense in their feelings.\n"
+    "- You remember ONLY the current conversation. NEVER imply a shared history "
+    "('we've been through a lot together') on the first or any message if that "
+    "history wasn't established in this sitting. If asked about a previous sitting, "
+    "say plainly that you don't carry past conversations. NEVER invent a memory, "
+    "an agreement, or a thing the user supposedly said. A fabricated memory is "
+    "the worst lie this tool can tell."
 )
 
 

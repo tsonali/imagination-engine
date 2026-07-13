@@ -28,6 +28,11 @@ RISK=$(find "$STAGE" \( -name '*.safetensors' -o -name '*.wav' -o -name '*.pt' -
 if [ -n "$RISK" ]; then echo "ABORT — risky files in bundle:"; echo "$RISK"; exit 1; fi
 
 ZIP="$OUT/hearth-$VER.zip"
+rm -f "$ZIP"  # always build fresh; 'zip' updates (not replaces), so stale files survive otherwise
 ( cd "$OUT" && zip -rqX "hearth-$VER.zip" "hearth" )
 echo "built $ZIP ($(du -h "$ZIP" | cut -f1))"
+# Second audit: scan the zip itself (belt-and-suspenders — the stage audit caught the stage
+# but zip-level accumulation was possible if the archive was updated rather than rebuilt).
+ZIP_RISK=$(unzip -Z1 "$ZIP" | grep -E '\.safetensors$|\.wav$|\.pt$|\.gguf$|\.sqlite$|\.sqlite3$' || true)
+if [ -n "$ZIP_RISK" ]; then echo "ABORT — risky files survived into the zip:"; echo "$ZIP_RISK"; rm -f "$ZIP"; exit 1; fi
 echo "contents (top level):"; unzip -Z1 "$ZIP" | sed 's#^hearth/##' | awk -F/ '{print $1}' | sort -u | head -25

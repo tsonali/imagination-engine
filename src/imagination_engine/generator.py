@@ -53,11 +53,13 @@ from typing import Callable, Optional
 from imagination_engine.comprehension import Classification, classify_intake
 from imagination_engine.inference import Engine
 from imagination_engine.postcheck import (degeneration_report, drop_collapsed_paragraphs,
-                                          drop_foreign_paragraphs,
+                                          drop_foreign_paragraphs, clean_ellipsis_breaks,
+                                          clean_narrator_possessives, drop_active_body_wildlife,
                                           find_degeneration_start, trim_degenerate_tail,
                                           phrase_repeat_count, repair_phrase_repeats,
                                           repair_short_phrase_repeats,
-                                          drop_adjacent_duplicates)
+                                          drop_adjacent_duplicates, fix_possessive_pronouns,
+                                          strip_back_instruction_leaks)
 from imagination_engine.scene_bibles import get_bible
 from imagination_engine.structured import extract_array
 
@@ -128,7 +130,7 @@ FORBIDDEN PHRASES (these produce the meditation-app sound, opposite of immersion
 - "you could" / "allow yourself to" / "let yourself"
 - "whatever it is" / "whatever you" / "without judgment"
 - "I invite you to" / "see if you can" / "notice if"
-REPLACE THEM with the thing itself. Not "perhaps her hand finds yours" but "her hand finds yours." (That example is for a scene that explicitly has another person in it. DO NOT INVENT CHARACTERS — no guides, therapists, helpers, or other people the user did not name.)
+REPLACE THEM with the thing itself. Not "perhaps her hand finds yours" but "her hand finds yours." (That example is for a scene that explicitly has another person in it. DO NOT INVENT CHARACTERS OR ANIMALS — no guides, therapists, helpers, companion animals, or other people/creatures the user did not name. If the user is an eagle, there is no hawk alongside unless they said so. If the user is in a forest, there are no forest spirits or animal guides. Invent ONLY what came from the user.)
 
 FORBIDDEN STOCK IMAGERY (the AI's safe default for "peaceful" — unless the user EXPLICITLY named these, NEVER use them):
 candlelight, candles, meadows, rolling hills, wildflowers, gurgling brooks, babbling streams, blooming lavender, nightingales, songbirds, soft glow, dappled light, warm bath, gentle breeze, twinkling stars, shimmering.
@@ -410,9 +412,11 @@ leaves them nothing to do.
   listener, not a character IN the scene. Specifically banned: "I hold", "I guide you",
   "my voice", "as soon as I speak", "when I say", "I will take you", "I am here",
   "with me", "we start", "we are here", "for us both", "we both", "come with me",
-  "join me here", "follow me" — any phrase where the narrating voice places itself
-  as a character present in the scene or invites the listener to be "with" it.
-  Rewrite in second person or cut the narrator reference entirely.
+  "join me here", "follow me", "my boy", "my dog", "my [any character or animal]" —
+  any phrase where the narrating voice places itself as a character present in the scene,
+  claims ownership of a person or animal in the scene, or invites the listener to be
+  "with" it. Rewrite in second person or cut the narrator reference entirely.
+  Example: "my boy" → "him" or "the dog" or cut the line.
 - When in doubt, say LESS. A named sensation + space is more immersive than a
   fully-rendered tableau. Suggestion, not depiction.
 
@@ -441,7 +445,7 @@ ALERT-CALM REGISTER: If the intake contains alert-calm language (night shift, ne
 SCENE TYPE: The reader is clothed, sitting in a chair or lying fully dressed. No bed-settling, no sheets, no pillows, no bedroom wind-down setup. The GENRE is "athlete before the game" — body still and grounded, mind sharpening, not dissolving. Write as if they are minutes from beginning a demanding task.
 
 BANNED (explicit — do not write these or close paraphrases):
-"drift toward sleep", "let your eyes grow heavy", "fade toward rest", "no need to think", "let go", "drift off", "fall asleep", "lullaby", "like a lullaby", "white noise looping", "sheets", "no need for hurry", "no rush", "without any need for hurry", "without needing to hurry", "soothing", "almost soothing", "falling back", "surrender to the quiet", "let the day fall away", "settling deeper", "ease into rest", "the weight of sleep", "drift away"
+"drift toward sleep", "let your eyes grow heavy", "fade toward rest", "no need to think", "let go", "drift off", "fall asleep", "lullaby", "like a lullaby", "white noise looping", "sheets", "pillow", "blanket", "quilt", "duvet", "mattress", "bedroom", "no need for hurry", "no rush", "without any need for hurry", "without needing to hurry", "soothing", "almost soothing", "falling back", "surrender to the quiet", "let the day fall away", "settling deeper", "ease into rest", "the weight of sleep", "drift away"
 
 BANNED (semantic equivalents — any language that makes a listener want to close their eyes and go to sleep):
 "heavy lids", "sinking down", "let the body sink", "slowing further", "slowing down", "breath slows", "quieter and quieter", "no need for anything", "just let it all go", "let the day fall"
@@ -470,9 +474,9 @@ The five moves you write through, in order (DO NOT print these labels):
 
 (2) CARRY-BACK — 1-2 short paragraphs. THIS IS THE MOST IMPORTANT PART. Name ONE specific concrete detail from the body and tell the listener to carry it forward. Pull it directly from what you just read; do not invent.
 
-(3) RE-ROOM — one short paragraph, brief. Bring them back to the real room. The chair. The breath. Two sentences max.
+(3) RE-ROOM — two sentences, no more. Notice them in the room they're in — the chair or surface under them, the quality of their breath. Ground them briefly in the actual physical space.
 
-(4) EYES OPEN — one sentence. Open when ready.
+(4) EYES OPEN — a single sentence. Invite the eyes to open, softly, whenever they feel ready.
 
 (5) ONE FINAL LINE. A specific quiet sentence to land on. Not "welcome back" (template). Something grounded in what just happened.
 
@@ -601,6 +605,17 @@ def _generate_settling(engine: Engine, transcript: list[dict], emit) -> str:
     body, adj_dropped = drop_adjacent_duplicates(body)
     if adj_dropped:
         log.warning('[settling] %d adjacent near-duplicate sentence(s) dropped', adj_dropped)
+    body, ellipsis_cleaned = clean_ellipsis_breaks(body)
+    if ellipsis_cleaned:
+        log.warning('[settling] %d inline ellipsis marker(s) converted to paragraph breaks',
+                    ellipsis_cleaned)
+    body, poss_dropped = clean_narrator_possessives(body)
+    if poss_dropped:
+        log.warning('[settling] %d narrator-possessive sentence(s) dropped', poss_dropped)
+    body, pronoun_fixed = fix_possessive_pronouns(body)
+    if pronoun_fixed:
+        log.warning('[settling] %d possessive-pronoun adjective error(s) fixed (hers→her/yours→your)',
+                    pronoun_fixed)
     emit("writing_return", "Softening the close.", 3, 3, 3.0)
     log.info("[settling] session ready: %d words", len(body.split()))
     return body
@@ -684,27 +699,108 @@ def generate_session(
         + " ".join(classification.anchors)
         + " " + _transcript_text
     ).lower()
+    # Animal-companion grief walk: user is a HUMAN walking WITH a named pet (not BEING the pet).
+    # Signals: pet death context + walk-with framing. Suppress active-body when detected.
+    _GRIEF_PET_SIGNALS = (
+        "put down", "passed away", "died", "had to put", "say goodbye",
+        "said goodbye", "one more", "last walk", "last time with", "put to sleep",
+    )
+    _is_grief_pet_walk = any(kw in _transcript_text for kw in _GRIEF_PET_SIGNALS)
+
     _is_active_body = (
         classification.direction == "case_a"
         and any(kw in _scene_text_lc for kw in _motion_keywords)
+        and not _is_grief_pet_walk  # animal-companion scenes: listener is human, not animal
     )
+    _grief_pet_open_note = (
+        "\n\n⚠️ ANIMAL-COMPANION SCENE: The user is imagining a walk WITH a named animal "
+        "companion who has died — they are the HUMAN in this scene, not the animal. "
+        "Open entirely from the HUMAN's physical experience: feet on ground, leash weight "
+        "in hand, morning air on skin, the familiar pace of the walk, the pull they remember. "
+        "The animal walks ALONGSIDE the listener — its sounds, smell, behavior — but the "
+        "listener's body is always the HUMAN body. "
+        "FORBIDDEN PERSPECTIVE WORDS (these put the listener in the animal's body — immediate failure): "
+        "'your tail', 'your paws', 'your fur', 'your snout', 'your muzzle', 'nestled in my mouth', "
+        "'your claws', 'your whiskers', 'your leash pulls you' (the human HOLDS the leash, "
+        "the animal WEARS it). "
+        "NARRATOR FIRST-PERSON BAN: never 'I', 'me', 'my' — narrator has no body. "
+        "The close returns to the listening chair carrying the felt memory of the walk."
+    ) if _is_grief_pet_walk else ""
     _active_body_open_note = (
         "\n\n⚠️ ACTIVE-BODY OPENING OVERRIDE: This scene places the listener inside "
         "a body in MOTION (running, flying, performing, etc.). "
-        "MOVE 1 (Utilization): do NOT say 'you can feel the chair beneath you' or "
-        "'your hands rest in your lap' — those are sedentary settling cues that "
-        "break the register. Instead: note their eyes are closed, then go directly "
-        "to a physical sensation from the active scene itself "
-        "(e.g. breath in the effort, pavement under feet, lungs burning, wind). "
-        "MOVE 3 opens ALREADY IN THE ACTION — not transitioning TO it."
+        "THE 'in a chair, hands at rest' INSTRUCTION IN MOVE 1 IS CANCELLED FOR THIS SCENE. "
+        "The listening room does not appear anywhere in this script. "
+        "FORBIDDEN IN MOVE 1 AND THROUGHOUT: 'the chair', 'weight of your body', "
+        "'body in the chair', 'hands at rest', 'sitting here', 'seated' — the listener "
+        "is NOT described in the listening room at any point. "
+        "MOVE 1: eyes are closed — immediately name a physical sensation FROM INSIDE "
+        "THE ACTIVE SCENE (talons gripping air, wind pressing into feathers, thermal "
+        "lift under wings, pavement pushing back against feet, lungs burning). "
+        "MOVE 3 opens ALREADY INSIDE THE ACTION — the listener IS the active body "
+        "from the first word, not arriving into it."
     ) if _is_active_body else ""
+
+    # Detect rehearsal scenarios: user is practicing for a specific real environment.
+    # When detected, inject a strong override naming the exact environment so the model
+    # cannot relocate them (the MRI→underground-tunnel failure from battery11 0708).
+    _REHEARSAL_ENVS = [
+        ("mri", "MRI tube"),
+        ("the tube", "MRI tube"),
+        ("tube ", "MRI tube"),
+        ("scanner", "MRI/CT scanner"),
+        ("deposition", "deposition conference room"),
+        ("being deposed", "deposition conference room"),
+        ("courtroom", "courtroom"),
+        ("operating room", "operating room"),
+        ("surgery ", "operating room"),
+        ("chemo", "chemotherapy infusion chair"),
+        ("infusion chair", "infusion chair"),
+        ("hospital waiting", "hospital waiting room"),
+        ("waiting room", "hospital waiting room"),
+    ]
+    _rehearsal_env = next(
+        (env for kw, env in _REHEARSAL_ENVS if kw in _transcript_text), None
+    )
+    _is_rehearsal = _rehearsal_env is not None
+    _rehearsal_open_note = (
+        f"\n\n⚠️ REHEARSAL FIDELITY OVERRIDE: The user is rehearsing a specific real situation. "
+        f"MOVE 1 MUST place them physically INSIDE the exact real environment: "
+        f"the {_rehearsal_env}. "
+        f"Do NOT open in a generic listening chair. Do NOT relocate them anywhere else. "
+        f"MOVE 3 stays INSIDE that environment — same walls, same sounds, same physical constraints. "
+        f"DO NOT invent any characters (no 'she', no guide, no helper, no therapist) "
+        f"that the user did not explicitly name. "
+        f"The coping mechanism (e.g. machine sounds → drums) happens INSIDE "
+        f"the real environment — they never leave it."
+    ) if _is_rehearsal else ""
+
+    # Alert-calm opening override: the opening must NOT settle the listener into a bed/bedroom.
+    # Negative constraints alone ("no sheets") fail — model defaults to bed-props anyway.
+    # Fix: supply the POSITIVE environment so the model reaches for those props instead.
+    _alert_calm_open_note = (
+        "\n\n⚠️ ALERT-CALM OPENING OVERRIDE: The user is calm but AWAKE — night shift or "
+        "similar commitment in one hour. This is NOT a sleep session. "
+        "ENVIRONMENT: They are reclining in a firm armchair or lying on a firm couch or carpeted "
+        "floor — FULLY CLOTHED (shoes on, work clothes on). This is a living room, break room, "
+        "or quiet corner — not a bedroom. "
+        "PROPS AVAILABLE: armrests, firm cushion, ceiling above, ambient street noise, breath. "
+        "FORBIDDEN — writing any of these words is automatic failure: "
+        "'pillow', 'sheet', 'blanket', 'quilt', 'duvet', 'pajamas', 'mattress', 'bedroom'. "
+        "MOVE 1 opens inside this clothed-body-on-firm-surface environment. "
+        "MOVE 3: body still, mind CLEAR and poised — athlete-before-the-game, not drifting. "
+        "Open into alert-presence. Every word must be consistent with someone who will stand "
+        "up and go to work in one hour."
+    ) if _alert_calm else ""
 
     # Stage 2: open.
     emit("writing_settle", "Writing the opening. Dropping you into the scene.", 2, 5, eta=15.0)
     log.info("[v5] open ...")
     t0 = time.time()
     open_user = (
-        intake_str + "\n\n" + class_block + _active_body_open_note + "\n\n"
+        intake_str + "\n\n" + class_block + _active_body_open_note
+        + _grief_pet_open_note
+        + _rehearsal_open_note + _alert_calm_open_note + "\n\n"
         + "Now produce the opening per OPEN_PROMPT rules."
     )
     open_text = _generate(engine, OPEN_PROMPT, open_user, max_tokens=600)
@@ -778,27 +874,75 @@ def generate_session(
 
     # When the user explicitly asked for alert-calm (e.g. night-shift reversal), inject
     # a prominent override note so the model cannot miss it while generating the body.
+    # Negative constraints alone fail — supply the positive environment instead.
     _alert_calm_override = (
         "\n\n⚠️ ALERT-CALM OVERRIDE (mandatory — this overrides any settling impulse):\n"
-        "The user EXPLICITLY asked to be calm but AWAKE — they have a night shift or similar.\n"
-        "Apply the ALERT-CALM REGISTER rules from BODY_PROMPT strictly:\n"
-        "- NO sheets, NO bed-settling, NO bedroom wind-down vocabulary.\n"
-        "- NO 'soothing', 'no need for hurry', 'no rush', 'let it slow', 'falling back'.\n"
-        "- Scene: reader is CLOTHED, sitting or lying FULLY DRESSED, taking a brief mental reset.\n"
+        "The user is calm but AWAKE — night shift or similar commitment in one hour.\n"
+        "ENVIRONMENT throughout the ENTIRE body: firm armchair, couch, or floor — "
+        "FULLY CLOTHED (shoes on, work clothes on). Not a bedroom.\n"
+        "PROPS AVAILABLE: armrests, firm surface, ceiling, ambient outside sound, breath, heartbeat.\n"
+        "FORBIDDEN WORDS — automatic failure if any appear anywhere in the body: "
+        "'pillow', 'sheet', 'blanket', 'quilt', 'duvet', 'pajamas', 'mattress', 'bedroom', "
+        "'soothing', 'no need for hurry', 'no rush', 'let it slow', 'falling back'.\n"
         "- Genre: athlete before the game — body still, mind SHARPENING, not fading.\n"
         "- Every line must STRENGTHEN presence. If it could help someone fall asleep, rewrite it.\n"
+        "- The close must leave them AWAKE and READY to stand up and go to work.\n"
     ) if _alert_calm else ""
 
+    _companion_wildlife_in_transcript = any(
+        b in _transcript_text for b in ("hawk", "falcon", "owl", "wolf")
+    )
     _active_body_body_note = (
         "\n\n⚠️ ACTIVE-BODY SCENE: The listener is inside a body in motion. "
         "Do NOT re-settle them in a chair or re-anchor to the listening room. "
         "Stay entirely inside the active scene — the effort, the sensation, "
-        "the physical reality of motion. Every paragraph must be inside the action."
+        "the physical reality of motion. Every paragraph must be inside the action. "
+        "DO NOT INVENT CHARACTERS or other creatures unless the user explicitly named them. "
+        "The listener IS the only creature with a perspective in this script. If the user "
+        "is an eagle, there is no other eagle, no hawk, no companion animal alongside them. "
+        "Other wildlife may appear as background detail only (distant movement, prey glimpsed "
+        "far below) — never as a named character with agency, dialogue, or a described presence "
+        "alongside the listener. "
+        + (
+            "FORBIDDEN — these must not appear as characters anywhere in the body "
+            "(user did not name these — automatic failure): "
+            "'hawk', 'falcon', 'owl', 'wolf', 'another eagle', 'a bear', 'a raven'. "
+            if not _companion_wildlife_in_transcript else ""
+        )
     ) if _is_active_body else ""
+
+    _grief_pet_body_note = (
+        "\n\n⚠️ ANIMAL-COMPANION BODY — NON-NEGOTIABLE: Every paragraph stays inside the HUMAN's "
+        "experience of this walk. The listener is the person holding the leash, not the animal. "
+        "Describe: the leash tension in their hand, the pace they match to the animal's, "
+        "the smells and sounds and light — all from human height, human legs, human hands. "
+        "The animal's behavior (pulling, stopping, chasing, sitting) is something the human "
+        "OBSERVES and FEELS through the leash — never something the human IS. "
+        "FORBIDDEN IN THE BODY (same failure as the opening): 'your tail', 'your paws', "
+        "'your fur', 'your snout', 'your muzzle', 'in my mouth', 'your claws'. "
+        "NARRATOR BAN: never 'I', 'me', 'my', 'I always', 'I hold', 'in my'. "
+        "The farewell symbol the user named (e.g., the tennis ball) MUST appear as a concrete "
+        "sensory anchor. The close returns to the listening chair."
+    ) if _is_grief_pet_walk else ""
+
+    _rehearsal_body_note = (
+        f"\n\n⚠️ REHEARSAL FIDELITY — NON-NEGOTIABLE: The user is rehearsing a real situation. "
+        f"EVERY SINGLE PARAGRAPH of the body MUST stay physically inside "
+        f"the {_rehearsal_env}. "
+        f"If the script relocates them to ANY other setting (a tunnel, a beach, a concert hall, "
+        f"a field, a forest), that is a CRITICAL FAILURE — the session rehearses nothing. "
+        f"DO NOT INVENT CHARACTERS — no 'she', no guide, no helper, no therapist, no animal — "
+        f"unless the user explicitly named that person or creature in their intake. "
+        f"DO NOT INVENT SENSORY DETAILS not in the {_rehearsal_env} environment or the user's "
+        f"own intake: no colored lights, no pine smell, no forest sounds — only what is actually "
+        f"present in a real {_rehearsal_env}. The coping technique (sounds → drums, breath → "
+        f"anchor) is TRANSMUTED inside the real environment, not a vehicle to leave it. "
+        f"Stay inside the {_rehearsal_env} from first word to last."
+    ) if _is_rehearsal else ""
 
     body_user = (
         intake_str + "\n\n" + class_block + _alert_calm_override
-        + _active_body_body_note + "\n\n"
+        + _active_body_body_note + _grief_pet_body_note + _rehearsal_body_note + "\n\n"
         "----- THE OPENING (already spoken) -----\n"
         + open_text
         + "\n----- END OPENING -----\n\n"
@@ -932,6 +1076,32 @@ def generate_session(
     full, adj_dropped = drop_adjacent_duplicates(full)
     if adj_dropped:
         log.warning('[v6] %d adjacent near-duplicate sentence(s) dropped', adj_dropped)
+    # Narrator-possessive and inline-ellipsis cleaners: catch "my boy", "my dog",
+    # "Here we go again", "……" that slip through despite BODY_PROMPT bans.
+    full, poss_dropped = clean_narrator_possessives(full)
+    if poss_dropped:
+        log.warning('[v6] %d narrator-possessive sentence(s) dropped', poss_dropped)
+    full, pronoun_fixed = fix_possessive_pronouns(full)
+    if pronoun_fixed:
+        log.warning('[v6] %d possessive-pronoun adjective error(s) fixed (hers→her/yours→your)',
+                    pronoun_fixed)
+    # Strip BACK_PROMPT instruction leaks: model occasionally echoes sub-instructions
+    # ('Two sentences max.', 'Open your eyes when ready.') verbatim. Strip them.
+    full, leak_removed = strip_back_instruction_leaks(full)
+    if leak_removed:
+        log.warning('[v6] %d BACK instruction-leak sentence(s) stripped', leak_removed)
+    # Active-body wildlife filter: when the model ignores the FORBIDDEN wildlife
+    # prompt (e.g. generates "A hawk is alongside you" despite explicit prohibition),
+    # drop those sentences. Only fires when listener's transcript did not name these.
+    if _is_active_body and not _companion_wildlife_in_transcript:
+        _wildlife_tokens = ("hawk", "falcon", "owl", "wolf", "raven")
+        full, wildlife_dropped = drop_active_body_wildlife(full, _wildlife_tokens)
+        if wildlife_dropped:
+            log.warning('[v6] %d companion-wildlife sentence(s) dropped (active-body)',
+                        wildlife_dropped)
+    full, ellipsis_cleaned = clean_ellipsis_breaks(full)
+    if ellipsis_cleaned:
+        log.warning('[v6] %d inline ellipsis marker(s) cleaned', ellipsis_cleaned)
     rep = degeneration_report(full)
     if rep.get("degenerate"):
         log.warning("[v6] degeneration STILL detected post-trim: %s", rep)

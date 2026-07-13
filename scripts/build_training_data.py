@@ -86,14 +86,43 @@ for f in a_files:
         if r.get("tier") == "gold" or "script" in r:   # weight gold higher (both old/new format)
             pool["A"].append(rec); pool["A"].append(rec)
 
-# ---------- C: companion (prefer curated gold) ----------
+# ---------- C: companion (curated gold + beat exemplars) ----------
+# Base: curated/positive sets (annomi MI etc.)
 _cgold = find("C-companion", "c_gold_curated.jsonl") or find("C-companion", "c_gold_positive.jsonl")
 for r in jl(_cgold):
     ctx, resp = r.get("context", ""), r.get("response", "")
     if ctx and resp:
-        # strip the "Them:/You:" scaffolding for the user turn
         u = ctx.replace("You:", "").replace("Them:", "").strip()
         pool["C"].append(msg("C", u, resp))
+
+# Beat exemplars (c_gold_beat*.jsonl) — handcrafted to fix known prompt-unfixable defects.
+# These are TRIPLED (3x weight) so the model sees them frequently — they address
+# the rarest, hardest register calls (topic-whiplash, named refusal, landing-confirmation).
+# Format 1: {context, response, src, tag}  → single-turn
+# Format 2: {id, scenario, turns:[{user,companion}], note}  → multi-turn flattened to pairs
+import glob as _glob
+_beat_files = sorted(_glob.glob(os.path.join(ROOT, "C-companion", "c_gold_beat*.jsonl")))
+for bf in _beat_files:
+    for r in jl(bf):
+        if "turns" in r:
+            # multi-turn format: build context accumulating user+companion pairs
+            history = []
+            for t in r["turns"]:
+                u_txt = "\n".join(history + [t["user"]]) if history else t["user"]
+                a_txt = t["companion"]
+                rec = msg("C", u_txt, a_txt)
+                for _ in range(3):  # 3x weight
+                    pool["C"].append(rec)
+                # accumulate for next turn's context
+                history.append(f"[user] {t['user']}")
+                history.append(f"[you] {t['companion']}")
+        elif "context" in r and "response" in r:
+            ctx, resp = r.get("context", ""), r.get("response", "")
+            if ctx and resp:
+                u = ctx.replace("You:", "").replace("Them:", "").strip()
+                rec = msg("C", u, resp)
+                for _ in range(3):
+                    pool["C"].append(rec)
 
 # ---------- B: utility — CONTRACT-NATIVE first (generated through the real
 # product prompts + culled by the product's own gates), generic public sets

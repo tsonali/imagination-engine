@@ -536,6 +536,7 @@ def intake_reflect(session_id: str, req: ReflectRequest) -> JSONResponse:
 # ---------------------------------------------------------------------------
 _companions: dict[str, object] = {}
 _companion_memory = None
+_vital_facts = None
 
 
 def _get_companion_memory():
@@ -544,6 +545,14 @@ def _get_companion_memory():
         from imagination_engine.companion import CompanionMemory
         _companion_memory = CompanionMemory(MEMORY_DB.parent / "companion.sqlite")
     return _companion_memory
+
+
+def _get_vital_facts():
+    global _vital_facts
+    if _vital_facts is None:
+        from imagination_engine.vital_facts import VitalFacts
+        _vital_facts = VitalFacts(MEMORY_DB.parent / "companion" / "vital-facts.md")
+    return _vital_facts
 
 
 @app.get("/companion", response_class=HTMLResponse)
@@ -565,10 +574,34 @@ async def companion_turn(req: CompanionRequest) -> JSONResponse:
     comp = _companions.get(req.session_id)
     if comp is None:
         comp = Companion(get_engine(), memory=_get_companion_memory(),
-                         session_key=req.session_id)
+                         session_key=req.session_id,
+                         vital_facts=_get_vital_facts())
         _companions[req.session_id] = comp
     turn = await run_in_threadpool(comp.turn, req.message)
     return JSONResponse({"reply": turn.reply, "flagged": turn.flagged})
+
+
+class CompanionOpenerRequest(BaseModel):
+    session_id: str
+    last_session_heavy: bool = False
+
+
+@app.post("/companion/opener")
+async def companion_opener(req: CompanionOpenerRequest) -> JSONResponse:
+    """Generate a session-opening question from the user's open threads (if any).
+
+    Returns {"opener": "<question>"} or {"opener": null} if nothing to ask."""
+    from imagination_engine.companion import Companion
+    comp = _companions.get(req.session_id)
+    if comp is None:
+        comp = Companion(get_engine(), memory=_get_companion_memory(),
+                         session_key=req.session_id,
+                         vital_facts=_get_vital_facts())
+        _companions[req.session_id] = comp
+    opener = await run_in_threadpool(
+        comp.session_opener, req.last_session_heavy
+    )
+    return JSONResponse({"opener": opener})
 
 
 # ---------------------------------------------------------------------------

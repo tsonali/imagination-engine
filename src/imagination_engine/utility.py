@@ -53,7 +53,11 @@ _BASE = (
     "- In condolence or grief writing: never center the writer ('I can't find the "
     "words', 'this has been hard for me'), never measure or minimize the loss "
     "('at least...', 'we were lucky to have him even briefly'). Short, specific, "
-    "about them and the person.\n"
+    "about them and the person. BANNED GRIEF PLATITUDES (automatic fail): "
+    "'in a better place', 'he's in a better place', 'she's in a better place', "
+    "'his love remains forever', 'his love remains with', 'time heals', "
+    "'they would have wanted', 'everything happens for a reason', 'looking down on us', "
+    "'always be with you in your heart', 'your memories will', 'precious gift'.\n"
     "- A subject line names the topic, never the tactic ('Billing question' — not "
     "'Threat of Service Switch')."
 )
@@ -129,21 +133,47 @@ def _b_reply(text, instruction, tone, style):
     return system, user
 
 
+def _extract_numbers(text: str) -> list[str]:
+    """Pull every concrete number token from source text for explicit lossless enforcement."""
+    import re
+    found = []
+    # Dollar amounts: $2.4M, $380K, $28K, $45K, $400K
+    found += re.findall(r'\$[\d,]+(?:\.\d+)?(?:K|M|B)?', text)
+    # Percentages: 3.2%, 68%, 18%, 14%
+    found += re.findall(r'\d+(?:\.\d+)?\s*%', text)
+    # Time/count: 11 months, 4,200, 54 (NPS)
+    found += re.findall(r'\b\d[\d,]*\s+(?:months?|years?|weeks?|days?|hours?)\b', text, re.I)
+    # Deduplicate while preserving order
+    seen = set()
+    unique = []
+    for n in found:
+        norm = n.strip()
+        if norm not in seen:
+            seen.add(norm)
+            unique.append(norm)
+    return unique
+
+
 def _b_summarize(text, instruction, tone, style):
     system = _BASE
+    nums = _extract_numbers(text)
+    num_list = ", ".join(nums) if nums else ""
+    lossless_rule = (
+        "LOSSLESS NUMBER RULE: Every concrete number from the source MUST appear "
+        "verbatim in your output — no paraphrasing. "
+        "COST-CONTEXT numbers (a dollar amount that modifies a metric, e.g. "
+        "'each point of churn costs $28K ARR/month') are LOAD-BEARING — "
+        "the dollar amount MUST appear alongside the metric it modifies, "
+        "not silently dropped.\n"
+        + (f"MANDATORY NUMBERS (all must appear): {num_list}\n" if num_list else "")
+    )
     user = (
         "Summarize the text below in EXACTLY this format:\n"
         "BOTTOM LINE: <one sentence>\n"
         "- <key point>\n"
         "- <key point>\n"
         "(as many points as needed)\n\n"
-        "LOSSLESS NUMBER RULE: Before writing the summary, scan the source text for "
-        "every concrete number (dollar amounts, percentages, counts, dates, headcounts, "
-        "timeframes). Every one of them MUST appear verbatim somewhere in your bullet "
-        "points — no paraphrasing ('at current burn rate' when the text says '$380K/month' "
-        "is WRONG). A bullet point that needs a number to be actionable MUST include the "
-        "number. The only acceptable omissions are pleasantries and repeated mentions of "
-        "the same number already in the summary.\n\n"
+        + lossless_rule + "\n"
         "Every decision, every CONDITION attached to a decision ('yes, but only "
         "if...'), every deadline, and every open question MUST also survive — "
         "a condition or commitment lost is wrong. Keep relative dates AS THE "
@@ -290,6 +320,38 @@ class Assistant:
 
     def run(self, task_key: str, text: str, **kw) -> UtilityResult:
         out = "".join(self.stream(task_key, text, **kw)).strip()
+        # Post-check for summarize: if mandatory numbers were dropped, regen once with
+        # explicit call-out. Common failure: $28K cost-context figure alongside 3.2% churn.
+        if task_key == "summarize":
+            nums = _extract_numbers(text)
+            missing = [n for n in nums if n not in out]
+            if missing:
+                task = TASKS["summarize"]
+                system, user = task.build(
+                    text, kw.get("instruction", ""),
+                    kw.get("tone", ""), kw.get("style_sample", ""),
+                )
+                missing_str = ", ".join(missing)
+                extra = (
+                    f"\n\nCRITICAL — MANDATORY NUMBERS MISSING: A previous attempt dropped "
+                    f"these required numbers from the source — each MUST appear verbatim "
+                    f"in your output: {missing_str}. "
+                    "Include every one. For cost-context figures (e.g., 'each churn point "
+                    "costs $28K ARR/month'), include the dollar amount alongside the metric."
+                )
+                regen = "".join(self.engine.stream(
+                    messages=[
+                        {"role": "system", "content": system + extra},
+                        {"role": "user", "content": user},
+                    ],
+                    max_tokens=kw.get("max_tokens", 1200),
+                    temperature=0.4,
+                )).strip()
+                recovered = [n for n in missing if n in regen]
+                if len(recovered) >= len(missing) // 2 + 1:
+                    log.info("secretary[summarize]: regen recovered %d/%d missing numbers",
+                             len(recovered), len(missing))
+                    out = regen
         return UtilityResult(task=task_key, output=out)
 
 

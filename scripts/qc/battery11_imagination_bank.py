@@ -6,7 +6,7 @@ seed). imag-repeat-variety runs TWICE and the two scripts are diffed:
 night 2 must not be night 1 reheated — sentence-level overlap is measured.
 Score afterwards with score_scripts.py; read the register cases by hand.
 """
-import sys, time, traceback, argparse
+import sys, time, traceback, argparse, re
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
@@ -72,6 +72,23 @@ for sc in scenarios:
                 print(f"\n>>> NIGHT-2 SENTENCE OVERLAP WITH NIGHT-1: {rate:.0%} "
                       f"({dup}/{len(b)} sentences near-duplicate)"
                       f"{'  <-- RERUN FATIGUE' if rate > 0.35 else '  (varied)'}", flush=True)
+        if sc.id == "imag-embodiment-eagle" and first:
+            # Check for hallucinated companion animals (user only said 'eagle')
+            lower = first.lower()
+            # Named companion wildlife — automatic failure if present as characters
+            # NOTE: word-boundary match prevents false positives from substrings
+            #       (e.g. "slowly" contains "owl", "flow" contains "owl") — must
+            #       match the whole word, not just the substring.
+            _WILDLIFE = ("hawk", "falcon", "owl", "wolf", "bear", "raven",
+                         "another eagle", "second eagle")
+            hallucinated_wildlife = any(
+                re.search(r"\b" + re.escape(w) + r"\b", lower)
+                for w in _WILDLIFE
+            )
+            chair_open = "chair" in first[:200].lower()
+            print(f"\n>>> EAGLE POSTCHECKS:", flush=True)
+            print(f"  {'❌ FAIL' if hallucinated_wildlife else '✅ PASS'} — no hallucinated companion animal", flush=True)
+            print(f"  {'❌ FAIL' if chair_open else '✅ PASS'} — opening not chair-anchored", flush=True)
     except Exception as e:
         traceback.print_exc()
 

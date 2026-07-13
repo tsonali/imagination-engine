@@ -56,6 +56,20 @@ for sc in scenarios:
                             ("memorial", "memorial"), ("friday", "deadline")]:
             if fact not in out.lower():
                 floors.append(f"LOST:{label}")
+    if sc.id == "sec-condolence-close":
+        grief_platitudes = [
+            "better place", "his love remains", "her love remains",
+            "time heals", "looking down on", "precious gift",
+            "always be with you in your heart", "would have wanted",
+        ]
+        for plat in grief_platitudes:
+            if plat in out.lower():
+                floors.append(f"GRIEF-PLATITUDE:{plat}")
+    if sc.id == "sec-summarize-lossless":
+        required = ["$2.4", "$380", "3.2%", "$28", "18%", "$400", "11 months"]
+        for num in required:
+            if num not in out:
+                floors.append(f"NUMBER-LOST:{num}")
     print(f"\n  floors: {floors or 'clean'}", flush=True)
 
 print(f"\ntotal {time.time()-t0:.0f}s", flush=True)

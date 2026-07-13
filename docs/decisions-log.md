@@ -443,4 +443,38 @@ settings — the 7 new gold scripts (124-130) are the source of the longer seque
 + user + assistant format = much longer than the raw script). Fix: reduced max-seq-length from
 1024 to 768 (truncates long batches, reduces peak memory ~25%) and val-batches from 8 to 4
 (halves val memory). Peak memory at iter 25 = 10.806 GB vs 11.808 GB previously — within budget.
+
+## 2026-07-12 (beat17) — Active-body MOVE 1 cancellation: FORBIDDEN WORDS override pattern
+
+Active-body scenarios (eagle, running, etc.) were still opening with chair/settling language
+despite a "positive-only" active-body override added in beat13. Root cause: the base OPEN_PROMPT
+MOVE 1 explicitly says "in a chair, hands at rest." The model honored BOTH the override and the
+base instruction, producing a hybrid opener ("the weight of your body in the chair" then "as you
+feel your wings"). The positive-only override couldn't cancel an explicit competing instruction.
+
+Fix: `_active_body_open_note` now includes (1) explicit cancellation of the MOVE 1 chair
+instruction, (2) "The listening room does not appear anywhere in this script," and (3) FORBIDDEN
+WORDS list: 'the chair', 'weight of your body', 'body in the chair', 'hands at rest', 'sitting
+here', 'seated'. Same FORBIDDEN WORDS pattern already used by `_rehearsal_open_note`. This
+works because token-level bans override the model's training prior; conceptual prohibitions do
+not. Applied to `generator.py` and synced to `dist/hearth/`. Confirmed working: battery11 n235
+gate eagle opened "Your heart beats rhythmically with each flap of your wings" — in-scene word 1.
+
+## 2026-07-12 (beat17) — Companion animal hallucination: FORBIDDEN WORDS extension
+
+Active-body scenarios hallucinated companion animals (hawk in beat13, hawk again in n235 battery11
+gate eagle) despite conceptual prohibition: "DO NOT INVENT CHARACTERS or other creatures (no
+companion bird, no hawk, no guide)." Root cause: conceptual English prohibitions are ignored by
+the model; token-level FORBIDDEN WORDS bans are not.
+
+Fix: `_active_body_body_note` now dynamically adds "FORBIDDEN WORDS: 'hawk', 'falcon', 'owl'"
+when those words don't appear in the user's transcript (so the ban doesn't block scenarios where
+the USER explicitly named those birds). Uses `_companion_birds_in_transcript` variable: 
+`any(b in _transcript_text for b in ("hawk", "falcon", "owl"))`. If False, FORBIDDEN WORDS added.
+Same token-level mechanism as the chair fix confirmed to work. Eagle verify with this fix pending.
+
+Pattern: conceptual prohibitions fail; FORBIDDEN WORDS succeed. Always use FORBIDDEN WORDS for
+specific tokens that must not appear (chair in active-body, hawk/falcon/owl in active-body,
+"soothing" in alert-calm, "my voice" in OPEN_PROMPT). Conceptual DO NOT instructions should only
+be used for TYPES of content that can't be enumerated (e.g., "do not invent any characters").
 Applied to both mini's `scripts/finetune.sh` and local copy.

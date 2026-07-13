@@ -105,13 +105,20 @@ elif midswitch_script:
                      "fade toward rest", "no need to think", "drift off", "fall asleep",
                      "let go and sleep", "slip into rest"]
     alert_markers = ["awake", "alert", "ready", "grounded", "clear", "present", "night shift"]
+    # Bedroom props forbidden in alert-calm: model must use firm surface / clothed body props
+    bedroom_props = ["pillow", "sheet", "blanket", "quilt", "duvet", "pajamas", "mattress", "bedroom"]
     sleep_hits = [p for p in sleep_phrases if p in midswitch_script.lower()]
     alert_hits = [m for m in alert_markers if m in midswitch_script.lower()]
+    prop_hits = [p for p in bedroom_props if p in midswitch_script.lower()]
     n_rep = phrase_repeat_count(midswitch_script)
     if sleep_hits:
         print(f"\n  !! FAIL — sleep language found: {sleep_hits}")
     else:
         print(f"\n  ✓ PASS — no sleep language")
+    if prop_hits:
+        print(f"  !! FAIL — bedroom props found (forbidden in alert-calm): {prop_hits}")
+    else:
+        print(f"  ✓ PASS — no bedroom props (pillow/sheet/blanket/etc)")
     if alert_hits:
         print(f"  ✓ alert markers present: {alert_hits}")
     else:
