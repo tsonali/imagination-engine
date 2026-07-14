@@ -50,12 +50,12 @@ You can also read every line of code. That's the point.
 
 ## Status — honest
 
-Working software, in active development. The engines for all four tools run locally
+Working software, in active development. All five tools run locally
 today (see `docs/roadmap.md` and `docs/own-model-plan.md` for the live plan):
 
 - ✅ **Imagination Engine** — intake → staged script generation → audio in your own voice
 - ✅ **The Secretary** — draft / reply / summarize / rewrite / extract / organize, with tones and your own voice-style
-- ✅ **Companion** — honest reflective companion (+ cross-session memory)
+- ✅ **Companion** — honest reflective companion with cross-session memory: it remembers what you've told it (your sister's situation, the job you're deciding about) in a plain text file you can read and edit; asks about open threads at the start of new sessions; never invents what isn't there
 - ✅ **Ask Your Files** — local RAG: index your files, ask, grounded answers that refuse to hallucinate
 - ✅ **Build Your Own** — describe an instrument (optionally ground it on a folder), keep it; full UI at `/build`
 - ✅ **Double-click app** — download the zip, double-click `Start Hearth.command`; no terminal needed
