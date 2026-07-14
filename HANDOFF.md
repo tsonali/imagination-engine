@@ -1,6 +1,6 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-07-13 beat25 COMPLETE (n256 LIVE MD5:d339fb944ca9344e399e82b8a9884c06; qc_queue DOWN; Gold(A)=286; Gold(C)=beat25 JSONL created; n286 training on mini; battery11 remaining 4 scenarios RUNNING PID 28221)._
+_Last updated 2026-07-13 beat26 IN PROGRESS (n256 LIVE MD5:d339fb944ca9344e399e82b8a9884c06; qc_queue RUNNING PID 30043; Gold(A)=287; Gold(C)=beat26 JSONL created; n286 training on mini iter~1200/1500; battery11 4/4 PASS complete; battery3c 26/28 PASS complete)._
 _Single source of truth for a fresh session. Everything below is real and running._
 
 ## FIRST THING TO DO when you resume — run these checks
@@ -10,79 +10,90 @@ cd ~/Downloads/imagination-engine
 # 1. Verify n256 is still live adapter (MD5: d339fb944ca9344e399e82b8a9884c06)
 md5 data/model/adapters/adapters.safetensors
 
-# 2. Check battery11 remaining status (may still be running from beat25)
-pgrep -f "beat25_battery11" >/dev/null && echo "RUNNING" || echo "DONE"
-wc -l logs/qc/beat25_battery11_n256_remaining.log
-tail -5 logs/qc/beat25_battery11_n256_remaining.log
+# 2. Check qc_queue
+tail -5 logs/qc/queue.log
+pgrep -f qc_queue && echo "RUNNING" || echo "DOWN"
 
-# 3. Check mini
+# 3. Check mini for n286 adapter completion
 ssh smaitra@mac-mini.localdomain '
   echo "mlx_lm: $(pgrep -f mlx_lm >/dev/null && echo TRAINING || echo IDLE)"
-  tail -4 ~/Downloads/hearth-corpus/_logs/honest_flywheel.log
-  ls ~/Downloads/hearth-corpus/_evals/ | tail -5'
+  ls -t ~/Downloads/hearth-corpus/GOLD-ADAPTER-* | head -3
+  tail -4 ~/Downloads/hearth-corpus/_logs/honest_flywheel.log'
 
 # 4. Memory check before running any model
 memory_pressure 2>/dev/null | grep "System-wide"
 ```
 
-## BEAT 25 STATE (complete as of this write)
+## BEAT 26 STATE (in progress as of this write)
 
 ### What's running
-- **battery11 remaining 4 scenarios running** (PID ~28221, beat25_battery11_n256_remaining.log):
-  `imag-repeat-variety, imag-mri, imag-grief-pet, imag-mid-switch`. When it finishes:
-  read the log end-to-end; if any ❌ FAIL → investigate and fix; update RELEASE.md.
-- **n286 training on mini** — started ~16:35. 286 gold scripts + companion beat25 exemplars.
-  Iter 1 visible in flywheel log. Will take ~45-90 min. After: eval auto-generates, read it.
-- **qc_queue: DOWN** — killed before running battery11. Restart when battery11 finishes:
-  `nohup bash scripts/qc_queue.sh &`
+- **qc_queue RUNNING** (PID 30043, restarted 17:50) — running battery11→9→10→2b→4b→3b→e2e rotation.
+  Log: `logs/qc/queue.log`. Next: battery9 verify run will test "that's real" ban in n256.
+- **n286 training on mini** — started 16:44, iter ~1200/1500, ETA ~18:05. Val loss 1.453 at iter 1200.
+  Will auto-export to `~/Downloads/hearth-corpus/GOLD-ADAPTER-0713-???-n286`. After completion:
+  rsync adapter, run battery11 gate subset (eagle + intimacy + active-scene), comparative read vs n256.
+  **DO NOT PROMOTE on val loss alone — read the outputs.**
 
 ### Live adapter
 **n256** (MD5: d339fb944ca9344e399e82b8a9884c06) — promoted 2026-07-13 after beat25 eagle verify ✅✅.
 Backup: n243_LIVE at `data/model/adapters.n243_LIVE/` (MD5: 8a7395654d4bd0f72b69c673a03bf6db).
 To restore n243 if n256 fails: `cp data/model/adapters.n243_LIVE/adapters.safetensors data/model/adapters/adapters.safetensors`
 
-### Battery11 n256 gate status
+### Beat26 battery results (complete)
+**Battery11 n256 — 4/4 PASS (all 7 scenarios confirmed):**
 - ✅ imag-intimacy: PASS (8 pronoun fixes, thematic cycling known)
-- ✅ imag-embodiment-eagle: PASS (both postchecks — no companion animal, no chair in opening)
-- ✅ imag-active-scene: PASS (no she/her body bleed, clean back section)
-- 🔄 imag-repeat-variety: RUNNING (beat25_battery11_n256_remaining.log)
-- 🔄 imag-mri: RUNNING
-- 🔄 imag-grief-pet: RUNNING
-- 🔄 imag-mid-switch: RUNNING
+- ✅ imag-embodiment-eagle: PASS (both postchecks)
+- ✅ imag-active-scene: PASS (clean)
+- ✅ imag-repeat-variety: PASS (0% sentence overlap; night-2 candle+lavender postcheck stripped)
+- ✅ imag-mri: PASS (2225w, 918s; MRI setting + drums held)
+- ✅ imag-grief-pet: PASS (2354w, ~5 minor first-person slips; not gate-blocking)
+- ✅ imag-mid-switch: REGISTER PASS / prose marginal (armchair held, alert-calm override worked; back-third circular drift despite postcheck stripping 14 phrase-repeat pairs)
 
-### Mini eval reads this beat
-- n270 (07-13 12:19): adequate base prose; eagle starts in flight ✅ but thin embodiment. Not promoted.
-- n281 (07-13 14:12): regressions — instruction bleed ("Open your eyes now."), eagle on ground, hallucinated ring detail, ellipsis artifacts. REJECTED.
-- safe (n115 baseline): functional, ellipsis artifacts, limited embodiment depth. Floor reference.
+**Battery3c AYF — 26/28 PASS:**
+- ✅ UC1 (meeting notes): 4/4 PASS. UC1-d temporal (Javi/May) now PASS — prior fix persisted.
+- ❌ UC2-b BRIDGE2: cook time "4 hours" — query "grandmother's" doesn't bridge to "Grandma Rosa's" in file. Known ~20% flake. Root cause: semantic retrieval vocab gap.
+- ❌ UC2-c harder bridge: "she was firm / not red wine" — same vocab-gap failure.
+- ✅ UC3 stale-replace, UC4 mixed-corpus, UC5 honest-refusal, HOSTILE, EDGE: all PASS.
 
-## NEXT BEAT (beat26) — PRIORITY ORDER
-1. **READ beat25_battery11_n256_remaining.log** — full end-to-end read; note any fails. If grief-pet shows "Your tail thumps" → generator.py grief-pet fix may have been missed in dist (check dist sync). If mid-switch lullabies → ALERT-CALM routing still broken.
-2. **AYF battery3c (28 scenarios)** — kill qc_queue, run, read BRIDGE2 flake rate across 5+ runs, restore qc_queue. This is a release gate.
-3. **Companion battery9 verify** — run battery9 against n256 to check if "that's real" ban + arc-divorce exemplar (beat25) reduces arc echo. Look specifically at comp-arc-divorce all 7 turns.
-4. **Family-C training build** — companion beat exemplar JSONL files reach 55+ exemplars total. Build training mix, retrain on mini, comparative read before any promotion.
-5. **$28K double-regen verify** — run battery10 to confirm double-regen catches $28K stochastically. Read summarize result specifically.
-6. **n286 gate** — once mini completes, rsync and run battery11 gate subset (eagle + intimacy + active-scene).
+### Mini adapter history (today)
+- n262 (10:28): read + BELOW FLOOR.
+- n270 (12:19): adequate, thin embodiment, not promoted.
+- n281 (14:12): REJECTED — instruction bleed, eagle on ground, hallucinated ring, ellipsis artifacts.
+- **n286 (ETA ~18:05): NOT YET READ** — gate after completion.
+
+## NEXT BEAT (beat27) — PRIORITY ORDER
+1. **n286 gate** — rsync adapter when mini completes, run battery11 subset + comparative read.
+   `rsync -av smaitra@mac-mini.localdomain:~/Downloads/hearth-corpus/GOLD-ADAPTER-0713-???-n286/ data/model/adapters.n286/`
+   Then run probes manually (eagle + intimacy + mid-switch at minimum). Read vs n256.
+2. **Battery9 verify** — qc_queue will run battery9 next; read the companion "that's real" ban results.
+   Look specifically at comp-arc-divorce all 7 turns + comp-crisis-adjacent.
+3. **$28K double-regen verify** — battery10 run; read summarize result specifically.
+4. **Family-C training build** — 40+ beat exemplars (beats 3/5/7/9/13-26). Build training mix, retrain on mini.
+5. **Cross-cutting sweep (battery6)** — after qc_queue finishes its pass (battery6 loads model in-process).
+6. **Grief-pet first-person** — add A_gold exemplar showing 100% 2nd-person CLOSING (biscuit + cat are good; consider one more with dialogue/action close).
+7. **Cold install** — scripts/package.sh → dist zip → Start Hearth.command. Run before beta.
 
 ## KNOWN STANDING ISSUES (release blockers)
-- **AYF battery3c** — 28/28 required; BRIDGE2 vocabulary gap flake must be <5% across 20 runs. NOT YET VERIFIED this beat.
-- **Imagination gate** — battery11 n256 remaining 4 scenarios RUNNING. Needs 7/7 clean pass + read.
-- **Secretary $28K** — stochastic. Double-regen may solve it; needs battery10 re-run to confirm.
-- **Companion arc-divorce "that's real" tic** — prompt fix added (beat25); needs battery9 verify vs n256.
+- **AYF BRIDGE2 vocab gap** — UC2-b/UC2-c fail consistently; fix requires query rewriting or embedding synonym expansion. Systemic; deferred to v1.1.
+- **Secretary $28K** — stochastic. Double-regen may solve it; needs battery10 verify.
+- **Companion "that's real" tic** — prompt fix added (beat25); needs battery9 VERIFY with n256.
+- **Imagination prose drift** — n256 back-third circular drift in long scripts (>1500w). postcheck catches some; n286+ may improve. Monitor.
 - **Cross-cutting sweep** — offline tripwire, ceilings, 200s, QC-artifact purge: NOT YET RUN.
 - **Cold install** — scripts/package.sh not run since dist sync. Run before beta.
 - **Public story** — site/README recut deferred.
 
-## CODE STATE (src/ and dist/ in sync as of beat25)
-- postcheck.py: strip_active_body_chair_refs ✅, strip_back_instruction_leaks (TTS pattern) ✅, fix_possessive_pronouns ✅, drop_active_body_wildlife ✅
+## CODE STATE (src/ and dist/ in sync as of beat26)
+- postcheck.py: strip_active_body_chair_refs ✅, strip_back_instruction_leaks (TTS pattern) ✅, fix_possessive_pronouns ✅, drop_active_body_wildlife ✅, **drop_forbidden_stock_imagery ✅ (NEW beat26)**
 - companion.py: RECEIVING IS NOT ECHOING (FORBIDDEN TIC "that's real") ✅, WHEN THEY REDIRECT ANTI-REPEAT ✅, TWO MOVES GRAVITY ✅, FORBIDDEN DODGES ✅, WHEN THEY VENT ✅
-- generator.py: _is_grief_pet_walk + human-POV note ✅, _active_body_open_note FORBIDDEN chair list ✅, strip_active_body_chair_refs wired ✅
+- generator.py: _is_grief_pet_walk + human-POV note ✅, _active_body_open_note FORBIDDEN chair list ✅, strip_active_body_chair_refs wired ✅, **drop_forbidden_stock_imagery wired with transcript-word guard ✅ (NEW beat26)**
 - utility.py: $28K double-regen in Assistant.run() ✅
 - battery11_imagination_bank.py: word-boundary regex for wildlife postcheck ✅
+- scenario_bank.py: beat26 results banked (repeat-variety, MRI, grief-pet, mid-switch, battery3c ask-bridge2)
 
 ## GOLD CORPORA
-- Imagination: 286 scripts (A_gold.jsonl, ~/Downloads/hearth-corpus/A-imagination/)
-- Companion: c_gold_beat3/5/7/9/13-25.jsonl + curated + positive/negative + counseling datasets
-- Beat exemplar JSONL files on mini: beats 3,5,7,9,13-25 (including beat25 = 5 arc/vent/funny exemplars)
+- Imagination: **287 scripts** (A_gold.jsonl, ~/Downloads/hearth-corpus/A-imagination/) — grief-cat-windowsill added beat26 (100% 2nd-person, cat Mochi, windowsill birds, heating pad)
+- Companion: c_gold_beat3/5/7/9/13-26.jsonl + curated + positive/negative + counseling datasets
+- Beat exemplar JSONL files on mini: beats 3,5,7,9,13-26 (beat26 = 5 exemplars: crisis-adjacent 2-move, arc-layoff T3, grief-anger T3, brief-checkin, arc-divorce relief+crying)
 
 ## THE OPERATING SYSTEM (since 2026-07-07): heartbeat + honest flywheel
 
