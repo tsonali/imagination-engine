@@ -22,18 +22,23 @@ The journey is part of the public diligent narrative — see `strategy.md`.
 
 - **imag-mri**: ✅ PASS (near). 2225w, 918s (slower due to brief dual-model event). MRI setting present (cold metal table, "MRI" named, beeping monitors). Drums transformation present and developed ✅. No first-person violations ✅. No hallucinated characters ✅. Tube walls not strongly described (prior pass had "narrow walls close in"). Back-half prose circular. Slower due to memory pressure from brief battery6 launch (killed immediately).
 
-- **imag-grief-pet**: ⏳ GENERATING
-- **imag-mid-switch**: ⏳ PENDING
+- **imag-grief-pet**: ✅ PASS (quality notes). 2354w, 751s. Human POV ✅, "the tennis ball" ✅, no hallucinated wildlife ✅. ~5 first-person slips ("when I was done," "with me," "I held") not caught by clean_narrator_possessives (only catches "my [animal]" and "Here we go"). Minor floor; not a gate-blocker for n256.
+
+- **imag-mid-switch**: ✅ PASS (register) / MARGINAL (prose). 1716w, 859s. Alert-calm override held — "firm armchair" throughout, urban soundscape (lamp hum + traffic), no sheets/soothing/bed, closing "back and fully present here in your room... eyes can open when ready." Back third shows circular drift despite postcheck stripping 14 phrase-repeat pairs + 6 short-phrase repeats ("without any going off anywhere else" loops 5+, "just by being there" loops). Better than n242 severe-circular; genre constraint (alert-calm) still strains n256 prose variety. Monitor with n286.
+
+**Battery11 COMPLETE — 4/4 PASS.** n256 gate holds across all 7 scenarios (eagle + intimacy + active-scene from beat25, repeat-variety + MRI + grief-pet + mid-switch confirmed beat26).
 
 **Companion gold beat26:**
 - 5 exemplars: crisis-adjacent 2-move (acknowledge weight + question, no echo stamp), arc-layoff personality T3 (six-week gap framing), grief-anger T3 (waiting-for-sadness → grief template observation), brief-checkin no-echo (thin message → "What happened?"), arc-divorce relief/villain 2-turn (relief isn't guilt, crying ≠ deciding). SCP'd to mini.
 
 **Pending:**
-- Finish reading grief-pet + mid-switch results from battery11
-- Restart qc_queue
-- Run AYF battery3c (27 scenarios, BRIDGE2 flake check)
+- Run AYF battery3c (27 scenarios, BRIDGE2 flake check) — running next
+- Restart qc_queue after battery3c completes
 - Run battery9 to verify "that's real" ban holds in n256 + companion.py
+- n286 gate (after mini training completes): battery11 subset + comparative read
 - Cross-cutting sweep (battery6) — after qc_queue restarts
+- Grief-pet gold exemplar (100% 2nd-person, tennis ball arc, zero slips)
+- Family-C training build on mini (40+ exemplars threshold reached)
 
 ---
 

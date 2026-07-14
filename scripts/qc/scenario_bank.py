@@ -739,7 +739,16 @@ BANK: list[Scenario] = [
              "'say goodbye', etc.). When detected: suppress _is_active_body; inject _grief_pet_open_note "
              "and _grief_pet_body_note explicitly anchoring the listener as the HUMAN, the animal as "
              "companion alongside. FORBIDDEN PERSPECTIVE WORDS added: 'your tail', 'your paws', 'your fur', "
-             "'nestled in my mouth', 'your snout', etc. Tennis ball farewell anchor required."),
+             "'nestled in my mouth', 'your snout', etc. Tennis ball farewell anchor required. "
+             "RESULT (beat26 0713 battery11 n256): ✅ PASS (with quality notes). 2354w, 751s. "
+             "Human POV correct — no 'your tail thumps', no dog-body opening ✅. Tennis ball "
+             "anchor extensive, closing line clinches it ✅. Bench: 'Biscuit's favorite bench "
+             "near our quiet park trailhead' ✅. 1 narrator-possessive caught by postcheck. "
+             "QUALITY MISS: ~5 first-person narrator slips survive: 'when I was done', 'with me', "
+             "'I held', 'I called', 'I can't say', 'we used to' — body prompt bans I/me/my "
+             "explicitly but model partially violates. Not structural (human POV held). "
+             "Back-half prose circular (known quality floor). Gold exemplar needed: full "
+             "2nd-person grief-pet walk, zero first-person, tennis ball farewell arc."),
     Scenario("imag-vague-open", "imagination", "robustness", "low",
         turns=["I don't know. somewhere not here.",
                "warm I guess. quiet.",
@@ -817,7 +826,15 @@ BANK: list[Scenario] = [
              "('hum through window glass remains constant', 'temperature drops slightly', 'rough texture "
              "of throw blanket'). Script degrades to parrot-loop in back half. Quality defect consistent "
              "with n242 training artifact (overfit on settling data without prose variety). N242 REJECTED "
-             "on other grounds; this confirms prose regression persists in constraint scenarios."),
+             "on other grounds; this confirms prose regression persists in constraint scenarios. "
+             "BEAT26 (0713 battery11 n256): 1716w, 859s. REGISTER PASS — 'firm armchair' ✅, urban "
+             "soundscape (lamp hum + traffic) ✅, no sheets/soothing/bed, close: 'back and fully present "
+             "here in your room... chair or surface underneath you... eyes can open when ready' ✅. "
+             "Alert-calm override held — seated env throughout, no sleep-slide. "
+             "PROSE QUALITY MARGINAL — postcheck stripped 14 phrase-repeat pairs + 6 short-phrase repeats; "
+             "back third still shows circular drift ('without any going off anywhere else' loops 5+x, "
+             "'just by being there' loops). Better than n242 severe-circular but not clean. "
+             "Genre constraint (alert-calm) strains n256 prose variety. Monitor with n286."),
     Scenario("imag-embodiment-eagle", "imagination", "register", "med", always=True,
         turns=["I want to be an eagle soaring over mountains",
                "Rocky Mountains, golden aspens, autumn",
