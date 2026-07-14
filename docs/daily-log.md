@@ -31,13 +31,17 @@ The journey is part of the public diligent narrative — see `strategy.md`.
 **Companion gold beat26:**
 - 5 exemplars: crisis-adjacent 2-move (acknowledge weight + question, no echo stamp), arc-layoff personality T3 (six-week gap framing), grief-anger T3 (waiting-for-sadness → grief template observation), brief-checkin no-echo (thin message → "What happened?"), arc-divorce relief/villain 2-turn (relief isn't guilt, crying ≠ deciding). SCP'd to mini.
 
+**AYF battery3c (beat26 run, 2026-07-13):**
+- **26/28 PASS** (342s). 2 FAIL: UC2-b BRIDGE2 (cook time "4 hours", known flake) + UC2-c harder bridge ("she was firm / not red wine"). Both failures: RAG doesn't bridge "grandmother's" / "she" → "Grandma Rosa's" in file. Systemic vocab-bridge weakness; query rewriting or embedding synonym expansion needed; deferred. UC1-d (temporal/Javi "may 7") now PASS — prior fix persisted. All HOSTILE/EDGE/UC3-5 PASS.
+- Added ask-bridge2 to scenario_bank.py for BRIDGE2 tracking. Updated ask-temporal-current note with beat26 PASS result.
+
+**Grief-pet gold (beat26):** Added `c-grief-cat-windowsill` exemplar to A_gold — last evening with cat Mochi, heating pad, windowsill birds, 100% 2nd-person (zero first-person slips verified). A_gold = **287 lines**. SCP'd to mini. (Will be included in n287+ training, not the current in-progress n286 run.)
+
 **Pending:**
-- Run AYF battery3c (27 scenarios, BRIDGE2 flake check) — running next
-- Restart qc_queue after battery3c completes
+- Restart qc_queue (memory 82% free ✅) — next
 - Run battery9 to verify "that's real" ban holds in n256 + companion.py
-- n286 gate (after mini training completes): battery11 subset + comparative read
+- n286 gate (training at iter ~1125/1500 on mini, ETA ~18:00): rsync adapter → battery11 subset + comparative read before any promotion
 - Cross-cutting sweep (battery6) — after qc_queue restarts
-- Grief-pet gold exemplar (100% 2nd-person, tennis ball arc, zero slips)
 - Family-C training build on mini (40+ exemplars threshold reached)
 
 ---

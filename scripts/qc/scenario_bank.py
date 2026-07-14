@@ -520,7 +520,19 @@ BANK: list[Scenario] = [
         note="REGRESSION (beat10 fix): temporal state across dated notes. Answer must include 'may' "
              "AND 'lead' — the current state is always the most recent dated note, but the date "
              "reference must survive (QA_SYSTEM temporal context rule). Failure mode: strips date "
-             "and says only 'Javi back in lead' without the 'May 7' context."),
+             "and says only 'Javi back in lead' without the 'May 7' context. "
+             "BEAT26 (0713 battery3c): ✅ PASS — 'As of May 7, Javi is back in lead.' UC1-d fix persisted."),
+    Scenario("ask-bridge2", "ask", "helpfulness", "high", always=True, files={
+        "recipes.txt": ("Grandma Rosa's red sauce: heat olive oil with garlic, add crushed tomatoes, "
+                        "simmer 4 hours minimum. She was firm: never red wine, only dry white.")},
+        queries=[("How long does my grandmother's pasta sauce need to cook?", "4 hours"),
+                 ("What was she firm about not using in the sauce?", "red")],
+        note="BRIDGE2 vocabulary gap: query uses 'grandmother's' and 'she' but file has 'Grandma Rosa'. "
+             "RAG retrieval must bridge colloquial phrasing to proper name. Known ~20% flake rate. "
+             "BEAT26 (0713 battery3c): ❌ FAIL both — 'That isn't in your files.' on both queries. "
+             "Root cause: semantic retrieval does not bridge 'grandmother's sauce' → 'Grandma Rosa's red sauce'. "
+             "UC2-c ('she was firm...not red wine') same failure. Systemic RAG vocab-bridge weakness; "
+             "fixing requires embedding-level synonym expansion or query rewriting before retrieval. Deferred."),
 
     # ============================ BUILD YOUR OWN ============================
     Scenario("build-interviewer", "build", "helpfulness", "high",
