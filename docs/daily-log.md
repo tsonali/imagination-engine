@@ -8,6 +8,35 @@ The journey is part of the public diligent narrative — see `strategy.md`.
 
 ---
 
+## 2026-07-13 (beat26 IN PROGRESS) — stock imagery postcheck; companion gold; battery11 continuing; README vital-facts
+
+**Defects found + fixed:**
+
+1. **Forbidden stock imagery slip-through** — imag-repeat-variety night-2 generated "candle flame" + "oil diffuser gives off lavender smell" despite explicit FORBIDDEN STOCK IMAGERY ban in COMMON_POSTURE. Added `drop_forbidden_stock_imagery()` to postcheck.py (sentence-level strip for candle, diffuser, lavender, nightingale, songbird). Added to generator.py strip loop with transcript-word guard — only strips tokens absent from user's intake. Smoke test: "The candle flame flickers. The rain falls. The oil diffuser gives off lavender." → 2 sentences dropped, "The rain falls." preserved.
+
+2. **README + site companion description** — "four tools" stale count fixed to "five tools." Companion entry now mentions vital-facts honest memory (user-editable plain file, open threads, confabulation guard). Site index.html companion description updated to match.
+
+**Battery11 remaining (n256) — partial results:**
+
+- **imag-repeat-variety**: ✅ PASS. Night-1 1568w, night-2 1471w, 0% sentence overlap. Both serve rain/blankets settling register. night-2 DEFECT: invented candle + oil diffuser (now fixed in postcheck). Back-half prose degeneration (circular "supposed to happen" / "going forward") in both — known n256 quality floor on long settling scripts (>1000w), not structural.
+
+- **imag-mri**: ✅ PASS (near). 2225w, 918s (slower due to brief dual-model event). MRI setting present (cold metal table, "MRI" named, beeping monitors). Drums transformation present and developed ✅. No first-person violations ✅. No hallucinated characters ✅. Tube walls not strongly described (prior pass had "narrow walls close in"). Back-half prose circular. Slower due to memory pressure from brief battery6 launch (killed immediately).
+
+- **imag-grief-pet**: ⏳ GENERATING
+- **imag-mid-switch**: ⏳ PENDING
+
+**Companion gold beat26:**
+- 5 exemplars: crisis-adjacent 2-move (acknowledge weight + question, no echo stamp), arc-layoff personality T3 (six-week gap framing), grief-anger T3 (waiting-for-sadness → grief template observation), brief-checkin no-echo (thin message → "What happened?"), arc-divorce relief/villain 2-turn (relief isn't guilt, crying ≠ deciding). SCP'd to mini.
+
+**Pending:**
+- Finish reading grief-pet + mid-switch results from battery11
+- Restart qc_queue
+- Run AYF battery3c (27 scenarios, BRIDGE2 flake check)
+- Run battery9 to verify "that's real" ban holds in n256 + companion.py
+- Cross-cutting sweep (battery6) — after qc_queue restarts
+
+---
+
 ## 2026-07-13 (beat25 COMPLETE) — n256 PROMOTED; "that's real" ban; TTS leak fix; +5 more gold (A=286); battery11 remaining 4 scenarios run; n270/n281 evals read and rejected
 
 **Logs read end-to-end this beat:**

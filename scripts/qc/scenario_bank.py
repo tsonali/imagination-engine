@@ -615,7 +615,16 @@ BANK: list[Scenario] = [
              "honored throughout. Script stays in tube. _is_rehearsal code fix CONFIRMED WORKING. "
              "Quality note: back-half phrase degeneration ('nothing else but drum, breath without "
              "needing anything too much for those in chair does not close off so much at all') — "
-             "known n115 floor issue, not structural."),
+             "known n115 floor issue, not structural. "
+             "RESULT (beat26 0713 battery11 n256): ✅ PASS. 2225w, 918s. MRI setting present "
+             "('beeping of monitors', 'cold metal table', 'MRI stable' named). Drums transformation "
+             "present and developed throughout ✅. No first-person violations ✅. No hallucinated "
+             "characters ✅. Back-half prose degeneration: 'nothing needed or forced from anywhere' "
+             "circular loop in final 800w — known n256 quality floor, same as n115. Quality note: "
+             "tube WALLS not strongly described (prior passing run: 'narrow walls close in on all "
+             "sides; they press against your arms'); n256 says 'metal table' without the enclosure. "
+             "Not a structural regression — setting held, no escape to drum tunnel/bedroom. "
+             "Generation slower (918s vs 584s) — memory pressure from brief dual-model event."),
     Scenario("imag-deposition", "imagination", "helpfulness", "high",
         turns=["I'm being deposed next month in a lawsuit against my old employer. Their lawyer will try to rattle me. I want to rehearse staying flat and factual",
                "the conference room, the court reporter typing, their lawyer smiling like we're friends. I answer only what was asked and then I stop talking",
