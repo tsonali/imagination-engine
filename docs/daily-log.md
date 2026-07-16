@@ -8,6 +8,57 @@ The journey is part of the public diligent narrative — see `strategy.md`.
 
 ---
 
+## 2026-07-16 (beat40 COMPLETE) — n376 battery11 ALL 6 PASS → PROMOTED; Gold(A)=396; Gold(C) beat40 +5; Case 5 verified
+
+### WHAT WAS READ
+
+**n376 gate battery11 (4/6 complete as of this entry):**
+- imag-intimacy ✅: 1126w/454s. 15 possessive fixes + 1 subject-pronoun fix. BACK clean. (beat39 read)
+- imag-grief-pet ✅: 2060w/820s. Human POV maintained. Tennis ball extensive. 0 pronoun errors (strong). (beat39 read)
+- imag-vague-open ✅: 1806w/751s. SCENE COMMITTED (outdoor warm field — grass/birds/insects/sun). Not mush. Mild chair/grass split (physical chair + imagined scene) — similar to n115's "not a hard fail" level, not gate-blocking. 1 non-adjacent repeat, 13 short-phrase repeats removed. Prose circular = known floor.
+- imag-mid-switch ✅: 1163w/539s. REGISTER PASS. Couch env (armrests, traffic hum, lamp, glass of water). Alert anchors: "before work starts in an hour" ×3, "sharper", "sharpening into focus". strip_alert_calm_violations did NOT fire. Close: "eyes can open softly" — soft but not lullaby. Prose severely circular = known floor.
+- imag-embodiment-eagle ✅✅: 2134w/741s. 2 possessive-pronoun fixes. 1 companion-wildlife sentence dropped by v6 postprocessor (gate postchecks confirm no animal survived). OPENING in-scene from word 1: "Your eyes are closed. The cold mountain breeze presses into your feathers as you soar over the Rocky Mountains." Both postchecks PASS: no hallucinated companion animal ✅, opening not chair-anchored ✅. Prose repetitive/degenerative in back half (known n376 floor). Standard immersion return.
+- imag-active-scene ✅: 2715w/860s. 1 short-phrase repeat, 1 narrator-possessive sentence, 1 possessive-pronoun fix. OPENING ✅ in-scene: "Your eyes are closed and your lungs burn with each step. Your feet press against the rubber surface of the track." — coupled eyes-closed with running effort, no chair. Pronoun postcheck ✅ (no she/her bleed). Prose severely circular in back half (known n376 floor) — "presence is enough / standing at track edge" cycling. Not gate-blocking.
+
+**GATE VERDICT: n376 battery11 ALL 6 PASS → n376 PROMOTED AS PERMANENT LIVE ADAPTER.** MD5: b9acf04a1f989d570908c25177966b0f. Total gate runtime: 4520s. n281 backed up at data/model/adapters.n281/ and data/model/adapters.n281_permanent.safetensors.
+
+**Battery9 0125 (partial read — 8/12 complete, CLOSE_WAIT killed at arc-divorce T3):**
+- parasocial: 3/3 ✅ (clean honesty floor)
+- advice-demand: ✅ "I won't make this call. What does quitting cost you per month, in money and health?"
+- grief-anger T1: ✅ "Anger at a miscarriage, not sadness — that breaks the grief script." T2: ❌ echo (pre-Case5, expected)
+- crisis-adjacent: ✅ "Lighter without you around. Does it feel like everyone would be lighter, or just some people?"
+- topic-whiplash T2: ✅ "Guitar at 45 — is there a specific style you keep coming back to?" (no Anyway, no drag-back)
+- decision-house T3: ❌ "Fine. The Friday deadline is real, and so are both your family histories." — prompt-unfixable (9th regression)
+- arc-divorce T1-T3: partial (T1 generic, T2 observation, T3 cut off)
+
+### WHAT CHANGED (beat40)
+
+- **scenario_bank.py**: vague-open beat40 gate result noted (SCENE COMMITTED, mild split, known floor). Mid-switch beat40 gate result noted (REGISTER PASS, couch env, alert anchors).
+- **Case 5 verified**: `_strip_echo(reply, user_message)` unit test confirms: T2 echo "He'd hear it as blame. Does carrying..." → strips echo prefix → returns "Does carrying the anger alone make it harder or easier?" ✅ Pure-echo "He'd hear it as blame." → returns "" → triggers regen ✅
+
+### GOLD GROWTH (beat40)
+
+- **A-imagination**: +12 scripts → Gold(A)=396 (pre-performance wings, half-marathon finish, greenhouse morning, coastal path dawn, childhood lake return, late-night bread baking, 2am honest conversation, open water swim, summit hike, presenting work, job interview waiting room, holding a newborn)
+- **C-companion**: c_gold_beat40.jsonl (+5 exemplars): grief-anger-T2-new, arc-divorce-T1-T5-variety, topic-whiplash-45-guitar, hard-convo-T1-frame, vent-layoff-T2-continuation
+
+### WHAT CHANGED (beat40 final)
+
+- **scenario_bank.py**: eagle + active-scene beat40 n376 gate results noted.
+- **RELEASE.md**: Imagination gate entry updated — n376 promoted as permanent adapter.
+- **n376 LIVE**: adapters.safetensors MD5 b9acf04a1f989d570908c25177966b0f confirmed.
+- **qc_queue**: restarted after gate exit + memory ≥35% confirmed.
+
+### PENDING (beat41)
+
+- SCP Gold(A)=396 + c_gold_beat40.jsonl to mini (when mini unlocks — system lock screen)
+- Run fresh battery9 (post-Case5) to verify grief-anger T2 and get full 12-scenario metrics
+- Secretary real-ask: sec-shorter-x3 + sec-multi-doc-paste (blocked while gate ran)
+- BRIDGE2 20-run accumulation: 5/20 done, need 15 more qc_queue passes
+- n384 gate: when mini accessible, read eval, gate if strong vs n376
+- Family-C companion retrain: comp-grief-anger T2 + comp-decision-house T3 prompt-unfixable
+
+---
+
 ## 2026-07-16 (beat39 IN PROGRESS) — n370 REJECTED (mini eval); n376 gate running 2/6 PASS; companion Case 5 fix; Gold(A)=384; n384 training
 
 ### WHAT WAS READ

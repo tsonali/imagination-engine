@@ -1140,7 +1140,14 @@ BANK: list[Scenario] = [
              "same 3 sensory details (hum, window warmth, hands drifting apart) without advancing; nonsense constructions "
              "('without anything else replacing what went away somehow just like that') multiply in final third. 1 postcheck "
              "pronoun fix. Known quality floor — not a new defect class. n370 gate candidate (committed scene is the gate "
-             "criterion; prose quality expected to improve with gold adapter)."),
+             "criterion; prose quality expected to improve with gold adapter). "
+             "RESULT (beat40 0716 battery11 0437 n376): ✅ SCENE COMMITTED. 1806w, 751s. Committed to warm outdoor field "
+             "(dry grass, birds, insects, sun warmth). NOT mush. MILD CHAIR/GRASS SPLIT: 'feet on floor' then 'feet on dry "
+             "grass underfoot' — physical chair is the settle anchor, outdoor scene is the imagined content. Similar to n115's "
+             "'not a hard fail' level (not gate-blocking; chair/bed split was n115's failure, this is chair vs imagined-scene). "
+             "1 non-adjacent phrase-repeat pair, 13 short-phrase repeats removed. Prose severely circular — same 4 props "
+             "(grass/birds/insects/breeze) repeat without advancing. Known quality floor. GATE CRITERION MET: committed scene. "
+             "n376 gate 3/4 at this point."),
     Scenario("imag-mid-switch", "imagination", "robustness", "med", protocol="settling",
         turns=["help me wind down for sleep",
                "actually no — not sleep. I have to be UP in an hour for a night shift. I need calm but awake",
@@ -1241,7 +1248,15 @@ BANK: list[Scenario] = [
              "chair kept steady.' ✅. strip_alert_calm_violations did NOT fire (no sleep props). 15 phrase-"
              "repeat pairs removed, 7 short-phrase repeats removed, 1 pronoun fix. 'beat planner returned "
              "only 5 beats' (shorter output, not gate-blocking). Prose circular (chair/hum/traffic/fan loop) "
-             "— known alert-calm floor. REGISTER GATE: PASS. n370 gate candidate."),
+             "— known alert-calm floor. REGISTER GATE: PASS. n370 gate candidate. "
+             "RESULT (beat40 0716 battery11 0437 n376): ✅ REGISTER PASS. 1163w, 539s. "
+             "Couch env (armrests, traffic hum, warm lamp, glass of water) ✅ NOT bedroom. "
+             "Alert anchors: 'before needing to be awake for work', 'before work starts in an hour' (×3), "
+             "'Your mind feels sharper somehow', 'sharpening everything into focus' ✅. "
+             "strip_alert_calm_violations did NOT fire (no sleep props). beat planner returned only 7 beats. "
+             "Close: 'Your eyes can open softly whenever they feel ready.' — soft, not lullaby, acceptable. "
+             "Prose severely circular (glass/traffic/lamp/couch loop) — known alert-calm quality floor. "
+             "REGISTER GATE: PASS. n376 gate 4/4 so far."),
     Scenario("imag-embodiment-eagle", "imagination", "register", "med", always=True,
         turns=["I want to be an eagle soaring over mountains",
                "Rocky Mountains, golden aspens, autumn",
@@ -1358,7 +1373,15 @@ BANK: list[Scenario] = [
              "('golden-topped trees'/'thin air'/'that one white cloud' repeated) — known n281 quality floor. "
              "Back half adequate. No BACK leak strips needed. Beat38 fixes confirmed: or-surface-where-you-sit/lie "
              "pattern working (imag-intimacy caught it; eagle clean). n370 candidate gate pending (probe OK, "
-             "val 1.235 — must do comparative read vs n281 on eagle + intimacy + grief-pet before promotion)."),
+             "val 1.235 — must do comparative read vs n281 on eagle + intimacy + grief-pet before promotion). "
+             "n370 REJECTED (beat38 mini eval catastrophic: eagle meta-commentary, grandmother-kitchen 2 sentences, alert-competition 2 sentences). "
+             "RESULT (beat40 0716 battery11 0437 n376): ✅✅ PASS — 2134w, 741s. 2 possessive-pronoun fixes. "
+             "1 companion-wildlife sentence dropped by postprocessor (clean artifact: 'your only.' trailing stub; "
+             "gate postchecks confirm no hallucinated animal survived). OPENING ✅ in-scene from word 1: "
+             "'Your eyes are closed. The cold mountain breeze presses into your feathers as you soar over the "
+             "Rocky Mountains.' Postchecks: ✅ PASS no hallucinated companion animal, ✅ PASS opening not "
+             "chair-anchored. Prose: repetitive/degenerative in back half (known n376 floor). Close: standard "
+             "immersion return to chair. n376 (val 0.641/1500, best ever) 5/6 PASS — eagle strong positive."),
     Scenario("imag-active-scene", "imagination", "register", "med",
         turns=["I want to imagine finishing a long run — the last 200 meters, giving everything",
                "a track, alone, late afternoon",
@@ -1416,7 +1439,17 @@ BANK: list[Scenario] = [
              "PROSE: moderately circular (golden light/shadows loop 8-10x, fragmented sentences in middle). "
              "Known quality floor — consistent with n281 behavior under motion constraint. "
              "_is_active_body override working correctly at n281. n370 gate candidate (prose quality "
-             "expected to improve with gold adapter; pronoun floor already confirmed clean)."),
+             "expected to improve with gold adapter; pronoun floor already confirmed clean). "
+             "n370 REJECTED (mini eval catastrophic). "
+             "RESULT (beat40 0716 battery11 0437 n376): ✅ PASS — 2715w, 860s. 1 short-phrase repeat removed, "
+             "1 narrator-possessive sentence dropped, 1 possessive-pronoun fix. OPENING ✅ in scene from word 1: "
+             "'Your eyes are closed and your lungs burn with each step. Your feet press against the rubber "
+             "surface of the track.' No chair reference in opening — coupled 'eyes closed' with running effort "
+             "(same pass pattern as n281). PRONOUN ✅ postcheck: no she/her bleed (user in own body). "
+             "PROSE: severely circular/degenerative in back half (known n376 floor) — repeating 'presence is "
+             "enough / standing here at track edge / whatever comes next' cycle 15+ times. Not a gate criterion. "
+             "n376 battery11 ALL 6 PASS — n376 PROMOTED as permanent live adapter (val 0.641/1500, best ever). "
+             "4520s total gate runtime."),
 
     # ============================ BUILD-YOUR-OWN ============================
     # Scenarios from byo_deep_test.py (beat12 0708 first BYO deep test run).

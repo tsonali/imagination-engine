@@ -1,6 +1,6 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-07-16 beat39 ~05:00 — companion Case 5 fix + Gold(A)=384 + n376 gate RUNNING (2/6 PASS: intimacy ✅ grief-pet ✅). n370 REJECTED (mini eval catastrophic). n376 live (MD5: b9acf04a1f989d570908c25177966b0f). n384 training on mini (iter ~75/1500). qc_queue DOWN. Memory ~80% free._
+_Last updated 2026-07-16 beat40 ~06:00 — n376 battery11 ALL 6 PASS → n376 PROMOTED PERMANENT. Gold(A)=396 (+12). Gold(C) beat40 +5. qc_queue restarted. n384 training on mini (status unknown — mini locked). Memory clearing after gate exit._
 _Single source of truth for a fresh session. Everything below is real and running._
 
 ## FIRST THING TO DO when you resume — run these checks
@@ -79,26 +79,28 @@ HF_HUB_OFFLINE=1 .venv/bin/python scripts/qc/battery11_imagination_bank.py \
 # If rejected → restore n281: cp data/model/adapters.n281_permanent.safetensors data/model/adapters/adapters.safetensors
 ```
 
-## BEAT 39 STATE (as of this write — 2026-07-16 ~05:00)
+## BEAT 40 STATE (as of this write — 2026-07-16 ~06:00)
 
 ### What's running
-- **n376 GATE IN PROGRESS** (PID 10015) — `logs/qc/gate_0716_0437_n376_battery11.log`. 2/6 DONE: intimacy ✅ (1126w/454s, beat38 fixes confirmed), grief-pet ✅ (2060w/820s, 0 pronoun errors — cleaner than n281). vague-open generating. Log: `logs/qc/gate_0716_0437_n376_battery11.log`. **DO NOT START qc_queue until PID 10015 exits.**
-- **n370 REJECTED** — mini eval catastrophic: eagle meta-commentary, grandmother-kitchen 2 sentences, alert-competition 2 sentences. Did not run full gate.
-- **Live adapter: n376** (MD5: b9acf04a1f989d570908c25177966b0f) — installed for gating. n281 backed up at `data/model/adapters.n281/` and `data/model/adapters.n281_permanent.safetensors`.
-- **mini flywheel RUNNING** (restarted beat39 after idle since 04:22). n384 training started (~iter 75/1500 as of 05:00). ETA: GOLD-ADAPTER-0716-~0730-n384. Training on Gold(A)=384 (8 new scripts added beat39).
-- **qc_queue DOWN** — killed before gate. Restart after gate finishes.
-- **IMAGINATION GATE**: CLOSED ✅ — n281 ALL 6 PASS confirmed. n376 gate RUNNING — may upgrade the live adapter but gate stays CLOSED regardless.
-- **battery3c AYF** — 28/28 PASS beat39 (read this beat). BRIDGE2 clean (5 consecutive passes since bridge-retry fix beat30).
-- **companion.py Case 5 fix** — any-sentence echo detection added. Synced to both dist/ copies. 4/4 unit tests PASS.
+- **n376 GATE COMPLETE** (PID 10015 exited) — `logs/qc/gate_0716_0437_n376_battery11.log`. ALL 6 PASS. **n376 PROMOTED PERMANENT.**
+- **Live adapter: n376** (MD5: b9acf04a1f989d570908c25177966b0f). n281 backed up at `data/model/adapters.n281/` and `data/model/adapters.n281_permanent.safetensors`.
+- **mini status: UNKNOWN** (system lock screen). n384 training started beat39 at ~04:45 (iter ~175/1500 at beat40 start). ETA was 06:15-06:30 but mini is locked, cannot check.
+- **qc_queue RUNNING** (restarted beat40 post-gate after memory ≥35% confirmed).
+- **IMAGINATION GATE**: CLOSED ✅ — n376 battery11 ALL 6 PASS (beat40 2026-07-16). Imagination upgraded to n376.
+- **companion.py Case 5 fix** — any-sentence echo detection. Synced to both dist/ copies. 4/4 unit tests PASS.
+- **Gold(A)=396** — +12 beat40 (pre-performance wings, half-marathon, greenhouse, coastal dawn, childhood lake, late-night bread, 2am conversation, open water swim, summit hike, presenting work, job interview, holding newborn). NOT yet SCP'd to mini (mini locked).
+- **Gold(C) +5 beat40** — c_gold_beat40.jsonl (grief-anger T2, arc-divorce variety, topic-whiplash, hard-convo, vent-layoff). NOT yet SCP'd to mini.
 
-### Beat39 gate_0716_0437_n376_battery11 results (PARTIAL — 2/6 as of 05:00)
-- ✅ imag-intimacy: 1126w/454s. 15 possessive fixes, 1 subject-pronoun fix. BACK clean. Thematic cycling persists (known floor).
-- ✅ imag-grief-pet: 2060w/820s. Human POV ✅, tennis ball extensive ✅ (bench scene, fetch, jaw), bench present ✅. **ZERO postcheck interventions** — n376 generated grief-pet with 0 pronoun errors (vs n281's 4-7). Strong quality improvement signal. Cycling severe (known floor). STRUCTURAL PASS.
-- vague-open, mid-switch, eagle, active-scene: generating or pending.
+### Beat40 gate results — ALL 6 PASS
+- ✅ imag-intimacy: 1126w/454s. 15 possessive fixes, 1 subject-pronoun fix. BACK clean.
+- ✅ imag-grief-pet: 2060w/820s. 0 pronoun errors. Human POV, tennis ball, bench present. STRUCTURAL PASS.
+- ✅ imag-vague-open: 1806w/751s. Outdoor warm field committed scene. Mild chair/grass split (not gate-blocking).
+- ✅ imag-mid-switch: 1163w/539s. Couch env, alert anchors ×3 "before work starts in an hour", strip_alert_calm_violations clean.
+- ✅✅ imag-embodiment-eagle: 2134w/741s. In-scene from word 1, both postchecks PASS, 1 wildlife sentence dropped+cleaned.
+- ✅ imag-active-scene: 2715w/860s. "Your eyes are closed and your lungs burn with each step." In-scene, no chair, pronoun postcheck ✅.
 
-### Beat39 code fixes
-- **companion.py**: _strip_echo Case 5 — any-sentence echo (checks non-first user sentences). Synced to dist/.
-- **scenario_bank.py**: comp-grief-anger beat39 note added.
+### Beat40 code fixes
+None (all code work was beat39: Case 5, scenario_bank.py notes).
 
 ### Beat38 battery11 0146 results (COMPLETE — 4418s, 6/6 done)
 
