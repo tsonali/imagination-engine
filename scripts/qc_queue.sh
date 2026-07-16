@@ -54,11 +54,20 @@ while true; do
     pkill -f "mlx_lm" 2>/dev/null
     pkill -f "battery11_imagination\|battery9_engagement\|battery10_registers\|product_e2e_test" 2>/dev/null
     sleep 5
+    # Syntax guard: abort entire pass if scenario_bank.py is broken (prevents silent empty runs)
+    if ! .venv/bin/python -c "import ast; ast.parse(open('scripts/qc/scenario_bank.py').read())" 2>/dev/null; then
+      say "SCENARIO_BANK SYNTAX ERROR — skipping all batteries this pass; fix scenario_bank.py"
+      break
+    fi
     name=$(basename "$b" .py)
     log="logs/qc/queue_$(date +%m%d_%H%M)_${name}.log"
     say "running $name -> $log"
     mem_ok || continue
-    .venv/bin/python "$b" > "$log" 2>&1
+    # HF_HUB_OFFLINE=1: prevents huggingface_hub (imported by mlx_lm) from making
+    # network calls to HuggingFace CDN (CloudFront) during model load. Without this,
+    # the process can get stuck in CLOSE_WAIT when CloudFront drops a long-idle connection,
+    # causing battery runs to hang silently mid-generation (observed beat38 battery11 0044).
+    HF_HUB_OFFLINE=1 .venv/bin/python "$b" > "$log" 2>&1
     say "$name exit $? ($(grep -c 'PASS' "$log" 2>/dev/null || echo 0) PASS / $(grep -c 'FAIL' "$log" 2>/dev/null || echo 0) FAIL lines)"
     sleep 120  # let memory settle between model loads
   done

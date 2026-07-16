@@ -60,8 +60,10 @@ from imagination_engine.postcheck import (degeneration_report, drop_collapsed_pa
                                           phrase_repeat_count, repair_phrase_repeats,
                                           repair_short_phrase_repeats,
                                           drop_adjacent_duplicates, fix_possessive_pronouns,
+                                          fix_subject_pronouns,
                                           strip_back_instruction_leaks,
-                                          strip_active_body_chair_refs)
+                                          strip_active_body_chair_refs,
+                                          strip_alert_calm_violations)
 from imagination_engine.scene_bibles import get_bible
 from imagination_engine.structured import extract_array
 
@@ -618,6 +620,9 @@ def _generate_settling(engine: Engine, transcript: list[dict], emit) -> str:
     if pronoun_fixed:
         log.warning('[settling] %d possessive-pronoun adjective error(s) fixed (hers→her/yours→your)',
                     pronoun_fixed)
+    body, subj_fixed = fix_subject_pronouns(body)
+    if subj_fixed:
+        log.warning('[settling] %d subject-pronoun error(s) fixed (her→she before verb)', subj_fixed)
     emit("writing_return", "Softening the close.", 3, 3, 3.0)
     log.info("[settling] session ready: %d words", len(body.split()))
     return body
@@ -709,8 +714,16 @@ def generate_session(
     )
     _is_grief_pet_walk = any(kw in _transcript_text for kw in _GRIEF_PET_SIGNALS)
 
+    # Force case_a when user explicitly says "I want to be [animal/role]" — the
+    # classifier is stochastically unreliable on embodiment phrases and sometimes
+    # returns case_b (observer), which silences the active-body prompt overrides and
+    # wildlife drop. Explicit "I want to be" + a motion keyword = unambiguous embodiment.
+    _explicit_embodiment = (
+        "i want to be" in _transcript_text
+        and any(kw in _scene_text_lc for kw in _motion_keywords)
+    )
     _is_active_body = (
-        classification.direction == "case_a"
+        (classification.direction == "case_a" or _explicit_embodiment)
         and any(kw in _scene_text_lc for kw in _motion_keywords)
         and not _is_grief_pet_walk  # animal-companion scenes: listener is human, not animal
     )
@@ -1099,20 +1112,32 @@ def generate_session(
     if pronoun_fixed:
         log.warning('[v6] %d possessive-pronoun adjective error(s) fixed (hers→her/yours→your)',
                     pronoun_fixed)
+    full, subj_fixed = fix_subject_pronouns(full)
+    if subj_fixed:
+        log.warning('[v6] %d subject-pronoun error(s) fixed (her→she before verb)', subj_fixed)
     # Strip BACK_PROMPT instruction leaks: model occasionally echoes sub-instructions
     # ('Two sentences max.', 'Open your eyes when ready.') verbatim. Strip them.
     full, leak_removed = strip_back_instruction_leaks(full)
     if leak_removed:
         log.warning('[v6] %d BACK instruction-leak sentence(s) stripped', leak_removed)
-    # Active-body wildlife filter: when the model ignores the FORBIDDEN wildlife
-    # prompt (e.g. generates "A hawk is alongside you" despite explicit prohibition),
-    # drop those sentences. Only fires when listener's transcript did not name these.
-    if _is_active_body and not _companion_wildlife_in_transcript:
+    # Wildlife filter: drop hallucinated companion animals from any immersion script
+    # where the user did not name these creatures. Decoupled from _is_active_body so
+    # it catches hawk/wolf even when classify_intake stochastically returns case_b
+    # (which suppresses the active-body prompt and lets hawk through unchecked).
+    if not _companion_wildlife_in_transcript:
         _wildlife_tokens = ("hawk", "falcon", "owl", "wolf", "raven")
         full, wildlife_dropped = drop_active_body_wildlife(full, _wildlife_tokens)
         if wildlife_dropped:
-            log.warning('[v6] %d companion-wildlife sentence(s) dropped (active-body)',
+            log.warning('[v6] %d companion-wildlife sentence(s) dropped',
                         wildlife_dropped)
+    # Talon-metaphor filter: model occasionally hallucinates eagle body-part metaphors
+    # ("Your talons are gripping the edge of the table") in non-embodiment scripts such
+    # as deposition rehearsal. Drop any sentence containing "talon/talons" when the
+    # session is NOT an active-body embodiment scene (eagle, wolf, etc.).
+    if not _is_active_body:
+        full, talon_dropped = drop_active_body_wildlife(full, ("talon", "talons"))
+        if talon_dropped:
+            log.warning('[v6] %d talon-metaphor sentence(s) dropped', talon_dropped)
     # Forbidden stock imagery filter: model sometimes generates clichéd ambient objects
     # (candles, oil diffusers, lavender) despite FORBIDDEN STOCK IMAGERY prompt instruction.
     # Strip any sentence containing a forbidden token the user did NOT name in their intake.
@@ -1122,6 +1147,14 @@ def generate_session(
         full, stock_dropped = drop_forbidden_stock_imagery(full, _stock_tokens)
         if stock_dropped:
             log.warning('[v6] %d forbidden-stock-imagery sentence(s) dropped', stock_dropped)
+    # Alert-calm violation filter: model stochastically inserts sleep-register props
+    # (pillow, sheet, blanket, etc.) despite the FORBIDDEN WORDS list in _alert_calm_override.
+    # Belt-and-suspenders: strip at output time when the session is alert-calm.
+    if _alert_calm:
+        full, alert_stripped = strip_alert_calm_violations(full)
+        if alert_stripped:
+            log.warning('[v6] %d alert-calm FORBIDDEN WORD sentence(s) stripped (pillow/sheet/etc)',
+                        alert_stripped)
     full, ellipsis_cleaned = clean_ellipsis_breaks(full)
     if ellipsis_cleaned:
         log.warning('[v6] %d inline ellipsis marker(s) cleaned', ellipsis_cleaned)

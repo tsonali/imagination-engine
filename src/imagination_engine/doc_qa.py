@@ -118,4 +118,27 @@ class DocQA:
             max_tokens=max_tokens, temperature=0.2,  # low temp: faithful, not creative
         ):
             chunks.append(piece)
-        return Answer("".join(chunks).strip(), sources=sources, grounded=True)
+        answer = "".join(chunks).strip()
+        # If the model refused despite having context, retry once with an explicit
+        # vocabulary-bridge reminder. Fires ONLY on the exact refusal string so
+        # clean answers are unaffected. Same pattern as companion empty-reply regen.
+        if "isn't in your files" in answer.lower() and grounding:
+            retry_user = (
+                "VOCABULARY BRIDGE REMINDER: before declining, check whether any excerpt "
+                "describes the same thing under a different name or phrasing — 'Nonna', "
+                "'Grandma Rosa', 'Mom's recipe', or any similar familiar name IS the answer "
+                "to a question about 'my grandmother'. A nickname, title, or foreign-language "
+                "name still counts. Apply the synonym rule from the system prompt, then answer.\n\n"
+                + user
+            )
+            retry_chunks = []
+            for piece in self.engine.stream(
+                messages=[{"role": "system", "content": QA_SYSTEM},
+                          {"role": "user", "content": retry_user}],
+                max_tokens=max_tokens, temperature=0.3,
+            ):
+                retry_chunks.append(piece)
+            retry_answer = "".join(retry_chunks).strip()
+            if retry_answer:
+                answer = retry_answer
+        return Answer(answer, sources=sources, grounded=True)

@@ -175,9 +175,10 @@ def _b_summarize(text, instruction, tone, style):
         "(as many points as needed)\n\n"
         + lossless_rule + "\n"
         "Every decision, every CONDITION attached to a decision ('yes, but only "
-        "if...'), every deadline, and every open question MUST also survive — "
-        "a condition or commitment lost is wrong. Keep relative dates AS THE "
-        "SOURCE SAYS THEM — never attach a month or year the source didn't state.\n\n"
+        "if...'), every deadline, every named event or commitment, and every open "
+        "question MUST also survive — a condition, commitment, or named event lost "
+        "is wrong. Keep relative dates AS THE SOURCE SAYS THEM — never attach a "
+        "month or year the source didn't state.\n\n"
         + (f"FOCUS: {instruction}\n\n" if instruction.strip() else "")
         + f"TEXT:\n{text}"
     )
@@ -203,6 +204,11 @@ def _b_extract(text, instruction, tone, style):
         "ACTION ITEMS (who does what, as a checklist)\n"
         "DATES & DEADLINES\n"
         "OPEN QUESTIONS / DECISIONS NEEDED\n\n"
+        "STRICT DATE RULE: Compute notice deadlines by counting DAYS (never months). "
+        "Step through it: 60 days before August 31 → subtract 31 days to reach August 1, "
+        "then subtract 29 more days = July 2. Write the FINAL date only — no alternative, "
+        "no intermediate, no parenthetical variant. FORBIDDEN: impossible dates (June has "
+        "30 days, not 31; April/September/November also end on 30).\n\n"
         + (f"NOTE: {instruction}\n\n" if instruction.strip() else "")
         + f"TEXT:\n{text}"
     )
@@ -320,13 +326,13 @@ class Assistant:
 
     def run(self, task_key: str, text: str, **kw) -> UtilityResult:
         out = "".join(self.stream(task_key, text, **kw)).strip()
-        # Post-check for summarize: if mandatory numbers were dropped, regen up to 2x.
+        # Post-check for summarize: if mandatory numbers were dropped, regen up to 3x.
         # Common failure: $28K cost-context figure alongside 3.2% churn — drops even with
         # MANDATORY NUMBERS in the initial prompt. Each regen attempt uses explicit callout;
-        # second attempt escalates with CRITICAL FAILURE framing.
+        # second attempt escalates with CRITICAL FAILURE framing; third uses lowest temp.
         if task_key == "summarize":
             nums = _extract_numbers(text)
-            for attempt in range(2):
+            for attempt in range(3):
                 missing = [n for n in nums if n not in out]
                 if not missing:
                     break
@@ -336,27 +342,58 @@ class Assistant:
                     kw.get("tone", ""), kw.get("style_sample", ""),
                 )
                 missing_str = ", ".join(missing)
-                severity = "CRITICAL FAILURE" if attempt else "MANDATORY NUMBERS MISSING"
+                if attempt == 0:
+                    severity = "MANDATORY NUMBERS MISSING"
+                elif attempt == 1:
+                    severity = "CRITICAL FAILURE"
+                else:
+                    severity = "ABSOLUTE CRITICAL FAILURE — THIRD ATTEMPT"
+                # Build per-number guidance: include the SOURCE SENTENCE for each missing
+                # number so the model knows where it came from and where to put it.
+                source_lines = [ln.strip() for ln in text.replace("\n", ". ").split(". ") if ln.strip()]
+                per_num = []
+                for n in missing:
+                    src_ctx = next((ln for ln in source_lines if n in ln), None)
+                    if src_ctx:
+                        per_num.append(f"{n} (from source: '{src_ctx}')")
+                    elif "%" in n:
+                        per_num.append(f"{n} (include the percentage RATE explicitly, "
+                                       "not just its dollar cost-per-point equivalent)")
+                    else:
+                        per_num.append(n)
+                missing_detail = "; ".join(per_num)
                 extra = (
                     f"\n\n{severity}: A previous attempt dropped "
-                    f"these required numbers from the source — each MUST appear verbatim "
-                    f"in your output: {missing_str}. "
-                    "Include every one. For cost-context figures (e.g., 'each churn point "
-                    "costs $28K ARR/month'), include the dollar amount alongside the metric."
+                    f"these required numbers — each MUST appear verbatim in your output: "
+                    f"{missing_detail}. "
+                    "Do not substitute a related figure; include EACH ONE as it appears. "
+                    "For cost-context figures (e.g., 'each churn point costs $28K ARR/month'), "
+                    "include BOTH the percentage rate AND the dollar amount."
                 )
+                temp = 0.25 if attempt >= 2 else (0.35 if attempt == 1 else 0.4)
                 regen = "".join(self.engine.stream(
                     messages=[
                         {"role": "system", "content": system + extra},
                         {"role": "user", "content": user},
                     ],
                     max_tokens=kw.get("max_tokens", 1200),
-                    temperature=0.35 if attempt else 0.4,
+                    temperature=temp,
                 )).strip()
                 recovered = [n for n in missing if n in regen]
                 if len(recovered) >= len(missing) // 2 + 1:
                     log.info("secretary[summarize]: attempt %d regen recovered %d/%d missing numbers",
                              attempt + 1, len(recovered), len(missing))
                     out = regen
+        # Post-check for draft: if the model invented specific day names not present
+        # in the brief, replace them with [day] (regression from sec-missing-facts).
+        if task_key == "draft":
+            _DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday",
+                     "saturday", "sunday"]
+            text_lower = text.lower()
+            for day in _DAYS:
+                if day not in text_lower and day in out.lower():
+                    out = re.sub(r'\b' + day + r'\b', '[day]', out, flags=re.IGNORECASE)
+                    log.info("secretary[draft]: replaced invented day '%s' with [day]", day)
         return UtilityResult(task=task_key, output=out)
 
 

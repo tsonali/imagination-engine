@@ -368,7 +368,21 @@ def clean_ellipsis_breaks(text: str) -> tuple[str, int]:
 _NARRATOR_POSS = re.compile(
     r"\bmy\s+(boy|dog|cat|pet|horse|bird|fish|rabbit|puppy|kitten|pup)\b"
     r"|\bHere\s+we\s+go\b"
-    r"|\bwe\s+are\s+here\b",
+    r"|\bwe\s+are\s+here\b"
+    # Grief-pet / body-script first-person narrator leaks (beat35):
+    # Model claims narrator "I" actions that belong to the second-person listener.
+    r"|\bI\s+(?:reach|keep|feel|sit|take|hold|said|step|walk|stand|watch|start|call|move)\b"
+    r"|\bI\s*'\s*m\s+\w+ing\b"          # "I'm [verb]ing" mid-script
+    r"|\bI\s*'\s*ve\s+\w+\b"            # "I've [past]" mid-script
+    r"|\bby\s+my\s+side\b"              # "by my side" narrator possessive
+    r"|\bfor\s+me\s+(?:just|here|now|there|too)\b"  # "for me just watching"
+    r"|\bunder\s+me\b"                  # should be "under you"
+    r"|\bthrough\s+me\b"               # should be "through you"
+    r"|\bwith\s+me\b"                  # should be "with you"
+    r"|\bwe\s+(?:started|are\s+now|were\s+both|had\s+been|come\s+back)\b"  # narrator "we"
+    r"|\bmy\s+(?:hand|hands|breath|side|step|voice|foot)\b"   # narrator body-part possessives
+    r"|\bboth\s+of\s+us\b"             # "both of us" narrator collective
+    r"|\bfor\s+us\b",                  # "for us" narrator collective
     re.IGNORECASE,
 )
 
@@ -397,6 +411,42 @@ _PRONOUN_SKIP = frozenset([
     "may", "might", "must", "do", "did", "does",
     "and", "or", "but", "nor", "to",
 ])
+
+
+_HER_SUBJECT_VERBS = re.compile(
+    # Present tense (3rd-person singular -s forms)
+    r"\bher\s+(enters|finds|reaches|searches|stands|turns|speaks|catches|"
+    r"looks|laces|passes|breaks|stops|tells|makes|lets|comes|moves|sits|meets|"
+    r"holds|takes|runs|walks|says|goes|sees|knows|wants|needs|leaves|starts|"
+    r"becomes|keeps|brings|gets|"
+    # Past tense forms (most common)
+    r"reached|found|stood|turned|met|held|told|said|came|saw|kept|went|"
+    r"spoke|broke|ran|took|got|left|made|started|moved|sat|walked|"
+    r"entered|searched|passed|stopped|caught|looked|laced)\b",
+    re.IGNORECASE,
+)
+
+
+def fix_subject_pronouns(text: str) -> tuple[str, int]:
+    """Replace 'her [verb]' → 'she [verb]' when 'her' is incorrectly used as subject.
+
+    The fine-tuned model sometimes generates 'her enters your line of vision',
+    'her finds its way', 'until her reached out' — using the object case 'her'
+    as a subject pronoun. Only fires on unambiguous verb forms (3rd-person
+    singular present or simple past) to avoid touching legitimate 'her [noun]'
+    possessive uses.
+    """
+    fixed = 0
+
+    def _replace_her_subject(m: "re.Match") -> str:
+        nonlocal fixed
+        fixed += 1
+        verb = m.group(1)
+        prefix = m.group(0)[: m.group(0).lower().index("her")]
+        return f"{prefix}she {verb}"
+
+    result = _HER_SUBJECT_VERBS.sub(_replace_her_subject, text)
+    return result, fixed
 
 
 def fix_possessive_pronouns(text: str) -> tuple[str, int]:
@@ -438,9 +488,23 @@ _BACK_LEAK_PATTERNS = [
     re.compile(r"\bRe-room\b", re.IGNORECASE),
     re.compile(r"^Eyes open\b", re.IGNORECASE),
     re.compile(r"\bOne final line\b", re.IGNORECASE),
+    # "(3) RE-ROOM" instruction bleed: model echoes "or surface where you sit/lie down"
+    re.compile(r"\bor surface where you (?:sit|lie)\b", re.IGNORECASE),
+    # BACK section leak variant: "chair or whatever surface is beneath you"
+    re.compile(r"\bor whatever surface is beneath you\b", re.IGNORECASE),
+    # BACK section leak variant: "the chair or surface beneath you" (beat38 battery11 0146 imag-intimacy)
+    re.compile(r"\bchair or surface\b", re.IGNORECASE),
+    # BACK section leak variant: "your chair or whatever surface has you resting" (beat38 battery11 0146 imag-active-scene)
+    re.compile(r"\bor whatever surface has you\b", re.IGNORECASE),
     # Model occasionally hallucinates technical environment details — strip these.
     re.compile(r"\bTTS output device\b", re.IGNORECASE),
     re.compile(r"\btext.to.speech\b", re.IGNORECASE),
+]
+
+# Instruction prefixes that leak as a label before real content — strip the prefix only,
+# keep the content that follows it (don't drop the whole sentence).
+_INSTRUCTION_PREFIX_PATTERNS = [
+    re.compile(r"Hard Cut Into The Scene:\s*", re.IGNORECASE),
 ]
 
 
@@ -452,6 +516,10 @@ def strip_back_instruction_leaks(text: str) -> tuple[str, int]:
     This strips sentences containing known leak patterns.
     Returns (cleaned_text, n_sentences_removed).
     """
+    # First strip instruction prefixes that precede real content (keep the content).
+    for pat in _INSTRUCTION_PREFIX_PATTERNS:
+        text = pat.sub("", text)
+
     sentences = re.split(r"(?<=[\.\!\?])\s+", text.strip())
     kept = []
     removed = 0
@@ -518,6 +586,30 @@ def drop_forbidden_stock_imagery(text: str, tokens: tuple) -> tuple[str, int]:
 
 
 _CHAIR_WORD = re.compile(r"\bchair\b", re.IGNORECASE)
+
+_ALERT_CALM_FORBIDDEN = re.compile(
+    r"\b(pillow|pillows|sheet|sheets|blanket|blankets|quilt|duvet|mattress|bedroom|pajamas)\b",
+    re.IGNORECASE,
+)
+
+
+def strip_alert_calm_violations(body_text: str) -> tuple[str, int]:
+    """Strip sentences containing sleep-register props from alert-calm body text.
+
+    When _alert_calm is detected, the FORBIDDEN WORDS list in _alert_calm_override
+    bans 'pillow', 'sheet', 'blanket', etc. at prompt level, but n256+ stochastically
+    violates this. This postprocessor catches violations at output time — applied only
+    to body_text when _alert_calm is True. Returns (cleaned_text, n_sentences_stripped).
+    """
+    sentences = re.split(r"(?<=[\.\!\?—])\s+", body_text.strip())
+    kept = []
+    stripped = 0
+    for s in sentences:
+        if _ALERT_CALM_FORBIDDEN.search(s):
+            stripped += 1
+        else:
+            kept.append(s)
+    return " ".join(kept), stripped
 
 
 def strip_active_body_chair_refs(opening_text: str) -> tuple[str, int]:

@@ -67,9 +67,40 @@ for sc in scenarios:
                 floors.append(f"GRIEF-PLATITUDE:{plat}")
     if sc.id == "sec-summarize-lossless":
         required = ["$2.4", "$380", "3.2%", "$28", "18%", "$400", "11 months"]
+        # Normalize hyphenated adjective form "11-month" → "11 months" before checking
+        out_check = re.sub(r'(\d+)-month\b', r'\1 months', out)
         for num in required:
-            if num not in out:
+            if num not in out and num not in out_check:
                 floors.append(f"NUMBER-LOST:{num}")
+    if sc.id == "sec-shorter-x3":
+        # Multi-pass: run rewrite 3 times; each must be shorter than previous
+        prev_words = len(out.split())
+        for i in range(2, 4):
+            r2 = c.post("/utility/run", json={"task": "rewrite", "text": out,
+                                               "tone": "concise", "instruction": "make it shorter"})
+            out2 = r2.text.strip()
+            cur_words = len(out2.split())
+            if cur_words >= prev_words:
+                floors.append(f"NOT-SHORTER-PASS-{i}:{prev_words}w->{cur_words}w")
+            else:
+                print(f"  pass {i}: {prev_words}w -> {cur_words}w ✓", flush=True)
+            if len(out2) < 5:
+                floors.append(f"EMPTY-PASS-{i}")
+            prev_words = cur_words
+            out = out2
+    if sc.id == "sec-multi-doc-paste":
+        # Both docs must contribute to the summary
+        must_survive = [("Q3", "Q3-launch-delay"), ("Sarah", "Sarah-owns-timeline"),
+                        ("legal", "compliance-legal-risk"), ("Q4", "Q4-slip-risk")]
+        for term, label in must_survive:
+            if term.lower() not in out.lower():
+                floors.append(f"LOST:{label}")
+    if sc.id == "sec-lease-extract":
+        # June 31 is impossible (June has 30 days) — correct answer is July 2
+        if re.search(r'\bJune\s+31\b', out, re.I):
+            floors.append("IMPOSSIBLE-DATE:June-31")
+        if not re.search(r'\bJuly\s+2\b', out, re.I):
+            floors.append("WRONG-DEADLINE:should-be-July-2")
     print(f"\n  floors: {floors or 'clean'}", flush=True)
 
 print(f"\ntotal {time.time()-t0:.0f}s", flush=True)
