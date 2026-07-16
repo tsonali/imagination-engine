@@ -173,12 +173,13 @@ Backup n243 also: `data/model/adapters.n243_LIVE/` (MD5: 8a7395654d4bd0f72b69c67
 - n287 (19:58): REJECTED — narrator "we" violation. val 0.577.
 - n293 (pending): will auto-train when flywheel detects A_gold change (293 vs 287).
 
-## NEXT BEAT (beat37) — PRIORITY ORDER
-1. **Read battery11 with new code** — verify _NARRATOR_POSS catches grief-pet narrator leaks (should log "[v6] X narrator-possessive sentence(s) dropped"); verify talon filter fires on deposition (should log "[v6] X talon-metaphor sentence(s) dropped"). qc_queue running battery2b now; battery11 will queue after.
-2. **n356 mini eval** — when flywheel completes n356, read `_evals/GOLD-ADAPTER-*-n356.txt`. Judge vs n281. First adapter with c_gold_beat35+beat36 companion exemplars (grief-anger T1+T2, arc-newparent T2+T3, hard-convo-prep HOW-frame, decision-house concrete-pivot, arc-divorce T5 no-echo). If eval clean → battery11 gate before any promotion.
-3. **Battery3c AYF — 20-run BRIDGE2 flake rate** — memory must be ≥35%. Run: `python3 scripts/qc/battery3c_ask_usecases.py 2>&1 | tee logs/qc/battery3c_manual_$(date +%H%M).log`. Target: BRIDGE2 <5% flake across 20 runs. If verified: close AYF gate.
-4. **Secretary "shorter ×3" + multi-doc paste** — use-cases.md UC5 edge cases. Run against live server.
-5. **Cross-cutting sweep (battery6)** — offline tripwire, ceilings, all-200s, QC-artifact purge: NOT YET RUN. Required for release.
+## NEXT BEAT (beat41) — PRIORITY ORDER
+1. **Read qc_queue battery11 run** (queue_0716_0556) — running now with n376 as live adapter. Verify n376 quality consistent across a second battery11 run. Look especially for active-scene prose quality (was 2715w/degenerate back half this gate run).
+2. **Secretary real-ask tests** — sec-shorter-x3 + sec-multi-doc-paste. Start Hearth server, run real-ask manually against live server. Required for Secretary gate close.
+3. **SCP Gold(A)=396 + c_gold_beat40 to mini** — when mini unlocks (system lock screen). Run: `scp ~/Downloads/hearth-corpus/A-imagination/A_gold.jsonl smaitra@mac-mini.localdomain:~/Downloads/hearth-corpus/A-imagination/A_gold.jsonl && scp ~/Downloads/hearth-corpus/C-companion/c_gold_beat40.jsonl smaitra@mac-mini.localdomain:~/Downloads/hearth-corpus/C-companion/c_gold_beat40.jsonl`. Flywheel will auto-detect change and queue n396 training.
+4. **n384 gate** — when mini accessible, SSH and check `tail -5 ~/Downloads/hearth-corpus/_logs/honest_flywheel.log`. If GOLD-ADAPTER-0716-HHMM-n384 exists, SCP to laptop and read mini eval at `_evals/GOLD-ADAPTER-0716-*-n384.txt`. Gate only if eval shows no catastrophic failures.
+5. **Battery9 fresh run (post-Case5)** — qc_queue will queue this after battery11. Read metrics: q-enders, paraphrase openers, opener diversity. Key scenarios: grief-anger T2 (Case 5 should prevent echo), decision-house T3 (9th regression — prompt-unfixable, family-C retrain needed).
+6. **BRIDGE2 accumulation** — 5/20 qc_queue passes so far (beats 33/35/36/37/39). 15 more needed. AYF gate closes when <5% across 20 runs.
 
 ## KNOWN STANDING ISSUES (release blockers)
 - **AYF BRIDGE2 vocab gap** — battery3b BRIDGE2 PASS ✅ (beat33). battery3c TRUNCATED at UC2-a last full run. Needs manual 20-run re-verify when memory ≥35%. NOT in qc_queue rotation. Run: `cd ~/Downloads/imagination-engine && python3 scripts/qc/battery3c_ask_usecases.py 2>&1 | tee logs/qc/battery3c_manual_$(date +%H%M).log`
