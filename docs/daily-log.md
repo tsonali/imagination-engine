@@ -2654,3 +2654,12 @@ Run 2 (0803):
 - **Secretary use-case deep test**: battery10 10/10 but lossless-contracts and multi-doc-paste scenarios new — need real-ask read.
 - **Cold install test**: scripts/package.sh → dist zip → Start Hearth.command — still pending.
 - **Public story**: README/site still needs recut.
+
+## 2026-07-16 ~18:15 (manual check-in session, between beats — Sonali asked for a mini check)
+
+### MINI RECOVERED — n384 DEAD, n396 TRAINING
+
+- **Mini rebooted at ~05:14** this morning (uptime confirmed). The reboot killed the honest flywheel AND the in-progress n384 training (log froze at 05:08, first val-loss calc). **n384 never produced an adapter — it is dead, do not look for GOLD-ADAPTER-*-n384.** Superseded by n396.
+- **Gold synced to mini**: A_gold.jsonl (396 scripts) + c_gold_beat40.jsonl (5 exemplars) SCP'd, line counts verified on mini (396 + 5).
+- **Flywheel restarted** on mini as PID 2496 (nohup, log also at _logs/flywheel_nohup.log). It detected the gold change immediately and **n396 training is underway** (mlx_lm PID 2511, 1500 iters, Iter 1 val 3.610 at ~18:10). Expect GOLD-ADAPTER-0716-~2015-n396 + mechanical probe in ~2h. Beat41 should read the probe + comparative-read before any gate.
+- **Fragility note**: the flywheel dies on reboot/logout (plain nohup). A caffeinate is currently holding the mini awake, but if unattended reboots recur, consider a launchd LaunchAgent for honest_flywheel.sh (KeepAlive) — decision for Sonali/heartbeat.
