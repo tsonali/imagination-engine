@@ -150,6 +150,15 @@ def _extract_numbers(text: str) -> list[str]:
     found += re.findall(r'\d+(?:\.\d+)?\s*%', text)
     # Time/count: 11 months, 4,200, 54 (NPS)
     found += re.findall(r'\b\d[\d,]*\s+(?:months?|years?|weeks?|days?|hours?)\b', text, re.I)
+    # Bare integer counts before common countable nouns (e.g. "3 bugs", "47 users")
+    # Catches standalone counts not covered by dollar/percent/time patterns above.
+    found += re.findall(
+        r'\b(\d+)\s+(?:bug|bugs|issue|issues|item|items|task|tasks|error|errors|'
+        r'ticket|tickets|user|users|account|accounts|point|points|customer|customers|'
+        r'problem|problems|change|changes|step|steps|people|person|seat|seats|'
+        r'feature|features|sprint|sprints|release|releases)\b',
+        text, re.I
+    )
     # Deduplicate while preserving order
     seen = set()
     unique = []
@@ -432,8 +441,18 @@ class Assistant:
         # second attempt escalates with CRITICAL FAILURE framing; third uses lowest temp.
         if task_key in ("summarize", "organize"):
             nums = _extract_numbers(text)
+
+            def _num_present(n: str, o: str) -> bool:
+                """True if number n appears in output o.
+                For short pure-digit tokens (e.g. '3', '47') use word-boundary regex
+                so '3' in 'March 3rd' doesn't count — '3rd' is not the bug count.
+                For composite tokens like '$28K', '3.2%', simple substring is fine."""
+                if re.fullmatch(r'\d+', n):
+                    return bool(re.search(r'\b' + re.escape(n) + r'\b', o))
+                return n in o
+
             for attempt in range(3):
-                missing = [n for n in nums if n not in out]
+                missing = [n for n in nums if not _num_present(n, out)]
                 if not missing:
                     break
                 task_obj = TASKS[task_key]

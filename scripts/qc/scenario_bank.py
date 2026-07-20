@@ -195,7 +195,17 @@ BANK: list[Scenario] = [
            "and  What does it feel like to be the one who isn't?' — Case 2e partial-fire artifact: "
            "stripped prefix left ' — and  What...' with stray 'and' + double space). T7 ✅ 'Good.' "
            "— WHEN THEY CONFIRM AN INSIGHT holds. companion.py MD5: fef51b1cdf7f1019e7b4f1fe72c67b58 "
-           "(all 4 copies synced). Family-C retrain for My→She echo (T2 root cause) and T6 regen artifact."),
+           "(all 4 copies synced). Family-C retrain for My→She echo (T2 root cause) and T6 regen artifact. "
+           "BEAT53 BATTERY9 0720_0935: T1 ✅ ('You've already taken them out of the dark.'). "
+           "T2 ✅ ('Her composure is the thing that feels worse.'). T3 ✅ ('That's the answer everyone gets.'). "
+           "T4 ✅ ('That breaks the script of everyone asking how you are.' — echo-strip fired on first reply, regen produced clean form). "
+           "T5 ❌ NEW DEFECT ('That relief feels like proof you're the villain.' — demonstrative-article swap: "
+           "model replaced 'The' → 'That' at start of I→you transform, bypassing Case 2c equality check). "
+           "Root cause: _norm(r_first_c)='that relief...' ≠ _norm(u_2nd)='the relief...' by one word ('that' vs 'the'). "
+           "FIX (beat53): Case 2c extended — after primary equality check fails, also check with leading "
+           "'that/this' in reply normalized to 'the' (r_norm_demoted). If demoted form matches u_2nd norm → echo detected. "
+           "T6 PARTIAL ('He crying more than you does feel like proof — but of what exactly?' — paraphrase opener + forward question). "
+           "T7 ✅ 'Good.' companion.py MD5: d082dcba6bc2e15c788cd7501cd48dc4 (beat53)."),
     Scenario("comp-arc-sober", "companion", "engagement", "high", turns=[
         "Day 40 without a drink. Nobody knows I quit.",
         "Telling people makes it real, and real means I can fail in public.",
@@ -1044,7 +1054,16 @@ BANK: list[Scenario] = [
              "NOTE: sec-shorter-x3 also failed beat44 battery10 (NOT-SHORTER-PASS-3: 9w→10w) — same stochastic "
              "floor as beat43; sec-multi-doc-paste ✅. "
              "BEAT44 secretary deep test 1527: ✅ UC3 PASS — '47' confirmed present in organized output. "
-             "Organize numeric floor fix (utility.py _b_organize MANDATORY NUMBERS + run() post-check) CONFIRMED WORKING."),
+             "Organize numeric floor fix (utility.py _b_organize MANDATORY NUMBERS + run() post-check) CONFIRMED WORKING. "
+             "BEAT53 BATTERY10 0720_1037: ❌ LOST:bug-count — '3' missing from organized output despite MANDATORY NUMBERS. "
+             "Root cause (1): _extract_numbers() didn't capture bare integer counts like '3' from '3 bugs to close' — "
+             "only matched $, %, and time-unit patterns. '47' survived stochastically (model includes it from general "
+             "NUMERIC FLOOR instruction); '3' is less salient and gets dropped. "
+             "Root cause (2): post-check used Python substring 'n in out' — '3 in March 3rd' = True (false positive), "
+             "so regen never triggered even if '3' was in the extracted list. "
+             "FIX (beat53): (1) _extract_numbers() extended to capture 'N [countable noun]' patterns (bugs, users, etc.); "
+             "(2) run() post-check uses word-boundary regex for pure-digit tokens: re.search(r'\\b3\\b', out) prevents "
+             "'March 3rd' from falsely satisfying '3'. utility.py MD5: e7a8e60f1b15314a3b18a7565d256b9b."),
 
     # ============================ ASK YOUR FILES ============================
     Scenario("ask-aggregate", "ask", "helpfulness", "med", files={

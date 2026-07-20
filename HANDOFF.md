@@ -1,6 +1,6 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-07-20 beat52 — **generator.py `_wildlife_tokens` BUG FIXED: "another eagle" + "second eagle" added to mechanical drop tuple in all 3 copies (eagle was surviving postprocessing — postcheck caught it but generator never dropped it). Battery11 with fix PID 23001 launched 04:38 — result pending (read next beat). battery12 server-down false-failure SKIP fix applied. README "four tools"→"five tools" fixed. Gold(A)=460 (+7). Gold(C) +5 (c_gold_beat52.jsonl, total 81 in _candidates/). battery6 crosscut PASS (QC purge pending before final gate). Mini SSH still down. Family-C retrain (81 exemplars) waiting on SSH. n376 live (MD5: b9acf04a1f989d570908c25177966b0f)._
+_Last updated 2026-07-20 beat53 — **companion.py Case 2c' FIXED: demonstrative-article echo (The→That/This) now caught before I→You transform. utility.py _extract_numbers() extended to capture bare integer counts ("3 bugs"); _num_present() word-boundary guard prevents "3" matching "3rd" (false-positive regen suppression). Both fixed and verified. Battery9 re-run PID 53526 started 12:34 (verify arc-divorce T5 fix — read result next beat). Gold(A)=467 (+7). Gold(C) +5 (c_gold_beat53.jsonl, total 86 in _candidates/). Mini SSH 100% packet loss — family-C retrain (86 exemplars) still blocked. n376 live (MD5: b9acf04a1f989d570908c25177966b0f). companion.py MD5: d082dcba6bc2e15c788cd7501cd48dc4. utility.py MD5: e7a8e60f1b15314a3b18a7565d256b9b._
 _Single source of truth for a fresh session. Everything below is real and running._
 
 ## FIRST THING TO DO when you resume — run these checks
@@ -26,6 +26,7 @@ ping -c 2 -t 5 mac-mini.localdomain
 # scp ~/Downloads/hearth-corpus/C-companion/_candidates/c_gold_beat50.jsonl smaitra@mac-mini.localdomain:~/Downloads/hearth-corpus/C-companion/_candidates/
 # scp ~/Downloads/hearth-corpus/C-companion/_candidates/c_gold_beat51.jsonl smaitra@mac-mini.localdomain:~/Downloads/hearth-corpus/C-companion/_candidates/
 # scp ~/Downloads/hearth-corpus/C-companion/_candidates/c_gold_beat52.jsonl smaitra@mac-mini.localdomain:~/Downloads/hearth-corpus/C-companion/_candidates/
+# scp ~/Downloads/hearth-corpus/C-companion/_candidates/c_gold_beat53.jsonl smaitra@mac-mini.localdomain:~/Downloads/hearth-corpus/C-companion/_candidates/
 
 # 4. Latest battery log:
 tail -20 logs/qc/$(ls -t logs/qc/ | head -1)
@@ -87,6 +88,46 @@ HF_HUB_OFFLINE=1 .venv/bin/python scripts/qc/battery11_imagination_bank.py \
 # If n370 passes AND shows clear quality improvement → cp n370 to permanent
 # If rejected → restore n281: cp data/model/adapters.n281_permanent.safetensors data/model/adapters/adapters.safetensors
 ```
+
+## BEAT 53 STATE (2026-07-20) — TWO CODE FIXES, GOLD GROWN, BATTERY9 RERUN PENDING
+
+### What's running
+- **Battery9 re-run** (PID 53526, started 12:34) — verifies arc-divorce T5 Case 2c' fix. ETA ~13:30–14:00.
+- **qc_queue PID 2284 PAUSED** for battery9 re-run launch.
+- **Memory 22% free** while battery9 model runs — do NOT launch any second model until battery9 exits and memory returns ≥35%.
+- **Live adapter: n376** (MD5: b9acf04a1f989d570908c25177966b0f).
+
+### Beat53 code fixes
+1. **companion.py Case 2c'** (MD5: d082dcba6bc2e15c788cd7501cd48dc4, all 4 copies synced):
+   - Defect: user "The relief..." → model "That relief feels like proof you're the villain." — article swap "The"→"That" made Case 2c I→you equality miss.
+   - Fix: after primary norm check fails, demote leading 'that/this' → 'the' in model reply and re-check. Both "That relief..." and "This relief..." now caught.
+   - Verified: 4/4 unit tests PASS.
+   - Copies synced: src/imagination_engine/companion.py, dist/imagination_engine/companion.py, dist/imagination_engine/imagination_engine/companion.py, dist/hearth/src/imagination_engine/companion.py.
+
+2. **utility.py two fixes** (MD5: e7a8e60f1b15314a3b18a7565d256b9b, all 4 copies synced):
+   - Defect: sec-braindump-organize LOST:bug-count — "3 bugs" dropped from organized output.
+   - Root 1: `_extract_numbers()` didn't capture bare `N [countable-noun]` patterns. Fix: added regex for "3 bugs", "47 users", etc. (12 countable noun variants).
+   - Root 2: post-check `n in out` — "3" in "March 3rd" → True (false positive suppressed regen). Fix: `_num_present()` helper uses `\b3\b` regex for pure-digit tokens; "3rd" has word-char after "3", so no match.
+   - Verified: both fixes in isolation before applying.
+   - Copies synced: same 4 paths as companion.py above.
+
+### Beat53 gold
+- **Gold(A)=467** (+7 from 460): argument-that-didn't-feel-like-winning, parent's-house-last-time-before-sale, mountain-summit-alone, letter-from-past-self-braver-than-you-knew, moment-knowing-relationship-over, first-sunrise-after-sleepless-night, holding-object-from-lost-person.
+- **Gold(C)**: c_gold_beat53.jsonl +5 exemplars (arc-divorce T5 demonstrative-echo correct forms ×2, grief-anger T2 trap-naming, arc-divorce T1-T3 clean arc, arc-divorce T7 "Good."). Total in _candidates/: 86.
+
+### Beat53 reads
+- **battery9 0935**: Arc-divorce T5 echo defect found — "That relief feels like proof you're the villain." — T5 FAIL. T1-T4 ✅, T7 ✅. arc-sober T1/T5 still abstract-question/q-ender (family-C retrain path).
+- **battery10 1037**: sec-braindump LOST:bug-count found — "3 bugs" not in organized output. Both root causes identified and fixed.
+- **battery11 0819 and 1122**: eagle ✅✅ both runs. active-scene stochastic (1 FAIL in 3 runs today — she/her pronoun bleed). vague-open completed both runs (no mechanical postchecks, appears "incomplete" but isn't).
+- **battery12 1104**: 7/12 — 7/7 unit tests ✅ PASS; 5 model tests ❌ EXCEPTION(404) because server was partially running (root GET 200 but /companion/turn 404). Transient condition, not a code bug. Beat52 skip fix works when server is fully down.
+
+### Pending next beat
+1. **Read battery9 re-run** (PID 53526, started 12:34) — arc-divorce T5 result. Should show no "That relief..." echo. If still failing, deeper investigation needed.
+2. **When memory ≥35%**: Run companion deep test (`HF_HUB_OFFLINE=1 .venv/bin/python scripts/qc/companion_deep_test.py`) — companion gate UC rotation.
+3. **Mini SSH**: Still 100% packet loss. When reachable: SCP A_gold.jsonl + c_gold_beat{49-53}.jsonl + restart honest_flywheel + caffeinate.
+4. **Cold install**: `scripts/package.sh` → dist zip → `Start Hearth.command` cold exercise.
+5. **Public story**: site/README recut for five tools + vital-facts / open-threads.
+6. **Cross-cutting final sweep**: all pages 200, offline tripwire (QC purge handled by package.sh).
 
 ## BEAT 49b STATE (2026-07-18) — DEEP TEST V2 COMPLETE; BATTERY10 PENDING
 

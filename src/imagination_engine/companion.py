@@ -734,13 +734,19 @@ def _strip_echo(reply: str, user_message: str) -> str:
     # 2c. I→You echo: companion transforms user's first-person statement to second-person.
     #     "I can't say this to my husband." → "You can't say this to your husband."
     #     Handles contractions: "I'm" → "you're", "I've" → "you've", etc.
+    #     Also catches demonstrative-article swap: "The X" → "That X" (Case 2c').
     if r and u:
         u_first_raw = re.split(r'[.!?]', u)[0].strip()
         if len(u_first_raw) > 20 and re.search(r'\bI\b|\bmy\b|\bme\b', u_first_raw):
             u_2nd = _i_to_you(u_first_raw)
             # Check if reply first sentence matches the I→You normalized form
             r_first_c = re.split(r'[.!?]', r)[0].strip()
-            if r_first_c and _norm(r_first_c) == _norm(u_2nd):
+            # Case 2c: exact I→you match
+            # Case 2c': model swapped leading article "The" → "That/This" (common LLM habit)
+            r_norm_c = _norm(r_first_c)
+            u_norm_c = _norm(u_2nd)
+            r_norm_demoted = re.sub(r'^(?:that|this)\b', 'the', r_norm_c)
+            if r_first_c and (r_norm_c == u_norm_c or r_norm_demoted == u_norm_c):
                 after_c = r[len(r_first_c):].lstrip(" .!?\n-—")
                 if after_c:
                     r = after_c

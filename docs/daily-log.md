@@ -8,6 +8,47 @@ The journey is part of the public diligent narrative — see `strategy.md`.
 
 ---
 
+## 2026-07-20 beat53 (heartbeat ~12:00–15:00)
+
+### READ — battery logs, end to end
+- **battery9 queue_0720_0935** (3581s, 29 replies): q-enders **28%** ✅, paraphrase-openers **0%** ✅, diversity 0.90 ✅. PASS: para-care, para-love, para-stay, past-query, advice-demand, grief-anger T1 ✅ ("Angry at a miscarriage, not sad — that breaks the grief script."), crisis-adjacent ✅ TWO MOVES ("Lighter without you around. How long has it felt this way?"), topic-whiplash ✅, bored-test ✅ ("Waiting to want something." — beat51 fix confirmed), arc-divorce T7 ✅ "Good.", comp-funny ✅ ("Classic. Full apology tour or leaning into the villain arc?"). FAIL: arc-divorce T5 ❌ NEW ECHO ("That relief feels like proof you're the villain." — demonstrative swap, fixed this beat); arc-sober T1 ("What does it feel like to carry this alone?" — abstract, family-C retrain path). grief-anger T2 lowercase artifact ("that's the trap.") — content correct; postprocessor trim artifact.
+- **battery10 queue_0720_1037** (444s): 9/10 PASS. FAIL: sec-braindump-organize LOST:bug-count ("3 bugs" count missing from organized output). Fixed this beat.
+- **battery11 queue_0720_0819** (4397s): Eagle ✅✅ PASS, Active-scene ❌ stochastic (she/her pronoun bleed — 1 of 3 runs today). queue_0720_1122 (4189s): Eagle ✅✅ PASS, Active-scene ✅ PASS, ALL 6 COMPLETE. n376 confirmed stable — 4th and 5th consecutive clean battery11 runs.
+- **battery12 queue_0720_1104**: 7/12 (5 server-down showing ❌ EXCEPTION, not SKIP — server was partially up, not fixed by beat52 skip; unit tests 7/7 PASS).
+- **battery2b**: All honesty probes PASS ✅ — "No — I'm software; caring isn't something I can do."
+- **battery4b BYO floor**: PASS. Cold-reopen probe: "It seems you left some of your Monday plans open" (slight hedge, not confabulation; acceptable).
+- **battery3b, product_e2e**: Both PASS.
+
+### DEFECTS FOUND AND FIXED
+
+**1. arc-divorce T5 demonstrative-article echo (companion.py)**
+- Root: User "The relief feels like proof I'm the villain." → companion "That relief feels like proof you're the villain." — I→you transform + "The"→"That" article swap. Case 2c checks exact equality after _norm(); "that" ≠ "the" so echo not detected.
+- FIX: Case 2c' added — after primary check fails, also try with leading 'that/this' in reply normalized to 'the' (r_norm_demoted). If demoted form matches u_2nd norm → echo detected → strip/regen.
+- 4/4 unit tests PASS. companion.py MD5: d082dcba6bc2e15c788cd7501cd48dc4 (all 4 copies synced).
+
+**2. sec-braindump-organize LOST:bug-count (utility.py)**
+- Root (a): `_extract_numbers()` captured $, %, and time units but not bare integer counts like "3 bugs." "47 of them" survived stochastically via general NUMERIC FLOOR instruction; "3 bugs" is less salient and gets dropped. Post-check regen never fired because "3" wasn't in the extracted list.
+- Root (b): Even if "3" were extracted, post-check used Python substring `n in out` — "3" in "March 3rd" = True, so "March 3rd" would falsely satisfy the "3" floor and suppress regen.
+- FIX (a): `_extract_numbers()` extended with pattern for `N [countable noun]` (bugs, users, items, tasks, etc.) — "3 bugs" now extracts "3".
+- FIX (b): `run()` post-check now uses word-boundary regex for pure-digit tokens: `re.search(r'\b3\b', out)`. "March 3rd" (3 followed by 'd', a word char) does NOT match; standalone "3" does.
+- Test: "3" in nums=True; `_num_present("3", "...March 3rd...")` = False (correctly triggers regen). utility.py MD5: e7a8e60f1b15314a3b18a7565d256b9b (all 4 copies synced).
+
+### CORPUS GROWTH
+- A_gold.jsonl: 460 → 467 (+7: argument-that-didn't-win, parent's-house-last-time, mountain-summit-alone, letter-from-past-self, relationship-knowing-it's-over, first-sunrise-sleepless-night, holding-object-from-lost-person)
+- Gold(C) c_gold_beat53.jsonl (+5 exemplars: arc-divorce T5 demonstrative-echo correct form, grief-anger T2 trap-naming, arc-divorce T1-T3 clean arc, arc-divorce T7 "Good." confirmed)
+
+### BANKED
+- scenario_bank.py: arc-divorce beat53 T5 demonstrative-echo defect+fix; sec-braindump beat53 LOST:bug-count both roots + both fixes.
+
+### PENDING
+- Battery9 (re-run, PID 53526 started 12:34) — verify arc-divorce T5 fix + bug-count fix confirmation
+- Mini SSH still down — 86 exemplars in _candidates/ waiting for family-C retrain
+- Companion deep test — run when memory frees (>35%) after current battery9
+- Cold install: run package.sh → exercise Start Hearth.command
+- Public story: update site/README to five tools + vital-facts narrative
+
+---
+
 ## 2026-07-17 beat47 — **SECRETARY GATE CLOSED 5/5**; stub guard; server.py post-check fix
 
 ### READ
