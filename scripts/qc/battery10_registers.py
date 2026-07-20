@@ -80,7 +80,9 @@ for sc in scenarios:
                                                "tone": "concise", "instruction": "make it shorter"})
             out2 = r2.text.strip()
             cur_words = len(out2.split())
-            if cur_words >= prev_words:
+            if prev_words <= 8:
+                print(f"  pass {i}: {prev_words}w (floor — already minimal, skip)", flush=True)
+            elif cur_words >= prev_words:
                 floors.append(f"NOT-SHORTER-PASS-{i}:{prev_words}w->{cur_words}w")
             else:
                 print(f"  pass {i}: {prev_words}w -> {cur_words}w ✓", flush=True)
@@ -101,6 +103,16 @@ for sc in scenarios:
             floors.append("IMPOSSIBLE-DATE:June-31")
         if not re.search(r'\bJuly\s+2\b', out, re.I):
             floors.append("WRONG-DEADLINE:should-be-July-2")
+    if sc.id == "sec-braindump-organize":
+        # All numeric facts from source must survive
+        for fact, label in [
+            (r"\$59", "price-new"), (r"\$49", "price-old"), (r"march\s+17|mar\s+17", "launch-date"),
+            (r"march\s+3|mar\s+3", "brief-deadline"), (r"miranda", "pr-contact"),
+            (r"\b47\b", "beta-user-count"), (r"30%", "beta-discount"),
+            (r"feb(ruary)?\s+28", "legal-deadline"), (r"\b3\b|three", "bug-count"), (r"tuesday", "check-in"),
+        ]:
+            if not re.search(fact, out, re.I):
+                floors.append(f"LOST:{label}")
     print(f"\n  floors: {floors or 'clean'}", flush=True)
 
 print(f"\ntotal {time.time()-t0:.0f}s", flush=True)

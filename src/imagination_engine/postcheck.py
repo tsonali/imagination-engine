@@ -379,7 +379,8 @@ _NARRATOR_POSS = re.compile(
     r"|\bunder\s+me\b"                  # should be "under you"
     r"|\bthrough\s+me\b"               # should be "through you"
     r"|\bwith\s+me\b"                  # should be "with you"
-    r"|\bwe\s+(?:started|are\s+now|were\s+both|had\s+been|come\s+back)\b"  # narrator "we"
+    r"|\bwe\s+(?:started|are\s+now|were\s+both|had\s+been|come\s+back)\b"  # narrator "we" (specific forms)
+    r"|\bwe\s+(?:reach|reached|walk|walked|came|come|arrive|arrived|ran|run|go|went|were\s+here|need|sat|sit|stand|stood|move|moved|used\s+to)\b"  # narrator "we" + motion/state verbs
     r"|\bmy\s+(?:hand|hands|breath|side|step|voice|foot)\b"   # narrator body-part possessives
     r"|\bboth\s+of\s+us\b"             # "both of us" narrator collective
     r"|\bfor\s+us\b",                  # "for us" narrator collective

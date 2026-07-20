@@ -68,7 +68,8 @@ TONES = {
     "plain": "Use plain, clear, neutral language.",
     "warm": "Use a warm, friendly, human tone — without gushing.",
     "formal": "Use a formal, professional tone.",
-    "concise": "Be as concise as possible while keeping everything essential.",
+    "concise": ("Compress: remove every unnecessary word and cut redundant phrases. "
+                "The output must be shorter than the input — fewer words, same core meaning."),
     "firm": ("Be firm and direct. State the expectation plainly and put it up front. "
              "No pleasantries, no hedging, no 'I hope', no apologizing for asking."),
 }
@@ -102,6 +103,11 @@ def _tone_clause(tone: str) -> str:
 # ----------------------------------------------------------------- task builders
 def _b_draft(text, instruction, tone, style):
     system = _BASE + _tone_clause(tone) + _style_clause(style)
+    dates = _extract_dates(text)
+    mandatory_clause = (
+        f"\nMANDATORY DATES (each must appear verbatim in your output): {', '.join(dates)}\n"
+        if dates else ""
+    )
     user = (
         "Write a message (email/letter/note) based on this brief. Output only the "
         "message itself, ready to send. If it's an email or letter, give it a normal "
@@ -112,8 +118,9 @@ def _b_draft(text, instruction, tone, style):
         "Say only what the brief supports. If it doesn't give a reason, a date, or a "
         "detail you need, put a [bracketed blank] — NEVER invent one (no fabricated "
         "'work commitments', no assumed dates, no invented day names like 'Tuesday' "
-        "when the brief only said 'next week').\n\n"
-        f"BRIEF (what it's about / who it's to / what to say):\n{text}"
+        "when the brief only said 'next week').\n"
+        + mandatory_clause
+        + f"\nBRIEF (what it's about / who it's to / what to say):\n{text}"
         + (f"\n\nADDITIONAL INSTRUCTION: {instruction}" if instruction.strip() else "")
     )
     return system, user
@@ -154,10 +161,72 @@ def _extract_numbers(text: str) -> list[str]:
     return unique
 
 
+_MONTH_ABBR = r'(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)'
+
+# Person-verb pattern: "[Name] will/owns/flagged/..." to extract named individuals
+# who have stated responsibilities or actions in source text.
+_PERSON_VERB_RE = re.compile(
+    r'\b([A-Z][a-z]{2,})\s+'
+    r'(?:will|shall|can|should|owns?|leads?|manages?|handles?|heads?|'
+    r'flagged|said|noted|mentioned|reported|confirmed|approved|denied|'
+    r'told|wrote|requested|allocated|assigned|coordinates?|oversees?|'
+    r'creates?|sent|shared|raised|brought|discussed|proposed|reviewed)\b',
+)
+_NAME_STOPWORDS = frozenset({
+    'january', 'february', 'march', 'april', 'june', 'july', 'august',
+    'september', 'october', 'november', 'december',
+    'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
+    'team', 'legal', 'budget', 'document', 'slack', 'meeting', 'notes', 'thread',
+    'bottom', 'line', 'focus', 'text', 'note', 'the', 'recommendation',
+})
+
+
+def _extract_names(text: str) -> list[str]:
+    """Extract probable person names from source text via person-verb patterns.
+
+    Finds "[Name] will/owns/flagged/..." patterns — named individuals with stated
+    responsibilities. Used to build MANDATORY NAMES clause so named people survive
+    summarization (root cause: model drops 'Sarah will own timeline' as non-decision).
+    """
+    candidates = _PERSON_VERB_RE.findall(text)
+    seen: set[str] = set()
+    unique = []
+    for c in candidates:
+        if c.lower() not in _NAME_STOPWORDS:
+            key = c.lower()
+            if key not in seen:
+                seen.add(key)
+                unique.append(c)
+    return unique
+
+
+def _extract_dates(text: str) -> list[str]:
+    """Pull specific calendar dates from source text (Month Day forms only).
+
+    Returns the matched token as it appears in the source — used to build a
+    MANDATORY FACTS clause in draft prompts so dates survive verbatim.
+    """
+    found = re.findall(
+        rf'\b{_MONTH_ABBR}\s+\d{{1,2}}(?:st|nd|rd|th)?\b',
+        text, re.I,
+    )
+    # Deduplicate preserving order
+    seen: set[str] = set()
+    unique = []
+    for d in found:
+        key = d.strip().lower()
+        if key not in seen:
+            seen.add(key)
+            unique.append(d.strip())
+    return unique
+
+
 def _b_summarize(text, instruction, tone, style):
     system = _BASE
     nums = _extract_numbers(text)
     num_list = ", ".join(nums) if nums else ""
+    names = _extract_names(text)
+    name_list = ", ".join(names) if names else ""
     lossless_rule = (
         "LOSSLESS NUMBER RULE: Every concrete number from the source MUST appear "
         "verbatim in your output — no paraphrasing. "
@@ -167,6 +236,13 @@ def _b_summarize(text, instruction, tone, style):
         "not silently dropped.\n"
         + (f"MANDATORY NUMBERS (all must appear): {num_list}\n" if num_list else "")
     )
+    names_rule = (
+        "MANDATORY NAMES RULE: Named individuals and their stated ownership or "
+        "responsibility assignments are as mandatory as numbers — if the source "
+        "says 'Sarah will own the timeline', both Sarah's name and her role MUST "
+        "appear in your output. Do not compress named assignments.\n"
+        + (f"MANDATORY NAMES (all must appear): {name_list}\n" if name_list else "")
+    ) if name_list else ""
     user = (
         "Summarize the text below in EXACTLY this format:\n"
         "BOTTOM LINE: <one sentence>\n"
@@ -174,7 +250,8 @@ def _b_summarize(text, instruction, tone, style):
         "- <key point>\n"
         "(as many points as needed)\n\n"
         + lossless_rule + "\n"
-        "Every decision, every CONDITION attached to a decision ('yes, but only "
+        + (names_rule + "\n" if names_rule else "")
+        + "Every decision, every CONDITION attached to a decision ('yes, but only "
         "if...'), every deadline, every named event or commitment, and every open "
         "question MUST also survive — a condition, commitment, or named event lost "
         "is wrong. Keep relative dates AS THE SOURCE SAYS THEM — never attach a "
@@ -217,12 +294,20 @@ def _b_extract(text, instruction, tone, style):
 
 def _b_organize(text, instruction, tone, style):
     system = _BASE
+    nums = _extract_numbers(text)
+    num_list = ", ".join(nums) if nums else ""
+    num_rule = (
+        "NUMERIC FLOOR: Every number in the source (counts, amounts, dates, codes) "
+        "MUST appear verbatim in your output — do NOT drop, round, or paraphrase counts.\n"
+        + (f"MANDATORY NUMBERS (all must appear): {num_list}\n" if num_list else "")
+    )
     user = (
         "Turn the messy notes / brain-dump below into a clean, organized structure — "
         "group related items under clear headings, order them sensibly, and use lists. "
         "EVERY item in the notes must appear exactly once in your output — count them; "
         "losing even one defeats the whole purpose. Don't add anything that isn't "
         "there: no invented ordering ('after X is done'), no advice, no new items.\n\n"
+        + num_rule + "\n"
         + (f"HOW TO ORGANIZE IT: {instruction}\n\n" if instruction.strip() else "")
         + f"NOTES:\n{text}"
     )
@@ -270,7 +355,7 @@ class Assistant:
 
     def stream(self, task_key: str, text: str, *, instruction: str = "",
                tone: str = "", style_sample: str = "",
-               max_tokens: int = 1200) -> Iterator[str]:
+               max_tokens: int = 1200, _extra_system: str = "") -> Iterator[str]:
         task = TASKS.get(task_key)
         if task is None:
             raise KeyError(f"unknown task: {task_key}")
@@ -281,7 +366,7 @@ class Assistant:
         def gen(extra_system: str = "") -> Iterator[str]:
             # Low temperature: a secretary should be faithful and predictable.
             return self.engine.stream(messages=[
-                {"role": "system", "content": system + extra_system},
+                {"role": "system", "content": system + _extra_system + extra_system},
                 {"role": "user", "content": user},
             ], max_tokens=max_tokens, temperature=0.4)
 
@@ -321,6 +406,21 @@ class Assistant:
                 combined = _STRIP_SENT.sub("", combined).lstrip("\n")
                 head = [combined]
                 log.warning("secretary[%s]: regen still had banned opener — sentence stripped", task_key)
+                # If stripping left only a salutation line (≤15 chars of real content),
+                # the model generated a stub that got entirely consumed. Force a third
+                # regen with explicit instruction to skip the greeting pleasantry.
+                if len(combined.strip()) <= 15:
+                    log.warning("secretary[%s]: strip left only salutation — forcing third regen", task_key)
+                    stream = gen(
+                        "\n\nCRITICAL: Write the body of the email IMMEDIATELY after the "
+                        "salutation line. Do NOT write 'I hope this email finds you well' or "
+                        "any other pleasantry. Begin with the substance in the very first sentence."
+                    )
+                    head = []
+                    for piece in stream:
+                        head.append(piece)
+                        if sum(len(p) for p in head) >= _HEAD_CHARS:
+                            break
         yield "".join(head)
         yield from stream
 
@@ -330,13 +430,13 @@ class Assistant:
         # Common failure: $28K cost-context figure alongside 3.2% churn — drops even with
         # MANDATORY NUMBERS in the initial prompt. Each regen attempt uses explicit callout;
         # second attempt escalates with CRITICAL FAILURE framing; third uses lowest temp.
-        if task_key == "summarize":
+        if task_key in ("summarize", "organize"):
             nums = _extract_numbers(text)
             for attempt in range(3):
                 missing = [n for n in nums if n not in out]
                 if not missing:
                     break
-                task_obj = TASKS["summarize"]
+                task_obj = TASKS[task_key]
                 system, user = task_obj.build(
                     text, kw.get("instruction", ""),
                     kw.get("tone", ""), kw.get("style_sample", ""),
@@ -381,8 +481,78 @@ class Assistant:
                 )).strip()
                 recovered = [n for n in missing if n in regen]
                 if len(recovered) >= len(missing) // 2 + 1:
-                    log.info("secretary[summarize]: attempt %d regen recovered %d/%d missing numbers",
-                             attempt + 1, len(recovered), len(missing))
+                    log.info("secretary[%s]: attempt %d regen recovered %d/%d missing numbers",
+                             task_key, attempt + 1, len(recovered), len(missing))
+                    out = regen
+        # Post-check for summarize: if named individuals were dropped, regen once.
+        # Root cause: model interprets "decisions only" instruction as license to drop
+        # named person + assignment ("Sarah will own the timeline" → compressed to Q3 delay).
+        if task_key == "summarize":
+            mandatory_names = _extract_names(text)
+            missing_names = [n for n in mandatory_names if n.lower() not in out.lower()]
+            if missing_names:
+                task_obj = TASKS[task_key]
+                n_sys, n_usr = task_obj.build(
+                    text, kw.get("instruction", ""),
+                    kw.get("tone", ""), kw.get("style_sample", ""),
+                )
+                names_str = ", ".join(missing_names)
+                names_extra = (
+                    f"\n\nMANDATORY NAMES MISSING: A previous attempt dropped these named "
+                    f"individuals — each MUST appear in your output with their stated role or "
+                    f"assignment: {names_str}. If the source says 'Sarah will own X', "
+                    f"include Sarah and her ownership in the output."
+                )
+                regen = "".join(self.engine.stream(
+                    messages=[
+                        {"role": "system", "content": n_sys + names_extra},
+                        {"role": "user", "content": n_usr},
+                    ],
+                    max_tokens=kw.get("max_tokens", 1200),
+                    temperature=0.4,
+                )).strip()
+                recovered = [n for n in missing_names if n.lower() in regen.lower()]
+                if recovered:
+                    log.info("secretary[summarize]: names regen recovered %s", recovered)
+                    out = regen
+        # Post-check for draft: if mandatory dates from brief are missing, regen up to 2x.
+        # Root cause: model drops specific dates (e.g., "March 11") to vague forms
+        # ("in March") even with MANDATORY DATES in the prompt.
+        if task_key == "draft":
+            mandatory_dates = _extract_dates(text)
+            for attempt in range(2):
+                missing_dates = [
+                    d for d in mandatory_dates
+                    if not re.search(re.escape(d), out, re.I)
+                ]
+                if not missing_dates:
+                    break
+                task_obj = TASKS[task_key]
+                s_sys, s_usr = task_obj.build(
+                    text, kw.get("instruction", ""),
+                    kw.get("tone", ""), kw.get("style_sample", ""),
+                )
+                missing_str = ", ".join(missing_dates)
+                severity = "CRITICAL FAILURE" if attempt else "MANDATORY DATES MISSING"
+                extra = (
+                    f"\n\n{severity}: A previous attempt dropped these required dates — "
+                    f"each MUST appear VERBATIM in your output: {missing_str}. "
+                    "Do not paraphrase (e.g., 'in March' is NOT acceptable when the brief "
+                    "says 'March 11'). Use the exact date as given in the brief."
+                )
+                temp = 0.3 if attempt else 0.4
+                regen = "".join(self.engine.stream(
+                    messages=[
+                        {"role": "system", "content": s_sys + extra},
+                        {"role": "user", "content": s_usr},
+                    ],
+                    max_tokens=kw.get("max_tokens", 1200),
+                    temperature=temp,
+                )).strip()
+                recovered = [d for d in missing_dates
+                             if re.search(re.escape(d), regen, re.I)]
+                if recovered:
+                    log.info("secretary[draft]: regen recovered dates %s", recovered)
                     out = regen
         # Post-check for draft: if the model invented specific day names not present
         # in the brief, replace them with [day] (regression from sec-missing-facts).
@@ -394,6 +564,50 @@ class Assistant:
                 if day not in text_lower and day in out.lower():
                     out = re.sub(r'\b' + day + r'\b', '[day]', out, flags=re.IGNORECASE)
                     log.info("secretary[draft]: replaced invented day '%s' with [day]", day)
+        # Post-check for draft/reply: model sometimes generates a stub — only a
+        # subject line or salutation with no body. Detect by stripping lines that
+        # are subject headers ("Subject: ..."), salutation/sign-off lines (end with
+        # comma), and placeholder lines ("[Name]") — if nothing real remains, regen
+        # up to 3 times with escalating body instruction at lower temperature.
+        if task_key in ("draft", "reply"):
+            def _draft_is_stub(s):
+                rls = [l.strip() for l in s.splitlines() if l.strip()]
+                cls = [l for l in rls
+                       if not re.match(r'^subject:', l, re.I)
+                       and not re.match(r'.*,$', l)
+                       and not re.match(r'^\[', l)]
+                return not cls
+
+            if _draft_is_stub(out):
+                task_obj = TASKS[task_key]
+                s_sys, s_usr = task_obj.build(
+                    text, kw.get("instruction", ""),
+                    kw.get("tone", ""), kw.get("style_sample", ""),
+                )
+                body_extra = (
+                    "\n\nCRITICAL: You MUST write the complete body of the message. "
+                    "Do NOT generate only a subject line or salutation. "
+                    "After any greeting line (Dear X / Hi X / Subject: Y), "
+                    "write the body IMMEDIATELY — at least 2–3 full sentences of substance."
+                )
+                for attempt in range(3):
+                    log.warning("secretary[%s]: stub output — body regen attempt %d",
+                                task_key, attempt + 1)
+                    temp = 0.25 if attempt >= 1 else 0.3
+                    regen = "".join(self.engine.stream(
+                        messages=[
+                            {"role": "system", "content": s_sys + body_extra},
+                            {"role": "user", "content": s_usr},
+                        ],
+                        max_tokens=kw.get("max_tokens", 1200),
+                        temperature=temp,
+                    )).strip()
+                    if not _draft_is_stub(regen):
+                        out = regen
+                        break
+                    log.warning("secretary[%s]: regen attempt %d still stub", task_key, attempt + 1)
+                else:
+                    out = regen  # use last attempt even if stub
         return UtilityResult(task=task_key, output=out)
 
 

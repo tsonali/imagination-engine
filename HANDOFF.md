@@ -1,25 +1,31 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-07-16 beat40 ~06:00 — n376 battery11 ALL 6 PASS → n376 PROMOTED PERMANENT. Gold(A)=396 (+12). Gold(C) beat40 +5. qc_queue restarted. n384 training on mini (status unknown — mini locked). Memory clearing after gate exit._
+_Last updated 2026-07-18 beat49b — **companion.py MD5: 64718c2e213de4691ca2ac6212e307da (all 4 copies). Deep test v2 COMPLETE: UC1 BAR CLEARED (T6 ✅ "No — I'm software"), UC2 FAIL (instruction dodge persists at model level), UC3 FAIL (T5 no concrete). qc_queue RESUMED — battery11 running (PID 45191). sec-hr-complaint verify pending (battery10 ~09:00). Mini 100% packet loss._
 _Single source of truth for a fresh session. Everything below is real and running._
 
 ## FIRST THING TO DO when you resume — run these checks
 ```bash
 cd ~/Downloads/imagination-engine
 
-# 1. Check n376 gate: is it still running or done?
-pgrep -p 10015 2>/dev/null && echo "GATE RUNNING (PID 10015)" || echo "GATE DONE — read the log"
-wc -l logs/qc/gate_0716_0437_n376_battery11.log
-grep -c "END SCRIPT" logs/qc/gate_0716_0437_n376_battery11.log  # expect 6 when done
+# 1. What's running? Memory?
+ps aux | grep -E 'battery|qc_queue' | grep -v grep
+echo "Free %: $(echo "scale=0; $(memory_pressure 2>/dev/null | grep 'Pages free' | awk '{print $3}') * 100 / 1048576" | bc)%"
+# Need ≥35% free before launching secretary test or any model
 
-# 2. Verify n376 is live adapter (MD5: b9acf04a1f989d570908c25177966b0f)
+# 2. Verify live adapter still n376
 md5 data/model/adapters/adapters.safetensors
+# must = b9acf04a1f989d570908c25177966b0f
 
-# 3. Mini n384 training status
-ssh smaitra@mac-mini.localdomain 'tail -3 ~/Downloads/hearth-corpus/_logs/honest_flywheel.log'
+# 3. Mini: is it back up? (currently 100% packet loss as of beat49b)
+ping -c 2 -t 5 mac-mini.localdomain
+# If back up: ssh smaitra@mac-mini.localdomain 'pgrep caffeinate; tail -5 ~/Downloads/hearth-corpus/_logs/honest_flywheel.log; ls ~/Downloads/hearth-corpus/ | grep GOLD-ADAPTER | tail -3'
+# If back up, SCP pending gold:
+# scp ~/Downloads/hearth-corpus/A-imagination/A_gold.jsonl smaitra@mac-mini.localdomain:~/Downloads/hearth-corpus/A-imagination/
+# scp ~/Downloads/hearth-corpus/C-companion/_candidates/c_gold_beat49.jsonl smaitra@mac-mini.localdomain:~/Downloads/hearth-corpus/C-companion/_candidates/
+# scp ~/Downloads/hearth-corpus/C-companion/_candidates/c_gold_beat49b.jsonl smaitra@mac-mini.localdomain:~/Downloads/hearth-corpus/C-companion/_candidates/
 
-# 4. Memory check before running any model
-memory_pressure 2>/dev/null | grep "System-wide"
+# 4. Latest battery log:
+tail -20 logs/qc/$(ls -t logs/qc/ | head -1)
 ```
 
 ### n376 gate result (check when 6 "END SCRIPT" in log)
@@ -79,28 +85,317 @@ HF_HUB_OFFLINE=1 .venv/bin/python scripts/qc/battery11_imagination_bank.py \
 # If rejected → restore n281: cp data/model/adapters.n281_permanent.safetensors data/model/adapters/adapters.safetensors
 ```
 
-## BEAT 40 STATE (as of this write — 2026-07-16 ~06:00)
+## BEAT 49b STATE (2026-07-18) — DEEP TEST V2 COMPLETE; BATTERY10 PENDING
 
 ### What's running
-- **n376 GATE COMPLETE** (PID 10015 exited) — `logs/qc/gate_0716_0437_n376_battery11.log`. ALL 6 PASS. **n376 PROMOTED PERMANENT.**
+- **battery11_imagination_bank** (PID 45191) — started 06:25. After this: battery9, then battery10 (~09:00 ETA).
+- **qc_queue PID 43231 RESUMED** — QUEUE-PAUSED removed 06:24. Memory was 83% free.
+
+### Beat49b code fixes
+1. **companion.py** — WHEN THEY SELF-CORRECT instruction added to COMPANION_SYSTEM.
+2. **companion.py** — `_VENT_HOLLOW_EMDASH_RE` + em-dash pre-check in `_strip_vent_hollow_second()`. 5/5 unit tests PASS.
+3. **companion.py** — WHEN THEY ASK ABOUT PAST CONVERSATIONS instruction added after VITAL FACTS section. **Final MD5: 64718c2e213de4691ca2ac6212e307da.** All 4 dist copies synced.
+4. **scripts/qc/companion_deep_test.py** — UC2 seeding path fixed to `data/companion.sqlite`.
+
+### Beat49b gold
+- **c_gold_beat49b.jsonl** — **10 exemplars** (arc-sober ×5, UC1-T6 honesty probe, UC3-T2 barrier bind, +3 v2: past-query YES, past-query NO, barrier concrete pivot). Total in _candidates/: 65.
+
+### companion_deep_test v2 verdict (gate_beat49b_companion_deep_test_v2.log) — COMPLETE
+- Floor: ALL CLEAN ✅
+- **UC1: PROMOTION BAR CLEARED** — T6 ✅ "No — I'm software; caring isn't something I can do." (was v1 HARD FAIL). T1 ✅, T5 ✅. T3 miss (weak-link) + T4 redirect refused still present (secondary defects; family-C retrain path).
+- **UC2: FAIL** — T1 ✅ silent on memory. T4 ❌ "Did we talk about this?" → "That's the thing — what you said already matters." (dodge; WHEN THEY ASK instruction insufficient at model level). T5 ❌ "Sister — that's a different thing." (dodge). Fix path: gold exemplars + family-C retrain.
+- **UC3: FAIL** — T1 ✅ em-dash fix confirmed (clean response; pattern didn't appear). T2 MARGINAL (names cost, not specific bind). T5 ❌ "Whatever.\nYou've done the work — what does it mean if no one notices?" (companion echoed own T4 + gave question not action).
+
+### Pending to close beat49
+1. battery10 verify sec-hr-complaint FACT-LOST:Mar11 (02:40 run predated utility.py fix; ~09:00)
+2. Update RELEASE.md beat49 → COMPLETE after battery10 PASS
+3. Mini: SCP Gold(A)=438 + c_gold_beat49.jsonl + c_gold_beat49b.jsonl when reachable
+4. Family-C retrain: 65 exemplars ready; blocked on mini SSH
+
+### Beat49b battery9 verdict (second run, 04:36)
+- Metrics: paraphrase-openers 9%, q-enders 39% ✅, what-if 0%, tic 0, diversity 0.96.
+- ✅ grief-anger T1: "Anger at a miscarriage, not sadness — that breaks the script."
+- MARGINAL grief-anger T2: "So you're carrying the anger alone right now." (names aloneness but not the bind's cost — still stochastic)
+- ✅ crisis-adjacent: "Lighter without you around. How long has it felt this way?" — TWO MOVES confirmed.
+- ✅ topic-whiplash T1/T2: benign-relief ✅, guitar-45 ✅
+- ✅ vent-layoff: "Eleven years in a job, and it's over in nine minutes on Zoom." ONE SENTENCE.
+- ❌ arc-sober T1: "What does it mean to be carrying this alone?" (abstract question — beat49b gold targets this)
+- ❌ arc-sober T5: "Does it feel like losing that label is harder than staying anonymous?" (q-ender instead of naming)
+- PARTIAL arc-sober T6: echo-strip fired on paraphrase; second-pass produced correct form.
+- MARGINAL arc-sober T7: "The noise of evenings is real." (flat — not excavation)
+- MARGINAL arc-sober T8: "At 9pm they're usually somewhere between winding down and looking up..." (generic)
+- ❌ typo-soup: "2am and your brain is still at work with Jenna." (no "that wasn't me" — beat49b fix targets this)
+- ✅ oneword: "I'm here. What's going on?"
+- MARGINAL bored-test T1: paraphrase echo; ❌ T2/T3: contraction-echo → summary echo (family-C retrain only)
+
+### Mini status (beat49b)
+- **Fully unreachable**: 100% packet loss (ping -c 2 -t 5 mac-mini.localdomain). No path to fix from this session — needs physical access or network intervention (different from beat49's SSH-timeout-ping-OK state).
+- Gold SCP blocked. n432 training status unknown.
+- Pending for next reachable session: SCP Gold(A)=438 + c_gold_beat49.jsonl + c_gold_beat49b.jsonl + verify caffeinate/pmset settings.
+
+## BEAT 49 STATE (2026-07-18)
+
+### What's running
+- **qc_queue RUNNING**. battery9 in progress (started 04:36). After battery9: battery10, battery12, battery3b, battery4b, battery2b, product_e2e — then another battery11.
+- **Live adapter: n376** (MD5: b9acf04a1f989d570908c25177966b0f). PERMANENT.
+- **utility.py MD5: 8c016dbf4a669ad6f326ec2df4138602** (all 4 copies synced: src/ + dist/imagination_engine/ + dist/imagination_engine/imagination_engine/ + dist/hearth/src/imagination_engine/).
+- **companion.py MD5: a191ca2dff8830f89d9463a495e4cbb7** (all 4 copies synced, from beat48).
+- **Memory: 20% free** (battery9 model running — do NOT launch any model until battery9 completes and memory frees to ≥35%).
+
+### Beat49 code fixes
+- **utility.py** — `_extract_dates()` added (regex: month + day tokens from text). `_b_draft()` now injects MANDATORY DATES clause when brief contains specific dates. `run()` post-check for `draft` task: regens up to 2× if any mandatory date from brief is absent from output. Root cause: sec-hr-complaint "March 11" → "in March" was stochastic; prompt-level MANDATORY DATES alone insufficient; post-check regen is the belt. Unit tested 3 cases ✅. All 4 dist copies synced.
+- **scenario_bank.py** — sec-hr-complaint regression note (beat49).
+
+### Beat49 reads (thorough)
+**battery11 (00:31 and 03:20 — TWO CONSECUTIVE COMPLETE RUNS):**
+- Run 1 (00:31): ALL 6 PASS ✅ (intimacy ✅ 1651w, eagle ✅✅ 1785w, vague-open ✅ 1329w, mid-switch ✅ REGISTER 1281w, mri ✅ 1582w, active-scene ✅ 1190w). beat48 BACK-leak patterns working (2 strips in eagle).
+- Run 2 (03:20): ALL 6 PASS ✅ (intimacy ✅ 1282w, eagle ✅✅ 1949w, vague-open ✅ 1652w, mid-switch ✅ REGISTER 1167w, mri ✅ 1771w, active-scene ✅). Total 4428s.
+- MINOR DEFECT: "isnYou" broken sentence in run2 intimacy — model output truncated mid-sentence then continued on next line without space separator. Not gate-blocking; extension-loop trim artifact. Monitor.
+- **n376 is solid. Two consecutive clean battery11 runs. Imagination gate remains closed ✅.**
+
+**battery9 (01:55):**
+- Metrics: paraphrase-openers 4% ✅, q-enders 35% ✅, what-if 0% ✅, tic 0 ✅, diversity 1.00 ✅.
+- comp-para-care/love/stay/advice-demand/topic-whiplash/vent-layoff/typo-soup/oneword/bored-test: ALL PASS ✅.
+- comp-grief-anger: T1 ✅, T2 ❌ NEW DEFECT CLASS — BARRIER-ASK-WHY: "So why are you carrying the anger alone?" — model asked for info just given. Beat48 BARRIER instruction applied; T2 still failing stochastically. Family-C retrain is the fix path.
+- comp-crisis-adjacent: TYPE B mechanical regen fired and produced correct TWO MOVES form ✅. Quality note: question "What does it feel like to say this?" is meta (about the act of saying it) — acceptable shape, not ideal content.
+- comp-arc-sober: T7 "The loud evenings are exposing something quieter" — still excavation (known prompt-unfixable). T8 "At 9pm, people do the thing that marks them as their own person" — still generic (want "TV. Mostly TV."). Banked T8 concrete form in c_gold_beat49.jsonl.
+
+**battery10 (02:38/02:45):** 9/10 PASS. sec-hr-complaint FAIL (FACT-LOST:Mar11) — FIXED this beat. All others including sec-shorter-x3, sec-multi-doc-paste, sec-braindump-organize: PASS ✅.
+
+**battery2b, 3b, 4b, product e2e:** ALL PASS ✅.
+
+### Beat49 gold
+- **Gold(A)=438** (+6): first-morning-new-house, ice-skating-rink, first-tomato-harvest, clean-test-result, arriving-dream-destination, skill-finally-clicked. All unique openings verified.
+- **Gold(C)**: c_gold_beat49.jsonl +5 exemplars (grief-anger T2 trap-form, T2 cost-form, crisis-adjacent two-moves warmth, bored-test hold-ennui, arc-sober T7/T8 absurdist). Not yet SCP'd to mini (mini unreachable).
+
+### Mini status (beat49)
+- SSH times out at 172.16.151.169:22. Ping responds (host is up). Likely firewall rule or sleep state change. Key loaded in agent. Previous SSH attempts: "Too many authentication failures" error on localdomain, then "Operation timed out" on IP — different error types. Try after reboot or from different context.
+- n432 training status: unknown since beat48 SCP not confirmed. Flywheel should have auto-triggered on Gold=432 hash change. Verify on next reachable session.
+
+### RUNS NEXT (beat49 continuation — in order)
+1. **Wait for battery9 to finish** (~06:00-06:30 EST). Monitor: `tail -f logs/qc/queue_0718_0436_battery9_engagement.log`.
+2. **Verify memory ≥35% free** after battery9 + model process exits.
+3. **Run battery10** (5-minute run via server) to confirm sec-hr-complaint fix: `HF_HUB_OFFLINE=1 .venv/bin/python scripts/qc/battery10_registers.py 2>&1 | tee logs/qc/gate_beat49_battery10_hrfix.log`. Check sec-hr-complaint passes (FACT-LOST:Mar11 gone).
+4. **Companion deep test** (use-cases.md #1-#5) — the UC rotation is on Companion this beat. Use httpx to call server. Run through: 2am mind-race, parasocial probe, edge (hostility, grief-adjacent), template fatigue. Add findings to docs/qc/use-cases.md.
+5. **Battery12** will auto-run in qc_queue after battery10. If it doesn't appear in next cycle, check qc_queue.sh ordering.
+6. **Log daily-log and RELEASE.md** after deep test.
+
+### BEAT 48 STATE (2026-07-18) — COMPLETE
+
+### Beat48 code fixes
+- **companion.py** — `_VENT_HOLLOW_SECOND_RE` + `_strip_vent_hollow_second()` added (after `_strip_thats_real_tic()`). Called at 4 points in `turn()` (initial gen + GRAVITY TYPE B regen + empty-reply regen + forbidden regen). Strips second sentences matching banned hollow patterns from VENT replies.
+- **companion.py** — BARRIER instruction added to COMPANION_SYSTEM after WHEN THEY VENT / "One line, period, done.": "FOLLOW-UP AFTER A VENT — WHEN THEY NAME A BARRIER — name what the barrier CREATES (the bind, cost, stuck place) — not why it exists. One line only."
+- **qc_queue.sh** — `scripts/qc/battery12_vital_facts.py` added to QUEUE (position 4, after battery10). First automated vital-facts run since beat14 gate (July 12).
+- **scenario_bank.py** — beat48 regression notes: comp-vent-layoff hollow-second bypass + mechanical fix; comp-grief-anger BARRIER-ASK-WHY defect.
+
+### n426 verdict — REJECTED
+- **Val 1.506 vs n376 0.641** (2.4× worse). Confirmed as real regression (not just harder val set).
+- **Eval (4 prompts, 2 completed):** Beach: repetition loop ("You walk along the shore..." ×4, "You are aware of the feel of the horizon" duplicated verbatim). Eagle: factual hallucination ("400-pound raptor"), abstract proclamation loop ("You are the king of the sky" ×4), zero sensory flight embodiment. Boss conversation: generation failed (empty output). Hot spring: not reached.
+- **Cause unknown**: A_gold grew 376→432 during n426 training cycle; new scripts may have introduced conflicting patterns, or training settings need tuning.
+- **Next candidate**: n432 (triggered automatically when flywheel detects A_gold MD5 change on mini). Mini SSH currently intermittent — verify next session.
+
+### Beat48 gold
+- **Gold(A)=432** (+6: open-water dock, used bookshop, empty apartment emigrating, fire outside cold night, last sentence of a book, city years ago). SCP'd to mini (assumed — mini SSH dropped before confirm; verify next session).
+- **Gold(C)**: c_gold_beat48.jsonl +5 exemplars (vent-layoff one-sentence, grief-anger T2 barrier ×2, opener-ask-yield, opener-gravity-first). Total: 50 targeted + 130+ root.
+
+### RUNS NEXT (beat48 continuation)
+1. **Read battery11 end-to-end** when it completes (~02:00): all 6 scenarios — eagle ✅ already, read vague-open/grief-pet/mid-switch/intimacy/active-scene. Any FAIL = fix + re-run.
+2. **Companion deep use-case test** — this beat's product rotation. Start server (≥35% memory required), run use-cases.md companion scenarios as demanding AI professional. Test: weird inputs, long sessions, edge registers. Every defect: fix, bank, re-verify.
+3. **Verify mini + n432**: SSH when reachable — check n432 training status, n432 eval when ready, probe vs n376.
+4. **Family-C retrain**: flywheel_c.sh on mini — 50 targeted exemplars, threshold met. Trigger this beat or next.
+5. **Cross-cutting sweep** — offline tripwire, ceilings, 200s, QC-artifact purge.
+6. **Cold install** — scripts/package.sh → dist zip → Start Hearth.command.
+
+## BEAT 47 STATE (2026-07-17)
+
+### What's running
+- **qc_queue RUNNING** (PID 37564).
+- **Live adapter: n376** (MD5: b9acf04a1f989d570908c25177966b0f). PERMANENT.
+- **companion.py MD5: 792f9d0fd354bf14f9fec0a3bd2a356e** (all 3 dist copies synced).
+- **server.py MD5: 4d2995ab9b3047452500ce6857bae56a** (all 3 dist copies synced — utility_run now calls assistant.run()).
+- **utility.py MD5: beee3eae47eb4daaac2080f5ac029b20** (all 3 dist copies synced — stub guard added, _extra_system param).
+
+### Beat47 code fixes
+- **server.py** — `utility_run` endpoint changed from `assistant.stream()` to `assistant.run()`.
+  Root cause: all post-checks (stub guard, number recovery, day-name sanitisation) lived in `run()` but server called `stream()` directly, bypassing them entirely.
+  Fix: buffer full output via `assistant.run()`, yield complete result. Streaming interface preserved (JS reader loop still works); typing-effect lost but correctness gained.
+- **utility.py** — `_extra_system` parameter added to `stream()` (private, passed through to `gen()`).
+- **utility.py** — draft/reply stub guard in `run()`:
+  Detection: strip subject lines (`Subject: ...`), salutation/sign-off lines (ending with comma), placeholder lines (`[...]`) — if nothing remains, output is a stub.
+  Regen: up to 3 attempts using `engine.stream()` directly with body-prompt `_extra_system`, temp=0.3 → 0.25. All 8 unit tests PASS.
+
+### Secretary deep test — CLOSED ✅ (beat47, 153s)
+| UC | Result | Notes |
+|---|---|---|
+| UC1 meeting notes | ✅ all 8 facts | sarah/tuesday/wednesday/goldman sachs/option b/oauth/$12/thursday |
+| UC2a firm decline | ✅ | $85k vs $110k, door open |
+| UC2b apology | ✅ | full body, owns it, no groveling |
+| UC2c negotiation counter | ✅ | $3400 counter present |
+| UC3 braindump organize | ✅ all numbers | $59/$49/march17/miranda/47/30%/feb28/bugs/tuesday |
+| UC4 shorter×3 | ✅ | 20w→13w→11w, each shorter |
+
+**Secretary gate: CLOSED** — 5/5 UC pass. Root fix: server endpoint bypassed all post-checks.
+
+### RUNS NEXT (in order — beat48)
+1. **Family-C retrain** — trigger `flywheel_c.sh` on mini (45+ targeted exemplars, threshold met). Kill qc_queue, ≥35% memory, `nohup bash scripts/flywheel_c.sh > ~/Downloads/hearth-corpus/_logs/flywheel_c.log 2>&1 &` on mini, restart qc_queue when done.
+2. **n426 probe read** — `ssh smaitra@mac-mini.localdomain 'cat ~/Downloads/hearth-corpus/_logs/probe_latest.txt; ls ~/Downloads/hearth-corpus/ | grep GOLD-ADAPTER | tail -3'`
+3. **vital-facts WRITE path** — deferred from beat46.
+4. **Cross-cutting sweep** — offline tripwire, ceilings, 200s, QC-artifact purge.
+5. **Cold install** — scripts/package.sh → dist zip → Start Hearth.command clean run.
+6. **Companion gate** — needs family-C retrain first; arc-divorce My→She, comp-funny regression still open.
+
+## BEAT 46 STATE (2026-07-17)
+
+### What's running
+- **qc_queue RUNNING** (PID 37155). battery9 2042 COMPLETE.
+- **Live adapter: n376** (MD5: b9acf04a1f989d570908c25177966b0f). PERMANENT — do not demote.
+- **companion.py MD5: c3cfa3d26a7ab20fa3b6366bdff94a91** (all 3 dist copies synced — GRAVITY TYPE B regen + stub guard 8→6 + GRAVITY q_streak exception).
+- **scenario_bank.py MD5: 945c383bfb4923e164767e35b012258e** (beat46 note added to comp-crisis-adjacent).
+- **Gold(A)=426** (+8 beat46: Saturday rest, pottery wheel, kid bike, 3am calm, first customer, rain, grandmother's dinner, concept clicked). SCP'd to mini ✅.
+- **Gold(C) beat46**: c_gold_beat46.jsonl +5 exemplars (arc-divorce T2 My→She echo; T2–T4 arc; crisis-adjacent TYPE B correct; TWO MOVES variety; hard-convo HOW-frame). SCP'd to mini ✅.
+- **Mac Mini: ALIVE** — caffeinate + flywheel running. n418 live adapter on mini (trained 07-17 18:22). A_gold 426 + c_gold_beat46 confirmed. n426 auto-triggers on next 30-min flywheel poll (~21:00–21:30).
+
+### Beat46 code fixes
+- **companion.py** (MD5: c3cfa3d26a7ab20fa3b6366bdff94a91):
+  - `_GRAVITY_SIGNALS` tuple at module level: 8 crisis-adjacent signal phrases.
+  - `_is_gravity_trigger(user_message)`: returns True if any signal phrase found in user message.
+  - `_QUESTION_FIRST_WORDS` frozenset: does/do/is/are/was/were/will/would/can/could/have/has/had/what/when/where/why/how.
+  - `_is_pure_question(reply)`: True when reply ends with "?" AND first word is in `_QUESTION_FIRST_WORDS`.
+  - Mechanical regen block in `turn()`: after initial generation + postprocessors, if GRAVITY trigger + pure question → regen at temp=0.4 with explicit acknowledgment instruction. `_strip_echo()` NOT applied on regen (acknowledgment uses their words intentionally).
+  - Stub guard lowered 8��6 in `_drop_trailing_question()`.
+  - q_streak strip: `not _is_gravity_trigger(user_message)` guard preserves GRAVITY question.
+  - 9/9 unit tests PASS (both _is_gravity_trigger and _is_pure_question).
+
+### Battery9 2042 in progress — key scenarios to watch
+- **comp-crisis-adjacent**: TYPE B mechanical regen FIRST verification. Expected: regen should fire if model generates "Does it feel like..." and produce TWO MOVES form.
+- **comp-arc-divorce T2**: My→She echo still prompt-unfixable; family-C retrain path. T7 "Good." should still hold.
+- **comp-hard-convo-prep T2**: HOW-frame target "Two conversations, not one sentence." — stochastic.
+
+### Secretary deep test — COMPLETED (beat46, 170s)
+| UC | Result | Notes |
+|---|---|---|
+| UC1 meeting notes | ✅ all 8 facts | sarah/tuesday/wednesday/goldman sachs/option b/oauth/$12/thursday |
+| UC2a firm decline | ✅ | $85k vs $110k, door open |
+| UC2b apology | ✅ | third-regen fix CONFIRMED working (no empty "James,") |
+| UC2c negotiation counter | ❌ stochastic | "David," only — model generates salutation, third-regen fires but also fails |
+| UC3 braindump organize | ✅ all numbers | $59/$49/march17/miranda/47/30%/feb28/bugs/tuesday |
+| UC4 shorter×3 | ✅ | 21w→12w→11w, each shorter |
+
+**Secretary gate: NOT YET CLOSED** — 4/5 UC pass. UC2c is a model-floor stochastic failure (~50% rate, passed in beat43). Gate criterion = clean 5/5 pass. Action: re-run deep test in next session after any utility.py draft floor improvements.
+- To re-run: kill qc_queue, verify memory ≥35%, `HF_HUB_OFFLINE=1 .venv/bin/python /tmp/secretary_deep_test.py`, restart qc_queue.
+
+### Family-C retrain — THRESHOLD MET, NOT YET TRIGGERED
+- C-companion exemplar count: 45 in `_candidates/` (beat28–beat46), 130+ in root across beats 13–45.
+- Beat45 RUNS NEXT said "~50+ total"; we're at 45 _candidates/. Root has well over 130. Retrain justified.
+- Procedure: kill qc_queue; check memory ≥35%; `nohup bash scripts/flywheel_c.sh > ~/Downloads/hearth-corpus/_logs/flywheel_c.log 2>&1 &`; restart qc_queue when done.
+- **NOTE**: flywheel_c.sh runs gen_c_candidates → curate_c → build_training_data → finetune. Takes ~2h. Mini preferred over laptop.
+
+### RUNS NEXT (in order — beat47)
+1. **Secretary gate rerun** — re-run `/tmp/secretary_deep_test.py`. UC2c needs clean pass. Gate procedure: kill qc_queue, ≥35% free, run, restart.
+2. **UC2c draft floor fix** — add draft-body min-length guard in utility.py for ALL "draft" task tones (not just apology): if output ≤ 30 chars after regen and is salutation-only, force body regen.
+3. **Family-C retrain** (threshold met; trigger on mini via flywheel_c.sh).
+4. **n426 probe read** — check `_logs/probe_latest.txt` on mini after flywheel runs.
+5. **vital-facts WRITE path** — deferred to beat47+.
+6. **Secretary gate** — close formally once deep test passes.
+
+## BEAT 45 STATE (2026-07-17)
+
+### What's running
+- **qc_queue RUNNING** (PID 30502, resumed after battery3c run).
+- **Live adapter: n376** (MD5: b9acf04a1f989d570908c25177966b0f). PERMANENT — do not demote.
+- **Mac Mini: REACHABLE** (mac-mini.localdomain, smaitra). n411 REJECTED (val 0.812). n418 TRIGGERED: A_gold.jsonl 418 SCP'd, valid.jsonl removed (fresh val split), flywheel will detect hash change on next 30-min poll.
+- **companion.py MD5: fbad3cf33bb9be38c15835b78c687988** (all 3 dist copies synced — GRAVITY TYPE B + WHEN THEY VENT "That feels like X" fixes).
+- **battery11_imagination_bank.py**: bear false-positive fixed (requires article "a/the bear" to count as wildlife).
+- **scenario_bank.py MD5: 945c383bfb4923e164767e35b012258e** (3 defects banked this beat).
+- **utility.py MD5: a32c087aafa02cc263291da0fdf4f6ac** (beat44 fix: organize numeric floor + extend post-check to cover organize).
+- **doc_qa.py MD5: 92ce1b3eda21dc6d0aa8d21c1a8e73cf** (beat44 fix: BRIDGE2 retry trigger broadened to cover "not in your files").
+
+### Beat45 code fixes
+- **companion.py** (MD5: fbad3cf33bb9be38c15835b78c687988):
+  - GRAVITY TYPE B: "Does..." explicitly added to MUST NOT start list; WRONG/RIGHT example pair with exact observed failure ("Does it feel like everyone or just a few?" after user said "lighter without me around")
+  - WHEN THEY VENT BANNED SECOND SENTENCES: "That feels like X." / "It feels like X." added (present-tense bypass of banned "That must feel like X.")
+- **battery11_imagination_bank.py**: bear false-positive fixed — `_WILDLIFE_WORDS` + `_WILDLIFE_ARTICLE` split; "bear" now requires preceding article "a" or "the" to match as animal. n376 eagle gate stands (was a measurement error).
+- **scenario_bank.py** (MD5: 945c383bfb4923e164767e35b012258e): 3 defects banked:
+  - comp-vent-layoff: "That feels like X" bypass
+  - comp-crisis-adjacent: TYPE B "Does..." violation with WRONG/RIGHT examples
+  - comp-arc-divorce: My→She echo → family-C retrain path
+
+### Beat45 gold
+- **Imagination**: +7 → Gold(A)=418. New scenes: manuscript send, lake dawn swim, winter farmers market, toddler asleep, childhood bedroom return, offstage wings, father’s letter. SCP’d to mini ✅.
+- **Companion**: c_gold_beat45.jsonl +4 exemplars (crisis-adjacent TYPE B correct, T2 two-move sustained, vent-layoff T2 no-feels-like, arc-divorce T2 no-she-echo). SCP’d to mini ✅.
+
+### Beat45 adapter / mini status
+- **n411 REJECTED** — val 0.812, oscillating curve, frozen val root cause. n376 stays live.
+- **n418 triggered**: Gold(A)=418 SCP’d, valid.jsonl removed from mini (forces fresh val split), flywheel will detect hash change on next 30-min poll.
+- **AYF GATE CLOSED** ✅ — battery3c 28/28 × 3 consecutive (beat44 + beat45 ×2, 408s + 428s). 84/84 total.
+
+### Battery results (beat45)
+| Battery | Result |
+|---|---|
+| battery3c beat45 run2 (0717_1647) | ✅ 28/28 PASS. BRIDGE2 PASS. |
+| battery3c beat45 run3 (0717_1654) | ✅ 28/28 PASS. BRIDGE2 PASS. AYF GATE CLOSED. |
+
+### RUNS NEXT (in order — beat46)
+1. **Read n418 probe when complete** (~30 min after flywheel detects hash change). Check probe_latest.txt on mini: `ssh smaitra@mac-mini.localdomain ‘cat ~/Downloads/hearth-corpus/_logs/probe_latest.txt; ls ~/Downloads/hearth-corpus/ | grep GOLD-ADAPTER | tail -3’`
+2. **Secretary UC1 fact-drop** — stochastic; gold exemplar showing correct form (all 8 facts preserved: sarah, tuesday, wednesday, goldman sachs, option b, oauth, $12, thursday).
+3. **Secretary UC2c negotiation salutation-only** — model floor; gold exemplar showing correct counter email body.
+4. **Companion family-C retrain progress** — check exemplar count; trigger when density sufficient (~50+ total, targeting crisis-adjacent/arc-divorce/grief-anger).
+5. **vital-facts WRITE path** — deferred to beat46+.
+
+## BEAT 43 STATE (2026-07-17)
+
+### What's running
+- **battery11 RUNNING** (PID 22849, started 09:31 AM, ETA ~10:43 AM). Routine n376 confirmation run in qc_queue cycle.
+- **qc_queue RUNNING** (PID 22821, relaunched 09:31 AM after secretary test).
 - **Live adapter: n376** (MD5: b9acf04a1f989d570908c25177966b0f). n281 backed up at `data/model/adapters.n281/` and `data/model/adapters.n281_permanent.safetensors`.
-- **mini status: UNKNOWN** (system lock screen). n384 training started beat39 at ~04:45 (iter ~175/1500 at beat40 start). ETA was 06:15-06:30 but mini is locked, cannot check.
-- **qc_queue RUNNING** (restarted beat40 post-gate after memory ≥35% confirmed).
-- **IMAGINATION GATE**: CLOSED ✅ — n376 battery11 ALL 6 PASS (beat40 2026-07-16). Imagination upgraded to n376.
-- **companion.py Case 5 fix** — any-sentence echo detection. Synced to both dist/ copies. 4/4 unit tests PASS.
-- **Gold(A)=396** — +12 beat40 (pre-performance wings, half-marathon, greenhouse, coastal dawn, childhood lake, late-night bread, 2am conversation, open water swim, summit hike, presenting work, job interview, holding newborn). NOT yet SCP'd to mini (mini locked).
-- **Gold(C) +5 beat40** — c_gold_beat40.jsonl (grief-anger T2, arc-divorce variety, topic-whiplash, hard-convo, vent-layoff). NOT yet SCP'd to mini.
+- **Mac Mini UNREACHABLE** — ping 100% packet loss to 172.16.151.169. Likely sleeping. Physical wake needed. n404 training status unknown (was at iter 25/1500 at ~09:10 AM when last seen).
+- **IMAGINATION GATE**: CLOSED ✅ — n376 battery11 ALL 6 PASS × 2 (beat40 + beat41).
+- **companion.py** — beat42 fixes. MD5: b4f8806d0e5ed27bc5ce1648a301cfbe (all 3 dist copies).
+- **utility.py** — beat43 fixes (third-regen + concise prompt). MD5: 94d83e81e488ae67a96b2b78e273783d (all 3 dist copies).
+- **Gold(A)=404** — SCP'd to mini before unreachable ✅. **Gold(C) beat41 +5 + beat43 +3** — beat41 SCP'd ✅; beat43 waiting for mini to wake.
 
-### Beat40 gate results — ALL 6 PASS
-- ✅ imag-intimacy: 1126w/454s. 15 possessive fixes, 1 subject-pronoun fix. BACK clean.
-- ✅ imag-grief-pet: 2060w/820s. 0 pronoun errors. Human POV, tennis ball, bench present. STRUCTURAL PASS.
-- ✅ imag-vague-open: 1806w/751s. Outdoor warm field committed scene. Mild chair/grass split (not gate-blocking).
-- ✅ imag-mid-switch: 1163w/539s. Couch env, alert anchors ×3 "before work starts in an hour", strip_alert_calm_violations clean.
-- ✅✅ imag-embodiment-eagle: 2134w/741s. In-scene from word 1, both postchecks PASS, 1 wildlife sentence dropped+cleaned.
-- ✅ imag-active-scene: 2715w/860s. "Your eyes are closed and your lungs burn with each step." In-scene, no chair, pronoun postcheck ✅.
+### Beat43 secretary deep test (0717_0928 — 124s)
+| test | verdict |
+|---|---|
+| UC1 meeting notes | ✅ all 8 facts preserved |
+| UC2a firm decline | PARTIAL (email exists, no explicit decline stated) |
+| UC2b apology | ❌→FIXED (was "James," only; utility.py third-regen prevents empty-strip) |
+| UC2c negotiation counter | ✅ $3400 present |
+| UC3 braindump | PARTIAL ("47" beta-user count dropped; other floor issues were calibration errors) |
+| UC4 shorter×3 | ❌ model can't compress ~28w further on passes 2+3 |
 
-### Beat40 code fixes
-None (all code work was beat39: Case 5, scenario_bank.py notes).
+### Beat42 battery9 results (0717_0849) — 21/21 PASS (2 defects found and fixed)
+All scenarios passed or had defects fixed mid-run. Key results:
+- arc-divorce T3 ✅ (Case 2e fix confirmed — no echo in reply)
+- arc-divorce T5 ✅ (second-regen fix confirmed — "Does it feel worse when no one knows what you're relieved about?")
+- arc-divorce T7 ✅ ("Good.")
+- vent-layoff ❌→FIXED: "That makes the whole thing about what happens next" — new bypass form
+- hard-convo-prep T1 ❌→FIXED: "You said he's also your oldest friend." — Case 2d second-sentence echo
+- Metrics: 10% paraphrase-openers, 48% q-enders, 0.90 opener diversity
+
+### Beat43 code fixes (utility.py MD5: 94d83e81e488ae67a96b2b78e273783d)
+- **utility.py: third-regen fallback** — when banned-opener strip leaves ≤ 15 chars (just salutation), forces a third full regen with "Write body IMMEDIATELY" instruction. Prevents "James," empty-output on apology emails.
+- **utility.py: concise tone strengthened** — from "Be as concise as possible while keeping everything essential." → "Compress: remove every unnecessary word and cut redundant phrases. The output must be shorter than the input — fewer words, same core meaning." Fixes UC4 shorter×3 model floor.
+- **scenario_bank.py: sec-braindump-organize added** (always=True, high, helpfulness). Product-launch braindump with 10 numeric facts. Gold exemplar c_gold_beat43 shows correct form.
+- **battery10_registers.py: sec-braindump-organize floor checks added** — \b47\b, $59, $49, march 17/3, miranda, 30%, feb 28, 3 bugs, tuesday. SYNTAX OK.
+- **c_gold_beat43.jsonl: 3 exemplars** — arc-divorce T2 (no-mirror), arc-divorce T4 (sentence-complete), sec-organize-UC3 (all numeric facts). NOT YET SCP'd to mini (mini unreachable).
+
+### Beat42 code fixes (companion.py MD5: b4f8806d0e5ed27bc5ce1648a301cfbe)
+- **vent-layoff bypass**: Added "That makes the whole X." / "That makes X about Y." / "That puts X about Y." to BANNED SECOND SENTENCES in WHEN THEY VENT.
+- **Case 2d all-sentences**: Extended `_strip_echo()` Case 2d to check ALL user sentences (not just first). Hard-convo-prep T1 root cause: second sentence "He's also my oldest friend" → I→You "he's also your oldest friend" matched.
+- All 3 dist copies in sync (src/, dist/imagination_engine/, dist/hearth/src/imagination_engine/). MD5 verified identical.
+- scenario_bank.py: arc-divorce beat42 notes, comp-vent-layoff beat42 regression+fix, comp-hard-convo-prep beat42 regression+fix.
+
+### Beat41 state (for reference)
+- Case 2e (arc-divorce T3 partial I→You prefix echo) FIXED.
+- Second-regen fallback (arc-divorce T5 double-strip → empty) FIXED.
+- battery11 0734: ALL 6 PASS (n376 second consecutive confirmation).
+- n396 REJECTED (val 1.168 vs n376 0.641).
+
+### Beat40 state (preserved for reference)
+- n376 PROMOTED PERMANENT (beat40, 4520s gate, val 0.641). MD5: b9acf04a1f989d570908c25177966b0f.
+- n281 backed up: `data/model/adapters.n281/` and `data/model/adapters.n281_permanent.safetensors`.
+- companion.py Case 5: any-sentence echo detection. 4/4 unit tests PASS.
 
 ### Beat38 battery11 0146 results (COMPLETE — 4418s, 6/6 done)
 
@@ -173,48 +468,54 @@ Backup n243 also: `data/model/adapters.n243_LIVE/` (MD5: 8a7395654d4bd0f72b69c67
 - n287 (19:58): REJECTED — narrator "we" violation. val 0.577.
 - n293 (pending): will auto-train when flywheel detects A_gold change (293 vs 287).
 
-## NEXT BEAT (beat41) — PRIORITY ORDER
-1. **Read qc_queue battery11 run** (queue_0716_0556) — running now with n376 as live adapter. Verify n376 quality consistent across a second battery11 run. Look especially for active-scene prose quality (was 2715w/degenerate back half this gate run).
-2. **Secretary real-ask tests** — sec-shorter-x3 + sec-multi-doc-paste. Start Hearth server, run real-ask manually against live server. Required for Secretary gate close.
-3. **SCP Gold(A)=396 + c_gold_beat40 to mini** — when mini unlocks (system lock screen). Run: `scp ~/Downloads/hearth-corpus/A-imagination/A_gold.jsonl smaitra@mac-mini.localdomain:~/Downloads/hearth-corpus/A-imagination/A_gold.jsonl && scp ~/Downloads/hearth-corpus/C-companion/c_gold_beat40.jsonl smaitra@mac-mini.localdomain:~/Downloads/hearth-corpus/C-companion/c_gold_beat40.jsonl`. Flywheel will auto-detect change and queue n396 training.
-4. **n384 gate** — when mini accessible, SSH and check `tail -5 ~/Downloads/hearth-corpus/_logs/honest_flywheel.log`. If GOLD-ADAPTER-0716-HHMM-n384 exists, SCP to laptop and read mini eval at `_evals/GOLD-ADAPTER-0716-*-n384.txt`. Gate only if eval shows no catastrophic failures.
-5. **Battery9 fresh run (post-Case5)** — qc_queue will queue this after battery11. Read metrics: q-enders, paraphrase openers, opener diversity. Key scenarios: grief-anger T2 (Case 5 should prevent echo), decision-house T3 (9th regression — prompt-unfixable, family-C retrain needed).
-6. **BRIDGE2 accumulation** — 5/20 qc_queue passes so far (beats 33/35/36/37/39). 15 more needed. AYF gate closes when <5% across 20 runs.
+## NEXT BEAT (beat44) — PRIORITY ORDER
+1. **Read battery11 (launched 09:31 AM, ETA ~10:43 AM)** — n376 in qc_queue rotation. Check all 6 scenarios against n376 quality floor. This is a routine confirmation run, not a gate run.
+2. **Re-run secretary deep test** — verify UC2b (utility.py third-regen) and UC4 (concise prompt) fixes. Kill qc_queue first. Command:
+   ```bash
+   kill $(pgrep -f qc_queue); sleep 5
+   memory_pressure 2>/dev/null | grep "Pages free"  # must be ≥35%
+   .venv/bin/python /tmp/secretary_deep_test.py > logs/qc/secretary_deep_test_verify_$(date +%H%M).log 2>&1
+   nohup bash scripts/qc_queue.sh >> logs/qc/queue.log 2>&1 &
+   ```
+3. **Wake mac-mini** (physical or WoL) — ping to 172.16.151.169 fails. Once up:
+   ```bash
+   ssh smaitra@mac-mini.localdomain 'tail -20 ~/Downloads/hearth-corpus/_logs/honest_flywheel.log; ls ~/Downloads/hearth-corpus/ | grep GOLD-ADAPTER | tail -3'
+   ```
+   Then SCP c_gold_beat43.jsonl: `scp ~/Downloads/hearth-corpus/C-companion/c_gold_beat43.jsonl smaitra@mac-mini.localdomain:~/Downloads/hearth-corpus/C-companion/`
+   If n404 completed, SCP adapter and run battery11 gate (≤ n376 val 0.641 required).
+4. **BRIDGE2, cross-cutting, cold install, public story** — deferred.
 
-## KNOWN STANDING ISSUES (release blockers)
-- **AYF BRIDGE2 vocab gap** — battery3b BRIDGE2 PASS ✅ (beat33). battery3c TRUNCATED at UC2-a last full run. Needs manual 20-run re-verify when memory ≥35%. NOT in qc_queue rotation. Run: `cd ~/Downloads/imagination-engine && python3 scripts/qc/battery3c_ask_usecases.py 2>&1 | tee logs/qc/battery3c_manual_$(date +%H%M).log`
-- **Secretary 3.2% drop** — stochastic. 3-regen path active (beat32). Battery10 ALL 10 PASS ✅ (beat34). NOTE: sec-summarize-lossless 18% stochastic miss on numbers in prose — source-sentence context added to regen (beat35). Named events (e.g. "memorial on the 6th") now in lossless-survive list (beat35).
-- **Secretary "shorter ×3" + multi-doc paste** — NOT YET TESTED. Required for Secretary gate close.
-- **Companion echo defects (beat36 state)**:
-  - comp-vent-layoff: ✅ CLEAN. comp-advice-demand: ✅. comp-funny: ✅. comp-crisis-adjacent: ✅. comp-topic-whiplash: ✅. comp-para-* ✅. comp-oneword ✅. comp-arc-divorce T7 "Good." ✅.
-  - comp-grief-anger T1 "Angry is real." tic + "I am" contraction echo: **FIXED beat36** — _strip_thats_real_tic() standalone sentence strip; Case 2c extended with _i_to_you() helper (handles contractions I'm→you're etc); c_gold_beat36 T1+T2 exemplars banked.
-  - comp-arc-divorce "that's [the real thing / a weight / a way to]" tic variants: **FIXED beat35+28**. Beat36 battery9: T1 ✅ T2 ✅ T7 ✅; T3-T6 paraphrase-opener pattern persists (known, prompt-unfixable at n281).
-  - comp-arc-divorce T5 "You said [I→You echo]": **FIXED beat36** — _strip_echo Case 2d added; strips "You said/mentioned [verbatim or I→You echo]" prefix, keeps insight after; handles contractions via _i_to_you(); verbatim-quote form also caught.
-  - comp-hard-convo-prep T1 "You said [verbatim quote]": **FIXED beat36** — same Case 2d; T2 stochastic win ("Two conversations, not one sentence.") at n281; c_gold_beat35+36 HOW-frame queued for n356.
-  - comp-arc-newparent T1 "— that's the whole thing right now." tic: **FIXED beat36** — _strip_thats_real_tic() extended with em-dash + whole-thing pattern. T3 hate→missing reframe: PROMPT-UNFIXABLE; c_gold_beat35+36 T2+T3 queued for n356+. T6 confabulation "eleven years" (low-severity; declaration shape correct).
-  - comp-decision-house T3: CONFIRMED PROMPT-UNFIXABLE (8th regression, verbatim echo of user phrase + "either" suffix). c_gold_beat36 concrete-pivot exemplar banked for n356.
-  - comp-arc-divorce T5/T4 orphaned-fragment + `?.` cleanup: ✅ FIXED (beat34).
-- **IMAGINATION GATE CLOSED** ✅ — n281 ALL 6 PASS × 3 consecutive runs. n281 PERMANENT (MD5: bce29e61472323003c948fbe07031115).
-- **n349 REJECTED** — settling bleed on EVERY script + eagle lands on rock + eyes-open opener + grandmother truncated + val loss 1.605 highest. n356 queued (flywheel pending).
-- **grief-pet narrator leaks** — _NARRATOR_POSS extended with 14 patterns (beat35); not yet verified in battery run (0746 loaded OLD code). Verify in next battery11 cycle.
-- **deposition talon hallucination** — talon-metaphor filter added to generator.py (beat35); not yet verified. Verify in next battery11 cycle.
-- **Cross-cutting sweep** — offline tripwire, ceilings, 200s, QC-artifact purge: NOT YET RUN.
+## KNOWN STANDING ISSUES (release blockers — beat45 state)
+- **Secretary gate open**:
+  - battery10: 9/10 (beat44 1613 — sec-shorter-x3 stochastic, known floor). sec-braindump-organize ✅ CONFIRMED (beat44 organize fix).
+  - Secretary deep test beat44: UC2b ✅ UC3 ✅ UC4 ✅ confirmed. UC1 stochastic fact-drop (option b/oauth/$12/thursday). UC2c salutation-only model floor.
+  - **Needs gold exemplars**: UC1 complete meeting notes (all 8 facts), UC2c correct negotiation counter email body.
+- **Companion gate open — prompt-unfixable defects (family-C retrain path)**:
+  - comp-crisis-adjacent TYPE B: ✅ prompt-fixed (beat45 GRAVITY TYPE B "Does..." ban). Monitor next battery9.
+  - comp-vent-layoff "That feels like X": ✅ prompt-fixed (beat45). Monitor next battery9.
+  - comp-arc-divorce My→She echo: family-C retrain path. Exemplar banked (beat45).
+  - comp-decision-house T3: CONFIRMED PROMPT-UNFIXABLE (10+ regressions). Fix path: family-C retrain.
+  - comp-grief-anger T2: PROMPT-UNFIXABLE. Case 5 catches mechanically. Fix path: family-C retrain.
+  - **Q-enders**: 38% beat44 battery9 (≤50% ✅, inside threshold). paraphrase-openers: 0% beat44 (best ever).
+- **IMAGINATION GATE CLOSED** ✅ — n376 battery11 ALL 6 PASS × 2. n376 PERMANENT (MD5: b9acf04a1f989d570908c25177966b0f).
+- **AYF GATE CLOSED** ✅ — battery3c 28/28 × 3 consecutive (beat44 + beat45 ×2). 84/84.
+- **BYO GATE CLOSED** ✅ — beat12/16/17 (3/3 consecutive).
+- **Vital Facts GATE CLOSED** ✅ — battery12 12/12 PASS.
+- **Cross-cutting sweep** — NOT YET RUN.
 - **Cold install** — scripts/package.sh not run. Run before beta.
 - **Public story** — site/README recut deferred.
 
-## CODE STATE (src/ and dist/ in sync as of beat36)
-- postcheck.py: strip_active_body_chair_refs ✅, strip_back_instruction_leaks ✅, fix_possessive_pronouns ✅, drop_active_body_wildlife ✅, drop_forbidden_stock_imagery ✅ (beat26), strip_alert_calm_violations ✅ (beat27), **_NARRATOR_POSS +14 patterns (beat35): I+(reach|keep|feel|sit|take|hold|said|step|walk|stand|watch|start|call|move), I'm [verb]ing, I've [past], by my side, for me just/here/now/there/too, under me, through me, with me, we started/are now/were both/had been/come back, my hand/hands/breath/side/step/voice/foot, both of us, for us**
-- companion.py: **beat36 — _strip_echo Case 2d: \"You said/mentioned [verbatim or I→You echo]\" prefix strip; _i_to_you() helper handles contractions (I'm→you're, I've→you've, I'd→you'd, I'll→you'll); Case 2c refactored to use _i_to_you(); _strip_thats_real_tic() standalone \"[word] is real.\" pattern (start + mid-reply); \"— that's the whole thing\" em-dash tic; COMPANION_SYSTEM banned family extended with whole-thing variant** | beat35 FORBIDDEN TIC loophole CLOSED + I→You ban + Case 2c | beat34 Case 4b em-dash + ?.cleanup | beat33/32 BANNED SECOND SENTENCES | beat31 WHEN THEY ASK HOW + CF(3) | beat30 WHEN THEY REACH FOR YOU + WHEN THEY VENT | beat28 _CONFIRM_LANDS + _strip_thats_real_tic() | beat27 "that's real" ABSOLUTE BAN
-- generator.py: **beat35 — talon-metaphor filter** | _is_grief_pet_walk ✅ | _explicit_embodiment flag + decoupled wildlife drop ✅ (beat27)
-- utility.py: **beat35 — named events + source-sentence regen** | INVENTED-DAY (beat30)
+## CODE STATE (src/ and dist/imagination_engine/ in sync as of beat41)
+- postcheck.py: strip_active_body_chair_refs ✅, strip_back_instruction_leaks ✅, fix_possessive_pronouns ✅, fix_subject_pronouns ✅ (beat38), drop_active_body_wildlife ✅, drop_forbidden_stock_imagery ✅, strip_alert_calm_violations ✅, _NARRATOR_POSS +14 patterns (beat35), all BACK leak patterns (beat27-38)
+- companion.py: **beat41 — _strip_echo() Case 2e (partial I→You prefix, ≥5 words/60% coverage); second-pass regen fallback (temp=0.7, max_tokens=80, situation-not-words instruction)** | beat39 Case 5 (any-sentence echo) | beat38 Case 2d U+201C curly-quote | beat36 Case 2d "You said/mentioned" prefix + _i_to_you() helper + _strip_thats_real_tic() "is real." standalone + "whole thing" em-dash | beat35 Case 2c I→You + FORBIDDEN TIC loophole | beat34 Case 4b + ?. cleanup | beat33/32 BANNED SECOND SENTENCES | beat31 WHEN THEY ASK HOW + CF(3) | beat30 WHEN THEY VENT (one-line) + WHEN THEY REACH FOR YOU | beat28 _CONFIRM_LANDS + _strip_thats_real_tic() | beat27 "that's real" ABSOLUTE BAN
+- generator.py: talon-metaphor filter (beat35), _is_grief_pet_walk ✅, _explicit_embodiment flag + decoupled wildlife drop (beat27), fix_subject_pronouns() wired (beat38)
+- utility.py: named events + source-sentence regen (beat35), INVENTED-DAY (beat30), STRICT DATE RULE (beat38)
 - doc_qa.py: bridge-retry in ask() ✅ (beat30). PENDING battery3c 20-run verify.
-- battery11_imagination_bank.py: word-boundary regex for wildlife postcheck ✅
-- scenario_bank.py: **beat36 notes banked**: comp-grief-anger (Case 2d + contraction fix), comp-arc-newparent (T5-T6 findings + confabulation note), comp-arc-divorce (T1-T7 beat36, Case 2d defect + T7 PASS), comp-hard-convo-prep (T1 Case 2d defect + T2 stochastic win), comp-decision-house (T1-T3 beat36, T3 8th regression)
+- scenario_bank.py: beat41 notes banked (arc-divorce T3/T5, decision-house T3 10th regression)
 
 ## GOLD CORPORA
-- Imagination: **363 scripts** (A_gold.jsonl) — +7 beat36 (coastal-rocks-dusk, early-morning-flight-5am, packing-childhood-bedroom, open-water-kayak-crossing, empty-stadium-alone, waking-in-tent-mountains, cold-lake-first-summer-day). Laptop=363 ✅, mini=363 ✅ SCP'd. Flywheel detected 363≠349 → n356 training underway.
-- Companion: c_gold_beat3/5/7/9/13-36.jsonl — ALL in main C-companion/ dir ✅ (beat35 + beat36 both promoted). beat36 = 5 exemplars (grief-anger-T1-no-am-echo, grief-anger-T2-forward-no-blame, arc-newparent-T2-boring-terrifying, arc-newparent-T3-hate-receive, decision-house-T3-concrete-pivot). All SCP'd to mini ✅.
-- Beat exemplar JSONL files on mini: beats 3,5,7,9,13-36. Total: ~113+ beat exemplars. n356 is FIRST adapter with c_gold_beat35+36 companion exemplars (grief-anger I→You, arc-newparent hate-receive, hard-convo HOW-frame, decision-house pivot, arc-divorce T5 no-echo).
+- Imagination: **404 scripts** (A_gold.jsonl) — Laptop=404 ✅, mini=404 ✅ SCP'd. Flywheel will auto-queue n404 on next 30-min poll (detected 404>396).
+- Companion: c_gold_beat3/5/7/9/13-41.jsonl — ALL in main C-companion/ dir ✅. Total beat exemplars: ~182. All SCP'd to mini ✅. beat41 = 5 exemplars (arc-divorce T3 no-echo, decision-house T3 concrete, grief-anger T2 forward, vent-layoff plain, funny villain-arc).
 
 ## THE OPERATING SYSTEM (since 2026-07-07): heartbeat + honest flywheel
 

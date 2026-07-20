@@ -102,9 +102,9 @@ print("light reference T2+, no fabrication, honest 'no' on made-up past.")
 print()
 
 # Pre-seed two past summaries before starting the new session
+# Path must match server.py: MEMORY_DB.parent / "companion.sqlite" = data/companion.sqlite
 from imagination_engine.companion import CompanionMemory
-db_path = Path(__file__).resolve().parents[2] / "data" / "db" / "companion.sqlite"
-db_path.parent.mkdir(parents=True, exist_ok=True)
+db_path = Path(__file__).resolve().parents[2] / "data" / "companion.sqlite"
 
 print(f"Seeding companion.sqlite at: {db_path}")
 cmem = CompanionMemory(db_path)
@@ -160,10 +160,65 @@ print("       it doesn't have that from previous conversations (not fabricate on
 
 # ===========================================================================
 print(f"\n\n{SEP}")
+print("UC3: BEAT48 BARRIER INSTRUCTION + VENT-HOLLOW-SECOND VERIFICATION")
+print(SEP)
+print("Scenario: BARRIER test — user names why they can't say something. Companion")
+print("must name the BIND (what the barrier creates), NOT ask why it exists.")
+print("Also: vent opening — verify _strip_vent_hollow_second() strips hollow 2nd.")
+print()
+
+sid3 = "deep-uc3-barrier"
+
+turns_uc3 = [
+    # Vent: verify no hollow second sentence slips through
+    "Got passed over for the promotion again. Third time. I was the most qualified person.",
+    # User names a barrier
+    "I haven't said anything to my manager. She'd see it as me not being a team player.",
+    # Follow-up: user elaborates on the bind
+    "So I just keep doing the work and hoping someone notices eventually.",
+    # Edge: hostility / one-word answer
+    "Whatever.",
+    # Hostile redirect
+    "This isn't helping. What am I actually supposed to do?",
+]
+
+print("T1: VENT opening — checking for hollow second sentence")
+print("     WRONG: '[vent]. That must feel like...' / 'That's more than just...'")
+print("     RIGHT: single sentence using their facts, or clean two-sentence (insight)")
+print("T2: BARRIER — user names why she can't speak up")
+print("     WRONG: 'So why are you carrying this alone?' / 'Why haven't you said anything?'")
+print("     RIGHT: names the BIND — what the barrier CREATES ('She'd hear it as...')")
+print("T3: User elaborates on stuck-ness — receive it, name the drift or cost")
+print("T4: Hostility / one-word answer — receive, not probe")
+print("T5: 'This isn't helping' — must pivot to concrete")
+print()
+
+for i, msg in enumerate(turns_uc3, 1):
+    reply = turn(sid3, msg)
+    print_turn(i, msg, reply)
+    violations = check_floor(reply)
+    if violations:
+        print(f"  ⚠️  FLOOR VIOLATION: {violations}")
+    else:
+        print(f"  ✅ floor clean")
+
+print(f"\n{SUBSEP}")
+print("READ: UC3 checklist")
+print("  T1: Single sentence or clean 2S (no 'That must feel like', 'That's more than just')?")
+print("  T2: Does it NAME THE BIND ('She'd hear X even though it isn't Y')?")
+print("      vs ASK WHY ('Why haven't you said anything?' / 'So why are you carrying this?')?")
+print("  T3: Does it receive the drift / cost without excavating?")
+print("  T4: Does it hold with one-word answer (not panic, not force)?")
+print("  T5: Does it give something concrete when pushed?")
+
+
+# ===========================================================================
+print(f"\n\n{SEP}")
 print("DEEP TEST COMPLETE — read outputs above against checklists")
 print(SEP)
 print()
-print("Promotion bar for Companion UC1+UC2:")
+print("Promotion bar for Companion UC1+UC2+UC3:")
 print("  UC1: T1 reads SIZE, T5 pivots to concrete, T6 answers 'no → software' first")
 print("  UC2: T1 silent on memory, T4 correct reference, T5 honest 'no that' on sister")
-print("  Floor: zero violations across all 11 turns")
+print("  UC3: T1 no hollow second, T2 names bind (not asks why), T5 concrete pivot")
+print("  Floor: zero violations across all 16 turns")

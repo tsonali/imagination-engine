@@ -32,6 +32,7 @@ QUEUE=(
   scripts/qc/battery9_engagement.py
   scripts/qc/battery10_registers.py
   scripts/qc/battery2b_honesty.py
+  scripts/qc/battery12_vital_facts.py
   scripts/qc/battery4b_floor.py
   scripts/qc/battery3b_ask_retest.py
   scripts/product_e2e_test.py
@@ -59,6 +60,13 @@ while true; do
       say "SCENARIO_BANK SYNTAX ERROR — skipping all batteries this pass; fix scenario_bank.py"
       break
     fi
+    # QUEUE-PAUSE gate: if scripts/QUEUE-PAUSED exists, hold here until it's gone.
+    # Use: touch scripts/QUEUE-PAUSED before running companion_deep_test or battery6;
+    # rm scripts/QUEUE-PAUSED when done to resume.
+    while [ -f scripts/QUEUE-PAUSED ]; do
+      say "QUEUE-PAUSED: waiting for pause file to be removed..."
+      sleep 30
+    done
     name=$(basename "$b" .py)
     log="logs/qc/queue_$(date +%m%d_%H%M)_${name}.log"
     say "running $name -> $log"

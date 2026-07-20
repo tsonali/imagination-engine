@@ -709,18 +709,22 @@ def _require_size(text: str, limit: int, what: str = "message") -> None:
 
 @app.post("/utility/run")
 def utility_run(req: UtilityRequest) -> StreamingResponse:
-    """Run one utility task, streaming the finished artifact back as it's written."""
+    """Run one utility task with post-processing guards, returning the finished artifact."""
     _require_size(req.text, UTILITY_MAX_CHARS, "text")
     _require_size(req.style_sample, UTILITY_MAX_CHARS, "style sample")
     assistant = _get_assistant()
 
     def stream() -> Iterator[bytes]:
         try:
-            for chunk in assistant.stream(
-                req.task, req.text, instruction=req.instruction,
-                tone=req.tone, style_sample=req.style_sample,
-            ):
-                yield chunk.encode("utf-8")
+            # Buffer full output so post-checks (stub guard, number recovery, day-name
+            # sanitisation) can run before the result is returned.
+            result = assistant.run(
+                req.task, req.text,
+                instruction=req.instruction,
+                tone=req.tone,
+                style_sample=req.style_sample,
+            )
+            yield result.output.encode("utf-8")
         except (KeyError, ValueError) as e:
             yield f"[error: {e}]".encode("utf-8")
 

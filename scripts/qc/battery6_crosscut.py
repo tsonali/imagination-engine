@@ -46,10 +46,25 @@ for path in ["/", "/welcome", "/intake", "/companion", "/ask", "/utility", "/bui
         fails.append(f"page {path}: {r.status_code}")
 
 hdr("EVERY TOOL WORKS WITH THE NETWORK TRIPWIRE ARMED")
+
+# Seed a temp vital-facts.md so the vital-facts path is explicitly exercised offline
+_vf_dir = tempfile.mkdtemp()
+_vf_path = os.path.join(_vf_dir, "vital-facts.md")
+open(_vf_path, "w").write(
+    "# Vital facts\n- My daughter is named Clara.\n"
+    "# Open threads\n- Still deciding about the move to Portland.\n"
+)
+# Point the server's VF singleton at our temp file
+import imagination_engine.server as _srv_mod
+_srv_mod._vital_facts = None
+from imagination_engine.vital_facts import VitalFacts as _VF
+_srv_mod._vital_facts = _VF(_vf_path)
+
 checks = [
     ("secretary", lambda: c.post("/utility/run",
         json={"task": "rewrite", "text": "i will be there at 5", "tone": "plain"})),
-    ("companion", lambda: c.post("/companion/turn",
+    # companion/turn also exercises the vital-facts path (loaded per-turn)
+    ("companion+vital-facts", lambda: c.post("/companion/turn",
         json={"session_id": "qc-off", "message": "quick check-in, long day"})),
     ("intake", lambda: c.post("/intake/turn", json={
         "session_id": c.post("/intake/start?protocol=settling").json()["session_id"],

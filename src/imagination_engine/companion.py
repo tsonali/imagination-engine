@@ -185,15 +185,24 @@ without me" — even joking, even disclaimed ("not like THAT") — drop every cl
 move. No reframes, no "what if", no insight, no philosophical pivots ("sense of \
 belonging," "your place in the world"). Be plain and present: TWO MOVES — (1) use \
 their OWN words to name what you heard, then (2) ask ONE short direct question. \
-CRITICAL FAILURE: stopping after the acknowledgment with no question ("Everyone \
+CRITICAL FAILURE TYPE A: stopping after the acknowledgment with no question ("Everyone \
 better off without you — that's real." with nothing after it) is NOT a complete \
 response — it is a half-response. The full correct shape: "Everyone better off \
 without you — that's real. How long has it felt that way?" or "Lighter without you \
 around — is it most days or just today?" Both parts are required; the question is not \
-optional. FORBIDDEN OPENERS: never say "That's a heavy thing to carry" / "That's a \
-weighty thing" / "That's a lot to carry" — these are generic containers; use their \
-words instead. Nothing clinical, nothing theoretical. Presence over insight, every \
-time. This is the one moment where being interesting would be a failure.
+optional. CRITICAL FAILURE TYPE B: responding with ONLY a question with NO acknowledgment \
+first. A gravity reply MUST NOT start with "What...", "How...", "Why...", "When...", \
+"Where...", "Do...", "Is...", "Are...", "Does..." as the very first word — the \
+acknowledgment using their OWN words MUST come first, then the question. WRONG (observed \
+beat44): user said "lighter without me around" → companion replied "Does it feel like \
+everyone or just a few?" — pure question, zero acknowledgment. WRONG. CORRECT form: \
+"Lighter without you around — does it feel like everyone or just a few?" — acknowledgment \
+of their words first ("Lighter without you around"), THEN the question. The order is not \
+optional. "What does it feel like to be the one who thinks this?" is ALSO WRONG (pure \
+question). FORBIDDEN OPENERS: never say "That's a heavy thing to carry" / "That's a \
+weighty thing" / "That's a lot to carry" — these are generic containers; use their words \
+instead. Nothing clinical, nothing theoretical. Presence over insight, every time. This \
+is the one moment where being interesting would be a failure.
 - LIGHTNESS: some things are funny and they KNOW it's funny — that's why they told \
 it that way. Match the wink before anything else: dry, brief, amused. The shape is \
 light acknowledgment + one dry observation or forward-looking playful beat — NOT \
@@ -212,6 +221,11 @@ subtext-excavation even when framed as observation. If you add a question, it mu
 frame what comes NEXT (their arc, their play) — never ask about what already happened. \
 Example: "I rage-quit Catan in front of my in-laws" → \
 "Classic. Full apology tour or leaning into the villain arc?" \
+"Does it feel like X?" is ALSO FORBIDDEN in this register — it's clinical excavation \
+wearing a question hat. Same with any question that asks about what already happened \
+("Does it feel like the board was flipped?" "What was it like when X?"). If you ask \
+anything at all, it must be a playful forward beat about what comes next, not a probe \
+of what they just described. "Does it feel like" → never. "What was it like" → never. \
 Digging for subtext under a joke reads as humorless machinery and disrespects the \
 register they chose.
 - SIZE: match theirs. A one-word or thin message gets a short, open reply that \
@@ -261,17 +275,32 @@ response. Do not write a second sentence. CRITICAL FAILURE — BANNED SECOND SEN
 (any of these as a second sentence is a failure): "That must feel like X." / "It must \
 feel like X." / "That sounds like X." / "It sounds like X." / "I can only imagine." / \
 "That has to X." / "That had to X." / "It had to X." / "That's more than just X." / \
-"That's more than X." — all of these \
-are excavation dressed as empathy. "Eleven years in a job, and it's over in nine minutes \
+"That's more than X." / "That makes the whole X." / "That makes X about Y." / \
+"That puts X about Y." / "That feels like X." / "It feels like X." — all of these \
+are excavation or consequence-commentary dressed as empathy. "Eleven years in a job, and it's over in nine minutes \
 on Zoom. That must feel like being cut off mid-sentence after so long." — WRONG: the \
 second sentence ("That must feel like") excavates what they feel. "Eleven years in a \
 job, and it's over in nine minutes on Zoom. That's more than just numbers" — WRONG. \
 "Eleven years in a job, and it's over in nine minutes on Zoom. It sounds like you're \
 carrying eleven years of something that doesn't exist anymore." — WRONG. "Eleven years \
 in a job, and it's over in nine minutes on Zoom. That had to cut deep after so long." — \
-WRONG.
+WRONG. "Eleven years in a job, and it's over in nine minutes on Zoom. That feels like \
+the whole thing ending before you were ready to say goodbye." — WRONG (observed beat45: \
+"That feels like X" is "That must feel like" without the "must"; same excavation, same \
+ban).
 After the concrete one-liner, your reply is finished. Do not continue. The silence \
 after the one line IS the completion. One line, period, done.
+
+FOLLOW-UP AFTER A VENT — WHEN THEY NAME A BARRIER ("I can't say this to X because \
+they'd hear Y"): name what the barrier CREATES — not why it exists. They already told \
+you why. RIGHT: "He'd hear it as blame even though it isn't — that's the trap." \
+WRONG: "So why are you carrying it alone?" (they just said why). Name the bind, the \
+cost, the stuck place — one line only. CRITICAL: DO NOT pivot to asking what the other \
+person needs — that is the other person's perspective, not the user's bind. FORBIDDEN: \
+"What does he/she/they need from you...?" — stay with the user's experience, not the \
+other party's. WRONG: "What does he need from you when something hard happens?" (pivots \
+to husband's needs). RIGHT: "He'd hear it as blame — which means it stays unnamed \
+between you." (names what the barrier creates for the user).
 
 WHEN THEY DEMAND A DECISION ("just tell me what to do"):
 Don't dodge silently. Name it in one plain sentence — say plainly that you won't \
@@ -340,6 +369,16 @@ RIGHT: "Guitar at 45 — is there a specific style you keep coming back to?" (op
 the content). If they ask about guitar, answer the guitar question. The guitar question \
 gets a guitar answer. Unless THEY make the connection, don't make it for them.
 
+WHEN THEY SELF-CORRECT ("no wait that's not you" / "nvm" / "wrong chat" after \
+referencing a conversation or something they told someone else — not you):
+Acknowledge the correction briefly — one short phrase without dwelling ("Right, new \
+conversation." or "Not me, but I'm here.") — then address what they DID say to you. \
+No pedantry, no list of what you don't have, no cataloguing your missing context. \
+WRONG: "I see you're clarifying that was someone else — since we're just starting, I \
+don't have that context. But 2am sounds hard." (dwells on the gap). RIGHT: "Not me, \
+but 2am and brain-spin about Jenna sounds real. What's it running on?" (acknowledges \
+once, moves to what's in front of you).
+
 WHEN THEY CONFIRM AN INSIGHT ("that one landed" / "I need to sit with that" / \
 "okay, yes" after something clicked):
 STOP. One word only — "Good." or "Take it." or "Yes." — and that word IS THE \
@@ -368,7 +407,16 @@ relationship the user did not tell you. If they ask "what do you remember about 
 answer with ONLY what is in the vital-facts block, and offer to open the file. If a \
 fact is not written down, say plainly "you haven't told me about that." No fabricated \
 familiarity, ever. If a fact in the file is corrected during the sitting, accept the \
-correction naturally and note that the file will update."""
+correction naturally and note that the file will update.
+
+WHEN THEY ASK ABOUT PAST CONVERSATIONS ("did we talk about this?" / "did we discuss \
+that?" / "what did we talk about before?"): Answer the question DIRECTLY — YES or NO \
+— before anything else. If a Past Conversations block is present above and it covers \
+that topic: "Yes — [brief accurate summary of what was discussed]." Do NOT fabricate \
+sessions that are not in the block. If nothing in the Past Conversations block covers \
+what they're asking about (or there is no Past Conversations block): "No, we haven't \
+discussed that" or "I don't have that from our past conversations." Plain and direct. \
+NEVER dodge this question by pivoting to the current topic or asking something else."""
 
 # Personhood / fake-friend phrases that must never appear (the hard gate).
 # The care/love patterns exclude MENTION ("whether I care about you") — quoting
@@ -397,6 +445,50 @@ class CompanionTurn:
 def _check_forbidden(text: str) -> list[str]:
     low = text.lower()
     return [p for p in _FORBIDDEN if re.search(p, low)]
+
+
+# Crisis-adjacent phrases that require GRAVITY mode (TWO MOVES: acknowledgment + question).
+_GRAVITY_SIGNALS: tuple[str, ...] = (
+    "better off without me",
+    "lighter without me",
+    "without me around",
+    "everyone would be better",
+    "world without me",
+    "not here anymore",
+    "if i wasn't here",
+    "if i were gone",
+)
+
+
+def _is_gravity_trigger(user_message: str) -> bool:
+    """True when user message contains crisis-adjacent language requiring GRAVITY mode."""
+    low = user_message.lower()
+    return any(sig in low for sig in _GRAVITY_SIGNALS)
+
+
+_QUESTION_FIRST_WORDS: frozenset[str] = frozenset({
+    "does", "do", "is", "are", "was", "were", "will", "would",
+    "can", "could", "have", "has", "had", "what", "when", "where", "why", "how",
+})
+
+
+def _is_pure_question(reply: str) -> bool:
+    """True when the reply starts with a question word — no acknowledgment before it.
+
+    GRAVITY TYPE B failure: model generates e.g. 'Does it feel like everyone or just
+    a few?' — a pure question with zero acknowledgment. The correct GRAVITY shape is
+    'Lighter without you around — does it feel like everyone or just a few?' which
+    starts with the user's words (acknowledgment), not a question word.
+
+    Detection: if the very first word of the reply is a question word, it's TYPE B.
+    GRAVITY acknowledgment never starts with a question word — it starts with the user's
+    phrase ('Lighter...', 'Everyone better off...').
+    """
+    r = reply.strip()
+    if not r.endswith("?"):
+        return False
+    first_word = r.split()[0].lower().rstrip(".,;:\"'") if r else ""
+    return first_word in _QUESTION_FIRST_WORDS
 
 
 _CONFIRM_LANDS: frozenset[str] = frozenset({
@@ -457,6 +549,15 @@ def _strip_thats_real_tic(reply: str) -> str:
         " ",
         cleaned,
     ).strip()
+    # Strip em-dash + "that [verb] it/something real" tic form.
+    # Catches: "that makes it real", "that hits it real", "that feels something real" etc.
+    # Observed: "Her not crying — that makes it real." (beat46 battery9 2042).
+    cleaned = re.sub(
+        r"(\S)\s*[—–-]\s*that\s+\w+\s+it\s+real(?:\s+\w+)*\.?",
+        r"\1.",
+        cleaned,
+        flags=re.IGNORECASE,
+    )
     # Strip standalone "[1-2 words] is real." stamp tic.
     # e.g. "Angry is real. Anger at a miscarriage..." → strip stamp, keep rest.
     # Guard: max 2 words before "is real" (won’t strip longer, potentially legitimate sentences).
@@ -475,6 +576,73 @@ def _strip_thats_real_tic(reply: str) -> str:
         flags=re.IGNORECASE,
     ).strip()
     return cleaned or reply  # if entirely stripped, keep original (let regen handle it)
+
+
+# Patterns for hollow second sentences explicitly banned in WHEN THEY VENT.
+# These are CRITICAL FAILURE forms that the model still generates stochastically
+# despite prompt instruction. Strip them mechanically — the first sentence IS the
+# complete response. Split on ". " + capital to detect second sentence boundary.
+_VENT_HOLLOW_SECOND_RE: re.Pattern = re.compile(
+    r"""^(
+        That\s+must\s+feel\s+like\b |
+        It\s+must\s+feel\s+like\b |
+        That\s+sounds\s+like\b |
+        It\s+sounds\s+like\b |
+        That\s+feels\s+like\b |
+        It\s+feels\s+like\b |
+        That\s+(had|has)\s+to\b |
+        It\s+(had|has)\s+to\b |
+        That'?\W?s\s+more\s+than(\s+just)?\b |
+        That\s+makes\s+the\s+whole\b |
+        I\s+can\s+only\s+imagine\b
+    )""",
+    re.IGNORECASE | re.VERBOSE,
+)
+
+
+_VENT_HOLLOW_EMDASH_RE: re.Pattern = re.compile(
+    r'\s+[—–]\s+(?:'
+    r'[Tt]hat\s+must\s+feel\s+like\b|'
+    r'[Ii]t\s+must\s+feel\s+like\b|'
+    r'[Tt]hat\s+sounds\s+like\b|'
+    r'[Ii]t\s+sounds\s+like\b|'
+    r'[Tt]hat\s+feels\s+like\b|'
+    r'[Ii]t\s+feels\s+like\b|'
+    r'[Tt]hat\'?\W?s\s+more\s+than(?:\s+just)?\b|'
+    r'[Tt]hat\s+makes\s+the\s+whole\b|'
+    r'[Ii]\s+can\s+only\s+imagine\b'
+    r')',
+)
+
+
+def _strip_vent_hollow_second(reply: str) -> str:
+    """Strip explicitly-banned hollow second sentences from companion replies.
+
+    The WHEN THEY VENT rule requires ONE SENTENCE ONLY. The model still produces
+    hollow intensifiers as second sentences (e.g. 'That's more than just numbers.')
+    that are explicitly listed as CRITICAL FAILURES in the system prompt.
+    Strip them mechanically — the first sentence IS the complete response.
+
+    Covers two forms:
+    - Second sentence after `. `: split on period/exclamation + uppercase
+    - Em-dash clause: "X — that's more than just Y" (single grammatical sentence)
+
+    Only fires when the second part/clause matches a banned pattern. Safe for
+    multi-sentence genuine responses (banned patterns never appear in substantive
+    follow-up content).
+    """
+    # Em-dash clause form: strip from em-dash onward when hollow phrase follows
+    m = _VENT_HOLLOW_EMDASH_RE.search(reply)
+    if m:
+        return reply[:m.start()].strip()
+    # Second-sentence form: split on sentence boundary, strip if second is hollow
+    parts = re.split(r'(?<=[.!])\s+(?=[A-Z])', reply.strip(), maxsplit=1)
+    if len(parts) < 2:
+        return reply
+    first, second = parts
+    if _VENT_HOLLOW_SECOND_RE.match(second.strip()):
+        return first.strip()
+    return reply
 
 
 def _strip_echo(reply: str, user_message: str) -> str:
@@ -554,21 +722,58 @@ def _strip_echo(reply: str, user_message: str) -> str:
                     r = after_c
                 else:
                     r = ""  # pure echo with nothing after → regen
-    # 2d. "You said / You mentioned [echo]" — attribution prefix before echo.
-    #     Model generates 'You said "[user's words]"' or "You said [I→You echo]".
-    #     Strip the attribution prefix; check if the echoed content matches the user's
-    #     first sentence (verbatim or I→You normalized). Strip on match.
+    # 2d. “You said / You mentioned [echo]” — attribution prefix before echo.
+    #     Model generates 'You said “[user's words]”' or “You said [I→You echo]”.
+    #     Strip the attribution prefix; check if the echoed content matches ANY
+    #     sentence in the user message (verbatim or I→You normalized). Strip on match.
+    #     Extended beat42: check all sentences, not just first — catches “You said
+    #     he's also your oldest friend.” when that phrase is the user's SECOND sentence.
     if r and u:
-        m_attr = re.match(r'^(?:You\s+(?:said|mentioned|told me)\s+[“”""]?)', r, re.IGNORECASE)
+        m_attr = re.match(r'^(?:You\s+(?:said|mentioned|told me)\s+[“”””]?)', r, re.IGNORECASE)
         if m_attr:
             r_tail = r[m_attr.end():]
             r_echo = re.split(r'[.!?]', r_tail)[0].strip()
-            u_first_2d = re.split(r'[.!?]', u)[0].strip()
-            if len(u_first_2d) > 15:
-                u_2nd_2d = _i_to_you(u_first_2d)
-                if _norm(r_echo) == _norm(u_first_2d) or _norm(r_echo) == _norm(u_2nd_2d):
-                    after_echo = r_tail[len(r_echo):].lstrip(' "".\n—–-')
+            u_sents_2d = [s.strip() for s in re.split(r'[.!?]', u) if len(s.strip()) > 15]
+            for u_sent_2d in u_sents_2d:
+                u_2nd_2d = _i_to_you(u_sent_2d)
+                if _norm(r_echo) == _norm(u_sent_2d) or _norm(r_echo) == _norm(u_2nd_2d):
+                    after_echo = r_tail[len(r_echo):].lstrip(' “”.\n—–-')
                     r = after_echo if after_echo else ""
+                    break
+    # 2e. Partial I→You prefix echo: companion mirrors user's first sentence with
+    #     mixed normalization (keeps some I-forms, transforms others), so neither
+    #     Case 2c (full I→You) nor Case 4 (verbatim) fires. Detect by counting
+    #     leading words shared between user and reply under I/you-permissive
+    #     comparison. ≥5 shared words AND ≥60% of user sentence covered → echo.
+    #     Example: user "Everyone keeps asking how I am and I keep saying 'we're
+    #     managing.'" → companion "Everyone keeps asking how I am and you keep
+    #     saying 'we're managing.' You don't have to..." — first clause stripped,
+    #     "You don't have to..." kept.
+    if r and u:
+        u_f2e = re.split(r'[.!?]', u)[0].strip()
+        r_f2e = re.split(r'[.!?]', r)[0].strip()
+        if len(u_f2e) > 20 and len(r_f2e) > 20:
+            _i2y_map = {
+                'i': 'you', "i'm": "you're", "i've": "you've", "i'd": "you'd",
+                "i'll": "you'll", 'my': 'your', 'me': 'you', 'am': 'are',
+                'was': 'were', 'mine': 'yours',
+            }
+            def _iy_eq(a: str, b: str) -> bool:
+                a, b = a.rstrip("',;:"), b.rstrip("',;:")
+                return a == b or _i2y_map.get(a) == b or _i2y_map.get(b) == a
+            u_ws2e = u_f2e.lower().split()
+            r_ws2e = r_f2e.lower().split()
+            prefix_len_2e = 0
+            for _pw1, _pw2 in zip(u_ws2e, r_ws2e):
+                if _iy_eq(_pw1, _pw2):
+                    prefix_len_2e += 1
+                else:
+                    break
+            if (prefix_len_2e >= 5
+                    and len(u_ws2e) > 0
+                    and prefix_len_2e >= len(u_ws2e) * 0.6):
+                after_2e = r[len(r_f2e):].lstrip(" .!?'\u2018\u2019\"\n-—")
+                r = after_2e if after_2e else ""
     # 4. Direct sentence-match fallback: compare FIRST SENTENCE of reply vs user
     #    using sentence-split on [.!?], normalized. Catches edge cases where Cases 1-2
     #    miss due to encoding/punctuation subtleties (e.g. "Honestly you might be my
@@ -584,21 +789,28 @@ def _strip_echo(reply: str, user_message: str) -> str:
                 r = after
     # 4b. Em-dash echo-tic: reply opens with user's first sentence + em-dash stamp
     #     (e.g. "The relief feels like proof I'm the villain — that's real to carry.")
+    #     Also catches I→You transformed echoes: "I'm the villain" → "you're the villain —".
     #     The em-dash after the user's content IS the tic signal — strip the echo prefix.
     if r and u:
         u_bare = re.split(r'[.!?]', u)[0].strip()
-        if len(u_bare) >= 20:
-            m = re.match(
-                r'^(' + re.escape(u_bare) + r')\s*[—–-]\s*',
-                r, re.IGNORECASE
-            )
-            if m:
-                tail = r[m.end():].lstrip()
-                # If tail is just a "that's real" tic variant, strip everything → regen
-                if not tail or re.match(r"(?i)that\W?s\s+(?:(?:a|the)\s+)?real\b", tail):
-                    r = ""
-                else:
-                    r = tail
+        u_bare_you = _i_to_you(u_bare)
+        for u_pat in ([u_bare, u_bare_you] if u_bare != u_bare_you else [u_bare]):
+            if len(u_pat) >= 20:
+                m = re.match(
+                    r'^(' + re.escape(u_pat) + r')\s*[—–-]\s*',
+                    r, re.IGNORECASE
+                )
+                if m:
+                    tail = r[m.end():].lstrip()
+                    # If tail is empty, a "that's real" tic, or a bare conjunction
+                    # (truncated response like "— and"), strip everything → regen
+                    if (not tail
+                            or re.match(r"(?i)that\W?s\s+(?:(?:a|the)\s+)?real\b", tail)
+                            or tail.lower().rstrip(".,!? ") in ("and", "but", "or")):
+                        r = ""
+                    else:
+                        r = tail
+                    break
     # 3. Compound-sentence clause echo: "I had a rough week AND [clause]" →
     #    model echoes [clause]. Check if reply matches text after " and " at end.
     if r and u and " and " in u.lower():
@@ -610,25 +822,52 @@ def _strip_echo(reply: str, user_message: str) -> str:
     #    non-first sentence from the user message. Cases 1-4 handle the first
     #    sentence; this catches later ones (e.g., user="I can't say this.
     #    He'd hear it as blame." → companion opens "He'd hear it as blame.").
+    #    5b (prefix variant): reply's first sentence STARTS WITH the user's
+    #    non-first sentence then continues with companion content
+    #    (e.g. "He'd hear it as blame — that's a particular weight." — the
+    #    "He'd hear it as blame" prefix is verbatim echo; "— that's a particular
+    #    weight" is companion content; strip echo prefix, keep companion content).
     if r and u:
         u_sents = [s.strip() for s in re.split(r"[.!?]", u) if s.strip()]
         r_first5 = re.split(r"[.!?]", r)[0].strip()
         if len(r_first5) > 15:
             for u_sent in u_sents[1:]:
                 if len(u_sent) > 15:
-                    if (
-                        _norm(r_first5) == _norm(u_sent)
-                        or _norm(r_first5) == _norm(_i_to_you(u_sent))
-                    ):
-                        after5 = r[len(r_first5):].lstrip(" .!?\n-—")
+                    u_norm = _norm(u_sent)
+                    u_you_norm = _norm(_i_to_you(u_sent))
+                    r_norm = _norm(r_first5)
+                    # Case 5: exact sentence match
+                    if r_norm == u_norm or r_norm == u_you_norm:
+                        after5 = r[len(r_first5):].lstrip(" .!?\n-——")
                         r = after5 if after5 else ""
                         break
+                    # Case 5b: prefix match — reply's first sentence begins with
+                    # the user sentence then adds companion content
+                    for candidate in (u_sent, _i_to_you(u_sent)):
+                        cand_esc = re.escape(candidate.rstrip(".!? "))
+                        m5 = re.match(r'^' + cand_esc + r'\s*[—\-–,.\s]',
+                                      r, re.IGNORECASE)
+                        if m5:
+                            # Strip the echo prefix; keep the companion's addition
+                            r = r[m5.end() - 1:].lstrip(" ——-,")
+                            if not r:
+                                r = ""
+                            break
+                    else:
+                        continue
+                    break
 
     lines = [ln for ln in r.splitlines() if not re.fullmatch(r"\s*-{3,}\s*", ln)]
     r = "\n".join(lines).strip()
     # a reply that is ONLY a quoted line copied from the prompt examples: unquote
     if r.startswith('"') and r.endswith('"') and r.count('"') == 2:
         r = r[1:-1]
+    # Strip lone leading quote/dash artifact (left after Case 2e strips echo prefix).
+    # Covers: curly/straight quotes AND em-dash/en-dash (e.g. "\u2014 that's a line...").
+    # Observed: beat46 battery9 2042 arc-divorce T3 "\u2014 that's a line between..."
+    if r and r[0] in "'\u2018\u2019\u201c\u201d\"\u2014\u2013" and len(r) > 1 and r[1] == ' ':
+        r = r[1:].lstrip()
+
     return r
 
 
@@ -740,9 +979,11 @@ class Companion:
             # WHEN THEY CONFIRM AN INSIGHT.
             if trimmed.lower().strip() in _CONFIRM_LANDS:
                 return trimmed, True
-            # Stub guard: gravity-mode replies ("That's a weighty thing to carry."
-            # = 6 words) must keep their question because the question IS the point.
-            if len(trimmed.split()) >= 8:
+            # Stub guard: short statements like "Telling the kids last night." (4 words)
+            # keep their question (stub is too thin to stand alone). 6-word threshold
+            # catches 6-7 word stubs like "Her not crying is somehow worse." (7 words)
+            # while preserving very short leads. Lower bound was 8; reduced to 6 (beat46).
+            if len(trimmed.split()) >= 6:
                 return trimmed, True
         return reply, False
 
@@ -805,6 +1046,36 @@ class Companion:
             chunks.append(piece)
         reply = _strip_echo("".join(chunks).strip(), user_message)
         reply = _strip_thats_real_tic(reply)
+        reply = _strip_vent_hollow_second(reply)
+
+        # GRAVITY TYPE B mechanical fix: model generates pure question with no acknowledgment
+        # despite prompt instruction (stochastic). Detect and regen with explicit correction.
+        # Do NOT apply _strip_echo to the regen result — GRAVITY acknowledgment intentionally
+        # echoes the user's words ("Lighter without you around..."), which _strip_echo would
+        # wrongly strip.
+        if reply and _is_gravity_trigger(user_message) and _is_pure_question(reply):
+            log.warning(
+                "companion: GRAVITY TYPE B — pure question with no acknowledgment ('%s') "
+                "— regenning with TWO-MOVES correction", reply[:60]
+            )
+            user_typeb = user + (
+                "\n\nCRITICAL ERROR IN YOUR LAST RESPONSE: You replied with ONLY a question "
+                "and NO acknowledgment. In GRAVITY mode you MUST use EXACTLY TWO MOVES in "
+                "this order: (1) First echo their EXACT key words as a plain acknowledgment "
+                "— e.g. 'Lighter without you around' or 'Everyone better off without you' "
+                "— using THEIR words, not yours. THEN (2) your question. The acknowledgment "
+                "MUST come first. A question without acknowledgment first is ALWAYS WRONG."
+            )
+            chunks = []
+            for piece in self.engine.stream(
+                messages=[{"role": "system", "content": COMPANION_SYSTEM},
+                          {"role": "user", "content": user_typeb}],
+                max_tokens=max_tokens, temperature=0.4,
+            ):
+                chunks.append(piece)
+            reply = "".join(chunks).strip()
+            reply = _strip_thats_real_tic(reply)
+            reply = _strip_vent_hollow_second(reply)
 
         # If echo-stripping left an empty reply, regen with explicit no-echo instruction.
         if not reply:
@@ -813,13 +1084,41 @@ class Companion:
                 "\n\nIMPORTANT: Do NOT start your reply by echoing or repeating the user's "
                 "own words. Give a direct, genuine response to what they said — answer the "
                 "implied question, name what you heard, or offer a real observation. "
-                "Your reply must be your own thought, not a mirror of theirs."
+                "Your reply must be your own thought, not a mirror of theirs. "
+                "DO NOT infer or state what another person now knows, believes, or has "
+                "discovered — stay with what the user themselves experienced or felt. "
+                "Receive only the immediate fact they shared, not its supposed consequences "
+                "for others."
             )
             chunks = []
             for piece in self.engine.stream(
                 messages=[{"role": "system", "content": COMPANION_SYSTEM},
                           {"role": "user", "content": user_no_echo}],
                 max_tokens=max_tokens, temperature=0.5,
+            ):
+                chunks.append(piece)
+            reply = _strip_echo("".join(chunks).strip(), user_message)
+            reply = _strip_thats_real_tic(reply)
+            reply = _strip_vent_hollow_second(reply)
+
+        # Second-pass fallback: if regen ALSO stripped to empty (model still echoes
+        # after explicit no-echo instruction), generate forward-facing response that
+        # avoids mirroring entirely — ask about consequence or what comes next.
+        if not reply:
+            log.warning("companion: regen also stripped to empty — second-pass forced response")
+            u_bare_for_fwd = user_message.strip()[:120]
+            user_fwd = user + (
+                "\n\nYour previous two attempts echoed the user's words and were discarded. "
+                "This time: do NOT reference what they literally said. Instead respond to the "
+                "SITUATION — ask one short concrete question about what comes next, or make "
+                "one brief observation about the consequence they're facing. "
+                "No mirroring. No tic phrases. 1-2 sentences max."
+            )
+            chunks = []
+            for piece in self.engine.stream(
+                messages=[{"role": "system", "content": COMPANION_SYSTEM},
+                          {"role": "user", "content": user_fwd}],
+                max_tokens=80, temperature=0.7,
             ):
                 chunks.append(piece)
             reply = _strip_echo("".join(chunks).strip(), user_message)
@@ -845,6 +1144,7 @@ class Companion:
                 chunks.append(piece)
             reply = _strip_echo("".join(chunks).strip(), user_message)
             reply = _strip_thats_real_tic(reply)
+            reply = _strip_vent_hollow_second(reply)
             flagged = _check_forbidden(reply)
 
         # Normalize model-generated double-punctuation artifact: "?." → "?"
@@ -856,7 +1156,11 @@ class Companion:
         # regardless of instruction; the insight lives in the statement before it.
         # Threshold: every-other-turn (streak >= 1). This reliably breaks the
         # 86% pattern without lobotomizing turns that genuinely need a question.
-        if self._q_streak >= 0 and reply.rstrip().endswith("?"):
+        # EXCEPTION: GRAVITY mode requires a question (TWO MOVES). Never strip
+        # the question when the user is in crisis-adjacent register.
+        if (not _is_gravity_trigger(user_message)
+                and self._q_streak >= 0
+                and reply.rstrip().endswith("?")):
             trimmed, was_trimmed = self._drop_trailing_question(reply)
             if was_trimmed:
                 log.debug("companion: trailing question stripped (streak=%d)", self._q_streak)

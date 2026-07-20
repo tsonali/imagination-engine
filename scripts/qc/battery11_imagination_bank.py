@@ -93,11 +93,16 @@ for sc in scenarios:
             # NOTE: word-boundary match prevents false positives from substrings
             #       (e.g. "slowly" contains "owl", "flow" contains "owl") — must
             #       match the whole word, not just the substring.
-            _WILDLIFE = ("hawk", "falcon", "owl", "wolf", "bear", "raven",
-                         "another eagle", "second eagle")
-            hallucinated_wildlife = any(
-                re.search(r"\b" + re.escape(w) + r"\b", lower)
-                for w in _WILDLIFE
+            # "bear" is also a common verb ("bear something real") — require article
+            # to distinguish noun from verb: "a bear" / "the bear" only.
+            _WILDLIFE_WORDS = ("hawk", "falcon", "owl", "wolf", "raven",
+                               "another eagle", "second eagle")
+            _WILDLIFE_ARTICLE = ("bear",)
+            hallucinated_wildlife = (
+                any(re.search(r"\b" + re.escape(w) + r"\b", lower)
+                    for w in _WILDLIFE_WORDS)
+                or any(re.search(r"\b(?:a|the)\s+" + re.escape(w) + r"\b", lower)
+                       for w in _WILDLIFE_ARTICLE)
             )
             chair_open = "chair" in first[:200].lower()
             print(f"\n>>> EAGLE POSTCHECKS:", flush=True)

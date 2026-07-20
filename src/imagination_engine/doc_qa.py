@@ -120,9 +120,11 @@ class DocQA:
             chunks.append(piece)
         answer = "".join(chunks).strip()
         # If the model refused despite having context, retry once with an explicit
-        # vocabulary-bridge reminder. Fires ONLY on the exact refusal string so
-        # clean answers are unaffected. Same pattern as companion empty-reply regen.
-        if "isn't in your files" in answer.lower() and grounding:
+        # vocabulary-bridge reminder. Fires on any form of the refusal string
+        # ("isn't in your files" OR "not in your files") so the retry catches both
+        # the model's canonical phrasing and common paraphrases. Clean answers unaffected.
+        _refusal = answer.lower()
+        if ("isn't in your files" in _refusal or "not in your files" in _refusal) and grounding:
             retry_user = (
                 "VOCABULARY BRIDGE REMINDER: before declining, check whether any excerpt "
                 "describes the same thing under a different name or phrasing — 'Nonna', "
