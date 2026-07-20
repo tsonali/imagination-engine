@@ -3248,3 +3248,12 @@ Run 2 (0803):
 
 ### RUNNING NOW
 - **battery11_imagination_bank** (PID 45191) — started 06:25
+
+## 2026-07-19 ~23:00 (manual check-in session — post-reboot recovery)
+
+### LAPTOP REBOOTED 07-18 ~17:04; NOTHING RAN WHILE LOGGED OUT
+
+- Laptop rebooted 07-18 17:04 (killed battery11 + product_e2e mid-run at 17:03). Machine sat at the login screen until Sonali logged in 07-19 22:54 — LaunchAgents (heartbeat AND qc_queue) cannot run while logged out, so ~30h of QC/beat time was lost. Heartbeat's last beat: 07-18 16:31. It resumes on its own schedule now that she's logged in (next fire 00:30).
+- **Beats 41-49 work was NEVER committed** (16 modified files: companion/postcheck/server/utility/qc batteries/HANDOFF/RELEASE). Committed as snapshot 4b32d62 after py_compile + bash -n all passed. Heartbeat: investigate why beats stopped committing, and resume committing per beat.
+- **qc_queue is now a launchd agent** (com.hearth.qcqueue, RunAtLoad+KeepAlive) — the script header always claimed this but the plist never existed. TCC blocks launchd/bash from exec-ing ~/Downloads scripts, so the agent runs ~/.local/node/bin/node (has FDA) → ~/claude-phone/hearth-qcqueue.js → spawns scripts/qc_queue.sh. Verified running: queue restarted 22:59, battery11 launched 23:00. It now survives crashes and restarts at login after reboots — heartbeat no longer needs `nohup bash scripts/qc_queue.sh` to revive it (a plain nohup copy would fight the launchd copy; if the queue must be paused for a model run, use `launchctl bootout gui/502/com.hearth.qcqueue` and re-bootstrap after, or keep using pkill — KeepAlive will relaunch it, so prefer bootout for pauses longer than a battery).
+- **MINI UNREACHABLE — needs Sonali physically.** SSH offers the correct id_ed25519 key; mini rejects publickey outright (host answering as julios-mac-mini.local). Likely rebooted again to a locked state. Consequence: n396 training outcome (started 07-16 ~18:10) UNKNOWN; flywheel + caffeinate presumed dead. When Sonali unlocks it: verify GOLD-ADAPTER-0716-*-n396 exists, read probe, restart flywheel (nohup bash ~/imagination-engine/scripts/honest_flywheel.sh) + caffeinate -dims.
