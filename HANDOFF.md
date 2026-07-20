@@ -1,6 +1,6 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-07-18 beat49b — **companion.py MD5: 64718c2e213de4691ca2ac6212e307da (all 4 copies). Deep test v2 COMPLETE: UC1 BAR CLEARED (T6 ✅ "No — I'm software"), UC2 FAIL (instruction dodge persists at model level), UC3 FAIL (T5 no concrete). qc_queue RESUMED — battery11 running (PID 45191). sec-hr-complaint verify pending (battery10 ~09:00). Mini 100% packet loss._
+_Last updated 2026-07-20 beat52 — **generator.py `_wildlife_tokens` BUG FIXED: "another eagle" + "second eagle" added to mechanical drop tuple in all 3 copies (eagle was surviving postprocessing — postcheck caught it but generator never dropped it). Battery11 with fix PID 23001 launched 04:38 — result pending (read next beat). battery12 server-down false-failure SKIP fix applied. README "four tools"→"five tools" fixed. Gold(A)=460 (+7). Gold(C) +5 (c_gold_beat52.jsonl, total 81 in _candidates/). battery6 crosscut PASS (QC purge pending before final gate). Mini SSH still down. Family-C retrain (81 exemplars) waiting on SSH. n376 live (MD5: b9acf04a1f989d570908c25177966b0f)._
 _Single source of truth for a fresh session. Everything below is real and running._
 
 ## FIRST THING TO DO when you resume — run these checks
@@ -19,10 +19,13 @@ md5 data/model/adapters/adapters.safetensors
 # 3. Mini: is it back up? (currently 100% packet loss as of beat49b)
 ping -c 2 -t 5 mac-mini.localdomain
 # If back up: ssh smaitra@mac-mini.localdomain 'pgrep caffeinate; tail -5 ~/Downloads/hearth-corpus/_logs/honest_flywheel.log; ls ~/Downloads/hearth-corpus/ | grep GOLD-ADAPTER | tail -3'
-# If back up, SCP pending gold:
+# If back up, SCP pending gold (beats 49-51):
 # scp ~/Downloads/hearth-corpus/A-imagination/A_gold.jsonl smaitra@mac-mini.localdomain:~/Downloads/hearth-corpus/A-imagination/
 # scp ~/Downloads/hearth-corpus/C-companion/_candidates/c_gold_beat49.jsonl smaitra@mac-mini.localdomain:~/Downloads/hearth-corpus/C-companion/_candidates/
 # scp ~/Downloads/hearth-corpus/C-companion/_candidates/c_gold_beat49b.jsonl smaitra@mac-mini.localdomain:~/Downloads/hearth-corpus/C-companion/_candidates/
+# scp ~/Downloads/hearth-corpus/C-companion/_candidates/c_gold_beat50.jsonl smaitra@mac-mini.localdomain:~/Downloads/hearth-corpus/C-companion/_candidates/
+# scp ~/Downloads/hearth-corpus/C-companion/_candidates/c_gold_beat51.jsonl smaitra@mac-mini.localdomain:~/Downloads/hearth-corpus/C-companion/_candidates/
+# scp ~/Downloads/hearth-corpus/C-companion/_candidates/c_gold_beat52.jsonl smaitra@mac-mini.localdomain:~/Downloads/hearth-corpus/C-companion/_candidates/
 
 # 4. Latest battery log:
 tail -20 logs/qc/$(ls -t logs/qc/ | head -1)

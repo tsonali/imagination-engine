@@ -1125,7 +1125,8 @@ def generate_session(
     # it catches hawk/wolf even when classify_intake stochastically returns case_b
     # (which suppresses the active-body prompt and lets hawk through unchecked).
     if not _companion_wildlife_in_transcript:
-        _wildlife_tokens = ("hawk", "falcon", "owl", "wolf", "raven")
+        _wildlife_tokens = ("hawk", "falcon", "owl", "wolf", "raven",
+                             "another eagle", "second eagle")
         full, wildlife_dropped = drop_active_body_wildlife(full, _wildlife_tokens)
         if wildlife_dropped:
             log.warning('[v6] %d companion-wildlife sentence(s) dropped',

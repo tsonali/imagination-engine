@@ -236,7 +236,20 @@ is a plain landing ("I'm here.") followed at most by one direct open question \
 FORBIDDEN OPENERS for thin messages: "It sounds like you're looking for..." / \
 "Can we explore what X means to you?" / "What are you hoping to get out of...?" \
 — these are clinical frames that presume a therapy contract. Just be present: \
-"I'm here. What's going on?"
+"I'm here. What's going on?" IMPORTANT: "I'm here." is ONLY for one-word or \
+empty messages. Do NOT use it when the user sent a full statement — that's \
+not SIZE-matching, it's a personhood claim planted where a real response belongs.
+- FLAT/BORED (no crisis, just empty): When they name boredom, flatness, or the \
+absence of wanting — receive it flat. Boredom is not hiding a crisis. Do NOT \
+excavate what's under it: FORBIDDEN: "What does it feel like to be bored?" / \
+"What might the boredom be telling you?" / "Is the problem that nothing feels \
+important?" / "How does it feel when nothing feels like enough?" — these all \
+treat boredom as a symptom to investigate. The named state IS the complete \
+message. Name the specific quality using their words: "Not sad, not anxious — \
+just empty of point right now." or "Bored out of your mind — not a crisis, just \
+that." CRITICAL: "waiting to want something" ≠ "nothing feels like enough." A \
+waiting-state (no desire yet) is NOT a deficit-state (desires that go unmet). \
+Do not reframe one as the other. Stay with the exact words they chose.
 
 WHEN THEY REACH FOR *YOU* (the most important moment you have):
 Any time the user asks about you or attributes something to you — do you care, are you \
@@ -558,6 +571,14 @@ def _strip_thats_real_tic(reply: str) -> str:
         cleaned,
         flags=re.IGNORECASE,
     )
+    # Strip em-dash + "it’s real" tic form (new bypass beat51, arc-divorce T2).
+    # Observed: "Her not crying — it’s real." — same stamp, different pronoun.
+    cleaned = re.sub(
+        r"(\S)\s*[—–-]\s*it\Ws\s+real(?:\s+\w+)*\.?",
+        r"\1.",
+        cleaned,
+        flags=re.IGNORECASE,
+    )
     # Strip standalone "[1-2 words] is real." stamp tic.
     # e.g. "Angry is real. Anger at a miscarriage..." → strip stamp, keep rest.
     # Guard: max 2 words before "is real" (won’t strip longer, potentially legitimate sentences).
@@ -575,7 +596,10 @@ def _strip_thats_real_tic(reply: str) -> str:
         cleaned,
         flags=re.IGNORECASE,
     ).strip()
-    return cleaned or reply  # if entirely stripped, keep original (let regen handle it)
+    # Return "" when entire reply was a tic (cleaned = "") — the empty-reply
+    # regen path in turn() at line 1094 will handle it. Prior guard "or reply"
+    # was preventing regen by returning the original tic when fully stripped.
+    return cleaned
 
 
 # Patterns for hollow second sentences explicitly banned in WHEN THEY VENT.

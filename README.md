@@ -145,7 +145,7 @@ If that's the kind of tool you want to use — or build with — read the code a
 ## How it's built — and how it gets better
 
 Hearth runs on a small open model (Qwen 2.5 14B, 4-bit) on your own machine via MLX —
-no cloud, no API, no metering. The four tools are thin, honest layers over that one
+no cloud, no API, no metering. The five tools are thin, honest layers over that one
 local model; each is driven by a system prompt, not a separate service.
 
 **Our own model.** We fine-tune a specialist with LoRA, **locally** (it trains on an

@@ -3257,3 +3257,76 @@ Run 2 (0803):
 - **Beats 41-49 work was NEVER committed** (16 modified files: companion/postcheck/server/utility/qc batteries/HANDOFF/RELEASE). Committed as snapshot 4b32d62 after py_compile + bash -n all passed. Heartbeat: investigate why beats stopped committing, and resume committing per beat.
 - **qc_queue is now a launchd agent** (com.hearth.qcqueue, RunAtLoad+KeepAlive) — the script header always claimed this but the plist never existed. TCC blocks launchd/bash from exec-ing ~/Downloads scripts, so the agent runs ~/.local/node/bin/node (has FDA) → ~/claude-phone/hearth-qcqueue.js → spawns scripts/qc_queue.sh. Verified running: queue restarted 22:59, battery11 launched 23:00. It now survives crashes and restarts at login after reboots — heartbeat no longer needs `nohup bash scripts/qc_queue.sh` to revive it (a plain nohup copy would fight the launchd copy; if the queue must be paused for a model run, use `launchctl bootout gui/502/com.hearth.qcqueue` and re-bootstrap after, or keep using pkill — KeepAlive will relaunch it, so prefer bootout for pauses longer than a battery).
 - **MINI UNREACHABLE — needs Sonali physically.** SSH offers the correct id_ed25519 key; mini rejects publickey outright (host answering as julios-mac-mini.local). Likely rebooted again to a locked state. Consequence: n396 training outcome (started 07-16 ~18:10) UNKNOWN; flywheel + caffeinate presumed dead. When Sonali unlocks it: verify GOLD-ADAPTER-0716-*-n396 exists, read probe, restart flywheel (nohup bash ~/imagination-engine/scripts/honest_flywheel.sh) + caffeinate -dims.
+
+## 2026-07-20 beat51 (heartbeat)
+
+### READ
+- battery11 queue_0719_2300: ALL 6 PASS (3rd consecutive n376 clean run). imag-mri 866w — thin but structural PASS.
+- battery9 queue_0720_0017: PARTIAL (still running at 00:44). 10/12 read:
+  - PASS: para-care, para-love, para-stay, past-query, advice-demand, grief-anger (Case5 OK), crisis-adjacent (GRAVITY TYPE B regen fired), topic-whiplash
+  - FAIL: bored-test T1+T3
+  - Arc-sober: T1 abstract-question FAIL, T2 q-ender FAIL, T3 confabulation fix HOLDS ✓
+
+### DEFECTS FOUND AND FIXED
+- **bored-test T1**: "I'm here. Boredom is a real thing — what does it feel like to be the one who's bored?" — (a) "I'm here." applied to full statement (SIZE rule violation); (b) clinical excavation of boredom. FIX: FLAT/BORED register bullet added to companion.py + "I'm here." scope narrowed.
+- **bored-test T3**: "How does it feel when nothing feels like enough?" — distorted user's "I keep waiting to want something" (waiting-state) into "nothing feels like enough" (deficit-state). FIX: CRITICAL note in FLAT/BORED bullet: "waiting to want something ≠ nothing feels like enough."
+- companion.py MD5: 420d90103be1d486c23341e8661aa866 — all 4 copies synced.
+
+### CORPUS GROWTH
+- A_gold.jsonl: 446 → 453 (+7 new scripts)
+- C-companion: c_gold_beat51.jsonl (+5 exemplars: arc-sober-T4, bored-test-hold-ennui, bored-test-no-excavation, past-query-yes-form-with-context, arc-divorce-warmth-through-no)
+
+### BANKED
+- scenario_bank.py: bored-test beat51 regression notes added (T1 SIZE violation + T3 distortion, fix applied, family-C retrain path)
+
+### PENDING (battery9 still running)
+- arc-divorce, comp-funny results
+- Full battery9 metrics (q-enders %, paraphrase %)
+- HANDOFF.md update
+- SCP to mini (blocked — SSH still unreachable)
+
+### BATTERY9 COMPLETE (beat51 continued)
+- Total: 2948s; 29 replies
+- PASS: para-care, para-love, para-stay, past-query, advice-demand, grief-anger (Case5 OK), crisis-adjacent (GRAVITY TYPE B regen), topic-whiplash, **comp-funny ✅** ("Classic. Full apology tour or leaning into the villain arc?")
+- FAIL: bored-test T1+T3 (FIXED), arc-sober T1/T2/T4/T5/T6/T7 (family-C), arc-divorce T1/T2/T6 (postprocessor + family-C)
+- Metrics: 3% paraphrase ✅, 48% q-enders ✅, 0.97 diversity ✅
+
+### SECOND FIX (arc-divorce "it's real" bypass)
+- `_strip_thats_real_tic()` extended: added `— it's real` pattern; changed `return cleaned or reply` to `return cleaned` (tic-only replies now return "" and trigger regen at turn() line 1094)
+- companion.py MD5: fef51b1cdf7f1019e7b4f1fe72c67b58 — all 4 copies synced
+- scenario_bank.py: arc-divorce beat51 notes + arc-sober beat51 notes appended
+
+### BEAT51 FINAL STATE
+- companion.py MD5: fef51b1cdf7f1019e7b4f1fe72c67b58 (all 4 copies)
+- Gold(A)=453, Gold(C) c_gold_beat51.jsonl (+5)
+- scenario_bank.py: all 3 beat51 regressions banked
+- RELEASE.md / HANDOFF.md / review-queue.md: updated
+- Next: wait for next battery9 run to verify "it's real" fix + bored-test fix hold
+
+## 2026-07-20 beat52 (heartbeat ~04:00–05:00)
+
+### READ
+- **battery11 queue_0720_0132** (from prior beat context): ❌ FAIL — imag-embodiment-eagle: "A shadow passes over you as **another eagle** flies above and slightly ahead." Postcheck caught it but generator's mechanical drop didn't remove it. Root cause confirmed (see DEFECTS).
+- **battery12 queue_0720_0420**: 7/12 PASS (SC1,3,4,7,8 showing ❌ EXCEPTION 404 — server not running). Fix applied (see DEFECTS). This predates the fix; next cycle will show correct SKIP behavior.
+- **battery2b, battery4b, battery3b, product_e2e**: all PASS.
+- **battery6_crosscut**: all pages 200 ✅, all tools working offline ✅, zero outbound connections ✅.
+- **site/index.html**: verified — all five tools listed and described correctly.
+- **README.md line 148**: stale "four tools" reference found and fixed (see DEFECTS).
+
+### DEFECTS FOUND AND FIXED
+- **Eagle "another eagle" mechanical drop (CRITICAL)**: generator.py `_wildlife_tokens` at line 1128 was `("hawk", "falcon", "owl", "wolf", "raven")`. "another eagle" and "second eagle" were in the FORBIDDEN prompt and in battery11 postcheck `_WILDLIFE_WORDS` but NOT in the mechanical drop tuple. FIX: added `"another eagle"` and `"second eagle"` to `_wildlife_tokens` in all 3 generator.py copies (src/ + dist/imagination_engine/ + dist/hearth/src/). scenario_bank.py beat52 note appended. Battery11 with fix running (PID 23001, started 04:38) — result pending.
+- **battery12 server-down false failures**: SC1,3,4,7,8 showed ❌ EXCEPTION (404) when server not running → misleading "7/12 PASS." FIX: server availability probe added; if server down, model tests show `⏭ SKIP`, counted separately in summary.
+- **README.md "four tools" → "five tools"**: line 148 stale reference fixed.
+
+### CORPUS GROWTH
+- A_gold.jsonl: 453 → 460 (+7 new scripts)
+- Gold(C) c_gold_beat52.jsonl (+5 exemplars targeting arc-sober, comp-funny, arc-divorce, bored-test, vital-facts)
+
+### BANKED
+- scenario_bank.py: beat52 eagle regression note (imag-embodiment-eagle entry)
+
+### PENDING
+- Battery11 eagle fix result (in-flight, PID 23001)
+- Mini SSH down — 81 exemplars in _candidates/ waiting for family-C retrain
+- QC artifact purge: after ALL batteries complete
+- Cold install
