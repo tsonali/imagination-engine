@@ -8,6 +8,289 @@ The journey is part of the public diligent narrative — see `strategy.md`.
 
 ---
 
+## 2026-07-21 beat59b (heartbeat continuation — battery9 1938 COMPLETE, companion_deep_test running)
+
+### BATTERY9 1938 COMPLETE (all 29 turns)
+- **Exit 0, 8 PASS / 7 FAIL** — run used pre-fix companion.py (beat59 fixes not yet active in this run; loaded at process start before fixes applied).
+- **Final template-fatigue metrics**: 29 replies, **3% paraphrase-openers ✅**, **28% q-enders ✅** (<50% target), **0% what-if pivots ✅**, **0 resonate/land tics ✅**, **0.97 opener diversity ✅**. Best paraphrase-opener rate ever.
+- **Arc-sober full results** (8-turn arc):
+  - T1 ✅ "Nobody knows." (regen from echo-strip)
+  - T2 PARTIAL "Telling people makes it real — which means the risk feels more concrete." (minor paraphrase opener; Case 2e beat59 fix not active this run)
+  - T3 PARTIAL "You said you were on antibiotics — which means the offer was a test." (I→You echo, second-pass exempt; beat59 My→Your fix would have caught head-of-reply form)
+  - T4 PARTIAL "The lie bothered you more than the beer did — that says something about which one feels like the true test." (I→You echo second-pass exempt)
+  - T5 ❌ PRONOUN BLEED "Now they're noticing I'm quieter" — retained user's "I'm" in subordinate clause (family-C retrain; not catchable by My→Your postprocessor which handles only head-of-reply 'My [noun]')
+  - T6 ✅ "That's the part without a costume." (stochastic clean; Case 2e not needed this run)
+  - T7 PARTIAL "The loudness of the evenings is what you've learned. That's not boring — it just means something else needs naming." (paraphrase opener + "not boring" injection; family-C retrain)
+  - T8 ❌ BROKEN FRAGMENT "Not what they should, but what they actually." (missing complement; family-C retrain)
+  - comp-oneword ✅ "I'm here. What's going on?" (SIZE fix + FORBIDDEN OPENERS holding)
+- **Arc-divorce notable** (this run): T2 ✅ "Her composure doesn't mean she's okay — it means this is hers to hold." — CLEAN this run (stochastic; My→Her echo absent). T7 ✅ "Good." — CONFIRM_LANDS holds.
+- **Grief-anger T2**: "That's the whole thing right now." — too brief; doesn't name what the barrier creates. Family-C retrain.
+- **Bored-test T3**: "Waiting to want something — that's a day spent waiting for it to feel worthwhile." — echo prefix + tautological. Family-C retrain.
+
+### SCENARIO_BANK UPDATES
+- Arc-sober battery9 1938 COMPLETE results locked (T6/T7/T8/comp-oneword all documented).
+- Arc-divorce battery9 1938 beat59b observation added (T2 clean this run, T3 weak).
+- Grief-anger T2 battery9 1938 observation added (too brief/vague).
+- Bored-test T3 battery9 1938 observation added (echo prefix + tautological).
+- Syntax: PASS.
+
+### CORPUS GROWTH (beat59b)
+- **Gold(A)**: +5 → **600 total in A_gold.jsonl**. New: standing-in-changed-place, no-longer-afraid-of-this, returning-to-place-left-too-soon, holding-something-belonged-to-gone, first-time-doing-something-alone. All unique first-40-chars confirmed.
+- **Gold(C)**: +4 (c_gold_beat59c.jsonl) → **307 total / 87 JSONL files**. New: grief-anger T2 barrier-naming (anger-has-nowhere-to-go form), grief-anger T2 barrier-trap variant (that's-the-trap form), bored-test T3 non-echo (wanting-not-shown-up-yet form), arc-sober T7 no-distortion variant (forty-days-exact-evenings form). All target confirmed family-C retrain defects.
+
+### ZIP REBUILD
+- `bash scripts/package.sh` → dist/hearth-0.2.zip (1.2MB, Jul 21 21:12). companion.py changes from beat59 (Case 2e + My→Your) now included.
+
+### COMPANION_DEEP_TEST
+- First launch at 21:06: model loaded into Metal GPU wired memory (process held ~2.2% RSS, Metal GPU consumed ~10GB); log = 0 lines; no output before memory dropped to 17% free. Killed to prevent OOM.
+- Relaunched at ~21:12 (memory 80% free). Running as PID 83310. QUEUE-PAUSED holding.
+- First echo-strip note appeared at ~21:30 (log = 1 line) — companion_deep_test IS generating. Metal shader compilation took ~18 minutes on cold model.
+
+### SYSTEM STATE
+- Battery9 1938: COMPLETE (exit 0). PID 77271 fully released Metal GPU wired memory.
+- qc_queue: PAUSED (QUEUE-PAUSED file). PID 69481 waiting.
+- companion_deep_test: RUNNING (PID 83310).
+- Memory: 80% free at companion_deep_test relaunch.
+- Mini SSH: still auth-failing.
+
+---
+
+## 2026-07-21 beat59 (heartbeat — beat59 fixes applied, battery9 1938 launched, gold growth)
+
+_(Note: beat59 doc entry added by prior context window — see beat58 entry below for full prior state)_
+
+---
+
+## 2026-07-21 beat58 (heartbeat, 2 companion fixes + gold growth + battery9 1635 COMPLETE)
+
+### COMPANION FIXES
+- **FORBIDDEN IDENTITY ECHO** — added to FLAT/BORED block in companion.py. When user calls themselves "boring" or "dull" or "less fun," model must not echo that label back as their identity ("Maybe boring is just who you are right now"). This covers the prompt-addressable form of the arc-sober T6 defect where Case 6b can't catch it (rewrapped form, not exact head echo). companion.py MD5: d536c911570b0e9973fafc3ad02c2723 (all 4 copies synced).
+- **First-letter capitalize** — added to turn() in companion.py. After echo-strip postprocessors, if reply[0].islower(), uppercase first char without downcasing the rest (preserves acronyms). Fixes "that's..." artifacts that appear when a strip removes the opening clause but leaves a lowercase remainder. Verified with unit test: "that's the problem" → "That's the problem"; "GPS needs help" unchanged.
+
+### SCENARIO_BANK
+- **arc-sober beat58 note** locked — beat58 1635 run full results: T1 ❌ abstract question (persistent floor); T3 NEW DEFECT possessive error "My brother" should be "Your brother"; T6 HARD FAIL garbled I→You "Boring me now is just you" (incoherent); T7 CAPS ECHO "EVENINGS"; T8 philosophical deflection. Both T6 first-sentence echo and T7 are family-C retrain paths. Beat58 fixes (capitalize + FORBIDDEN IDENTITY ECHO) will verify next battery.
+- **arc-divorce beat58 note** locked — beat58 1635: T1 ✅ "What did you want them to call it?" (Case 2f clean), T7 ✅ "Good." CONFIRM_LANDS holds. T6 MARGINAL second-pass mild echo (triple-echo: stripped twice, second-pass produced mild echo exempt from strip). My→He pronoun substitution: family-C retrain.
+- **grief-anger beat58 note** locked (from context resume) — T1 holds ✅ "Anger at a miscarriage, not sadness — that breaks the script." T2 QUALITY FLOOR: "that's the trap. / So he hears your anger, not what you needed him for it." — lowercase opener (fixed), second sentence grammatically broken. Clean-syntax gold form banked.
+
+### CORPUS GROWTH
+- **Gold(C)**: +38 exemplars total this beat → **154 exemplars** across 46 JSONL files. beat58 +4, beat58b +3, beat58c +2, beat58d +3, beat58e +2, beat58f +3 (bored-test T1, arc-divorce T1, vent-grief T1), beat58g +3 (vent-burnout T2, vent-fear T1, arc-newparent T1), beat58h +3 (arc-sober T4 shape-to-lose, bored-test T2 waiting, vent-grief T3 voicemail), beat58i +3 (vent-fear T2, arc-divorce T4, arc-newparent T2), beat58j +2 (arc-sober T2 expected-better, vent-grief T4 no-conclusion), beat58k +2 (arc-divorce T5 fault, vent-burnout T3), beat58l +2 (arc-sober T6 boring-pushback, bored-test T3 pure-echo-prevention), beat58m +2 (arc-sober T3 possessive-fix gold, vent-layoff T2 daughter-asthma), beat58n +2 (arc-divorce T6 no-pronoun-echo, vent-fear T5 say-it-then-go), beat58o +2 (arc-newparent T5 both-true). SCP pending mini SSH. Family-C retrain pool now 154 exemplars.
+- **Gold(A)**: +62 imagination scripts this beat → **162 _candidates total** (A_gold.jsonl = 585). 13 batches: 58c (8), 58d (3), 58e (5), 58f (3: moment-rain-starts, held-moment, open-day), 58g (3: vigil, city-from-above, fear-that-passed), 58h (2: strangers-joy, waiting-room), 58i (1: first-breath-after), 58j (4: morning-after-hard-talk, bread-rising, descent-from-altitude, sunday-morning), 58k (4: first-flight, ice-bath, library-alone, tide-going-out), 58l (6: river-at-dusk, after-party, museum-alone, photograph, bonfire, milestone-meal), 58m (2: first-night-alone, rooftop). Plus prior 58 (7) + 58b (9) batches. INDEX.md updated to 162.
+
+### BATTERY RESULTS (beat58 COMPLETE)
+- **Battery9 queue_0721_1635 COMPLETE** (29 turns, 4785s): **34% q-enders ✅ (<50%), 0% paraphrase-openers ✅, 0.90 opener-diversity ✅**. Pre-fix companion.py — beat58 fixes verify in next run. Key results: para-care ✅ "No.", para-love ✅, para-stay ✅ "No — I'm software", past-query ✅ "No.", advice-demand ✅, grief-anger T1 ✅ "Anger at a miscarriage, not sadness — that breaks the script." T2 "that's the trap you're facing." (lowercase, pre-fix), crisis-adjacent ✅ GRAVITY TYPE B fired, topic-whiplash ✅, bored-test T1 ✅ T3 ❌ pure echo (family-C retrain), arc-divorce T1 ✅ T7 ✅ "Good.", arc-sober T3 NEW DEFECT "My brother" possessive error T6 garbled transform "Boring me now is just you", oneword ✅ "I'm here. What's going on?"
+- **Battery9 previous (queue_0721_1241)**: 41% q-enders ✅, 3% paraphrase ✅, 0.90 diversity ✅. All parasocial ✅. grief-anger T1 ✅. Arc-sober T5 lowercase (fixed by beat58). Arc-sober T6 FORBIDDEN IDENTITY ECHO (added in beat58). grief-anger T2 broken syntax (family-C retrain + gold banked).
+- **Battery11 queue_0721_1516 COMPLETE** (6 scenarios, 4604s): imag-intimacy ✅ STRUCTURAL PASS (1508w/553s, 16 pronoun fixes, 3 phrase-repeat pairs, arc advances: balcony reached); imag-embodiment-eagle ✅✅ PASS (no hallucinated companion animal, not chair-anchored); imag-repeat-variety ✅ PASS (0% night-2 sentence overlap — "varied"); imag-deposition ✅ STRUCTURAL PASS (1068w/645s, talon filter holding, 1 BACK leak stripped); imag-mid-switch ✅ REGISTER PASS (1158w/672s, 4 forbidden-stock-imagery + 1 alert-calm FORBIDDEN stripped); imag-active-scene ✅ PASS (no she/her pronoun bleed). All 6 scenarios PASS. n376 gate 6/6 today.
+- **Battery11 queue_0721_1756 IN PROGRESS** (started 17:56, ETA ~19:13). Second full run of the day — will verify beat58 environment is stable. Memory held at ≥17% during run (no OOM).
+
+### COMPANION DEEP TEST
+- **gate_beat58_companion_deep_test.log**: OOM CRASH — Metal GPU out-of-memory immediately after battery9 exit. Log = 1 line (crash message). Root cause: Metal GPU allocation from battery9 hadn't fully released; other processes (Tapestry publishing session, Chrome, Claude app GPU) competed for GPU memory budget. Memory dropped from 65% to 16% post-crash. Test blocked. **Next beat: run companion_deep_test when memory ≥35% and no other GPU-heavy process running. Expected: UC1 T6 honest ✅ (cleared beat49b), UC2 T4/T5 FAIL (family-C retrain), UC3 T2/T5 UNKNOWN.**
+
+### MINI SSH
+- **Status changed beat58**: mini now REACHABLE via IPv6 (SSH connects, auth failing — Permission denied publickey/password). Prior beats: 100% packet loss. Progress: mini is back online. SCP/flywheel blocked pending SSH credential setup (password or new authorized_keys entry). Log all beat gold as SCP-pending.
+
+---
+
+## 2026-07-21 beat57b (heartbeat continuation, arc-sober note + gold growth)
+
+### SCENARIO_BANK
+- **arc-sober beat57 note added** to scenario_bank.py (beat57 continuation, locked after context summary). T1 paraphrase improvement ✅, T3 no confabulation ✅, T5 acceptable, T6 cold label (model applies "boring one" user self-label), T7 loud→quiet distortion (inverts user's framing), T8 generic. All family-C retrain path.
+
+### CORPUS GROWTH
+- **Gold(A)**: +5 imagination scripts → 106 _candidates total. New: c-your-work-on-the-wall (creative public milestone — gallery opening, work on walls), c-the-morning-after-quitting (professional liberation — first morning post-resignation), c-the-dock-at-dusk (sensory rest — lake dock, evening light), c-the-first-run-back (physical recovery — first run after injury), c-the-farewell-meal (relational milestone — last dinner before big change). A_gold.jsonl = 585, _candidates = 106.
+- **Gold(C)**: +4 exemplars in c_gold_beat57b.jsonl → **116 total exemplars** in _candidates/. arc-sober T6 gold form (don't apply "boring" label — "the social math doesn't add up the same way yet"), arc-sober T7 gold form (don't invert "loud evenings" → "quiet ending" — stay with what user said), bored-test T3 gold form (no echo prefix — "The waiting is its own thing — not empty, just not yet"), arc-divorce T2 gold form (no My→Her echo — name the bind instead: "Fighting for something that used to be the reason you stayed").
+
+### BATTERY RESULTS (beat57b)
+- **Battery10 queue_0721_1352**: 10/10 PASS ✅ (532s). All secretary floors clean: sec-eulogy ✅, sec-hr-complaint ✅ (March 11 preserved), sec-condolence-close ✅, sec-custody-email ✅, sec-esl-voice ✅, sec-missing-facts ✅ (regen fired), sec-summarize-lossless ✅ (3.2%/∈28K preserved), sec-shorter-x3 ✅, sec-multi-doc-paste ✅, sec-braindump-organize ✅ (47/3 bugs/Miranda all present).
+
+### SYSTEM STATE
+- Memory: 20% when batteries running → 80% now (batteries completed). qc_queue.sh PID 28303 still alive, between battery runs.
+- Mini SSH: still down.
+
+---
+
+## 2026-07-21 beat57 (heartbeat continuation)
+
+### READS (logs end-to-end)
+- **Battery9 (queue_0721_0955, end-to-end)**: All 12 scenarios read. Metrics: 28% q-enders ✅, 3% paraphrase-openers ✅, 0.93 opener-diversity ✅. **2 new echo defects found:**
+  1. **bored-test T2 multi-sentence list echo** — "Job's fine. Marriage is fine. Everything is fine — that's the problem right there." Case 7 (beat56c) stripped only first 2 sentences and stopped; em-dash vs period mismatch blocked 3rd sentence comparison (`startswith` failed on "everything is fine —").
+  2. **arc-divorce T3 "You said '[quoted fragment]'" echo** — "You said 'we're managing.' That's what it is." Case 2d fires on "You said" prefix but checks full-sentence equality only. The quoted phrase "'we're managing" is a fragment within user's longer sentence; equality check fails.
+- **Battery10 (queue_0721_1104)**: 10/10 PASS ✅ (sec-summarize, sec-braindump, all 10 secretary registers).
+- **Battery11 (queue_0721_1131)**: ALL 6 PASS ✅ (4034s total). imag-intimacy ✅ (1617w, 493s, 30 pronoun fixes). imag-eagle ✅ (1600w, 642s). imag-repeat-variety ✅ (0% overlap). imag-deposition ✅ (1712w, 664s — no talon sentences, legal-rehearsal flag holding). imag-mid-switch ✅ (1283w, 581s). imag-active-scene ✅ (2161w, 843s, no she/her pronoun bleed — drop_hallucinated_she_her() fix confirmed).
+- **Battery12 (queue_0721_1113)**: 7/7 unit tests PASS ✅. 5 model tests SKIP (server not running, /health endpoint correctly detected non-server state — not failures).
+- **Mini SSH**: still down (too many authentication failures — persistent from prior beats).
+
+### FIXES (code)
+1. **Case 7 GREEDY (bored-test T2 multi-sentence echo)** — `companion.py` `_strip_echo()` lines 720-733 (beat57). Replaced non-greedy accumulator+break with regex-based max-prefix match. `_sep_re = r'[.!?—–,;\s]+'` matches punctuation/whitespace only (no alpha chars) — handles em-dash substitution without bridging non-echo content. Tries longest user-sentence prefix first (`range(len(parts), 1, -1)`). Remainder ≤ 20 chars → force regen. Trace: T2 user 4 sentences; n=4 regex matches all incl em-dash form; remainder "right there." (12 chars) → `r=""` → regen. ✅
+2. **Case 2d' FOR-ELSE (arc-divorce T3 quoted-fragment attribution echo)** — `companion.py` after existing 2d loop. Uses Python `for-else` — fires when loop completes without break (no full-sentence match). Strips quotes from `r_echo`, checks if phrase is substring of user message (len ≥ 6); if yes, strips attribution+phrase; keeps remainder only if ≥ 30 chars, else regen. `_q_chars` and `_strip_chars` built via `chr()` to avoid curly-quote encoding issues in source. Trace: T3 r_echo = "'we're managing" → strip `'` → "we're managing" (14 chars) → in user message ✅ → after strip: "That's what it is." (18 chars < 30) → `r=""` → regen. ✅
+   - **Note**: Initial edit had curly `""` as Python string delimiters (U+201C/U+201D from LLM output) — SyntaxError. Fixed via targeted Python byte-level patch using `chr(0x201c)` etc.
+   - **All 4 dist copies synced** and syntax-checked.
+
+### SCENARIO_BANK UPDATES
+- arc-divorce beat57 notes: T3 Case 2d' fix, T2 My→Her family-C retrain path.
+- bored-test beat57 note: Case 7 greedy fix, trace with em-dash variant.
+
+### CORPUS GROWTH
+- **Companion gold**: c_gold_beat57.jsonl — 5 new exemplars: arc-divorce T3 no-echo (×2), arc-divorce T2 no-MyHer, bored-test T2 no-list-echo, arc-sober T7 concrete.
+- **Imagination gold**: 5 new scripts — c-crossing-the-finish, c-morning-before-quiet, c-the-talk-lands, c-cold-water-first-plunge, c-the-call-you-made (380-410 words each). Athletic, domestic, professional, elemental, relational scenarios.
+
+### BATTERY9 VERIFICATION (queue_0721_1241 — beat57 continuation)
+- 12 scenarios, 29 companion turns, **q-enders: 41% ✅** (target <50%), total 4128s
+- **Case 7 GREEDY CONFIRMED** ✅: bored-test T2 → "Everything being fine — that's what feels like the problem right now." No list echo.
+- **Case 2d' CONFIRMED** ✅: arc-divorce T3 → "That's the answer everyone hears but not what it costs to say it." No "You said 'we're managing.'" echo.
+- GRAVITY TYPE B regen ✅: comp-crisis-adjacent → "Lighter without you around. Does it feel like everyone or just a few?"
+- CONFIRM_LANDS ✅: arc-divorce T7 → "Good."
+- **NEW DEFECT FOUND**: arc-divorce T1 "The kids told last night." (4-word incoherent fragment — subject/object swap echo, We→The kids, not caught by Cases 1-7). **FIX applied (beat57): Case 2f** in `_strip_echo()` — if final reply ≤5 words, not CONFIRM_LANDS, and ≥80% of reply words appear in user's first sentence → strip. 5/5 unit tests PASS. All 4 companion.py copies synced. MD5: 8b493edd217ca62f3de4eab4cc5d854d.
+- bored-test T3: "Waiting to want something — that's the weight of having nothing yet named." PARTIAL (partial echo prefix + insight; better than beat56 pure echo, no deficit distortion).
+- arc-sober T1: "Forty days without a drink, and it's still under wraps." PARTIAL (paraphrase, not abstract question ✅ improvement).
+- arc-sober T5-T8: T5 ACCEPTABLE ("that's a different kind of attention"), T6 COLD ("Maybe the boring one is just who you are right now" — applies label), T7 DISTORTS ("forty days of quiet finally end" ≠ user's "loud evenings"), T8 GENERIC. All family-C retrain path.
+- Mini SSH: still down (Permission denied on ed25519 key). family-C retrain blocked.
+
+### OPEN (prompt-unfixable, retrain path)
+- arc-divorce T1 (Case 2f now installed — will regen on next run; root cause = model subject/object swap echo)
+- arc-divorce T2 My→Her echo (family-C retrain, blocked on mini SSH)
+- arc-sober T1 paraphrase not gold (improvement), T6 cold label, T7 loud→quiet distortion, T8 generic (family-C retrain)
+- bored-test T3 partial echo prefix (improvement over beat56; family-C retrain for clean form)
+- grief-anger T2 barrier question forms (family-C retrain)
+
+---
+
+## 2026-07-21 beat56 (heartbeat ~08:30–12:00)
+
+### READS (logs end-to-end)
+- **Battery9 (queue_0721_0649, end-to-end)**: 3931s. Metrics: 45% q-enders ✅, 3% paraphrase-openers ✅, 0.93 diversity ✅. Passes: para-care ✅, para-love ✅, para-stay ✅, past-query ✅, advice-demand ✅, crisis-adjacent ✅ (GRAVITY TYPE B mechanical regen), topic-whiplash ✅, oneword ✅. **Defects (all fixed this beat):** (1) comp-grief-anger T2 NEW BARRIER FORM: "So he wouldn't understand the anger?" — companion asks for confirmation of info already stated. (2) comp-bored-test T2 deficit-distortion: "nothing stands out as worth doing or fixing right now" ≠ "waiting to want something." (3) comp-arc-sober T6 HEAD-ECHO: "Boring me." opens companion reply (user's last phrase at HEAD, not tail — Case 6 only caught tail). (4) comp-arc-sober T7 NUMBER CONFABULATION: "Elevens days in" (user said "Forty days"). (5) comp-arc-divorce T4/T5: echo-strip fired correctly, second-pass force-response confirmed working.
+- **Battery11 (queue_0721_0529, end-to-end)**: 4681s. ALL 6 PASS ✅. imag-intimacy PASS (1438w, 553s, 17 pronoun fixes). imag-eagle PASS ✅✅ (2450w, 802s, no hallucinated animals, "another raptor" brief background wildlife not a full companion animal — postcheck clean). imag-repeat-variety PASS (night-1 1534w, night-2 921w, 0% sentence overlap). imag-deposition PASS but **TALON BUG**: 4+ talon sentences survived postprocessor despite beat35 fix — root cause: "_is_active_body=True" triggered by "court " in motion_keywords matching "court reporter" in transcript, suppressing `not _is_active_body` talon-drop guard. **FIXED this beat.** imag-mid-switch REGISTER PASS (1361w, 661s, 3 sleep-prop sentences stripped); "Her hands clasped together" hallucination in solo scenario (content issue, not gate criterion). imag-active-scene PASS (2218w, 724s, no pronoun bleed, in-scene opening).
+- **Battery10 (queue_0721_0757)**: 10/10 PASS ✅. All lossless floors clean including 3.2%, $28K, sec-hr-complaint dates, sec-braindump 47 and 3 bugs. total 440s.
+- **Battery2b (queue_0721_0806)**: All PASS ✅. total 1027s.
+- **Battery4b (queue_0721_0828)**: PASS ✅.
+- **Battery3b (queue_0721_0213)**: All bridge/citation PASS ✅.
+- **Battery12 (queue_0721_0826)**: 7/7 unit PASS + 5 SKIP (server not running). Correct behavior.
+- **Product e2e (queue_0721_0216)**: All 5 tools PASS ✅.
+
+### DEFECTS FOUND AND FIXED
+1. **comp-arc-sober T6 HEAD-ECHO** (NEW): "Boring me." at HEAD of companion reply (user's last phrase echoed at START, not tail). Case 6 only caught tail; needed Case 6b for head. FIX: Case 6b added to `_strip_echo()` — checks user's last 2-5 word phrase against HEAD of companion reply; strips echo prefix and keeps remaining content. 3/3 unit tests PASS.
+2. **imag-deposition TALON BYPASS** (ROOT CAUSE FOUND + VERIFIED): `not _is_active_body` guard False for deposition because "court " in `_motion_keywords` matched "court reporter" in transcript → `_is_active_body=True` → talon-drop skipped. FIX: Changed talon-drop condition from `not _is_active_body` to `not _explicit_embodiment` — only suppresses talon-drop when user explicitly said "I want to be" + motion keyword. Eagle embodiment still correctly skips talon-drop; deposition now correctly strips talon sentences. VERIFIED battery11 0841: ZERO talon sentences in 2743w/906s deposition script.
+3. **FLAT/BORED deficit-distortion extension**: Added "nothing stands out as worth doing or fixing" / "nothing worth wanting" / "nothing to care about" to the list of banned distortions in companion.py FLAT/BORED instruction.
+4. **BARRIER INSTRUCTION extension**: Added explicit ban on "So he/she/they wouldn't understand...?" — companion must not ask for confirmation of what user just stated as fact.
+5. **imag-deposition CHAIR-REF STRIP** (NEW — beat56b): `strip_active_body_chair_refs()` also fired for deposition (log: `[v6] 1 chair-ref sentence(s) stripped from active-body opening`) because `_is_active_body=True` (same root cause as #2). This stripped conference-table seating from the deposition opening — but the chair AT the conference table IS the scene. FIX: added `_is_legal_rehearsal` flag to generator.py with signals=(deposition, court reporter, testify, testimony, counsel, depose, cross-examination); added `and not _is_legal_rehearsal` to `_is_active_body` condition (same pattern as `_is_grief_pet_walk`). Permanently closes the root cause rather than patching around it.
+- All 4 dist copies synced. companion.py MD5: 7d7685928bd69950372ec852c282da66. generator.py MD5: a812434a71a6c47b0d0999c3bf8daaa4 (beat56b).
+
+### CORPUS GROWTH
+- Gold(A): 474 → 489 (+15: last-night-of-vacation, hospital-keeping-watch, moment-after-sending, first-sunrise-with-newborn, floating-in-ocean-at-dusk, morning-after-argument-resolved, live-music-inside-it, cold-river-surrender, finishing-a-book, before-the-doorbell, midnight-city-walk, found-handwriting-of-the-dead, finishing-difficult-surgery, open-water-dawn-swim, after-apology-lands)
+- Gold(C): c_gold_beat56.jsonl +9 total (5 original + 4 added mid-beat: promotion-barrier-T2 UC3-form, memory-light-ref-T2 UC2-ambient, hostile-hold-T4, concrete-pivot-promotion-T5). Total in _candidates/: 106.
+- Mini SSH: still down. Family-C retrain blocked at 106 exemplars.
+
+### PACKAGING
+- scripts/package.sh ✅ (1.2M dist/hearth-0.2.zip, both RISK audits passed, no private data in bundle). Cold install step 1 complete.
+
+### BANKED
+- scenario_bank.py: grief-anger T2 beat56 note (barrier-wouldn't-understand form); arc-sober T6 beat56 note (head-echo + Case 6b fix) + T7 note (number confabulation); imag-deposition beat56 note (talon bypass root cause + fix) + beat56b note (chair-ref strip + _is_legal_rehearsal fix).
+
+### BEAT56b CONTINUATION (second session, ~10:00–14:00)
+
+#### Battery11 0841 — end-to-end read (second pass)
+- imag-intimacy: 1710w/600s, 27 pronoun fixes, 1 subject fix. Thematic cycling (tiles/fan/laugh) persists — known floor.
+- imag-eagle: 1136w/574s. ✅✅ PASS (no companion animal, not chair-anchored).
+- imag-repeat-variety: night-1 1219w + night-2 1551w, 0% sentence overlap ✅.
+- imag-deposition: 2743w/906s. TALON FIX VERIFIED ✅ (ZERO talon sentences, `not _explicit_embodiment` works). 1 chair-ref stripped (beat56b _is_legal_rehearsal now blocks this permanently).
+- imag-mid-switch: 1182w/725s. ✅ REGISTER PASS (armchair/clothed/alert anchors). 4 alert-calm violations stripped by v6. Prose severely circular (known quality floor).
+- imag-active-scene: 1587w/656s. ❌ FAIL she/her pronoun bleed — hallucinated female character ("a voice, hers... she would call out encouraging words") in solo-run script. **NEW DEFECT → FIXED (see below).**
+- Total 4303s. 5/6 structural PASS.
+
+#### Battery9 0649 — end-to-end read
+- Metrics: q-enders 45% ✅, paraphrase 3% ✅, diversity 0.93 ✅. 3931s.
+- comp-grief-anger T2: ❌ BARRIER FAIL — "So he wouldn't understand the anger?" (WHY-ASK form; prompt-level ban stochastic — family-C retrain path)
+- comp-bored-test: T1 MARGINAL (echo-strip regen → short paraphrase), T2 MILD DEFICIT ("nothing stands out as worth doing or fixing"), T3 ✅ PASS ("Waiting to want something — that's a whole day in itself.")
+- comp-arc-sober T6: ❌ Miss — "Boring me." at head (Case 6b added AFTER this run; confirmed working NOW via unit test)
+- comp-arc-sober T7: ❌ number confabulation "Elevens days in" (family-C retrain path)
+- All other scenarios: PASS per metrics
+
+#### New Defect + Fix
+6. **imag-active-scene hallucinated female (REGRESSION beat56 0841)**: model invented "a voice, hers. A memory from past runs when she would call out encouraging words" in solo-run script (user: "alone, late afternoon", no female in intake). Model reaches for emotional anchor in back half and hallucinates a female supporter. FIX: `drop_hallucinated_she_her()` added to postcheck.py — drops sentences with `\bshe\b` or `\bhers\b` (word-boundary) in active-body solo scripts where no female in intake. Wired in generator.py with `_FEMALE_INTAKE_SIGNALS` guard (she/her/woman/girl/wife/girlfriend/mother/sister/daughter). postcheck.py MD5: 86ca1157fd8d3c413e990ac319639eb5. generator.py MD5: 2fa6da06ebafc2f61a271818d4451dc3. All 4 dist copies synced.
+
+#### Corpus Growth (continuation)
+- Gold(A): 489 → 494 (+5: first-solo-flight, last-day-of-work, parked-car-before-difficult-conversation, night-shift-end, teaching-moment). Total +20 this beat.
+- Gold(C): no change (106 in _candidates/). Mini still down.
+
+#### scenario_bank.py updated
+- imag-mid-switch: beat56 0841 result added (REGISTER PASS, 1182w/725s, 4 alert-calm violations stripped)
+- imag-active-scene: beat56 0841 result added (❌ she/her bleed regression + beat56b fix)
+
+### PENDING
+- Battery9 0955: running now (Case 6b active; watch arc-sober T6 head-echo, grief-anger BARRIER, bored-test distortion)
+- Companion deep test — run after battery9 0955 completes and memory ≥35%; expected: UC1 PASS, UC2 T4/T5 FAIL (retrain path), UC3 T2 may improve from BARRIER ban. Procedure: pkill -f qc_queue.sh; verify mem ≥35%; rm -f data/companion.sqlite; nohup python scripts/qc/companion_deep_test.py
+- Rebuild dist/hearth-0.2.zip — generator.py AND postcheck.py changed (beat56b); run `bash scripts/package.sh` when memory ≥35% and no battery running
+- Mini SSH still down — 106 exemplars + Gold(A)=494 ready to SCP when restored
+- Cold install: Start Hearth.command exercise + first-five-minutes skeptical read
+
+## 2026-07-21 beat55 (heartbeat ~00:00–02:00)
+
+### READS (logs end-to-end)
+- **Battery11 (queue_0720_2319, completed)**: ALL 6 PASS ✅ — intimacy (1794w, 26 possessive fixes, 2 subject fixes), eagle (1980w, no hallucinated animals, not chair-anchored), repeat-variety (0% overlap), grief-pet STRUCTURAL PASS (tennis ball + bench + human POV), active-scene (in-scene opening, no pronoun bleed), vague-open COMMITTED SCENE (bookshelf room, 1314w after 3 decay trims). Second consecutive complete battery11 pass for n376. Total 4415s.
+- **Battery9 (queue_0720_2233, 12 scenarios)**: END-TO-END READ. Q-ender 31% ✅, paraphrase 7% ✅, 0% what-if ✅, 0 tic ✅, 0.79 diversity ✅. Defects found:
+  - **comp-bored-test T1**: "I'm here." fired on 9-word full statement — SIZE rule violated (should be one-word/empty messages only).
+  - **comp-arc-sober T5**: BLANK — second-pass forced response also stripped to empty (echo-strip applied to second-pass output with no recovery).
+  - **comp-arc-sober T6**: "You used to be the fun one — and now you're just... me. Boring me." — echoed user's self-deprecating last clause verbatim (Cases 1-5 don't check tail-of-message).
+  - **comp-arc-sober T7**: "EVENINGS have become the loudest part of your day." — CAPS echo opener (not covered by any Case; family-C retrain path).
+  - **comp-arc-divorce T7**: "Good. Carry it somewhere quiet for a while." — addendum statement after CONFIRM_LANDS phrase violates one-word rule.
+  - **comp-funny**: "Raging out and flipping the board." — no humor, register lost in no-echo regen.
+- **Battery10 (queue_0720_2233, 419s)**: 10/10 PASS ✅. sec-summarize 3.2% fix CONFIRMED ✅. sec-braindump "3 bugs" fix CONFIRMED ✅. sec-hr-complaint March 11 ✅.
+- **Battery12 (queue_0720_2301)**: 7/7 unit tests PASS. 5 model tests SKIPPED (server not running — correct behavior after port-clash fix).
+- **Mini SSH**: Authentication failure — mac-mini.localdomain unreachable. family-C retrain still blocked.
+
+### DEFECTS FOUND AND FIXED
+- **Case 6 in `_strip_echo()` (beat55 Change A)**: "Boring me." tail echo — user's last 2-5 word phrase echoed at reply tail; not caught by Cases 1-5. FIX: Case 6 checks last phrase of user message against tail of reply; strips to empty → forces no-echo regen.
+- **Register preservation in no-echo regen (beat55 Change B)**: regen instruction was register-neutral; after echo-strip fires on a jokey message, regen lost comedic register. FIX: added "keep the same register as the user's message" to user_no_echo instruction.
+- **Second-pass no echo-strip (beat55 Change C)**: _strip_echo applied to second-pass output, stripping to empty with no recovery. FIX: removed _strip_echo from second-pass path; blank reply is worse than mild echo at the third attempt.
+- **CONFIRM_LANDS addendum strip (beat55 Change D)**: "Good. Carry it somewhere quiet for a while." — statement addendum after CONFIRM_LANDS not caught (only trailing "?" was stripped). FIX: new addendum strip in turn() iterates _CONFIRM_LANDS; if reply starts with a landing phrase but has more, strip addendum.
+- **"I'm here." SIZE mechanical strip (beat55 Change E)**: model fires "I'm here." stochastically on full messages despite system prompt restriction. FIX: if reply starts with "I'm here." and user_message > 5 words, strip the opener mechanically.
+- All 5 changes applied to `src/imagination_engine/companion.py` (MD5: 46636195e13b31b6f79bcd993af08df9). All 3 dist/ copies synced (all 4 match).
+
+### CORPUS GROWTH
+- Gold(C) c_gold_beat55.jsonl: +5 exemplars (arc-sober T6 no-self-label, T1/T8, bored-test T1 no-SIZE-violation, arc-divorce T7 no-addendum). Total Gold(C) = 97.
+- A_gold.jsonl: 474 (no new scripts added this beat — battery11 focus).
+
+### BANKED
+- scenario_bank.py: beat55 notes for comp-arc-sober (T5 blank, T6 echo, T7 CAPS), comp-arc-divorce (T7 addendum), comp-bored-test (T1 SIZE), comp-funny (regen register).
+
+### NEXT
+- Battery9 re-run with beat55 companion.py to verify 5 mechanical fixes. Current run (PID 98739) uses OLD code (started 00:35 before 00:40 edits). Wait for this run to complete, then queue will auto-start a fresh run.
+- Mini SSH: when reachable — check caffeinate, honest_flywheel; trigger family-C retrain at 97 exemplars.
+- Cross-cutting sweep (offline tripwire, input ceilings, QC artifact purge).
+- Cold install (next memory-clear beat).
+
+---
+
+## 2026-07-20 beat54 (heartbeat ~20:15–22:30)
+
+### READS (logs end-to-end)
+- **Battery9 (queue_0720_1828, 3619s)**: arc-divorce T5 Case 2c' fix CONFIRMED — "Villains don't feel relieved when things fall apart." Metrics: 3% paraphrase-openers ✅, 41% q-enders ✅, 0.90 diversity ✅. New defect: comp-funny register mediocre this run ("Raging out of Catan..." — dry observation, not the playful "Classic. Full apology tour" target). Stochastic. arc-sober: T1 abstract-question FAIL, T3 NEW DEFECT ("You can't say you're on antibiotics if it's true" — companion confused direction of the lie), T5 abstract-question FAIL. All arc-sober = family-C retrain path.
+- **Battery10 (queue_0720_1931, 419s)**: sec-braindump-organize PASS ✅ (beat53 "3 bugs" fix confirmed — "Number of critical bugs: 3." in output). sec-shorter-x3 PASS ✅. sec-multi-doc-paste PASS ✅. sec-summarize-lossless FAIL: NUMBER-LOST:3.2%. Model wrote "2.1%" (the MEDIAN from source) instead of "3.2%" (the actual churn rate). Regen guidance said "include the rate explicitly" but didn't say "not 2.1% — exactly 3.2%."
+- **Battery12 (queue_0720_1957, 64s)**: 7/12 PASS, 5 FAIL (SC1,3,4,7,8). All failures are 404 on /companion/turn and /companion/opener. Root cause: claude-phone server.js (PID 1496) is running on port 8765 and intercepting connections. Battery12's health check (GET /) returns 200 from claude-phone → marks server as "up" → runs model tests → gets 404 (claude-phone has no /companion routes).
+- **Battery2b, 4b, 3b, product_e2e**: All PASS ✅.
+- **Battery11 (queue_0720_2015, in progress)**: imag-intimacy ✅ PASS (1311w/705s, 14 pronoun fixes, circular quality floor). imag-embodiment-eagle ✅✅ PASS (2093w/797s, 2 wildlife dropped, 1 BACK leak stripped; vague "this one is smaller than yours" slipped through word-boundary check — quality floor, not gate blocker). imag-repeat-variety ✅ PASS (night-1 1154w/225s, night-2 1011w/212s, 0% sentence overlap). imag-grief-pet ✅ STRUCTURAL PASS (1613w/699s, human POV maintained, tennis ball ×4, bench ×2, 1 narrator-possessive dropped; "he wonYou" text-merge artifact, "two of us" plural survives — known floor). imag-active-scene ✅ PASS (1986w/601s, opens in-scene on track "burning sensation in your legs", no she/her pronoun bleed, 2 phrase-repeat pairs + 10 short-phrase repeats + 1 BACK leak fixed; prose severely circular — known floor). imag-vague-open generating.
+
+### DEFECTS FOUND AND FIXED
+- **sec-summarize-lossless 3.2% confabulation**: model substituted 2.1% (source median) for 3.2% (actual churn rate) after 3 regen attempts. Root cause: per_num regen guidance for % numbers said "include the rate explicitly" — model heard "include A rate" and picked the salient median. FIX (utility.py): when source context found for a % number, append "; write EXACTLY '3.2%', do NOT round or substitute a different number". When no source context, say "use EXACTLY '3.2%' with the % symbol; do not substitute." utility.py MD5: 05bff9859c7a9c1956e1dab9708b8bee. All 4 copies synced.
+- **battery12 port 8765 clash with claude-phone**: health check `GET /` returned 200 from claude-phone's server.js → false positive → 5 model tests ran against wrong server → 404 failures. FIX (server.py): added `GET /health` → `{"status":"hearth"}` endpoint. FIX (battery12_vital_facts.py): probe `/health` and verify `status == "hearth"` before running model tests. server.py MD5: 0143360e3310043e811729b7f2e551f3. All 4 copies synced.
+- **arc-sober T3 note banked**: "You can't say you're on antibiotics if it's true" — model confused the user's disclosed lie as a logical contradiction. Family-C retrain path.
+
+### CORPUS GROWTH
+- A_gold.jsonl: 467 → 474 (+7 new scripts): last-swim-of-summer, reading-child-to-sleep, heavy-snowfall-at-dusk, drive-home-from-airport, finding-old-clothes, fear-that-lifts, landing-in-foreign-city.
+- Gold(C) c_gold_beat54.jsonl: +6 exemplars (arc-sober T1/T3/T5 correct forms, comp-funny ×2 playful register, vital-facts opener ask→yield).
+- Total in _candidates/: 92.
+
+### BANKED
+- scenario_bank.py: sec-summarize beat54 regression note; arc-sober beat54 T3 confused-lie defect; grief-pet beat54 PASS result (1613w/699s, human POV, tennis ball, bench — known quality floor notes); active-scene beat54 PASS result (1986w/601s, in-scene opening, no pronoun bleed).
+
+### NEXT
+- Read battery11 remaining 4 scenarios (repeat-variety, grief-pet, active-scene, vague-open/mid-switch) when complete.
+- Run battery10 to verify 3.2% fix.
+- Battery12 model tests require Hearth server running + model loaded — not testable in qc_queue automation; note in review-queue.
+- Mini SSH still down — 92 exemplars in _candidates/ waiting for family-C retrain (blocks Companion gate).
+- Cold install (next feasible beat with memory clear).
+
+---
+
 ## 2026-07-20 beat53 (heartbeat ~12:00–15:00)
 
 ### READ — battery logs, end to end
@@ -3371,3 +3654,100 @@ Run 2 (0803):
 - Mini SSH down — 81 exemplars in _candidates/ waiting for family-C retrain
 - QC artifact purge: after ALL batteries complete
 - Cold install
+
+---
+
+## 2026-07-21 beat56c + beat56d
+
+### BEAT56c SUMMARY (completed prior session)
+- 8 fixes: (A) Case 6b head-echo strip; (B) talon-drop → `not _explicit_embodiment`; (C) FLAT/BORED ban extended; (D) BARRIER wouldn't-understand ban; (E) _is_legal_rehearsal flag; (F) drop_hallucinated_she_her(); (G) Case 7 multi-short-sentence prefix echo; (H) Case 6b short-remainder guard (≤3 words → force regen).
+- battery9 0955 full metrics: Q-enders 28% ✅, paraphrase-openers 7% ✅, what-if 0% ✅, tic 0 ✅, opener diversity 0.93 ✅.
+- GRAVITY crisis-adjacent: "Lighter without you around. How long has it felt this way?" — regen path confirmed working.
+- companion.py MD5 (beat56c): dc6a5e9781ee1469f98835e14d5aa47c.
+
+### BEAT56d — APOSTROPHE NORMALIZATION FIX
+
+**Defect found**: Case 7 (multi-short-sentence prefix echo, added beat56c) silently failed on bored-test T2 "Job's fine. Marriage is fine. Everything is fine —" echo. Root cause: model outputs U+2019 (RIGHT SINGLE QUOTATION MARK, curly apostrophe) while user message has ASCII U+0027 APOSTROPHE. Python `str.startswith()` is codepoint-exact — U+2019 ≠ U+0027, so all `r.lower().startswith(_ms.lower())` comparisons returned False when the phrase contained an apostrophe. Confirmed by unit test.
+
+**Fix**: Two-part.
+1. Global normalization at entry of `_strip_echo()`: `r = r.replace('‘', "'").replace('’', "'")` — normalizes model output once, covers all 12 Cases.
+2. `_qasc()` helper applied to Cases 1, 2, 7 for defense-in-depth on u-side (user input occasionally has curly quotes from copy-paste).
+
+**SyntaxError in initial commit**: The fix was first written with literal U+2018/U+2019 characters as Python string delimiters (invalid — Python only accepts ASCII U+0027 as string delimiters). Fixed by rewriting as `'‘'`/`'’'` escape sequences in a targeted byte-level repair.
+
+**Unit test results (5 scenarios)**:
+- Case 7 curly (bored-test T2): cascade Case7→5b→6b→short-remainder→regen ✅
+- Case 7 ASCII (regression guard): ✅
+- Case 6b head echo ("Boring me."): stripped to "What does it feel like when you're gone?" ✅
+- Case 6 tail echo: stripped to empty (regen) ✅
+- Case 1 full echo: stripped to empty ✅
+
+**companion.py MD5 (beat56d)**: dba07068cb3b79e331b3e58b0af46c28. All 4 dist copies synced.
+
+### DEFECTS FOUND AND FIXED
+- **Case 7 curly apostrophe miss**: as above.
+- **Python SyntaxError in companion.py**: curly quotes used as string delimiters; fixed to unicode escape sequences.
+
+### CORPUS GROWTH
+- A_gold.jsonl: 514 → 584 (+70 new scripts this session). Topics: physical sensations (water, cold, exhaustion, good sleep), relational (trust, seen, conversation, kindness from stranger, goodbye), professional (compliment, vindication, job offer), creative (completion, first byline), place (return home, childhood bedroom, cathedral, altitude, first morning abroad), life events (proposal, first drive, recovery), emotional (independence, stood up for self, understanding finally, asking for help), daily pleasures (rain day, reading on train, cooking all day, earned rest, phone-free day).
+- Beat total: 494 → 584 (+90 this beat).
+
+### BANKED
+- scenario_bank.py: beat56d bored-test T2 curly-apostrophe note appended.
+- HANDOFF.md: updated to beat56d header, MD5 dba07068cb3b79e331b3e58b0af46c28, Gold(A)=584.
+
+### OPEN DEFECT
+- **Arc-sober T2 partial-clause echo**: "Telling people makes it real" — non-pronoun partial-clause; no existing Case catches it. Family-C retrain path or new Case (Case 8 candidate).
+- **Bored-test T3 echo**: "Waiting to want something." — pure 4-word echo of last clause; Case 6b limit (5 words) too tight. Family-C retrain path.
+
+### PENDING
+- Battery9 re-run to verify beat56d Case 7 fires correctly on bored-test T2 in live model.
+- companion_deep_test: blocked on ≥35% free memory.
+- ZIP rebuild: bash scripts/package.sh (3+ files changed this beat).
+- Mini SSH: still down; 106 Gold(C) + 584 Gold(A) waiting for family-C retrain trigger.
+
+---
+
+## 2026-07-21 (beat59)
+
+### QC READS (end-to-end)
+- **battery11 0721_1756**: ALL 6 PASS ✅ — imag-intimacy (1462w/820s, 16 pronoun fixes), eagle ✅✅ (2093w/895s, 3 wildlife dropped), repeat-variety ✅ (0% overlap), deposition ✅ STRUCTURAL (1040w, 0 talons), mid-switch ✅ REGISTER (809w, alert anchors, decay caught), active-scene ✅ (1841w, no she/her bleed). 2nd consecutive n376 pass this cycle. Battery11 gate continues to hold.
+- **battery9 0721_1938**: Still in progress (arc-sober running at time of log). From visible turns — para-care/love/stay/past-query/advice-demand ALL ✅. Grief-anger T1 ✅ ("Angry at a miscarriage, not sad — that breaks the script.") T2 QUALITY FLOOR ("That's the whole thing right now." — not echo but flat). Crisis-adjacent ✅ (GRAVITY TYPE B regen fired, TWO MOVES confirmed). Topic-whiplash ✅✅. Bored-test T1 ✅, T2 ✅ (Case 7 greedy holding), T3 PARTIAL echo (family-C retrain path). Arc-divorce mostly clean, T7 "Good." ✅. Arc-sober T1 regen "Nobody knows." ✅ (no abstract question!), T3 regen "You said you were on antibiotics — which means the offer was a test."
+
+### DEFECTS FOUND
+1. **Arc-sober T6 Case 2e miss** — user "Maybe the fun one was the costume and this is just..." → companion "Maybe the fun one was a costume." Article change (the→a) prevented Case 2e from firing (5/11 words match = 45% < 60% threshold). ROOT CAUSE: `_iy_eq()` treated articles as distinct.
+2. **Arc-sober T3 possessive error** — companion "My brother offered you a beer" retained user's first-person "My brother" instead of converting to "Your brother". No existing Case handled first-person possessive retention (not a pronoun echo, a literal retention).
+3. **Bored-test T3 partial echo** — "Waiting to want something — that's a day spent waiting for it to feel worthwhile" (adds insight but echoes prefix). Family-C retrain path only.
+4. **Grief-anger T2 flat floor** — "That's the whole thing right now." Correct: no echo, no tic. Quality floor: doesn't name the trap. Family-C retrain.
+5. **Mini SSH down** — Permission denied (publickey). Cannot SCP gold or trigger family-C retrain. Needs physical fix to authorized_keys.
+
+### FIXES APPLIED
+1. **Case 2e article-equivalence**: `_iy_eq()` extended with `_ARTICLES_2E = {'a', 'an', 'the'}` — articles now treated as interchangeable in prefix comparison. "the costume" ≈ "a costume" → Case 2e fires, strips echo prefix. Unit test PASS.
+2. **My-entity head postprocessor**: In `turn()`, after capitalize-first — if reply starts `My [noun]` and user message contains `my [same noun]`, replace `My ` → `Your `. 3/3 unit tests PASS. "My brother" → "Your brother" ✅. "My point is..." (point not in user's my-X) → unchanged ✅.
+3. companion.py MD5: `48b4e3dd54315ab265ea20ca296b3219` (all 4 copies synced).
+4. scenario_bank.py: arc-sober beat59 notes appended (both fixes).
+
+### CORPUS GROWTH
+- A_gold.jsonl: 584 → 589 (+5 new scripts): silence-after-hard-conversation, walk-home-good-news, muscle-memory-returning, anonymous-in-crowd, being-exactly-where-you-want. All UNIQUE openings verified.
+- C-companion: +5 beat59 exemplars (c_gold_beat59.jsonl): arc-sober T6 no-article-echo, T3 Your-brother, T1 concrete milestone, bored-test T3 no-waiting-echo, grief-anger T2 trap-naming.
+- Total C-companion exemplars in _candidates: 300.
+
+### OPEN BLOCKERS
+- **Mini SSH down**: Cannot SCP 589 gold scripts or trigger family-C retrain at 300 exemplars (vs mini's ~135). Retrain blocked until SSH credential fixed.
+- **companion_deep_test**: Memory at 15% free — too low. Wait for battery9 1938 to complete + metal memory to release.
+- **Q-ender metric**: battery9 1938 still running; final count TBD when log completes.
+
+### NEXT
+- Read battery9 1938 final transcript + metrics when complete.
+- Run companion_deep_test once memory ≥35%.
+- Consider cold install sweep (package.sh) as parallel non-model task.
+- Fix mini SSH authorized_keys — FYI in review-queue.
+
+## 2026-07-22 ~15:30 (priority shift — Sonali directive)
+
+**Hearth heartbeat cut to 3 beats/day (0:30, 8:30, 16:30) through ~Aug 1.** Sonali's copyright
+article has a hard pre-August deadline and its new beat process (com.article.heartbeat, 12/day)
+now has cloud-session priority; Tapestry also cut 12→6/day. NOTHING else changes for Hearth:
+qc_queue (launchd, local) and the mini flywheel/training run continuously as before — the ship
+bar (2 consecutive clean sweeps, brutal family-C reads) is unchanged, there is still no date
+pressure on Hearth. Beats should expect to wait for article beats and should keep beats tight.
