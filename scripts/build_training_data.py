@@ -101,13 +101,27 @@ for r in jl(_cgold):
 # Format 1: {context, response, src, tag}  → single-turn
 # Format 2: {id, scenario, turns:[{user,companion}], note}  → multi-turn flattened to pairs
 import glob as _glob
-_beat_files = sorted(_glob.glob(os.path.join(ROOT, "C-companion", "c_gold_beat*.jsonl")))
+# Deduplicate by basename — _candidates/ has beat46+ which top-level doesn't have;
+# top-level has beat13-27 which _candidates/ may not. Prefer _candidates/ for any overlap.
+_beat_by_name: dict = {}
+for _f in (_glob.glob(os.path.join(ROOT, "C-companion", "c_gold_beat*.jsonl")) +
+           _glob.glob(os.path.join(ROOT, "C-companion", "_candidates", "c_gold_beat*.jsonl"))):
+    _beat_by_name[os.path.basename(_f)] = _f  # _candidates/ wins on same name (appended last)
+_beat_files = sorted(_beat_by_name.values())
 for bf in _beat_files:
     for r in jl(bf):
         if "turns" in r:
             # multi-turn format: build context accumulating user+companion pairs
+            # Normalize: beat58d/58e use {role,content} (OpenAI format); others use {user,companion}
+            raw = r["turns"]
+            if raw and "role" in raw[0]:
+                pairs = [{"user": raw[i]["content"], "companion": raw[i+1]["content"]}
+                         for i in range(0, len(raw)-1, 2)
+                         if raw[i].get("role") == "user" and raw[i+1].get("role") in ("assistant","companion")]
+            else:
+                pairs = [t for t in raw if "user" in t and "companion" in t]
             history = []
-            for t in r["turns"]:
+            for t in pairs:
                 u_txt = "\n".join(history + [t["user"]]) if history else t["user"]
                 a_txt = t["companion"]
                 rec = msg("C", u_txt, a_txt)

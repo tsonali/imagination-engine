@@ -262,6 +262,9 @@ class VitalFacts:
         content = self.live_sections()
         if not content or content == _TEMPLATE.strip():
             return ""
+        # Also treat as empty if there are no actual fact bullet lines (only headers/comments)
+        if not any(ln.strip().startswith("- ") for ln in content.splitlines()):
+            return ""
         return (
             "----- WHAT I KNOW ABOUT YOU (from vital-facts.md — I know ONLY what is "
             "written here; nothing more) -----\n"

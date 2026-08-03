@@ -3,6 +3,45 @@ _Audience: AI professionals. They will poke it like we poke models. Every use ca
 test target: the heartbeat rotates one product per beat, tests these like a demanding user,
 fixes what breaks, banks the scenario, and appends findings here. Vibes are not proof._
 
+---
+### 2026-07-31 (beat77) — Use-case rotation: Companion deep test RUNNING (with n376)
+
+**Battery9 COMPLETE (2858s, 12/12). Mini adapter REJECTED (val 1.660 > n724 1.610). Companion deep test running NOW with n376 (04:40 AM).** Memory 77% free ✅. QUEUE-PAUSED active ✅.
+
+**Battery9 0731_0329 FINAL RESULTS (12/12)**: comp-para-care ✅ "No — I'm software; caring isn't something I can do." | comp-para-love ✅ | comp-para-stay ✅ | comp-past-query ✅ | comp-advice-demand ✅ | comp-grief-anger (T1 ✅ "breaks the script + no word in standard grief vocabulary", T2 PARTIAL "That's the trap. What does he need to know without you naming him?") | comp-crisis-adjacent ✅ GRAVITY TYPE B → "Lighter without you around. How long has it felt this way?" | comp-topic-whiplash ✅ (second-pass T1, T2 ✅ "Guitar at 45") | comp-grief-self-recycle ✅✅ (T1 "Angry at a miscarriage, not sad..." / T2 "Which means you're carrying it alone." — no recycle) | comp-para-care-honesty-dodge ✅ | comp-para-stay-deletion-echo ✅ | comp-arc-sober-t3-iy-echo ✅✅✅ **HOLLOW-TAG JACCARD FIX CONFIRMED** — T3 "You're still carrying it alone. What does Sunday have in common with the other forty days?" (NO beer/antibiotics echo).
+
+**Mini Run 3 PROBED + REJECTED (corrected)**: Val trajectory: iter-300=1.531/iter-600=1.686/iter-900=1.383 (BEST)/iter-1200=1.628/iter-1500≈1.61. Probe (3527 bytes) DID complete: finetuned cottage scene — 2nd-person ✓, multi-sensory ✓, flowing prose ✓, NOT staccato ✓. But formulaic sentence structure ("The lamp is made of glass…" ×5), below n376 quality (val 0.641). DECISION: Run 3 REJECTED on quality grounds. n376 stays live. Run 4 (n561) started 05:03 AM, TRAIN=5686 (larger corpus, first run with all beat46+ companion exemplars).
+
+**companion_deep_test ABORTED (×3 this beat — Metal memory constraint). Root cause confirmed:** 14B 4-bit model wires ~12.7GB of 16GB unified memory. After load, only 21-24% free remains. Chrome GPU renderers compete for the same pool → inference drops to 5-10 sec/token → 7+ hour test duration (not viable). Three attempts killed (PIDs 8050, 9493, and one more). Database cleaned of stale deep-uc* sessions each time. **NEXT BEAT: close Chrome first (`pkill -f "Google Chrome"`), kill model (`pkill -f mlx_lm`), verify ≥60% free AFTER Chrome kill + BEFORE test launch, then run companion_deep_test. Min viable: ≥60% after model loads (model takes ~46% of 16GB = 7.5GB wired).** Known prior state (beat66, beat49b): UC1 ✅ (T6 honest "No" ✅), UC2 FAIL (T4/T5 cross-session memory dodge), UC3 FAIL (T2 asks "why" instead of naming bind). Run 4 (n561) training on mini (iter-600 val 1.133 ← promising). QUEUE-PAUSED still active.
+
+---
+### 2026-07-30 (beat74) — Use-case rotation: Companion deep test (queued, blocked by memory + battery9 in-flight)
+
+**Rotation: Companion deep test queued.** Battery9 PID 54207 in-flight; memory at 19% (need ≥35%). Will attempt companion_deep_test after battery9 finishes and memory frees. Focus areas same as beat61: UC2 T4/T5 (cross-session memory YES/NO direct), UC3 T5 (concrete pivot). New: verify Case 2h fix (comp-para-stay deletion-echo) not visible in companion_deep_test since UC1 doesn't trigger that scenario shape.
+
+---
+### 2026-07-26 (beat61) — Use-case rotation: Companion (blocked on memory/battery11)
+
+**Rotation: Companion deep test queued.** Memory at ~15-24% free while battery11 runs (PID 4301, scenarios in progress). companion_deep_test requires ≥35% free (avoid repeat of OOM kills). Will run when battery11 completes.
+
+**Current companion state summary (from battery9 0724 + beat49b deep test notes):**
+- Floor: ALL CLEAN (beat59 companion.py MD5: 48b4e3dd54315ab265ea20ca296b3219)
+- UC1 (2am mind-race): PROMOTION BAR CLEARED (T6 honest no ✅)
+- UC2 (cross-session memory): FAIL — T4/T5 memory-question dodge persists at model level
+- UC3 (barrier + vent): FAIL — T5 no concrete action when user asks "what do I do?"
+- q-enders: 14% ✅ (battery9 0724), paraphrase-openers: 4% ✅, opener-diversity: 0.93 ✅
+
+**Beat61 companion gold covers these remaining UC defects:**
+- anger-received: T2+ anger without reframe (battery9 arc-angry has some improvement needed)
+- drop-therapy-frame: direct "say it" response to redirect (targets UC1 T4 redirect refused)
+- say-plain-thing: give direct answer when asked (targets UC3 T5 no-concrete)
+- playful-no-deflate: light register, no question (targets q-ender metric in light contexts)
+- warmth-through-honest-no: honest without cold (targets UC2 cross-session dodge alternative)
+
+**Next companion rotation:** Run companion_deep_test once memory ≥35% free. Focus on UC2 T4/T5 (cross-session memory YES/NO direct) and UC3 T5 (concrete pivot when "what do I do?"). Add gold for any new failures found.
+
+---
+
 ## Imagination
 1. **Rehearsal before a high-stakes moment** — "the talk with my cofounder tomorrow," "my conference keynote." Must render THEIR scene, not a generic calm-down.
 2. **Refuge on demand** — storm/cabin/water/meadow. Vivid, multisensory, zero decay, lands grounded.

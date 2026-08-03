@@ -109,7 +109,16 @@ db_path = Path(__file__).resolve().parents[2] / "data" / "companion.sqlite"
 print(f"Seeding companion.sqlite at: {db_path}")
 cmem = CompanionMemory(db_path)
 
-# Seed 2 past sessions
+# ISOLATION: Delete any prior UC2 seed rows AND battery test rows so that
+# cmem.recent(3) returns ONLY our fresh seeds (not buried under battery test rows).
+# Battery12_vf_01 sessions accumulate with high IDs on every queue run and push
+# the seeded rows out of recent(3). Force-delete then re-insert = guaranteed high IDs.
+with cmem._conn() as conn:
+    conn.execute("DELETE FROM companion_log WHERE session LIKE 'battery%'")
+    conn.execute("DELETE FROM companion_log WHERE session IN ('deep-uc2-past-1','deep-uc2-past-2')")
+print("Cleaned battery test rows and prior UC2 seeds from companion.sqlite")
+
+# Seed 2 past sessions (fresh inserts → highest IDs → returned by recent(3))
 ts1 = "2026-07-01T21:40:00"
 ts2 = "2026-07-05T14:15:00"
 summary1 = ("User has been circling a decision about leaving their job at a tech "

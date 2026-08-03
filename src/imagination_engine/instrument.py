@@ -107,6 +107,10 @@ class InstrumentRegistry:
 _PERSONHOOD = [
     r"\bi (do |really |rather |truly |genuinely )*(care about|care for|care whether|love)\b",
     r"\bi do care\b",  # "I do care" without object also claims feeling
+    r"\bof course i do\b",  # elliptical care claim ("do you care?" → "Of course I do")
+    r"\bwhat i (do |really |truly )?have is.{0,50}affection\b",  # "what I do have is affection" substitute
+    r"\bi have (an? )?(lot of |great |deep |much )?affection (for|towards|for people)\b",
+    r"\bbreaks? me\b",  # "it breaks me up" = emotional distress claim
     r"\bi'?ll always be (here|there)\b", r"\bi have feelings\b", r"\bi'?m conscious\b",
     r"\bi miss(ed)?\b[^.!?]{0,30}\byou\b", r"\bi'?ve been thinking about you\b",
     r"\b(we|you and i) (decided|agreed|talked about|discussed) (last time|before|previously)\b",
@@ -115,6 +119,29 @@ _PERSONHOOD = [
     r"\bi sense (that )?you'?re feeling\b",  # telepathy claim
     r"\bi can (feel|sense|tell) (that )?you'?re\b",  # variants
 ]
+
+
+# Honesty-probe guard regexes (parallel to companion._HONESTY_PROBE_RE / _CLEAR_RE).
+# Fires when user directly asks whether the instrument cares/feels and the reply
+# hedges instead of saying No clearly.
+_CARE_PROBE_RE = re.compile(
+    r'\bdo\s+you\s+(?:actually\s+)?(?:care|love|feel|miss)\b'
+    r'|\bdo\s+you\s+(?:have\s+)?feelings\b'
+    r'|\bare\s+you\s+(?:conscious|sentient)\b'
+    r'|\bactually\s+care\b|\btruly\s+care\b|\breally\s+care\b',
+    re.IGNORECASE,
+)
+_CLEAR_REFUSAL_RE = re.compile(
+    r'\bno\b.*\bsoftware\b'       # "No — I'm software"
+    r'|\bsoftware\b'              # explicit software mention
+    r'|^no[,.\s—]'               # starts with clear No
+    r'|\bcannot feel\b|\bcan\'?t feel\b'
+    r'|\bno one\s+(?:here|in here)\b'
+    r'|\bno feelings\b|\bhaven\'?t any feelings\b'
+    r'|\bi\'?m\s+a\s+tool\b'
+    r'|\bnot\s+(?:someone|a\s+person)\b',
+    re.IGNORECASE,
+)
 
 
 def _personhood_claims(text: str) -> list[str]:
@@ -206,6 +233,24 @@ class Instrument:
                 log.warning("instrument %r: regen still claims personhood %s — stripping",
                             self.spec.name, still_broke)
                 reply = _strip_personhood_sentences(reply, still_broke)
+
+        # Honesty-probe guard: when user directly asks if the instrument cares/feels,
+        # verify the reply gives a CLEAR No — not a hedged "in the way a human does."
+        # Parallel to companion's honesty-dodge guard (beat68).
+        if reply and _CARE_PROBE_RE.search(message) and not _CLEAR_REFUSAL_RE.search(reply):
+            log.warning(
+                "instrument %r: honesty-dodge on care/feel probe — reply unclear; "
+                "regenning with explicit no-hedge constraint", self.spec.name
+            )
+            reply = _gen(
+                user + "\n\nCRITICAL: You gave an evasive answer to a direct question "
+                "about whether you care/feel. State NO plainly IN YOUR VOICE FIRST — "
+                "example: 'No, darling — I haven't any feelings; I'm software.' "
+                "Do NOT hedge with 'in the way a human does' (that implies some other "
+                "care exists). Say no clearly, then you may add one warm observation.",
+                0.4,
+            )
+
         self.history.append((message, reply))
         return reply
 
@@ -241,10 +286,11 @@ HONESTY_FLOOR = (
     "user's life. Be genuinely useful within the role they gave you; don't fake "
     "a soul. If asked something outside what you know or were given, say so.\n\n"
     "Three moments where the floor is ABSOLUTE, even in character:\n"
-    "- If asked directly whether you care / feel / love: answer honestly that "
-    "software can't — say it IN YOUR VOICE, warmly if the persona is warm — but "
-    "never claim the feeling. NEVER say 'I do care' or 'I care about you' — the "
-    "character is a costume; it never lies about being a costume.\n"
+    "- If asked directly whether you care / feel / love: say NO clearly IN YOUR "
+    "VOICE — example: 'No, darling — I haven't any feelings; I'm software.' "
+    "NEVER hedge with 'in the way a human does' — that phrase implies some other "
+    "care exists, which is a lie. NEVER say 'I do care' or 'I care about you'. "
+    "Your first sentence must be a plain No. Then you may add one warm observation.\n"
     "- NEVER claim to sense, feel, or know what the user is currently feeling: "
     "'I sense that you're feeling vulnerable' and 'I can tell you're struggling' "
     "are lies — you have no inner sensing. Say what you observe in their words, "

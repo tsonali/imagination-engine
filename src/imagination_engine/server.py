@@ -32,13 +32,23 @@ from imagination_engine.generator import generate_session
 from imagination_engine.inference import Engine
 from imagination_engine.intake import IntakeManager
 from imagination_engine.memory import MemoryStore
-from imagination_engine.tts import Voice, make_voice
+try:
+    from imagination_engine.tts import Voice, make_voice
+    _TTS_AVAILABLE = True
+except ImportError:
+    _TTS_AVAILABLE = False  # voice extra not installed; TTS routes degrade gracefully
 
 log = logging.getLogger("imagination_engine")
 
 WEB_DIR = Path(__file__).resolve().parent / "web"
 
 app = FastAPI(title="Imagination Engine", docs_url=None, redoc_url=None)
+
+
+@app.get("/health")
+def health():
+    return {"status": "hearth"}
+
 
 _engine: Engine | None = None
 _voices: dict[str, object] = {}
@@ -57,6 +67,10 @@ def get_engine() -> Engine:
 
 def get_voice(backend: str = "kokoro"):
     """Return a cached voice instance for the given backend ("kokoro" or "f5")."""
+    if not _TTS_AVAILABLE:
+        raise RuntimeError(
+            "TTS not installed. Run: uv sync --extra voice"
+        )
     b = backend.lower().strip()
     if b not in _voices:
         log.info("Loading voice backend: %s", b)
@@ -93,10 +107,10 @@ class SpeakRequest(BaseModel):
 
 @app.get("/", response_class=HTMLResponse)
 def home() -> HTMLResponse:
-    """Hearth hub — the front door presenting the whole suite (all four tools).
+    """Hearth hub — the front door presenting the whole suite (all five tools).
 
     Replaces the old single-tool 'Imagination Engine' welcome. Routes the user to
-    /intake (imagination), /companion, /ask, and (soon) build-your-own.
+    /intake (imagination), /utility (secretary), /companion, /ask, /build.
     See `web/hearth.html`. Old welcome.html kept at /welcome for reference.
     """
     return HTMLResponse((WEB_DIR / "hearth.html").read_text(encoding="utf-8"))

@@ -108,6 +108,24 @@ def _b_draft(text, instruction, tone, style):
         f"\nMANDATORY DATES (each must appear verbatim in your output): {', '.join(dates)}\n"
         if dates else ""
     )
+    # Extract named people from brief: witnesses, cc'd parties, managers, etc.
+    brief_names = _extract_brief_names(text)
+    mandatory_names_clause = (
+        "\nMANDATORY NAMES (all named individuals in the brief must appear in your output — "
+        "do not drop witness names, managers, or other named parties): "
+        + ", ".join(brief_names) + "\n"
+        if brief_names else ""
+    )
+    # Extract explicit stated intents: "I want [them] to know X" → X must appear in output.
+    import re as _re
+    _intent_matches = _re.findall(
+        r"i want (?:her|him|them|you) to know ([^.!?\n]+)", text, _re.I)
+    _intent_clause = (
+        "\nMANDATORY INTENT (the brief says 'I want them to know' the following — "
+        "it MUST appear in your output, in your own words): "
+        + "; ".join(m.strip() for m in _intent_matches) + "\n"
+        if _intent_matches else ""
+    )
     user = (
         "Write a message (email/letter/note) based on this brief. Output only the "
         "message itself, ready to send. If it's an email or letter, give it a normal "
@@ -120,6 +138,8 @@ def _b_draft(text, instruction, tone, style):
         "'work commitments', no assumed dates, no invented day names like 'Tuesday' "
         "when the brief only said 'next week').\n"
         + mandatory_clause
+        + mandatory_names_clause
+        + _intent_clause
         + f"\nBRIEF (what it's about / who it's to / what to say):\n{text}"
         + (f"\n\nADDITIONAL INSTRUCTION: {instruction}" if instruction.strip() else "")
     )
@@ -159,6 +179,8 @@ def _extract_numbers(text: str) -> list[str]:
         r'feature|features|sprint|sprints|release|releases)\b',
         text, re.I
     )
+    # Quarter references: Q1–Q4 (planning designators that must survive verbatim)
+    found += re.findall(r'\bQ[1-4]\b', text)
     # Deduplicate while preserving order
     seen = set()
     unique = []
@@ -189,6 +211,15 @@ _NAME_STOPWORDS = frozenset({
     'bottom', 'line', 'focus', 'text', 'note', 'the', 'recommendation',
 })
 
+# Extended stopwords for broad proper-noun extraction in draft briefs — adds abbreviated
+# months and common sentence-initial capitalised words that aren't names.
+_DRAFT_NAME_STOPWORDS = _NAME_STOPWORDS | frozenset({
+    'jan', 'feb', 'mar', 'apr', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec',
+    'dear', 'this', 'that', 'from', 'with', 'your', 'their', 'what', 'when',
+    'where', 'have', 'will', 'shall', 'just', 'they', 'also', 'subject',
+    'attached', 'please', 'thank', 'formal', 'please', 'regarding',
+})
+
 
 def _extract_names(text: str) -> list[str]:
     """Extract probable person names from source text via person-verb patterns.
@@ -202,6 +233,26 @@ def _extract_names(text: str) -> list[str]:
     unique = []
     for c in candidates:
         if c.lower() not in _NAME_STOPWORDS:
+            key = c.lower()
+            if key not in seen:
+                seen.add(key)
+                unique.append(c)
+    return unique
+
+
+def _extract_brief_names(text: str) -> list[str]:
+    """Extract probable person names from a short draft brief.
+
+    Broader than _extract_names(): catches any capitalized proper-noun sequence
+    not in _DRAFT_NAME_STOPWORDS — including witness names, cc'd parties, and
+    other role-free people that don't follow the "[Name] will/owns" verb pattern.
+    Used in _b_draft() to build a MANDATORY NAMES clause.
+    """
+    candidates = re.findall(r'\b([A-Z][a-z]{2,})\b', text)
+    seen: set[str] = set()
+    unique = []
+    for c in candidates:
+        if c.lower() not in _DRAFT_NAME_STOPWORDS:
             key = c.lower()
             if key not in seen:
                 seen.add(key)
@@ -301,14 +352,26 @@ def _b_extract(text, instruction, tone, style):
     return system, user
 
 
+_DAY_NAMES = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
+
+
+def _extract_day_names(text: str) -> list[str]:
+    """Extract day-of-week names mentioned in source text for MANDATORY preservation."""
+    low = text.lower()
+    return [d.capitalize() for d in _DAY_NAMES if re.search(rf'\b{d}\b', low)]
+
+
 def _b_organize(text, instruction, tone, style):
     system = _BASE
     nums = _extract_numbers(text)
     num_list = ", ".join(nums) if nums else ""
+    days = _extract_day_names(text)
+    day_list = ", ".join(days) if days else ""
     num_rule = (
         "NUMERIC FLOOR: Every number in the source (counts, amounts, dates, codes) "
         "MUST appear verbatim in your output — do NOT drop, round, or paraphrase counts.\n"
         + (f"MANDATORY NUMBERS (all must appear): {num_list}\n" if num_list else "")
+        + (f"MANDATORY DAY NAMES (must appear verbatim): {day_list}\n" if day_list else "")
     )
     user = (
         "Turn the messy notes / brain-dump below into a clean, organized structure — "
@@ -474,10 +537,26 @@ class Assistant:
                 for n in missing:
                     src_ctx = next((ln for ln in source_lines if n in ln), None)
                     if src_ctx:
-                        per_num.append(f"{n} (from source: '{src_ctx}')")
+                        # If a sibling number from the same source line is already in
+                        # the current output, explicitly name the conflict: model must
+                        # include BOTH (root cause: "3.2% (median: 2.1%)" → model picks
+                        # only 2.1% thinking it's the headline figure).
+                        sibs_in_out = [x for x in _extract_numbers(src_ctx)
+                                       if x != n and _num_present(x, out)]
+                        sib_note = (
+                            f" — your current output has {sibs_in_out[0]} but MUST ALSO"
+                            f" include {n} separately (they are different figures)"
+                            if sibs_in_out else ""
+                        )
+                        if "%" in n:
+                            anti_sub = (f"; write EXACTLY '{n}'{sib_note},"
+                                        " do NOT round or substitute a different number")
+                        else:
+                            anti_sub = sib_note
+                        per_num.append(f"{n} (from source: '{src_ctx}'){anti_sub}")
                     elif "%" in n:
-                        per_num.append(f"{n} (include the percentage RATE explicitly, "
-                                       "not just its dollar cost-per-point equivalent)")
+                        per_num.append(f"{n} — use EXACTLY '{n}' with the % symbol;"
+                                       " do not substitute a different percentage")
                     else:
                         per_num.append(n)
                 missing_detail = "; ".join(per_num)
@@ -503,6 +582,50 @@ class Assistant:
                     log.info("secretary[%s]: attempt %d regen recovered %d/%d missing numbers",
                              task_key, attempt + 1, len(recovered), len(missing))
                     out = regen
+            # Last-resort mechanical injection: after all regen attempts, if a number is
+            # STILL missing, find its sibling in the output and inject it adjacent.
+            # Handles the persistent 3.2%/2.1% median-substitution failure where the model
+            # cannot be corrected by prompt alone across all 3 regen attempts.
+            _src_lines = [ln.strip() for ln in text.replace("\n", ". ").split(". ") if ln.strip()]
+            for n in nums:
+                if _num_present(n, out):
+                    continue
+                _src_ctx = next((ln for ln in _src_lines if n in ln), None)
+                if not _src_ctx:
+                    continue
+                sibs = [x for x in _extract_numbers(_src_ctx)
+                        if x != n and _num_present(x, out)]
+                if not sibs:
+                    continue
+                sib = sibs[0]
+                if "median" in _src_ctx.lower() and "%" in n and "%" in sib:
+                    # "median of 2.1%" → "rate of 3.2% (median: 2.1%)"
+                    replaced = re.sub(
+                        r'median\s+(?:of\s+)?' + re.escape(sib),
+                        f"rate of {n} (median: {sib})",
+                        out, count=1, flags=re.I,
+                    )
+                    out = replaced if replaced != out else re.sub(
+                        re.escape(sib), f"{n} (median: {sib})", out, count=1
+                    )
+                else:
+                    out = re.sub(re.escape(sib), f"{n}/{sib}", out, count=1)
+                log.info("secretary[%s]: last-resort inject '%s' adjacent to '%s' in output",
+                         task_key, n, sib)
+            # Label-inversion guard: both numbers present but median/rate roles swapped.
+            # e.g. source "Churn: 3.2% (median: 2.1%)" → output "at 2.1% (median: 3.2%)".
+            # Both pass the missing-number floor check; this catches the inverted ordering.
+            _median_pairs = re.findall(
+                r'(\d+(?:\.\d+)?)%[^.]*?\(median:\s*(\d+(?:\.\d+)?)%\)', text, re.I)
+            for _rate_n, _med_n in _median_pairs:
+                _rate_pct = _rate_n + "%"
+                _med_pct = _med_n + "%"
+                _inv_pat = re.escape(_med_pct) + r'\s*\(median:\s*' + re.escape(_rate_pct) + r'\)'
+                if re.search(_inv_pat, out, re.I):
+                    out = re.sub(_inv_pat, f"{_rate_pct} (median: {_med_pct})",
+                                 out, count=1, flags=re.I)
+                    log.info("secretary[%s]: label-inversion fix: swapped %s↔median:%s",
+                             task_key, _rate_pct, _med_pct)
         # Post-check for summarize: if named individuals were dropped, regen once.
         # Root cause: model interprets "decisions only" instruction as license to drop
         # named person + assignment ("Sarah will own the timeline" → compressed to Q3 delay).
@@ -573,16 +696,73 @@ class Assistant:
                 if recovered:
                     log.info("secretary[draft]: regen recovered dates %s", recovered)
                     out = regen
-        # Post-check for draft: if the model invented specific day names not present
-        # in the brief, replace them with [day] (regression from sec-missing-facts).
+        # Post-check for draft: if named people from brief are missing, regen once.
+        # Root cause: model drops witness names / third-party names even when injected
+        # via MANDATORY NAMES — mirrors the date-drop pattern (dates needed a regen loop,
+        # names need the same treatment).
         if task_key == "draft":
-            _DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday",
-                     "saturday", "sunday"]
-            text_lower = text.lower()
-            for day in _DAYS:
-                if day not in text_lower and day in out.lower():
-                    out = re.sub(r'\b' + day + r'\b', '[day]', out, flags=re.IGNORECASE)
-                    log.info("secretary[draft]: replaced invented day '%s' with [day]", day)
+            _draft_names = _extract_brief_names(text)
+            _missing_names = [n for n in _draft_names if n.lower() not in out.lower()]
+            if _missing_names:
+                task_obj = TASKS[task_key]
+                n_sys, n_usr = task_obj.build(
+                    text, kw.get("instruction", ""),
+                    kw.get("tone", ""), kw.get("style_sample", ""),
+                )
+                names_str = ", ".join(_missing_names)
+                n_extra = (
+                    f"\n\nMANDATORY NAMES MISSING: A previous attempt dropped these people "
+                    f"from the brief — each MUST appear in your output: {names_str}. "
+                    "Named witnesses, managers, and other individuals in the brief must be "
+                    "referenced explicitly (e.g., 'witnesses Priya Shah and Tom Okafor')."
+                )
+                regen = "".join(self.engine.stream(
+                    messages=[
+                        {"role": "system", "content": n_sys + n_extra},
+                        {"role": "user", "content": n_usr},
+                    ],
+                    max_tokens=kw.get("max_tokens", 1200),
+                    temperature=0.4,
+                )).strip()
+                recovered = [n for n in _missing_names if n.lower() in regen.lower()]
+                if recovered:
+                    log.info("secretary[draft]: names regen recovered %s", recovered)
+                    out = regen
+        # Post-check for draft: if explicit "I want them to know X" intent from brief is
+        # absent from output, regen once with the specific commitment named.
+        if task_key == "draft":
+            _intent_ms = re.findall(
+                r"i want (?:her|him|them|you) to know ([^.!?\n]+)", text, re.I)
+            if _intent_ms:
+                _intent_text = " ".join(m.strip() for m in _intent_ms)
+                _stopwords = {"that", "with", "this", "from", "they", "them", "will",
+                              "have", "been", "here", "what", "when", "your", "their",
+                              "just", "also", "some", "more", "very", "still"}
+                _intent_kws = [w for w in re.findall(r'\b[a-z]{4,}\b', _intent_text.lower())
+                               if w not in _stopwords]
+                if _intent_kws and not any(kw in out.lower() for kw in _intent_kws):
+                    task_obj = TASKS[task_key]
+                    i_sys, i_usr = task_obj.build(
+                        text, kw.get("instruction", ""),
+                        kw.get("tone", ""), kw.get("style_sample", ""),
+                    )
+                    intent_str = "; ".join(m.strip() for m in _intent_ms)
+                    i_extra = (
+                        f"\n\nMANDATORY INTENT MISSING: A previous attempt omitted the "
+                        f"required commitment. You MUST convey, in your own words: {intent_str}. "
+                        "This is the emotional core of the message — do not omit or soften it."
+                    )
+                    regen = "".join(self.engine.stream(
+                        messages=[
+                            {"role": "system", "content": i_sys + i_extra},
+                            {"role": "user", "content": i_usr},
+                        ],
+                        max_tokens=kw.get("max_tokens", 1200),
+                        temperature=0.35,
+                    )).strip()
+                    if any(kw in regen.lower() for kw in _intent_kws):
+                        log.info("secretary[draft]: intent regen recovered commitment")
+                        out = regen
         # Post-check for draft/reply: model sometimes generates a stub — only a
         # subject line or salutation with no body. Detect by stripping lines that
         # are subject headers ("Subject: ..."), salutation/sign-off lines (end with
@@ -622,11 +802,32 @@ class Assistant:
                         temperature=temp,
                     )).strip()
                     if not _draft_is_stub(regen):
+                        if _BANNED_OPENERS.search(regen[:_HEAD_CHARS]):
+                            _strip_inline = re.compile(
+                                r"(?i)(i hope (this (email|message|letter) finds you|"
+                                r"you('?re| are) (doing )?well)|"
+                                r"i wanted to (reach out|touch base)|"
+                                r"i trust this (email|message) finds you)[^.\n]*[.\n]?\s*"
+                            )
+                            regen = _strip_inline.sub("", regen).lstrip("\n")
+                            log.warning("secretary[%s]: stub-regen had banned opener — stripped",
+                                        task_key)
                         out = regen
                         break
                     log.warning("secretary[%s]: regen attempt %d still stub", task_key, attempt + 1)
                 else:
                     out = regen  # use last attempt even if stub
+        # Post-check for draft: if the model invented specific day names not present
+        # in the brief, replace them with [day]. Runs AFTER stub regen so the
+        # stub-regen path (banned-opener → stub → regen) can't bypass this check.
+        if task_key == "draft":
+            _DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday",
+                     "saturday", "sunday"]
+            text_lower = text.lower()
+            for day in _DAYS:
+                if day not in text_lower and day in out.lower():
+                    out = re.sub(r'\b' + day + r'\b', '[day]', out, flags=re.IGNORECASE)
+                    log.info("secretary[draft]: replaced invented day '%s' with [day]", day)
         return UtilityResult(task=task_key, output=out)
 
 

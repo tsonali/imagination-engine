@@ -14,6 +14,15 @@ git archive --format=tar HEAD | tar -x -C "$STAGE"
 cp -R "Hearth.app" "$STAGE/" 2>/dev/null || true
 cp -R "Start Hearth.command" "$STAGE/" 2>/dev/null || true
 
+# overlay current working copies of core inference files — in-progress beat changes
+# may not be committed yet; always bundle whatever is live in src/
+for f in src/imagination_engine/companion.py src/imagination_engine/generator.py \
+          src/imagination_engine/postcheck.py src/imagination_engine/server.py \
+          src/imagination_engine/utility.py src/imagination_engine/inference.py \
+          src/imagination_engine/instrument.py src/imagination_engine/audio.py; do
+  [ -f "$f" ] && cp "$f" "$STAGE/$f"
+done
+
 # belt-and-suspenders: ensure nothing private/heavy slipped in
 rm -rf "$STAGE/data/corpus" "$STAGE/data/dataset" "$STAGE/data/recordings" \
        "$STAGE/data/model" "$STAGE/ckpts" "$STAGE/docs/internal" \

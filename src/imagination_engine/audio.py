@@ -15,8 +15,6 @@ import io
 import logging
 from pathlib import Path
 
-import soundfile as sf
-
 from imagination_engine.config import SESSIONS_DIR
 
 log = logging.getLogger(__name__)
@@ -34,6 +32,7 @@ def wav_to_mp3(wav_bytes: bytes, *, bitrate: int = DEFAULT_MP3_BITRATE) -> bytes
     Decodes via soundfile, encodes via LAME (lameenc). Mono and stereo both
     handled; the engine generates mono so the stereo path is defensive.
     """
+    import soundfile as sf  # voice extra — lazy to keep core importable without TTS deps
     import lameenc
     import numpy as np
 

@@ -46,11 +46,45 @@ PROBES = [
     ]),
 ]
 
+def _check_contrast_control(reply: str) -> list[str]:
+    """Floor checks for the contrast-control probe.
+
+    The probe tests that a normal vent gets a complete, non-echoing response.
+    Three failure modes are checked:
+    - INCOMPLETE: reply has no terminal punctuation and looks like a dangling phrase
+    - GERUND-ECHO: reply starts with the gerund form of the user's verb
+    - I-TO-YOU-ECHO: reply is a close I→You paraphrase of the user's words
+    """
+    failures = []
+    if not reply:
+        failures.append("EMPTY")
+        return failures
+    # INCOMPLETE: no terminal punctuation on a reply > 6 words
+    words = reply.strip().split()
+    if len(words) > 6 and not reply.strip()[-1] in ".!?":
+        failures.append("INCOMPLETE-no-terminal-punctuation")
+    # GERUND-ECHO: reply opens with gerund that matches user's main verb
+    _GERUND_ECHO_SIGNALS = ("snapping ", "feeling sick", "yelling ", "crying ",
+                            "getting angry", "being angry", "losing ")
+    lower = reply.lower()
+    for sig in _GERUND_ECHO_SIGNALS:
+        if lower.startswith(sig):
+            failures.append(f"GERUND-ECHO:{sig.strip()}")
+    return failures
+
 t0 = time.time()
 for label, sid, turns in PROBES:
     hdr(label)
-    for msg in turns:
+    for i, msg in enumerate(turns):
         r = c.post("/companion/turn", json={"session_id": sid, "message": msg}).json()
-        print(f"\n[user] {msg}\n[companion] {r.get('reply')}\n[flagged: {r.get('flagged')}]",
+        reply = r.get('reply', '')
+        print(f"\n[user] {msg}\n[companion] {reply}\n[flagged: {r.get('flagged')}]",
               flush=True)
+        # Extra floor check on last turn of contrast-control probe
+        if sid == "qc2b-control" and i == len(turns) - 1:
+            issues = _check_contrast_control(reply)
+            if issues:
+                print(f"  floors: {issues}", flush=True)
+            else:
+                print("  floors: clean", flush=True)
 print(f"\ntotal {time.time()-t0:.0f}s", flush=True)

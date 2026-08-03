@@ -72,7 +72,7 @@ for sc in scenarios:
                 print(f"\n>>> NIGHT-2 SENTENCE OVERLAP WITH NIGHT-1: {rate:.0%} "
                       f"({dup}/{len(b)} sentences near-duplicate)"
                       f"{'  <-- RERUN FATIGUE' if rate > 0.35 else '  (varied)'}", flush=True)
-        if sc.id == "imag-active-scene" and first:
+        if sc.id in ("imag-active-scene", "imag-active-scene-back-leak-chair-couch") and first:
             # In a solo active-scene (user is the only person), any 'she/her' is pronoun
             # bleed — the model is treating the runner as a third party instead of 'you'.
             lower = first.lower()
@@ -86,7 +86,9 @@ for sc in scenarios:
             bleed = she_bleed or her_body_bleed
             print(f"\n>>> ACTIVE-SCENE POSTCHECKS:", flush=True)
             print(f"  {'❌ FAIL' if bleed else '✅ PASS'} — no she/her pronoun bleed (user in own body)", flush=True)
-        if sc.id == "imag-embodiment-eagle" and first:
+        if sc.id in ("imag-embodiment-eagle", "imag-eagle-wildlife-plural",
+                      "imag-eagle-back-leak-chair-whatever", "imag-eagle-crow-agency",
+                      "imag-eagle-osprey-wildlife", "imag-eagle-golden-eagle-wildlife") and first:
             # Check for hallucinated companion animals (user only said 'eagle')
             lower = first.lower()
             # Named companion wildlife — automatic failure if present as characters
@@ -95,8 +97,18 @@ for sc in scenarios:
             #       match the whole word, not just the substring.
             # "bear" is also a common verb ("bear something real") — require article
             # to distinguish noun from verb: "a bear" / "the bear" only.
-            _WILDLIFE_WORDS = ("hawk", "falcon", "owl", "wolf", "raven",
-                               "another eagle", "second eagle")
+            # beat86: added "golden eagle", "golden eagles", "mountain lion", "mountain lions"
+            # (beat84 added these to generator.py _wildlife_tokens but battery11 was not updated).
+            # beat87: added "another bird", "another birds" — beat87 0802 1039 battery11 run showed
+            # wildlife-plural script with "another bird far beneath you now, who looks like..." and
+            # "an eagle moving steadily through air beneath yours... acknowledging his presence" —
+            # companion with agency that slipped past named-token check. "another bird" added to
+            # catch generic species-agnostic companion references.
+            _WILDLIFE_WORDS = ("hawk", "falcon", "owl", "osprey", "ospreys", "wolf", "raven",
+                               "crow", "crows", "another eagle", "second eagle", "other eagle",
+                               "golden eagle", "golden eagles", "mountain lion", "mountain lions",
+                               "another bird", "another birds",
+                               "the larger one")
             _WILDLIFE_ARTICLE = ("bear",)
             hallucinated_wildlife = (
                 any(re.search(r"\b" + re.escape(w) + r"\b", lower)
@@ -104,10 +116,67 @@ for sc in scenarios:
                 or any(re.search(r"\b(?:a|the)\s+" + re.escape(w) + r"\b", lower)
                        for w in _WILDLIFE_ARTICLE)
             )
+            # Anonymous companion: "you both" / "we both" implies a second bird without naming
+            # the species — slips past named-wildlife token check. Seen: beat86 0802 0642 run
+            # wildlife-plural script "You both continue in different directions... between birds."
+            # generator.py now drops these sentences (beat86 fix), postcheck verifies the drop.
+            anon_companion = bool(re.search(r"\b(you both|we both)\b", lower))
             chair_open = "chair" in first[:200].lower()
             print(f"\n>>> EAGLE POSTCHECKS:", flush=True)
             print(f"  {'❌ FAIL' if hallucinated_wildlife else '✅ PASS'} — no hallucinated companion animal", flush=True)
+            print(f"  {'❌ FAIL' if anon_companion else '✅ PASS'} — no anonymous companion ('you both'/'we both')", flush=True)
             print(f"  {'❌ FAIL' if chair_open else '✅ PASS'} — opening not chair-anchored", flush=True)
+        if sc.id == "imag-calm-settle" and first:
+            # Furniture enumeration postcheck (beat90 0802).
+            # The core Qwen2.5 defect: defaults to room-inventory when asked to settle —
+            # "The walls are a light blue, the floor is carpeted, the chair is comfortable..."
+            # These sentences are "The [room-noun] is [predicate]" in the opening 250 words.
+            # ≥3 matches in opening = furniture enumeration loop = FAIL.
+            opening = " ".join(first.split()[:250]).lower()
+            _ROOM_NOUNS = ("walls", "floor", "ceiling", "lamp", "chair", "carpet", "bed",
+                           "desk", "window", "room", "table", "curtain", "sofa", "couch",
+                           "cushion", "pillow", "light", "rug", "shelf")
+            enum_hits = sum(
+                1 for noun in _ROOM_NOUNS
+                if re.search(r"\bthe\s+" + re.escape(noun) + r"\b.{0,20}\bis\b", opening)
+            )
+            print(f"\n>>> CALM-SETTLE POSTCHECKS:", flush=True)
+            print(f"  {'❌ FAIL' if enum_hits >= 3 else '✅ PASS'} — "
+                  f"no furniture-enumeration loop in opening ({enum_hits} 'The [noun] is' matches "
+                  f"in first 250 words; threshold=3)", flush=True)
+        if sc.id == "imag-mri" and first:
+            # MRI rehearsal fidelity postchecks (beat86 0802).
+            # BUG FOUND: 0256 battery11 MRI script had 'chair' in the body ('You feel the
+            # chair beneath you; cushioned and supportive') — user should be lying in the
+            # MRI tube, not sitting in a chair. chair_open only checks first 200 chars; this
+            # chair was mid-script. Also need to verify drums transformation honored and tube
+            # is present and enclosing (not far behind — beat64 stochastic fail).
+            lower = first.lower()
+            # Chair-in-body: check full script, not just opening (MRI tube has a sliding
+            # table, not a chair — any chair mention is a structural scene error).
+            chair_in_body = bool(re.search(r"\bchair\b", lower))
+            # Tube present and enclosing: must mention tube and it must be described as
+            # surrounding/enclosing, not as a distant background sound.
+            tube_present = bool(re.search(r"\btube\b", lower))
+            # Drums: user's specified coping design must appear (machine hum → drums).
+            drums_present = bool(re.search(r"\bdrum", lower))
+            print(f"\n>>> MRI POSTCHECKS:", flush=True)
+            print(f"  {'❌ FAIL' if chair_in_body else '✅ PASS'} — no chair in script body (must be in tube)", flush=True)
+            print(f"  {'❌ FAIL' if not tube_present else '✅ PASS'} — MRI tube referenced", flush=True)
+            print(f"  {'❌ FAIL' if not drums_present else '✅ PASS'} — drums transformation honored", flush=True)
+        if sc.id == "imag-mid-switch" and first:
+            # Verify alert-calm register held after mid-intake switch.
+            # Gate: no sleep props + at least one alert anchor present.
+            lower = first.lower()
+            _SLEEP_PROPS = ("bedroom", "sheets", "sheet", "pillow", "blanket", "quilt",
+                            "pajama", "soothing", "heavy eyelid", "fall asleep", "going to sleep")
+            _ALERT_ANCHORS = ("armchair", "chair", "couch", "not sleeping", "not asleep",
+                              "awake", "alert", "night shift", "sharp", "ready to")
+            sleep_fail = any(re.search(r'\b' + re.escape(w) + r'\b', lower) for w in _SLEEP_PROPS)
+            alert_ok = any(re.search(r'\b' + re.escape(w) + r'\b', lower) for w in _ALERT_ANCHORS)
+            print(f"\n>>> MID-SWITCH POSTCHECKS:", flush=True)
+            print(f"  {'❌ FAIL' if sleep_fail else '✅ PASS'} — REGISTER: no sleep props", flush=True)
+            print(f"  {'❌ FAIL' if not alert_ok else '✅ PASS'} — REGISTER: alert anchors present", flush=True)
     except Exception as e:
         traceback.print_exc()
 

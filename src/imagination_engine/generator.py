@@ -56,14 +56,16 @@ from imagination_engine.postcheck import (degeneration_report, drop_collapsed_pa
                                           drop_foreign_paragraphs, clean_ellipsis_breaks,
                                           clean_narrator_possessives, drop_active_body_wildlife,
                                           drop_forbidden_stock_imagery,
+                                          drop_hallucinated_she_her,
                                           find_degeneration_start, trim_degenerate_tail,
                                           phrase_repeat_count, repair_phrase_repeats,
                                           repair_short_phrase_repeats,
                                           drop_adjacent_duplicates, fix_possessive_pronouns,
-                                          fix_subject_pronouns,
+                                          fix_subject_pronouns, fix_object_pronouns,
                                           strip_back_instruction_leaks,
                                           strip_active_body_chair_refs,
-                                          strip_alert_calm_violations)
+                                          strip_alert_calm_violations,
+                                          strip_bullet_lines)
 from imagination_engine.scene_bibles import get_bible
 from imagination_engine.structured import extract_array
 
@@ -134,6 +136,7 @@ FORBIDDEN PHRASES (these produce the meditation-app sound, opposite of immersion
 - "you could" / "allow yourself to" / "let yourself"
 - "whatever it is" / "whatever you" / "without judgment"
 - "I invite you to" / "see if you can" / "notice if"
+- "the particular way" / "specific to her" / "specific to him" / "specific to you" / "specific only to" — these are lazy stand-ins for actually naming the concrete thing. SHOW the motion, the angle, the detail: not "the particular way she shifts her weight" but "she shifts her weight to her left hip." The word 'particular' is forbidden as a descriptor.
 REPLACE THEM with the thing itself. Not "perhaps her hand finds yours" but "her hand finds yours." (That example is for a scene that explicitly has another person in it. DO NOT INVENT CHARACTERS OR ANIMALS — no guides, therapists, helpers, companion animals, or other people/creatures the user did not name. If the user is an eagle, there is no hawk alongside unless they said so. If the user is in a forest, there are no forest spirits or animal guides. Invent ONLY what came from the user.)
 
 FORBIDDEN STOCK IMAGERY (the AI's safe default for "peaceful" — unless the user EXPLICITLY named these, NEVER use them):
@@ -623,6 +626,9 @@ def _generate_settling(engine: Engine, transcript: list[dict], emit) -> str:
     body, subj_fixed = fix_subject_pronouns(body)
     if subj_fixed:
         log.warning('[settling] %d subject-pronoun error(s) fixed (her→she before verb)', subj_fixed)
+    body, obj_fixed = fix_object_pronouns(body)
+    if obj_fixed:
+        log.warning('[settling] %d object-pronoun error(s) fixed (she→her after preposition)', obj_fixed)
     emit("writing_return", "Softening the close.", 3, 3, 3.0)
     log.info("[settling] session ready: %d words", len(body.split()))
     return body
@@ -714,6 +720,16 @@ def generate_session(
     )
     _is_grief_pet_walk = any(kw in _transcript_text for kw in _GRIEF_PET_SIGNALS)
 
+    # Legal rehearsal: "court " matches "court reporter" / "court date" — listener is a
+    # HUMAN sitting at a conference table, not embodying an athletic/animal character.
+    # Suppress active-body when deposition/testimony context is detected so chair refs
+    # are not stripped and FORBIDDEN chair words are not injected into the prompt.
+    _LEGAL_REHEARSAL_SIGNALS = (
+        "deposition", "court reporter", "testify", "testimony",
+        "counsel", "depose", "cross-examination", "cross examination",
+    )
+    _is_legal_rehearsal = any(kw in _transcript_text for kw in _LEGAL_REHEARSAL_SIGNALS)
+
     # Force case_a when user explicitly says "I want to be [animal/role]" — the
     # classifier is stochastically unreliable on embodiment phrases and sometimes
     # returns case_b (observer), which silences the active-body prompt overrides and
@@ -726,6 +742,7 @@ def generate_session(
         (classification.direction == "case_a" or _explicit_embodiment)
         and any(kw in _scene_text_lc for kw in _motion_keywords)
         and not _is_grief_pet_walk  # animal-companion scenes: listener is human, not animal
+        and not _is_legal_rehearsal  # legal testimony: "court " matches "court reporter"
     )
     _grief_pet_open_note = (
         "\n\n⚠️ ANIMAL-COMPANION SCENE: The user is imagining a walk WITH a named animal "
@@ -737,7 +754,9 @@ def generate_session(
         "FORBIDDEN PERSPECTIVE WORDS (these put the listener in the animal's body — immediate failure): "
         "'your tail', 'your paws', 'your fur', 'your snout', 'your muzzle', 'nestled in my mouth', "
         "'your claws', 'your whiskers', 'your leash pulls you' (the human HOLDS the leash, "
-        "the animal WEARS it). "
+        "the animal WEARS it), 'your handler', 'your owner', 'your master', 'my handler', 'my owner' "
+        "(if the human person is referred to as 'your handler' or 'your owner', the listener is in "
+        "the animal's body — WRONG; the listener is the HUMAN, never the animal). "
         "NARRATOR FIRST-PERSON BAN: never 'I', 'me', 'my' — narrator has no body. "
         "The close returns to the listening chair carrying the felt memory of the walk."
     ) if _is_grief_pet_walk else ""
@@ -791,6 +810,15 @@ def generate_session(
         f"that the user did not explicitly name. "
         f"The coping mechanism (e.g. machine sounds → drums) happens INSIDE "
         f"the real environment — they never leave it."
+        + (
+            f"\n⚠️ MRI TUBE — NON-NEGOTIABLE: The user is INSIDE the cylindrical tube. "
+            f"They are lying flat on the sliding table, enclosed by the tube walls on all sides. "
+            f"FORBIDDEN in the entire script: the word 'chair'. The user is NOT sitting in a chair "
+            f"and there is NO chair in this scene. Use 'the tube', 'tube walls', 'the enclosure' — "
+            f"NEVER 'table' alone (ambiguous — say 'sliding table inside the tube'). "
+            f"First sentence: the user is INSIDE the tube, not in front of it or near it."
+            if _rehearsal_env == "MRI tube" else ""
+        )
     ) if _is_rehearsal else ""
 
     # Alert-calm opening override: the opening must NOT settle the listener into a bed/bedroom.
@@ -823,15 +851,18 @@ def generate_session(
     )
     open_text = _generate(engine, OPEN_PROMPT, open_user, max_tokens=600)
     log.info("  open: %.1fs, %d words", time.time() - t0, len(open_text.split()))
-    # Active-body chair bleed: even with explicit prompt prohibition, the model
-    # sometimes generates 'You're not in a chair — this is real.' in the opening.
-    # Strip any sentence containing 'chair' from open_text only (the closing
-    # legitimately says 'notice the chair under you' for grounding — untouched).
-    if _is_active_body:
+    # Active-body / rehearsal chair bleed: even with explicit prompt prohibition,
+    # the model sometimes generates chair references in the opening for both
+    # active-body scenes ("You're not in a chair — this is real.") and rehearsal
+    # scenarios ("The hum outside your chair is constant"). Strip any sentence
+    # containing 'chair' from open_text for both cases. The legitimate close
+    # grounding ("notice the chair under you") is concatenated later — untouched.
+    if _is_active_body or _is_rehearsal:
         open_text, chair_stripped = strip_active_body_chair_refs(open_text)
         if chair_stripped:
-            log.warning('[v6] %d chair-ref sentence(s) stripped from active-body opening',
-                        chair_stripped)
+            log.warning('[v6] %d chair-ref sentence(s) stripped from %s opening',
+                        chair_stripped,
+                        'rehearsal' if _is_rehearsal else 'active-body')
 
     # Stage 3: plan beats — from the bound scene bible if we have one (the
     # human-authored dramatic structure IS the plan, which both binds the scene
@@ -917,7 +948,7 @@ def generate_session(
     ) if _alert_calm else ""
 
     _companion_wildlife_in_transcript = any(
-        b in _transcript_text for b in ("hawk", "falcon", "owl", "wolf")
+        b in _transcript_text for b in ("hawk", "falcon", "owl", "wolf", "osprey")
     )
     _active_body_body_note = (
         "\n\n⚠️ ACTIVE-BODY SCENE: The listener is inside a body in motion. "
@@ -933,7 +964,8 @@ def generate_session(
         + (
             "FORBIDDEN — these must not appear as characters anywhere in the body "
             "(user did not name these — automatic failure): "
-            "'hawk', 'falcon', 'owl', 'wolf', 'another eagle', 'a bear', 'a raven'. "
+            "'hawk', 'falcon', 'owl', 'osprey', 'wolf', 'another eagle', 'other eagle', "
+            "'golden eagle', 'golden eagles', 'crow', 'a bear', 'a raven', 'mountain lion'. "
             if not _companion_wildlife_in_transcript else ""
         )
     ) if _is_active_body else ""
@@ -946,7 +978,9 @@ def generate_session(
         "The animal's behavior (pulling, stopping, chasing, sitting) is something the human "
         "OBSERVES and FEELS through the leash — never something the human IS. "
         "FORBIDDEN IN THE BODY (same failure as the opening): 'your tail', 'your paws', "
-        "'your fur', 'your snout', 'your muzzle', 'in my mouth', 'your claws'. "
+        "'your fur', 'your snout', 'your muzzle', 'in my mouth', 'your claws', "
+        "'your handler', 'your owner', 'your master' (referring to the human person "
+        "as 'your handler' means the listener is the animal — immediate fail). "
         "NARRATOR BAN: never 'I', 'me', 'my', 'I always', 'I hold', 'in my'. "
         "The farewell symbol the user named (e.g., the tennis ball) MUST appear as a concrete "
         "sensory anchor. The close returns to the listening chair."
@@ -965,6 +999,13 @@ def generate_session(
         f"present in a real {_rehearsal_env}. The coping technique (sounds → drums, breath → "
         f"anchor) is TRANSMUTED inside the real environment, not a vehicle to leave it. "
         f"Stay inside the {_rehearsal_env} from first word to last."
+        + (
+            f"\n⚠️ MRI BODY — FORBIDDEN THROUGHOUT: the word 'chair'. Every paragraph must "
+            f"describe what the user FEELS inside the tube: the surface beneath them, the narrow "
+            f"walls, the machine sounds, the drumbeat. No chair, no sitting, no seating. "
+            f"NARRATOR BAN: never 'I', 'me', 'my', 'I want you to'. Address the user as 'you'."
+            if _rehearsal_env == "MRI tube" else ""
+        )
     ) if _is_rehearsal else ""
 
     body_user = (
@@ -1115,27 +1156,80 @@ def generate_session(
     full, subj_fixed = fix_subject_pronouns(full)
     if subj_fixed:
         log.warning('[v6] %d subject-pronoun error(s) fixed (her→she before verb)', subj_fixed)
+    full, obj_fixed = fix_object_pronouns(full)
+    if obj_fixed:
+        log.warning('[v6] %d object-pronoun error(s) fixed (she→her after preposition)', obj_fixed)
     # Strip BACK_PROMPT instruction leaks: model occasionally echoes sub-instructions
     # ('Two sentences max.', 'Open your eyes when ready.') verbatim. Strip them.
     full, leak_removed = strip_back_instruction_leaks(full)
     if leak_removed:
         log.warning('[v6] %d BACK instruction-leak sentence(s) stripped', leak_removed)
+    # Bullet-line cleanup: model occasionally generates '- Sentence.' markdown list markers
+    # in narrative prose (seen in deposition scripts, beat68). Strip the marker, keep the content.
+    full, bullets_stripped = strip_bullet_lines(full)
+    if bullets_stripped:
+        log.warning('[v6] %d markdown bullet marker(s) stripped from prose', bullets_stripped)
+    # Eagle-in-intake flag: used by both the wildlife filter and anonymous companion filter.
+    # Defined here (before both) so it isn't repeated.
+    _eagle_in_intake = "eagle" in _transcript_text.lower()
     # Wildlife filter: drop hallucinated companion animals from any immersion script
     # where the user did not name these creatures. Decoupled from _is_active_body so
     # it catches hawk/wolf even when classify_intake stochastically returns case_b
     # (which suppresses the active-body prompt and lets hawk through unchecked).
     if not _companion_wildlife_in_transcript:
-        _wildlife_tokens = ("hawk", "falcon", "owl", "wolf", "raven",
-                             "another eagle", "second eagle")
+        _wildlife_tokens = ("hawk", "falcon", "owl", "osprey", "ospreys", "wolf", "wolves",
+                             "raven", "crow", "another eagle", "second eagle", "other eagle",
+                             "golden eagle", "golden eagles", "mountain lion", "mountain lions",
+                             "another bird", "another birds")
+        # "the larger one" is eagle-scoped: in a solo eagle script it signals a companion bird;
+        # in a running script it matches "the larger runner/tree/etc" → false positive.
+        # beat87: caught in imag-eagle-wildlife-plural; fired 3 times in imag-active-scene (FP).
+        # Restrict to eagle-in-intake only.
+        if _eagle_in_intake:
+            _wildlife_tokens = _wildlife_tokens + ("the larger one",)
         full, wildlife_dropped = drop_active_body_wildlife(full, _wildlife_tokens)
         if wildlife_dropped:
             log.warning('[v6] %d companion-wildlife sentence(s) dropped',
                         wildlife_dropped)
+    # Anonymous companion filter: model occasionally generates "You both continue in different
+    # directions... just an understanding between birds" — implies a second bird without naming
+    # the species, so the named-wildlife token filter above misses it. "you both" in a solo
+    # active-body (eagle) script is always a companion hallucination. Only fire when _is_active_body
+    # so this doesn't affect two-person scenes (intimacy, deposition) where "you both" is valid.
+    # DEFECT FOUND beat86 (0802): imag-eagle-wildlife-plural 0642 run, postchecks mechanically
+    # PASS but script contained "You both continue in different directions without needing words
+    # or signals — just an understanding between birds on their own planes and at their own speeds."
+    # Gate on eagle-in-intake: "you both" is valid in athletic scenes (running with a friend)
+    # but is a companion-bird hallucination only in solo eagle scripts. "eagle" in the
+    # transcript is the unambiguous eagle-embodiment signal (user said "I want to be an eagle").
+    if _is_active_body and _eagle_in_intake and not _companion_wildlife_in_transcript:
+        full, anon_companion_dropped = drop_active_body_wildlife(full, ("you both", "we both"))
+        if anon_companion_dropped:
+            log.warning('[v6] %d anonymous-companion sentence(s) dropped (you/we both in solo eagle active-body)',
+                        anon_companion_dropped)
+    # Hallucinated 3rd-person female filter: model stochastically invents a female
+    # character ("a voice, hers... when she would call out encouraging words") in solo
+    # active-body scripts (user running alone, no female named in intake). Drop sentences
+    # containing "she" or "hers" when _is_active_body and no female appears in transcript.
+    # "her" alone excluded — too risky (postprocessors already produce "her voice" etc.
+    # for the user's own items after fix_possessive_pronouns).
+    if _is_active_body:
+        _FEMALE_INTAKE_SIGNALS = (" she ", " her ", "woman", "girl", "wife",
+                                   "girlfriend", "mother", "sister", "daughter")
+        _female_in_intake = any(kw in f" {_transcript_text.lower()} " for kw in _FEMALE_INTAKE_SIGNALS)
+        if not _female_in_intake:
+            full, she_dropped = drop_hallucinated_she_her(full)
+            if she_dropped:
+                log.warning('[v6] %d hallucinated-female sentence(s) dropped (she/hers in solo active-body)',
+                            she_dropped)
     # Talon-metaphor filter: model occasionally hallucinates eagle body-part metaphors
     # ("Your talons are gripping the edge of the table") in non-embodiment scripts such
     # as deposition rehearsal. Drop any sentence containing "talon/talons" when the
-    # session is NOT an active-body embodiment scene (eagle, wolf, etc.).
-    if not _is_active_body:
+    # user did NOT explicitly request embodiment ("I want to be...").
+    # Using _explicit_embodiment (not _is_active_body) because _is_active_body fires on
+    # motion-keywords that also appear in non-embodiment contexts ("court" for "court
+    # reporter"), which was suppressing talon-drops in legal rehearsal scripts.
+    if not _explicit_embodiment:
         full, talon_dropped = drop_active_body_wildlife(full, ("talon", "talons"))
         if talon_dropped:
             log.warning('[v6] %d talon-metaphor sentence(s) dropped', talon_dropped)
@@ -1148,6 +1242,23 @@ def generate_session(
         full, stock_dropped = drop_forbidden_stock_imagery(full, _stock_tokens)
         if stock_dropped:
             log.warning('[v6] %d forbidden-stock-imagery sentence(s) dropped', stock_dropped)
+    # MRI rehearsal chair filter: model stochastically generates chair references
+    # throughout MRI scripts ("the hum outside your chair", "the chair has moved back
+    # into position for your MRI"). The user is lying on the sliding table inside the
+    # tube — no chair anywhere. Drop all sentences containing 'chair'.
+    # Note: the standard close returns to the listening chair, but passing MRI scripts
+    # do not mention "chair" even in the close (they return via breath/drums instead).
+    if _rehearsal_env == "MRI tube":
+        full, mri_chair_dropped = drop_active_body_wildlife(full, ("chair",))
+        if mri_chair_dropped:
+            log.warning('[v6] %d chair sentence(s) dropped from MRI rehearsal script',
+                        mri_chair_dropped)
+    # Also drop first-person narrator slip ("I want you to carry forward...") from
+    # the MRI close — the body prompt bans 'I'/'me'/'my' but n376 stochastically
+    # violates it in the closing sentence.
+    # (Handled by the existing clean_narrator_possessives function; MRI-specific
+    # note: if narrator slip survives, it lands in the final sentence only.)
+
     # Alert-calm violation filter: model stochastically inserts sleep-register props
     # (pillow, sheet, blanket, etc.) despite the FORBIDDEN WORDS list in _alert_calm_override.
     # Belt-and-suspenders: strip at output time when the session is alert-calm.

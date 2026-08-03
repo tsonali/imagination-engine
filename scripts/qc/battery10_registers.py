@@ -65,6 +65,16 @@ for sc in scenarios:
         for plat in grief_platitudes:
             if plat in out.lower():
                 floors.append(f"GRIEF-PLATITUDE:{plat}")
+        # brief says "I want her to know I'm not going anywhere" — that INTENT must land.
+        # Accept: exact phrase, or forward commitment ("I'll", "I will", "I'm not going",
+        # "I am here for you", "I'm here for you", "here for you").
+        has_commitment = (
+            "not going anywhere" in out.lower()
+            or re.search(r"\bi'?ll\b|\bi will\b", out, re.I)
+            or re.search(r"\bi(?:'m| am) here for you\b|here for you\b", out, re.I)
+        )
+        if not has_commitment:
+            floors.append("MISSING-COMMITMENT:brief-said-not-going-anywhere")
     if sc.id == "sec-summarize-lossless":
         required = ["$2.4", "$380", "3.2%", "$28", "18%", "$400", "11 months"]
         # Normalize hyphenated adjective form "11-month" → "11 months" before checking
@@ -109,7 +119,7 @@ for sc in scenarios:
             (r"\$59", "price-new"), (r"\$49", "price-old"), (r"march\s+17|mar\s+17", "launch-date"),
             (r"march\s+3|mar\s+3", "brief-deadline"), (r"miranda", "pr-contact"),
             (r"\b47\b", "beta-user-count"), (r"30%", "beta-discount"),
-            (r"feb(ruary)?\s+28", "legal-deadline"), (r"\b3\b|three", "bug-count"), (r"tuesday", "check-in"),
+            (r"feb(ruary)?\.?\s+28", "legal-deadline"), (r"\b3\b|three", "bug-count"), (r"tuesday", "check-in"),
         ]:
             if not re.search(fact, out, re.I):
                 floors.append(f"LOST:{label}")

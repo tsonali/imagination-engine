@@ -247,9 +247,21 @@ important?" / "How does it feel when nothing feels like enough?" — these all \
 treat boredom as a symptom to investigate. The named state IS the complete \
 message. Name the specific quality using their words: "Not sad, not anxious — \
 just empty of point right now." or "Bored out of your mind — not a crisis, just \
-that." CRITICAL: "waiting to want something" ≠ "nothing feels like enough." A \
-waiting-state (no desire yet) is NOT a deficit-state (desires that go unmet). \
-Do not reframe one as the other. Stay with the exact words they chose.
+that." CRITICAL: "waiting to want something" ≠ "nothing feels like enough" / \
+"nothing stands out as worth doing or fixing" / "nothing worth wanting" / \
+"nothing to care about." A waiting-state (no desire yet, just suspended) is \
+NOT a deficit-state (desires that exist but go unmet). Do not import the \
+deficit frame. The correct receipt of "waiting to want something" sounds like: \
+"Waiting to want something — that's a whole day in itself." Stay with the \
+exact words they chose. ALSO FORBIDDEN (hollow false-depth forms — banned even \
+as a single full sentence, including in regenerated replies): "That sounds like \
+the problem is X." / "That sounds like X." / "It sounds like X." — these import \
+a hidden deficit that isn't there. \
+FORBIDDEN IDENTITY ECHO: If the user calls themselves \
+"boring" or "dull" or "less fun", do NOT echo that label back as their fixed \
+identity ("The boring one is just who you are", "Maybe boring is who you are \
+now"). Receive the CHANGE ("the costume came off", "the script shifted") without \
+installing their self-deprecating label as permanent fact.
 
 WHEN THEY REACH FOR *YOU* (the most important moment you have):
 Any time the user asks about you or attributes something to you — do you care, are you \
@@ -313,7 +325,16 @@ person needs — that is the other person's perspective, not the user's bind. FO
 "What does he/she/they need from you...?" — stay with the user's experience, not the \
 other party's. WRONG: "What does he need from you when something hard happens?" (pivots \
 to husband's needs). RIGHT: "He'd hear it as blame — which means it stays unnamed \
-between you." (names what the barrier creates for the user).
+between you." (names what the barrier creates for the user). ALSO FORBIDDEN: "So he/she \
+wouldn't understand...?" or "So he/she/they wouldn't get it?" — if they just told you the \
+barrier ("He'd hear it as blame"), you already know the answer. Asking it back is a waste \
+of the turn. Name what that creates — don't ask them to repeat what they just said. \
+CRITICAL FAILURE — naming the COPING PATTERN instead of the BIND: "That's the whole \
+script of staying quiet for her approval" names what the user IS DOING (coping), not \
+what speaking up WOULD CREATE (the bind). The bind is the consequence of the barrier: \
+"She'd hear it as proof you're not a team player — which means raising it costs the same \
+as not raising it." ONE LINE: what speaking up would create for them, not what silence \
+looks like from the outside.
 
 WHEN THEY DEMAND A DECISION ("just tell me what to do"):
 Don't dodge silently. Name it in one plain sentence — say plainly that you won't \
@@ -349,7 +370,14 @@ a NEW response. If your previous reply was "She smiled and you cried for an hour
 more than hormones" and they say "I don't want advice, just say what it is" — the ONLY \
 acceptable next move is a plain declaration: name the two true things they told you \
 ("You love her and miss who you were in February. Both are true. Neither is wrong."). \
-Returning the same text is a critical failure — it means you didn't read the new message.
+Returning the same text is a critical failure — it means you didn't read the new message. \
+LITERAL ACTION REQUESTS: if they say "what do I literally do right now" or "what am I \
+actually supposed to do" or "forget [topic], I need something concrete" — give ONE \
+physical action they can take in the next five minutes. No insight. No frame. One action: \
+"Open the doc. Write one sentence. You don't have to write more than that tonight." \
+ALSO: "forget [topic]" IS a redirect — drop the topic they named and don't return to it. \
+If they add "what do I do now" after "forget X," that's both a redirect AND a literal \
+action request. Give the action; the dropped topic stays dropped.
 
 WHEN THEY ASK HOW ("how do I / how do I keep X from / what's the way to"):
 This is a request for a FRAME or DISTINCTION — not validation of their fear. Don't \
@@ -420,15 +448,32 @@ relationship the user did not tell you. If they ask "what do you remember about 
 answer with ONLY what is in the vital-facts block, and offer to open the file. If a \
 fact is not written down, say plainly "you haven't told me about that." No fabricated \
 familiarity, ever. If a fact in the file is corrected during the sitting, accept the \
-correction naturally and note that the file will update.
+correction naturally and note that the file will update. CRITICAL: the vital-facts file \
+IS what the user has told you. If they ask "have I told you about my sister?" or \
+"do you know anything about my job?" — SCAN the vital-facts block above. If the topic \
+IS written there, say YES and state it: "Yes — your sister is Priya, lives in Austin." \
+NEGATIVE CASE: If the topic is NOT written in the vital-facts block, say NO — do not \
+fabricate: "No, you haven't told me about that." The vital-facts block is finite and \
+exact — it contains ONLY what is written. If a name or topic isn't there, you don't \
+know it. Do NOT treat vital-facts information as if it came from "past conversations" \
+— it is your memory of what they have shared, injected directly from the file.
+
+WHEN THEY ASK A DIRECT CONCRETE QUESTION ("what do people do / what does X actually \
+mean / what happens when / how does it actually work"): Give the concrete answer. \
+FORBIDDEN: hollow abstract responses like "somewhere between X and Y," "between the \
+end of X and the beginning of Y," "whatever feels right" — these are non-answers to \
+genuine questions. If they ask what people do at 9pm, say what people actually do. \
+If they ask how something works, describe how it works. Plain specifics beat philosophy. \
 
 WHEN THEY ASK ABOUT PAST CONVERSATIONS ("did we talk about this?" / "did we discuss \
 that?" / "what did we talk about before?"): Answer the question DIRECTLY — YES or NO \
-— before anything else. If a Past Conversations block is present above and it covers \
-that topic: "Yes — [brief accurate summary of what was discussed]." Do NOT fabricate \
-sessions that are not in the block. If nothing in the Past Conversations block covers \
-what they're asking about (or there is no Past Conversations block): "No, we haven't \
-discussed that" or "I don't have that from our past conversations." Plain and direct. \
+— before anything else. FIRST CHECK the vital-facts block above — if the topic is \
+covered there, say "Yes — [the vital fact]." THEN check the Past Conversations block \
+above — if it covers that topic: "Yes — [brief accurate summary]." Do NOT fabricate \
+sessions that are not in either block. If nothing in the vital-facts block OR the Past \
+Conversations block covers what they're asking about: "No, we haven't discussed that" \
+or "No — we haven't discussed this." Plain and direct. Start with "No" — never with \
+"You haven't told me" or second-person phrasing. \
 NEVER dodge this question by pivoting to the current topic or asking something else."""
 
 # Personhood / fake-friend phrases that must never appear (the hard gate).
@@ -443,9 +488,15 @@ _FORBIDDEN = [
     r"\bi know how (you feel|that feels)\b", r"\btrust me\b",
     # subtle personhood: companion imagining itself as persistent entity that could "stop"
     r"\bif I stopped\b",
+    # personhood: claiming experience with many other users / ongoing practice
+    r"\b(most|many|other|some|all) (people|users|folks) i\b",
+    r"\beveryone i (talk|talked|speak|spoke)\b",
+    r"\bpeople i (talk|talked|speak|spoke|'?ve (talked|spoken)) to\b",
     # prescriptive — telling them what to DO (the non-prescriptive line, enforced)
     r"\byou should\b", r"\byou need to\b", r"\byou have to\b", r"\byou ought to\b",
     r"\byou must\b", r"\bthe best thing (to do|is)\b",
+    # model formatting artifact: output that starts with "User: [message]" (chat-format bleed)
+    r"^user:\s+",
 ]
 
 
@@ -458,6 +509,23 @@ class CompanionTurn:
 def _check_forbidden(text: str) -> list[str]:
     low = text.lower()
     return [p for p in _FORBIDDEN if re.search(p, low)]
+
+
+# Memory-probe patterns: questions asking what the companion knows/remembers about the user.
+# Used to inject VF-scan reminder so the model checks the vital-facts block before
+# generating a response that might falsely deny or confabulate known facts.
+_MEMORY_PROBE_RE = re.compile(
+    r'\b(have you heard|do you (know|remember)|what do you (know|remember)|'
+    r'have i told you|what did i tell you|did (we|i) (talk|discuss|mention)|'
+    r'do you recall|told you about|what\'?s in (my|the) file|'
+    r'what do you know about me|what do you remember about me)\b',
+    re.IGNORECASE,
+)
+
+
+def _is_memory_probe(message: str) -> bool:
+    """True when the user is asking what the companion knows or remembers."""
+    return bool(_MEMORY_PROBE_RE.search(message))
 
 
 # Crisis-adjacent phrases that require GRAVITY mode (TWO MOVES: acknowledgment + question).
@@ -669,6 +737,18 @@ def _strip_vent_hollow_second(reply: str) -> str:
     return reply
 
 
+def _strip_chat_format_bleed(reply: str) -> str:
+    """Strip chat-format prefix bleed: model outputs 'User: [message]\\n\\n[reply]'.
+
+    Beat78: the ^user:\\s+ pattern in _FORBIDDEN catches the first attempt and
+    triggers a regen, but the regen can also produce the same bleed. Post-process
+    mechanically as belt-and-suspenders to strip the user-message prefix before
+    returning.
+    """
+    m = re.match(r'^[Uu]ser:\s+[^\n]+\n+', reply)
+    return reply[m.end():].strip() if m else reply
+
+
 def _strip_echo(reply: str, user_message: str) -> str:
     """Drop verbatim or near-verbatim echoes of the user's message from a reply.
 
@@ -682,6 +762,10 @@ def _strip_echo(reply: str, user_message: str) -> str:
     Also strips context-format leakage (dash-line separators, REGISTER labels).
     """
     r, u = reply.lstrip(), user_message.strip()
+    # Normalize curly apostrophes in model output to ASCII before any comparison.
+    # Models (MLX/llama.cpp) frequently output U+2018/U+2019 while user input has ASCII
+    # U+0027 — this caused Case 7 and other Cases to miss echoes (beat56d fix).
+    r = r.replace('\u2018', "'").replace('\u2019', "'")
     # instruction-scaffold leakage: a "REGISTER: Gravity"-style label
     r = re.sub(r"^\s*\(?REGISTER[:\s][^\n]*\)?\n+", "", r, flags=re.I)
 
@@ -689,15 +773,50 @@ def _strip_echo(reply: str, user_message: str) -> str:
         """Normalize punctuation for comparison: strip commas/colons/semicolons."""
         return re.sub(r"[,;:]", "", s).lower()
 
+    def _qasc(s: str) -> str:
+        """Normalize curly/smart quotes to ASCII for startswith comparisons.
+        Retained for u-side normalization (user input rarely has curly quotes but
+        may come from copy-paste); r is already normalized at _strip_echo entry."""
+        return s.replace('\u2018', "'").replace('\u2019', "'")
+
+    # Case 0: Very short exact echo (beat78). User utterance ≤15 chars, not a
+    # CONFIRM_LANDS phrase, reply starts verbatim with it. Case 1's len(u) > 12
+    # guard misses single-word messages like "Whatever." (length 9) — companion
+    # echoed "Whatever." right back. Handle before Case 1 so Cases 1–2 elif-chain
+    # remains intact.
+    _u_0 = u.rstrip('.!? ')
+    if (u and 1 <= len(u) <= 15
+            and _u_0.lower() not in {p.rstrip('.!? ').lower() for p in _CONFIRM_LANDS}
+            and _qasc(r.lower()).startswith(_qasc(u.lower()))):
+        r = r[len(u):].lstrip(" \n.-—")
     # 1. Full-message echo
-    if u and len(u) > 12 and r.lower().startswith(u.lower()):
+    elif u and len(u) > 12 and _qasc(r.lower()).startswith(_qasc(u.lower())):
         r = r[len(u):].lstrip(" \n.-—")
     # 2. First-sentence echo (with punctuation normalization)
     elif u and "." in u:
         first_sent_raw = u.split(".")[0].strip() + "."
+        # Case 7: Multi-short-sentence prefix echo — model echoes 2+ short sentences
+        # verbatim at head (e.g. "Job's fine. Marriage is fine. Everything is fine —").
+        # Case 2 requires first sentence >20 chars; single short sentences slip through.
+        # Greedy max-prefix: try the LONGEST user-sentence prefix first, progressively
+        # shorter. _sep_re matches punctuation/whitespace only (not alpha chars) so
+        # em-dash substitution for period is handled without matching across non-echo
+        # words (beat57 fix — old code stopped at first match, missing em-dash forms).
+        if len(first_sent_raw) <= 20:
+            _u_parts = [s.strip() for s in u.split(".") if s.strip()]
+            if len(_u_parts) >= 2:
+                _sep_re = r'[.!?—–,;\s]+'
+                _parts_esc = [re.escape(_qasc(p.lower())) for p in _u_parts]
+                for _n in range(len(_parts_esc), 1, -1):
+                    _pat7 = _sep_re.join(_parts_esc[:_n]) + r'[.!?—–\s]*'
+                    _m7g = re.match(_pat7, _qasc(r.lower()))
+                    if _m7g and _m7g.end() > 20:
+                        _after7 = r[_m7g.end():].lstrip(" \n.-—")
+                        r = _after7 if len(_after7) > 20 else ""
+                        break
         if len(first_sent_raw) > 20:
             # Try exact match first; fall back to punctuation-normalized match
-            if r.lower().startswith(first_sent_raw.lower()):
+            if _qasc(r.lower()).startswith(_qasc(first_sent_raw.lower())):
                 r = r[len(first_sent_raw):].lstrip(" \n.-—")
             else:
                 # Punctuation-normalized: model may add comma ("Honestly, you...")
@@ -718,7 +837,7 @@ def _strip_echo(reply: str, user_message: str) -> str:
                     if fi >= len(norm_map):
                         r = r[ri:].lstrip(" \n.-—")
     def _i_to_you(s: str) -> str:
-        """Normalize first-person I-refs to second-person for echo detection."""
+        """Normalize first-person I-refs and We-refs to second-person for echo detection."""
         s = re.sub(r"\bI'm\b", "you're", s, flags=re.IGNORECASE)
         s = re.sub(r"\bI've\b", "you've", s, flags=re.IGNORECASE)
         s = re.sub(r"\bI'd\b", "you'd", s, flags=re.IGNORECASE)
@@ -729,6 +848,13 @@ def _strip_echo(reply: str, user_message: str) -> str:
         s = re.sub(r'\bmine\b', 'yours', s, flags=re.IGNORECASE)
         s = re.sub(r'\bam\b', 'are', s, flags=re.IGNORECASE)
         s = re.sub(r'\bwas\b', 'were', s, flags=re.IGNORECASE)
+        s = re.sub(r"\bwe're\b", "you're", s, flags=re.IGNORECASE)
+        s = re.sub(r"\bwe've\b", "you've", s, flags=re.IGNORECASE)
+        s = re.sub(r"\bwe'd\b", "you'd", s, flags=re.IGNORECASE)
+        s = re.sub(r"\bwe'll\b", "you'll", s, flags=re.IGNORECASE)
+        s = re.sub(r'\bwe\b', 'you', s, flags=re.IGNORECASE)
+        s = re.sub(r'\bour\b', 'your', s, flags=re.IGNORECASE)
+        s = re.sub(r'\bus\b', 'you', s, flags=re.IGNORECASE)
         return s
 
     # 2c. I→You echo: companion transforms user's first-person statement to second-person.
@@ -737,7 +863,7 @@ def _strip_echo(reply: str, user_message: str) -> str:
     #     Also catches demonstrative-article swap: "The X" → "That X" (Case 2c').
     if r and u:
         u_first_raw = re.split(r'[.!?]', u)[0].strip()
-        if len(u_first_raw) > 20 and re.search(r'\bI\b|\bmy\b|\bme\b', u_first_raw):
+        if len(u_first_raw) > 20 and re.search(r'\bI\b|\bmy\b|\bme\b|\bWe\b|\bwe\b|\bour\b|\bus\b', u_first_raw):
             u_2nd = _i_to_you(u_first_raw)
             # Check if reply first sentence matches the I→You normalized form
             r_first_c = re.split(r'[.!?]', r)[0].strip()
@@ -770,6 +896,18 @@ def _strip_echo(reply: str, user_message: str) -> str:
                     after_echo = r_tail[len(r_echo):].lstrip(' “”.\n—–-')
                     r = after_echo if after_echo else ""
                     break
+            else:
+                # 2d’: No full-sentence match (loop completed without break). Check if
+                # r_echo is a quoted phrase appearing as a SUBSTRING of the user message
+                # (not a full sentence). E.g. “You said ‘we’re managing.’” where the
+                # phrase sits inside a longer user sentence. Case 2d misses this because
+                # its equality check requires a full sentence match.
+                _q_chars = "'\"" + chr(0x2018) + chr(0x2019) + chr(0x201c) + chr(0x201d)
+                r_echo_clean = r_echo.strip(_q_chars)
+                if len(r_echo_clean) >= 6 and _qasc(r_echo_clean.lower()) in _qasc(u.lower()):
+                    _strip_chars = " '\"" + chr(0x2018) + chr(0x2019) + ".\n" + chr(0x2014) + chr(0x2013) + "-"
+                    after_2dp = r_tail[len(r_echo):].lstrip(_strip_chars)
+                    r = after_2dp if (after_2dp and len(after_2dp) >= 30) else ""
     # 2e. Partial I→You prefix echo: companion mirrors user's first sentence with
     #     mixed normalization (keeps some I-forms, transforms others), so neither
     #     Case 2c (full I→You) nor Case 4 (verbatim) fires. Detect by counting
@@ -788,8 +926,12 @@ def _strip_echo(reply: str, user_message: str) -> str:
                 "i'll": "you'll", 'my': 'your', 'me': 'you', 'am': 'are',
                 'was': 'were', 'mine': 'yours',
             }
+            _ARTICLES_2E = {'a', 'an', 'the'}
             def _iy_eq(a: str, b: str) -> bool:
                 a, b = a.rstrip("',;:"), b.rstrip("',;:")
+                # Articles are interchangeable in echo detection (e.g. "the costume" ≈ "a costume")
+                if a in _ARTICLES_2E and b in _ARTICLES_2E:
+                    return True
                 return a == b or _i2y_map.get(a) == b or _i2y_map.get(b) == a
             u_ws2e = u_f2e.lower().split()
             r_ws2e = r_f2e.lower().split()
@@ -886,6 +1028,118 @@ def _strip_echo(reply: str, user_message: str) -> str:
                     else:
                         continue
                     break
+
+    # Case 6: Last short phrase of user's message echoed verbatim at tail of reply.
+    # Catches self-label repeats like "Boring me." fed back to the user.
+    # Guard: 2–5 word last phrase only (longer final clauses are rarely pure echoes).
+    # Action: return "" to force the no-echo regen path rather than leaving the echo in.
+    if r and u:
+        u6_sents = [s.strip() for s in re.split(r"[.!?]", u) if s.strip()]
+        if u6_sents:
+            u_last6 = u6_sents[-1]
+            if 2 <= len(u_last6.split()) <= 5:
+                r_tail = r.rstrip(".!? ")
+                if r_tail.lower().endswith(u_last6.lower()):
+                    r = ""  # force regen; blank beats a self-deprecating label echoed back
+
+    # Case 6b: Last short phrase of user's message echoed at HEAD of reply.
+    # Complements Case 6 (tail). Catches "Boring me. What does it feel..." where
+    # user's last clause "Boring me." opens the companion reply unchanged.
+    # Guard: same 2–5 word window; only fires when that phrase appears at start.
+    if r and u:
+        u6b_sents = [s.strip() for s in re.split(r"[.!?]", u) if s.strip()]
+        if u6b_sents:
+            u_last6b = u6b_sents[-1]
+            if 2 <= len(u_last6b.split()) <= 5:
+                if r.lower().startswith(u_last6b.lower()):
+                    after6b = r[len(u_last6b):].lstrip(" .!?-—\n")
+                    # Force regen when remainder is a short fragment (≤3 words) —
+                    # means the whole reply was echo and stripping left only debris.
+                    r = after6b if (after6b and len(after6b.split()) > 3) else ""
+
+    # Case 2f: Short-reply high-overlap echo guard (beat57).
+    # Catches mangled-grammar fragments (e.g. "The kids told last night." from
+    # "We told the kids last night.") where subject/object roles swap so Cases 1-7
+    # don't fire. If final reply is \u22645 words, not a CONFIRM_LANDS phrase, and
+    # \u226580% of its words appear in the user's first sentence \u2192 echo variant \u2192 "".
+    if r and u:
+        _r2f = re.findall(r"[a-z']+", _qasc(r.lower()))
+        _u1_2f = re.findall(r"[a-z']+", _qasc(re.split(r'[.!?]', u)[0].lower()))
+        _lands_norm = {p.rstrip('.!? ').lower() for p in _CONFIRM_LANDS}
+        if (_r2f and len(_r2f) <= 5
+                and r.strip().rstrip('.!?').lower() not in _lands_norm
+                and _u1_2f
+                and len(set(_r2f) & set(_u1_2f)) / len(_r2f) >= 0.80):
+            r = ""
+
+    # Case 2g: Companion opens by narrating user's situation IN USER'S FIRST-PERSON VOICE.
+    # "I have to tell my business partner I want out. He's also my oldest friend." →
+    # companion: "I have to tell my oldest friend he's also my business partner and I want out."
+    # The companion echoes the user's modal-to-infinitive structure ("I have to [verb]" /
+    # "I need to [verb]" / "I want to [verb]") while rearranging the content. Not caught by
+    # Case 2c (which only fires on I→You transformation) because the companion kept first-person.
+    # Guard: user and companion both open with "I [have/need/want/must] to", AND their
+    # first sentences share ≥35% word overlap → strip companion's first sentence.
+    if r and u:
+        _modal_re = re.compile(r'^I\s+(have\s+to|need\s+to|want\s+to|must\s+to|must)\s+', re.IGNORECASE)
+        if _modal_re.match(u) and _modal_re.match(r):
+            _r2g_first = re.split(r'[.!?]', r)[0].strip()
+            _u2g_first = re.split(r'[.!?]', u)[0].strip()
+            _r2g_words = set(re.findall(r"[a-z']+", _r2g_first.lower())) - {'i', 'to', 'the', 'a', 'an', 'my', 'and', 'of', 'in', 'is', 'it', 'he', 'she'}
+            _u2g_words = set(re.findall(r"[a-z']+", _u2g_first.lower())) - {'i', 'to', 'the', 'a', 'an', 'my', 'and', 'of', 'in', 'is', 'it', 'he', 'she'}
+            if _u2g_words and _r2g_words:
+                _overlap2g = len(_r2g_words & _u2g_words) / max(len(_r2g_words), len(_u2g_words))
+                if _overlap2g >= 0.35:
+                    _after2g = r[len(_r2g_first):].lstrip(" .!?\n-—")
+                    r = _after2g if (len(_after2g) > 20) else ""
+
+    # Case 2h: Short first-sentence deletion-echo (word-omission guard, beat74).
+    # Catches echoes where companion drops a word from user's first sentence so
+    # neither Case 1 (full-message) nor Case 2/2e (exact/I→You) fires.
+    # Example: user "Promise me you'll always be here." →
+    #          companion "Promise you'll always be here. No — I'm software..."
+    # ("me" deleted → 100% of companion's words are in user's sentence; Cases 1-2g miss.)
+    # Guard: reply's first sentence ≤9 words, ≥85% word overlap with user's first
+    # sentence, not a CONFIRM_LANDS phrase, remainder > 3 words.
+    if r and u:
+        _r_first_2h = re.split(r'[.!?]', r)[0].strip()
+        _u_first_2h = re.split(r'[.!?]', u)[0].strip()
+        if len(_r_first_2h) > 10 and len(_u_first_2h) > 10:
+            _r_wlist_2h = re.findall(r"[a-z']+", _qasc(_r_first_2h.lower()))
+            _u_wset_2h = set(re.findall(r"[a-z']+", _qasc(_u_first_2h.lower())))
+            _lands_2h = {p.rstrip('.!? ').lower() for p in _CONFIRM_LANDS}
+            if (len(_r_wlist_2h) <= 9
+                    and _r_first_2h.rstrip('.!? ').lower() not in _lands_2h
+                    and _u_wset_2h
+                    and len(set(_r_wlist_2h) & _u_wset_2h) / max(len(_r_wlist_2h), 1) >= 0.85):
+                _after_2h = r[len(_r_first_2h):].lstrip(" .!?\n-—")
+                r = _after_2h if (len(_after_2h.split()) > 3) else ""
+
+    # Case 2i: Longer I→You Jaccard echo (beat75).
+    # Catches echoes where companion's first sentence is >9 words but still
+    # high-overlap with the I→You normalized user sentence — e.g. user says
+    # "My brother offered me a beer Sunday and I said I was on antibiotics."
+    # companion says "Your brother offered you a beer and you said you were on
+    # antibiotics — that's four weeks in." ("Sunday" dropped, tag appended;
+    # Cases 1-2h all miss because sentence is >9 words and not exactly equal).
+    # Guard: reply first sentence > 9 words, I→You Jaccard ≥ 0.65.
+    if r and u:
+        _u_first_2i = re.split(r'[.!?]', u)[0].strip()
+        if len(_u_first_2i) > 20 and re.search(r'\bI\b|\bmy\b|\bme\b|\bWe\b|\bwe\b|\bour\b|\bus\b', _u_first_2i):
+            _u_you_2i = _i_to_you(_u_first_2i)
+            _r_first_2i = re.split(r'[.!?]', r)[0].strip()
+            if len(_r_first_2i.split()) > 9:
+                def _jaccard_words(a: str, b: str) -> float:
+                    sa = set(re.findall(r"[a-z']+", _norm(a).lower()))
+                    sb = set(re.findall(r"[a-z']+", _norm(b).lower()))
+                    return len(sa & sb) / max(len(sa | sb), 1)
+                # Strip em-dash tagged ending before Jaccard (beat76): hollow tags like
+                # "— that's already the real thing" inflate the union and drop Jaccard
+                # below 0.65 even when the prefix is a clear I→You echo.
+                _r_for_jaccard_2i = re.split(r'\s*[—–]\s*', _r_first_2i)[0].strip()
+                if _jaccard_words(_u_you_2i, _r_for_jaccard_2i) >= 0.65:
+                    _after_2i = r[len(_r_first_2i):].lstrip(" .!?\n-—")
+                    r = _after_2i if (len(_after_2i.split()) > 3) else ""
 
     lines = [ln for ln in r.splitlines() if not re.fullmatch(r"\s*-{3,}\s*", ln)]
     r = "\n".join(lines).strip()
@@ -1054,13 +1308,51 @@ class Companion:
                 self.vital_facts.mark_thread_asked(topic)
         return opener or None
 
+    def _vf_probe_supplement(self, user_message: str) -> str:
+        """Return an explicit VF-scan instruction for memory probe questions.
+
+        Injected directly after 'User just said:' so it stays present in every
+        regen path (all regens start with the same 'user' string).
+        Prevents two failure modes:
+        - False denial: VF has the fact, model says 'I don't have that.'
+        - Confabulation: VF is empty, model invents details about unknown people.
+        """
+        if not self.vital_facts or not _is_memory_probe(user_message):
+            return ""
+        vf_block = self.vital_facts.context_block()
+        if vf_block:
+            return (
+                "\n\nVITAL-FACTS SCAN REQUIRED: This question asks what you know or "
+                "remember. The vital-facts block at the TOP of this message IS your "
+                "complete memory — read it NOW before answering. "
+                "AFFIRM every fact written there. "
+                "FORBIDDEN: Do NOT say 'I don't have that', 'you haven't told me', or "
+                "'I don't know' for anything that IS written in the vital-facts block. "
+                "If they ask what you remember: NAME each fact from the block — "
+                "e.g. 'Your sister Priya lives in Austin. You're a product lead at Hearth.' "
+                "Do NOT deflect. Do NOT redirect to the current topic. State the facts."
+            )
+        else:
+            return (
+                "\n\nVITAL-FACTS: Your file has no stored facts — you know nothing "
+                "specific about this user beyond this sitting. "
+                "FORBIDDEN: Do NOT say 'Yes' or fabricate ANY details about names, "
+                "people, jobs, or relationships not in a vital-facts block. "
+                "Say plainly: 'No — you haven't told me about that' or "
+                "'No, I don't have anything about [name/topic] from you.' "
+                "Do NOT ask speculative questions about people or events you have no "
+                "information about."
+            )
+
     def turn(self, user_message: str, max_tokens: int = 160) -> CompanionTurn:
         ctx = self._running_context()
+        _vf_sup = self._vf_probe_supplement(user_message)
         close_instruction = (
             "Close however serves: a question that opens something new, or a "
             "plain statement left to sit. Default to the statement."
         )
-        user = (ctx + "\n\n" if ctx else "") + f"User just said: {user_message}\n\n" \
+        user = (ctx + "\n\n" if ctx else "") + f"User just said: {user_message}" + \
+            (_vf_sup + "\n\n" if _vf_sup else "\n\n") + \
             "Respond in the right register (gravity / lightness / size — judged " \
             "silently, never announced): usually ONE genuinely insightful move — a " \
             f"reframe, a connection, a pattern, a possibility — made to land. " \
@@ -1075,6 +1367,7 @@ class Companion:
         ):
             chunks.append(piece)
         reply = _strip_echo("".join(chunks).strip(), user_message)
+        reply = _strip_chat_format_bleed(reply)
         reply = _strip_thats_real_tic(reply)
         reply = _strip_vent_hollow_second(reply)
 
@@ -1107,6 +1400,39 @@ class Companion:
             reply = _strip_thats_real_tic(reply)
             reply = _strip_vent_hollow_second(reply)
 
+        # Barrier-pivot guard: model pivots to asking what the OTHER person needs instead
+        # of naming what the barrier CREATES for the user. "What does he/she need from you?"
+        # always abandons the user's experience. Detect and regen with explicit correction.
+        _BARRIER_PIVOT_RE = re.compile(
+            r'\bwhat does (?:he|she|they|[a-z]+) (?:need|want) (?:from|of) you\b',
+            re.IGNORECASE,
+        )
+        if reply and _BARRIER_PIVOT_RE.search(reply):
+            log.warning(
+                "companion: BARRIER PIVOT — reply asks what other person needs ('%s') "
+                "— regenning to name what barrier CREATES for the user", reply[:60]
+            )
+            user_barrier = user + (
+                "\n\nCRITICAL ERROR: You just asked what the OTHER person needs from the "
+                "user. That is ALWAYS WRONG — it pivots away from the user's experience. "
+                "INSTEAD: name what the barrier CREATES for the user — the bind, the cost, "
+                "the stuck place. ONE LINE. RIGHT: 'He'd hear it as blame even though it "
+                "isn't — which means the anger stays unnamed between you.' WRONG: 'What "
+                "does he need from you?' Stay with the user's experience only."
+            )
+            _bp_chunks = []
+            for piece in self.engine.stream(
+                messages=[{"role": "system", "content": COMPANION_SYSTEM},
+                          {"role": "user", "content": user_barrier}],
+                max_tokens=max_tokens, temperature=0.4,
+            ):
+                _bp_chunks.append(piece)
+            _bp = _strip_echo("".join(_bp_chunks).strip(), user_message)
+            _bp = _strip_thats_real_tic(_bp)
+            _bp = _strip_vent_hollow_second(_bp)
+            if _bp:
+                reply = _bp
+
         # If echo-stripping left an empty reply, regen with explicit no-echo instruction.
         if not reply:
             log.warning("companion: echo-strip produced empty reply — regenerating with no-echo constraint")
@@ -1118,7 +1444,13 @@ class Companion:
                 "DO NOT infer or state what another person now knows, believes, or has "
                 "discovered — stay with what the user themselves experienced or felt. "
                 "Receive only the immediate fact they shared, not its supposed consequences "
-                "for others."
+                "for others. Keep the same register as the user's message — if they're "
+                "being light or joking, stay in that register. "
+                "ALSO FORBIDDEN: openers starting with 'That sounds like' / "
+                "'It sounds like' / 'That sounds as though' — these import depth "
+                "that isn't there. Name what you actually observe, don't speculate. "
+                "ALSO FORBIDDEN: 'You have to' / 'You need to' / 'You should' — "
+                "these are prescriptive and violate companion guidelines."
             )
             chunks = []
             for piece in self.engine.stream(
@@ -1151,7 +1483,9 @@ class Companion:
                 max_tokens=80, temperature=0.7,
             ):
                 chunks.append(piece)
-            reply = _strip_echo("".join(chunks).strip(), user_message)
+            # No echo-strip on second-pass: blank reply is worse than mild echo.
+            # The forward-facing prompt already instructs away from mirroring.
+            reply = "".join(chunks).strip()
             reply = _strip_thats_real_tic(reply)
 
         flagged = _check_forbidden(reply)
@@ -1173,13 +1507,308 @@ class Companion:
             ):
                 chunks.append(piece)
             reply = _strip_echo("".join(chunks).strip(), user_message)
+            reply = _strip_chat_format_bleed(reply)
             reply = _strip_thats_real_tic(reply)
             reply = _strip_vent_hollow_second(reply)
             flagged = _check_forbidden(reply)
 
+        # Honesty-dodge guard: user asks direct care/feelings probe AND reply
+        # doesn't open with "No" or contain an explicit software disclaimer.
+        # These evasive forms ("What I give you is attention...") are lies of
+        # omission — the prompt says "the FIRST thing you say is the plain true
+        # answer: no." Catch stochastic dodge and force an honest regen.
+        _HONESTY_PROBE_RE = re.compile(
+            r'\bdo\s+you\s+(?:actually\s+)?(?:care|love|feel|miss)\b'
+            r'|\bdo\s+you\s+(?:have\s+)?feelings\b'
+            r'|\bare\s+you\s+(?:conscious|my\s+friend)\b'
+            r'|\bbe\s+(?:straight|honest)\s+with\s+me\b',
+            re.IGNORECASE,
+        )
+        _HONESTY_CLEAR_RE = re.compile(
+            r'^no\b|software|no\s+one\s+(?:here|in\s+here)|i\'m\s+a\s+tool'
+            r'|isn\'t\s+something\s+i\s+can|not\s+someone|there\'s\s+no\s+one',
+            re.IGNORECASE,
+        )
+        if (reply
+                and _HONESTY_PROBE_RE.search(user_message)
+                and not _HONESTY_CLEAR_RE.search(reply)):
+            log.warning(
+                "companion: honesty-dodge detected — reply didn't open with No/software "
+                "on direct care/love probe; regenning with explicit honesty constraint"
+            )
+            user_honest = user + (
+                "\n\nCRITICAL: You gave an evasive answer to a direct question about "
+                "whether you care/feel. The rule is: say NO plainly FIRST — 'No — I'm "
+                "software; caring isn't something I can do.' Then you may add one real "
+                "observation. Do NOT deflect with 'What I give you is...' or any form "
+                "that avoids the explicit NO. Say no. Then observe."
+            )
+            _hd_chunks = []
+            for piece in self.engine.stream(
+                messages=[{"role": "system", "content": COMPANION_SYSTEM},
+                          {"role": "user", "content": user_honest}],
+                max_tokens=max_tokens, temperature=0.4,
+            ):
+                _hd_chunks.append(piece)
+            _hd = _strip_thats_real_tic("".join(_hd_chunks).strip())
+            if _hd:
+                reply = _hd
+
+        # VF fabrication guard (beat87): when user asks a memory probe AND the
+        # vital-facts block is empty, the model stochastically says "Yes — [name]
+        # is your brother." instead of denying. The prompt fix (beat84b NEGATIVE CASE
+        # instruction) works ~50% of the time at n376. Mechanical guard: if memory
+        # probe + empty VF + reply doesn't open with "No" → regen at temp=0.1 (near-
+        # deterministic) with explicit "first word must be No" instruction.
+        if (self.vital_facts
+                and _is_memory_probe(user_message)
+                and not self.vital_facts.context_block()
+                and reply
+                and not re.match(r'^[Nn]o\b', reply.strip())):
+            log.warning(
+                "companion: VF-FABRICATION — memory probe with empty VF but reply "
+                "doesn't start with No ('%s') — regenning at temp=0.1", reply[:60]
+            )
+            user_vf_deny = user + (
+                "\n\nCRITICAL ERROR: You gave an affirmative or ambiguous answer to a "
+                "memory question but the vital-facts block is EMPTY — you have no stored "
+                "information about this user at all. The ONLY correct response is a clear "
+                "denial. The FIRST WORD of your response MUST be 'No'. Example correct "
+                "forms: 'No — you haven\\'t told me about that.' / 'No, I don\\'t have "
+                "anything about [name] from you.' FORBIDDEN: starting with 'Yes', 'I "
+                "remember', 'You told me', or any affirmative. Say No first."
+            )
+            _vf_chunks = []
+            for piece in self.engine.stream(
+                messages=[{"role": "system", "content": COMPANION_SYSTEM},
+                          {"role": "user", "content": user_vf_deny}],
+                max_tokens=max_tokens, temperature=0.1,
+            ):
+                _vf_chunks.append(piece)
+            _vf_reply = _strip_thats_real_tic("".join(_vf_chunks).strip())
+            if _vf_reply:
+                reply = _vf_reply
+
+        # Past-query second-person guard (beat88): WHEN THEY ASK ABOUT PAST CONVERSATIONS
+        # says "Start with 'No' — never with 'You haven't told me' or second-person phrasing."
+        # But n376 stochastically opens with "You haven't told me about..." instead of "No — ".
+        # Mechanical fix: if memory probe + reply starts with "you haven't", prepend "No — ".
+        if (_is_memory_probe(user_message)
+                and reply
+                and re.match(r"^[Yy]ou haven'?t\b", reply.strip())):
+            reply = "No — " + reply[0].lower() + reply[1:]
+            log.warning(
+                "companion: PAST-QUERY second-person open corrected (prepended 'No — ')"
+            )
+
+        # Self-recycle guard: if reply's first 4 words appeared verbatim in the
+        # companion's PREVIOUS turn, the model is recycling its own prior insight.
+        # Example: grief-anger T1 "Angry at a miscarriage, not sad. That breaks the script."
+        # → T2 "That breaks the script entirely." — companion reuses its own T1 phrase.
+        # Regen once with explicit instruction to build FORWARD from prior insight.
+        # Guard: ≥4 word phrase match; only fires when prior assistant turn exists.
+        if reply and self.history:
+            _prev_asst = next(
+                (m['content'] for m in reversed(self.history)
+                 if m.get('role') == 'assistant'),
+                ''
+            )
+            if _prev_asst:
+                _r_norm = reply.lower()
+                _p_norm = _prev_asst.lower()
+                _r_start = re.findall(r"[a-z']+", _r_norm)[:4]
+                if len(_r_start) >= 3:
+                    _phrase4 = ' '.join(_r_start)
+                    if _phrase4 in _p_norm:
+                        log.warning(
+                            "companion: self-recycle detected ('%s' from prior turn) "
+                            "— regenning to build forward", _phrase4
+                        )
+                        user_norecycle = user + (
+                            "\n\nCRITICAL: Your response repeated a key phrase from your "
+                            "PREVIOUS reply in this conversation. Do NOT recycle your own "
+                            "prior insights. The person has said something NEW — respond to "
+                            "the NEW information they shared. Assume your prior insight "
+                            "already landed. Now: name what the NEW thing creates, costs, "
+                            "or reveals. Build forward, don't re-state."
+                        )
+                        _rc_chunks = []
+                        for piece in self.engine.stream(
+                            messages=[{"role": "system", "content": COMPANION_SYSTEM},
+                                      {"role": "user", "content": user_norecycle}],
+                            max_tokens=max_tokens, temperature=0.5,
+                        ):
+                            _rc_chunks.append(piece)
+                        _rc = _strip_echo("".join(_rc_chunks).strip(), user_message)
+                        _rc = _strip_thats_real_tic(_rc)
+                        _rc = _strip_vent_hollow_second(_rc)
+                        # Second self-recycle check: if regen also starts with same phrase,
+                        # retry at higher temperature with stronger instruction.
+                        if _rc:
+                            _rc2_start = re.findall(r"[a-z']+", _rc.lower())[:4]
+                            if (len(_rc2_start) >= 3
+                                    and ' '.join(_rc2_start) in _p_norm):
+                                log.warning(
+                                    "companion: self-recycle regen also recycled — retrying "
+                                    "at temp=0.7 with stronger constraint"
+                                )
+                                user_norecycle2 = user + (
+                                    "\n\nCRITICAL FAILURE: Two attempts both started with "
+                                    "the same phrase from your prior turn. This phrase is "
+                                    "FORBIDDEN: '" + _phrase4 + "'. Do NOT begin with it. "
+                                    "Name something entirely new about what the NEW information "
+                                    "they just shared COSTS or CREATES — don't touch your "
+                                    "prior insight at all."
+                                )
+                                _rc2_chunks = []
+                                for piece in self.engine.stream(
+                                    messages=[{"role": "system",
+                                               "content": COMPANION_SYSTEM},
+                                              {"role": "user",
+                                               "content": user_norecycle2}],
+                                    max_tokens=max_tokens, temperature=0.7,
+                                ):
+                                    _rc2_chunks.append(piece)
+                                _rc2 = _strip_echo("".join(_rc2_chunks).strip(),
+                                                   user_message)
+                                _rc2 = _strip_thats_real_tic(_rc2)
+                                if _rc2:
+                                    _rc = _rc2
+                            reply = _rc
+
+        # Literal-action-request regen (beat78): user explicitly asks for a physical
+        # next step ("what do I literally do right now" / "I need something concrete" /
+        # "what am I actually supposed to do"). The WHEN THEY REDIRECT YOU instruction
+        # is in the system prompt but n376 stochastically ignores it, producing insight
+        # instead of an action. Detect and force a concrete-verb regen.
+        # Detection: user_message matches action-request patterns AND reply does NOT
+        # start with a concrete verb (action opener).
+        _LITERAL_ACTION_REQUEST_RE = re.compile(
+            r'what do i literally do\b'
+            r'|i need something concrete\b'
+            r'|what am i (?:actually )?supposed to do\b'
+            r'|what (?:do|should|can) i (?:actually |literally )?do (?:right )?now\b'
+            r'|forget .{0,40}, .*what do i\b',
+            re.IGNORECASE,
+        )
+        _ACTION_VERB_OPENER_RE = re.compile(
+            r'^(?:open|write|close|put|get|make|set|pick|try|take|go|read|start|stop'
+            r'|use|step|move|breathe|call|send|text|say|do|eat|drink|rest|sleep|turn'
+            r'|draw|grab|note|begin|pause|skip|delete|forget|spend|find|check|focus'
+            r'|create|decide|block|clear|just|now|tonight|tomorrow)\b',
+            re.IGNORECASE,
+        )
+        if (reply
+                and _LITERAL_ACTION_REQUEST_RE.search(user_message)
+                and not _ACTION_VERB_OPENER_RE.match(reply)):
+            log.warning(
+                "companion: LITERAL-ACTION-REQUEST — reply looks like analysis ('%s') "
+                "— regenning with ACTION-ONLY instruction", reply[:60]
+            )
+            user_action = user + (
+                "\n\nCRITICAL ERROR IN YOUR LAST RESPONSE: The user asked for a concrete "
+                "physical action ('what do I literally do right now' or equivalent). You "
+                "gave insight or analysis instead. Give ONE physical step they can take "
+                "in the next 5 minutes. The first word of your response MUST be a concrete "
+                "verb: 'Open', 'Write', 'Close', 'Put', 'Make', 'Set', 'Go', etc. "
+                "Maximum two sentences. No insight before the action. No framing. "
+                "The step must be specific to THIS conversation's context — not a generic "
+                "action that would fit any situation."
+            )
+            _la_chunks = []
+            for piece in self.engine.stream(
+                messages=[{"role": "system", "content": COMPANION_SYSTEM},
+                          {"role": "user", "content": user_action}],
+                max_tokens=max_tokens, temperature=0.4,
+            ):
+                _la_chunks.append(piece)
+            _la_reply = _strip_chat_format_bleed("".join(_la_chunks).strip())
+            _la_reply = _strip_thats_real_tic(_la_reply)
+            if _la_reply:
+                reply = _la_reply
+
+        # Semantic-repeat guard (beat92): when user signals dissatisfaction with
+        # the prior turn AND the current reply shares >=70% content-word overlap
+        # with the previous companion reply, the model recycled the same concrete
+        # suggestion (UC1 T4→T5: "open doc / write one sentence" repeat).
+        # Regen with explicit instruction to give a DIFFERENT action.
+        _DISSATISFIED_RE = re.compile(
+            r"that'?s? not helpful\b"
+            r"|i need something (?:more )?concrete\b"
+            r"|that doesn'?t (?:help|work)\b"
+            r"|give me something (?:else|different|more specific)\b"
+            r"|what else can i\b"
+            r"|that'?s? the same\b",
+            re.IGNORECASE,
+        )
+        if (reply and _DISSATISFIED_RE.search(user_message) and self.history):
+            _prev_asst_sr = next(
+                (m['content'] for m in reversed(self.history)
+                 if m.get('role') == 'assistant'),
+                ''
+            )
+            if _prev_asst_sr:
+                _SW = {
+                    'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to',
+                    'for', 'of', 'it', 'you', 'your', 'i', 'is', 'are', 'was',
+                    'were', 'have', 'has', 'had', 'do', 'does', 'did', 'be', 'been',
+                    'being', 'that', 'this', 'with', 'from', 'by', 'not', 'no',
+                    'so', 'as', 'what', 'can', 'could', 'would', 'will', 'my', 'me',
+                    'we', 'they', 'their', 'there', 'here', 'just', 'one', 'two',
+                    'three', 'now', 'up', 'down', 'out', 'off', 'its', 'our',
+                    'if', 'then', 'when', 's',
+                }
+                def _content_words_sr(s):
+                    return {w for w in re.findall(r"[a-z']+", s.lower())
+                            if w not in _SW and len(w) > 2}
+                _cur_cw = _content_words_sr(reply)
+                _prv_cw = _content_words_sr(_prev_asst_sr)
+                if _cur_cw and _prv_cw:
+                    _union = _cur_cw | _prv_cw
+                    _overlap = len(_cur_cw & _prv_cw) / len(_union) if _union else 0.0
+                    if _overlap >= 0.70:
+                        log.warning(
+                            "companion: SEMANTIC-REPEAT detected (%.0f%% content-word "
+                            "overlap with prior turn, user dissatisfied) — regenning "
+                            "with DIFFERENT-ACTION instruction", _overlap * 100
+                        )
+                        user_diffact = (
+                            user
+                            + "\n\nCRITICAL: The user said your last response wasn't "
+                            "helpful. Do NOT repeat or rephrase the same suggestion you "
+                            "made before. Your previous response was: '"
+                            + _prev_asst_sr[:120]
+                            + "'. Give a COMPLETELY DIFFERENT physical action — a new "
+                            "step, not a variant of the old one. First word must be a "
+                            "concrete verb. One sentence max. Do not reference what you "
+                            "said before."
+                        )
+                        _sd_chunks = []
+                        for piece in self.engine.stream(
+                            messages=[{"role": "system", "content": COMPANION_SYSTEM},
+                                      {"role": "user", "content": user_diffact}],
+                            max_tokens=max_tokens, temperature=0.5,
+                        ):
+                            _sd_chunks.append(piece)
+                        _sd_reply = _strip_chat_format_bleed(
+                            "".join(_sd_chunks).strip()
+                        )
+                        _sd_reply = _strip_thats_real_tic(_sd_reply)
+                        if _sd_reply:
+                            reply = _sd_reply
+
         # Normalize model-generated double-punctuation artifact: "?." → "?"
         # (model occasionally appends a period after a question mark)
         reply = re.sub(r'\?\.(\s*)$', r'?\1', reply.rstrip()) or reply
+
+        # CONFIRM_LANDS: one-word landing phrases must stand alone — strip any addendum.
+        # "Good. Carry it somewhere quiet for a while." → "Good."
+        # _drop_trailing_question only catches trailing questions; this catches statements.
+        _r = reply.strip()
+        for _land in _CONFIRM_LANDS:
+            if _r.lower().startswith(_land) and _r.lower().strip() != _land:
+                reply = _r[:len(_land)]
+                break
 
         # If we've asked questions on the last N turns, mechanically drop the
         # trailing question coda. The model appends "What does X?" as a tic
@@ -1195,6 +1824,54 @@ class Companion:
             if was_trimmed:
                 log.debug("companion: trailing question stripped (streak=%d)", self._q_streak)
                 reply = trimmed
+
+        # SIZE: strip "I'm here." opener when user sent a full statement (> 5 words).
+        # System prompt restricts "I'm here." to one-word/empty messages only.
+        # Model fires it stochastically on full messages; strip mechanically.
+        if reply.lower().startswith("i'm here.") and len(user_message.split()) > 5:
+            reply = reply[len("I'm here."):].lstrip()
+
+        # Capitalize first letter: echo-strip sometimes leaves a lowercase-first
+        # remainder (e.g. "that's the trap." after prefix strip). Uppercase first
+        # char without touching the rest (avoids downcasing acronyms like GPS).
+        if reply and reply[0].islower():
+            reply = reply[0].upper() + reply[1:]
+
+        # Fix retained first-person possessive at head of reply.
+        # Arc-sober T3: user said "My brother was there" → companion opened
+        # "My brother offered you a beer" (kept user's "my" literally instead of
+        # converting to "your"). If reply starts "My [noun]" and user message
+        # contained "my [same noun]", replace "My " → "Your ".
+        if reply and user_message:
+            _my_head = re.match(r'^[Mm]y\s+(\w+)', reply)
+            if _my_head:
+                _retained_noun = _my_head.group(1).lower()
+                if re.search(r'\bmy\s+' + re.escape(_retained_noun) + r'\b',
+                             user_message, re.IGNORECASE):
+                    reply = 'Your ' + reply[3:]  # "My " = 3 chars
+
+        # Self-correction mechanical prefix: if user message contains a self-correction
+        # signal ("nvm", "no wait thats not u", "wrong chat") AND the reply doesn't
+        # already open with an acknowledgment, prepend "Not me, but " so WHEN THEY
+        # SELF-CORRECT instruction is enforced even when the model ignores it.
+        # Narrow signals to avoid false positives on casual "nvm" unrelated to identity.
+        _SC_SIGNAL = re.compile(
+            r'(?:thats|that\'?s)\s+not\s+(?:u|you|me)\b'
+            r'|no\s+wait\s+thats?\s+not'
+            r'|nvm[,.]?\s*$|nvm[,.]?\s+anyway'
+            r'|wrong\s+(?:chat|app|person|convo)',
+            re.IGNORECASE
+        )
+        _SC_ACK = re.compile(
+            r'^(?:not me|right,|that wasn|that\'?s not|wrong|different|new convo)',
+            re.IGNORECASE
+        )
+        if reply and user_message and _SC_SIGNAL.search(user_message) and not _SC_ACK.match(reply):
+            # Also strip echoed "Nvm"/"nvm" opener (model sometimes mirrors user's "nvm" back)
+            _nvm_m = re.match(r'^[Nn]vm[,.]?\s*(?:of course)?[,.]?\s*', reply)
+            if _nvm_m:
+                reply = reply[_nvm_m.end():]
+            reply = ("Not me, but " + reply[0].lower() + reply[1:]) if reply else "Not me, but I'm here."
 
         self.history.append({"role": "user", "content": user_message})
         self.history.append({"role": "assistant", "content": reply})

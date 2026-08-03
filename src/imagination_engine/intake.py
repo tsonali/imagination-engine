@@ -262,6 +262,11 @@ class IntakeManager:
                 response = DEFAULT_HANDOFF
             session.ready = True
 
+        # Strip bracket-only lines — model occasionally generates annotation-style
+        # notes like "[spend time in a tube at the hospital]" on their own line.
+        # Done AFTER ready-marker handling so [READY] is not consumed first.
+        response = re.sub(r"\n\s*\[[^\]]+\]\s*(?=\n|$)", "", response).strip()
+
         session.messages.append({"role": "assistant", "content": response})
         session.turn_count += 1
 

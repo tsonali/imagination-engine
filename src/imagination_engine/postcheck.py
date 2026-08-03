@@ -383,7 +383,11 @@ _NARRATOR_POSS = re.compile(
     r"|\bwe\s+(?:reach|reached|walk|walked|came|come|arrive|arrived|ran|run|go|went|were\s+here|need|sat|sit|stand|stood|move|moved|used\s+to)\b"  # narrator "we" + motion/state verbs
     r"|\bmy\s+(?:hand|hands|breath|side|step|voice|foot)\b"   # narrator body-part possessives
     r"|\bboth\s+of\s+us\b"             # "both of us" narrator collective
-    r"|\bfor\s+us\b",                  # "for us" narrator collective
+    r"|\bfor\s+us\b"                   # "for us" narrator collective
+    # Grief-pet dog-POV leak (beat70): model puts listener in animal's body and refers
+    # to the human as "your handler" / "your owner" — immediate perspective failure.
+    r"|\byour\s+(?:handler|owner|master)\b"
+    r"|\bmy\s+(?:handler|owner|master)\b",
     re.IGNORECASE,
 )
 
@@ -414,16 +418,48 @@ _PRONOUN_SKIP = frozenset([
 ])
 
 
+# "from she", "with she" etc — subject pronoun used as object of preposition.
+# Caught in n376 intimate scripts (battery11 0728 imag-intimacy).
+_SHE_AS_OBJECT = re.compile(
+    r'\b(from|with|to|by|for|about|toward|towards|of|near|beside)\s+(she)\b',
+    re.IGNORECASE,
+)
+
+
+def fix_object_pronouns(text: str) -> tuple[str, int]:
+    """Replace 'PREPOSITION she' → 'PREPOSITION her'.
+
+    The model occasionally uses the subject pronoun 'she' as the object of a
+    preposition ('from she', 'with she') — the opposite of the her-as-subject
+    error handled by fix_subject_pronouns. Caught on n376 imag-intimacy (0728).
+    """
+    fixed = 0
+
+    def _replace(m: "re.Match") -> str:
+        nonlocal fixed
+        fixed += 1
+        return f"{m.group(1)} her"
+
+    result = _SHE_AS_OBJECT.sub(_replace, text)
+    return result, fixed
+
+
 _HER_SUBJECT_VERBS = re.compile(
     # Present tense (3rd-person singular -s forms)
     r"\bher\s+(enters|finds|reaches|searches|stands|turns|speaks|catches|"
     r"looks|laces|passes|breaks|stops|tells|makes|lets|comes|moves|sits|meets|"
     r"holds|takes|runs|walks|says|goes|sees|knows|wants|needs|leaves|starts|"
     r"becomes|keeps|brings|gets|"
+    # Present tense additions (beat86: found in deposition script — 'her asks', 'her has')
+    r"asks|has|gives|seems|appears|does|follows|reads|checks|watches|faces|"
+    r"sets|puts|uses|calls|feels|shows|opens|closes|pulls|pushes|holds|places|"
     # Past tense forms (most common)
     r"reached|found|stood|turned|met|held|told|said|came|saw|kept|went|"
     r"spoke|broke|ran|took|got|left|made|started|moved|sat|walked|"
-    r"entered|searched|passed|stopped|caught|looked|laced)\b",
+    r"entered|searched|passed|stopped|caught|looked|laced|"
+    # Past tense additions (beat86)
+    r"asked|had|gave|seemed|appeared|did|followed|watched|faced|"
+    r"used|called|felt|showed|opened|closed|pulled|pushed|placed)\b",
     re.IGNORECASE,
 )
 
@@ -497,6 +533,18 @@ _BACK_LEAK_PATTERNS = [
     re.compile(r"\bchair or surface\b", re.IGNORECASE),
     # BACK section leak variant: "your chair or whatever surface has you resting" (beat38 battery11 0146 imag-active-scene)
     re.compile(r"\bor whatever surface has you\b", re.IGNORECASE),
+    # BACK section leak variant: "in this chair or whatever surface you are on right now exactly" (beat61 0726 battery11 eagle)
+    re.compile(r"\bor whatever surface you are on\b", re.IGNORECASE),
+    # BACK section leak variant: "on this surface or chair right now" — reversed form (beat61 0726 battery11 deposition)
+    re.compile(r"\bsurface or chair\b", re.IGNORECASE),
+    # BACK section leak variant: "whether it is chair or couch or floor below you" (beat68 battery11 imag-active-scene)
+    re.compile(r"\bchair or couch or floor\b", re.IGNORECASE),
+    # BACK section leak variant: "this chair or whatever support holds you now" (beat69 battery11 eagle)
+    re.compile(r"\bchair or whatever\b", re.IGNORECASE),
+    # BACK section leak variant: "the chair or floor under you" — couch-free form (beat73 battery11 imag-active-scene)
+    re.compile(r"\bchair or floor\b", re.IGNORECASE),
+    # BACK section meta-commentary: "an imaginary run that was very real" — breaks immersion (beat68 battery11 imag-active-scene)
+    re.compile(r"\bimaginary (?:run|session|experience|practice)\b", re.IGNORECASE),
     # Model occasionally hallucinates technical environment details — strip these.
     re.compile(r"\bTTS output device\b", re.IGNORECASE),
     re.compile(r"\btext.to.speech\b", re.IGNORECASE),
@@ -532,20 +580,48 @@ def strip_back_instruction_leaks(text: str) -> tuple[str, int]:
     return " ".join(kept), removed
 
 
+def strip_bullet_lines(text: str) -> tuple[str, int]:
+    """Strip markdown bullet markers from script prose.
+
+    The model occasionally formats body text with '- ' bullet prefixes
+    (e.g. '- With every breath, her eyes watch you.') instead of continuous
+    prose. Strip the '- ' marker after a sentence boundary ('. - ') or at a
+    line start, leaving the sentence content intact.
+    Returns (cleaned_text, n_markers_removed).
+    """
+    cleaned, count = re.subn(r'(?<=\. )-\s+(?=[A-Z])', '', text)
+    # Also catch at line start (after newline)
+    cleaned2, count2 = re.subn(r'(?m)^-\s+(?=[A-Z])', '', cleaned)
+    return cleaned2, count + count2
+
+
 def drop_active_body_wildlife(text: str, tokens: tuple) -> tuple[str, int]:
     """Drop sentences containing forbidden companion-wildlife tokens.
 
     Used when the model ignores the FORBIDDEN prompt-level wildlife ban in
     active-body scenes (e.g. eagle scripts generating hawk companions despite
-    explicit prohibition). Any sentence containing a token as a whole word is
-    removed. Only call when user did NOT name these creatures in their intake.
+    explicit prohibition). Any sentence containing a token (or its plural) as
+    a whole word is removed. Only call when user did NOT name these creatures
+    in their intake.
+
+    Single-word tokens match both singular and simple plural (hawk → hawks,
+    falcon → falcons, raven → ravens). Irregular plurals and multi-word phrases
+    use exact word-boundary matching.
 
     Returns (cleaned_text, n_sentences_dropped).
     """
     if not tokens:
         return text, 0
+    parts = []
+    for t in tokens:
+        if " " in t:
+            # Multi-word phrase: exact match only
+            parts.append(re.escape(t))
+        else:
+            # Single word: match singular and simple plural (e.g. hawk|hawks)
+            parts.append(re.escape(t) + r"s?")
     pattern = re.compile(
-        r"\b(" + "|".join(re.escape(t) for t in tokens) + r")\b",
+        r"\b(" + "|".join(parts) + r")\b",
         re.IGNORECASE,
     )
     sentences = re.split(r"(?<=[\.\!\?])\s+", text.strip())
@@ -553,6 +629,34 @@ def drop_active_body_wildlife(text: str, tokens: tuple) -> tuple[str, int]:
     dropped = 0
     for s in sentences:
         if pattern.search(s):
+            dropped += 1
+        else:
+            kept.append(s)
+    return " ".join(kept), dropped
+
+
+# She/her subject pronouns that signal a hallucinated 3rd-person female in a solo script.
+# "her" alone is excluded — too risky to drop (appears as possessive adjective in
+# fix_possessive_pronouns output: "her voice" after "hers voice" fix). Only "she" as
+# a subject pronoun and "hers" as a standalone possessive are unambiguous 3rd-person.
+_SHE_HER_PATTERN = re.compile(r'\b(she|hers)\b', re.IGNORECASE)
+
+
+def drop_hallucinated_she_her(text: str) -> tuple[str, int]:
+    """Drop sentences containing 3rd-person female pronouns ('she', 'hers') from
+    active-body solo scripts where the user did not name a female in their intake.
+
+    The model occasionally hallucinates a female character (e.g. 'a voice, hers. A
+    memory from past runs when she would call out...') in solo active-body scenes.
+    Only call after verifying no female appears in the transcript.
+
+    Returns (cleaned_text, n_sentences_dropped).
+    """
+    sentences = re.split(r"(?<=[\.\!\?])\s+", text.strip())
+    kept = []
+    dropped = 0
+    for s in sentences:
+        if _SHE_HER_PATTERN.search(s):
             dropped += 1
         else:
             kept.append(s)

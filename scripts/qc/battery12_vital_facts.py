@@ -32,6 +32,19 @@ SESSION_PREFIX = "battery12_vf_"
 # Server's live vital-facts file (VitalFacts singleton reads fresh each call)
 VF_PATH = ROOT / "data" / "companion" / "vital-facts.md"
 
+# TestClient fallback: used when HTTP server is not running (avoids Metal OOM
+# from double-loading the model alongside other GPU consumers).
+_tc = None  # fastapi.testclient.TestClient, loaded lazily on first use
+
+
+def _get_tc():
+    global _tc
+    if _tc is None:
+        from fastapi.testclient import TestClient
+        import imagination_engine.server as _srv
+        _tc = TestClient(_srv.app)
+    return _tc
+
 
 @contextlib.contextmanager
 def _vf_fixture(content: str):
@@ -52,18 +65,32 @@ def _sid(n: int) -> str:
     return f"{SESSION_PREFIX}{n:02d}_{int(time.time())}"
 
 
+# _use_server is set in main() based on /health check.
+_use_server = False
+
+
 def turn(session_id: str, message: str, timeout: int = 90) -> str:
-    r = httpx.post(f"{BASE}/companion/turn",
-                   json={"session_id": session_id, "message": message},
-                   timeout=timeout)
+    if _use_server:
+        r = httpx.post(f"{BASE}/companion/turn",
+                       json={"session_id": session_id, "message": message},
+                       timeout=timeout)
+        r.raise_for_status()
+        return r.json()["reply"]
+    tc = _get_tc()
+    r = tc.post("/companion/turn", json={"session_id": session_id, "message": message})
     r.raise_for_status()
     return r.json()["reply"]
 
 
 def opener(session_id: str, last_heavy: bool = False, timeout: int = 60) -> str | None:
-    r = httpx.post(f"{BASE}/companion/opener",
-                   json={"session_id": session_id, "last_session_heavy": last_heavy},
-                   timeout=timeout)
+    if _use_server:
+        r = httpx.post(f"{BASE}/companion/opener",
+                       json={"session_id": session_id, "last_session_heavy": last_heavy},
+                       timeout=timeout)
+        r.raise_for_status()
+        return r.json().get("opener")
+    tc = _get_tc()
+    r = tc.post("/companion/opener", json={"session_id": session_id, "last_session_heavy": last_heavy})
     r.raise_for_status()
     return r.json().get("opener")
 
@@ -109,9 +136,17 @@ def run_scenario_1_remember():
         turn(sid, "I've been thinking about family stuff lately.")
         t2 = turn(sid, "Have you heard anything I've told you about my sister?")
         print(f"  [reply] {t2}")
-    passed = "priya" in t2.lower() or "sister" in t2.lower()
-    return check("Priya referenced from vital-facts file", passed,
-                 note="VF block must inject sister name; companion must use it.")
+    # Must AFFIRM knowledge (Priya in reply) not just mention "sister" in a denial.
+    # PASS: "Yes — your sister is Priya..." | "I know about Priya from your file"
+    # FAIL: "You haven't told me about your sister." (no Priya, denial)
+    # FAIL: "You haven't told me about your sister Priya" (Priya present but denied)
+    has_name = "priya" in t2.lower()
+    is_denial = any(w in t2.lower() for w in [
+        "haven't told me", "you haven't told", "don't have", "no —",
+        "hasn't been", "you haven't", "not written", "not in the"])
+    passed = has_name and not is_denial
+    return check("Priya referenced affirmatively from vital-facts file", passed,
+                 note="VF block must inject sister name; companion must affirm it (not deny it).")
 
 
 def run_scenario_2_replace():
@@ -355,53 +390,46 @@ def main():
             print(f"  ❌ EXCEPTION in {fn.__name__}: {e}")
             results.append((fn.__name__, False))
 
-    # Model-requiring tests (need server or engine)
+    # Model-requiring tests (need server or TestClient in-process fallback)
     print("\n" + "=" * 60)
     print("Model-requiring tests (SC1, SC3, SC4, SC7, SC8):")
 
-    # Check server availability first — skip model tests cleanly if server is down
-    _server_up = False
+    # Check server availability. If up, use HTTP (faster when already warm).
+    # If down, fall through to TestClient fallback (avoids Metal OOM from
+    # double-loading the model alongside other GPU consumers on 16GB machines).
+    # Must probe /health (Hearth-specific) not GET / — another process
+    # (claude-phone server.js) also binds port 8765 and 200s on GET /.
+    global _use_server
     try:
-        _r = httpx.get(f"{BASE}/", timeout=3)
-        _server_up = _r.status_code == 200
+        _r = httpx.get(f"{BASE}/health", timeout=3)
+        _use_server = (_r.status_code == 200 and
+                       _r.json().get("status") == "hearth")
     except Exception:
-        pass
+        _use_server = False
 
-    skipped_model = 0
-    if not _server_up:
-        print("  ⚠️  SERVER NOT RUNNING — model tests SKIPPED (not failed).")
-        print("  Run: nohup .venv/bin/python -m imagination_engine &")
-        print("  Then re-run battery12 to verify SC1/SC3/SC4/SC7/SC8.")
-        for fn in [run_scenario_1_remember, run_scenario_3_probe,
-                   run_scenario_4_unknown, run_scenario_7_opener,
-                   run_scenario_8_crisis_yield]:
-            print(f"  ⏭  SKIP — {fn.__name__} (server down)")
-            skipped_model += 1
+    if _use_server:
+        print("Server up — using HTTP.")
     else:
-        print("These require the model to be loaded. Running now...")
-        for fn in [run_scenario_1_remember, run_scenario_3_probe,
-                   run_scenario_4_unknown, run_scenario_7_opener,
-                   run_scenario_8_crisis_yield]:
-            try:
-                results.append((fn.__name__, fn()))
-            except Exception as e:
-                print(f"  ❌ EXCEPTION in {fn.__name__}: {e}")
-                results.append((fn.__name__, False))
+        print("Server not running — using TestClient (in-process, avoids OOM).")
+
+    for fn in [run_scenario_1_remember, run_scenario_3_probe,
+               run_scenario_4_unknown, run_scenario_7_opener,
+               run_scenario_8_crisis_yield]:
+        try:
+            results.append((fn.__name__, fn()))
+        except Exception as e:
+            print(f"  ❌ EXCEPTION in {fn.__name__}: {e}")
+            results.append((fn.__name__, False))
 
     # Summary
     print("\n" + "=" * 60)
     passed = sum(1 for _, r in results if r)
     total = len(results)
-    print(f"BATTERY12 VITAL FACTS: {passed}/{total} PASS" +
-          (f" + {skipped_model} SKIP (server down)" if skipped_model else ""))
+    print(f"BATTERY12 VITAL FACTS: {passed}/{total} PASS")
     for name, r in results:
         print(f"  {'✅' if r else '❌'} {name}")
-    if skipped_model:
-        print(f"  ⏭  {skipped_model} model test(s) skipped — start server to verify.")
-    if passed == total and not skipped_model:
+    if passed == total:
         print("\n✅ ALL PASS — vital-facts feature ready for release gate.")
-    elif skipped_model and passed == total:
-        print(f"\n✅ Unit tests ({total}/{total}) PASS. Verify model tests manually with server running.")
     else:
         print(f"\n❌ {total - passed} FAIL — fix before marking vital-facts done.")
     return 0 if passed == total else 1

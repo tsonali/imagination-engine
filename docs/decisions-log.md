@@ -478,3 +478,15 @@ specific tokens that must not appear (chair in active-body, hawk/falcon/owl in a
 "soothing" in alert-calm, "my voice" in OPEN_PROMPT). Conceptual DO NOT instructions should only
 be used for TYPES of content that can't be enumerated (e.g., "do not invent any characters").
 Applied to both mini's `scripts/finetune.sh` and local copy.
+
+## 2026-07-26 — build_training_data.py beat-files gap discovered and fixed (beat61)
+
+**Decision:** Fix `_beat_files` glob in build_training_data.py to include both `C-companion/c_gold_beat*.jsonl` AND `C-companion/_candidates/c_gold_beat*.jsonl`.
+
+**Finding:** The glob was reading only from the top-level `C-companion/` directory (35 files). All beat46+ exemplars (the hand-crafted defect-fix training examples from beats 46-61b) were in `C-companion/_candidates/` only and were NEVER included in training. n599 and all prior adapters trained without 82 of the 117 total beat exemplars. The companion model was being fine-tuned only on exemplars up to beat45.
+
+**Impact:** High — all targeted companion fixes from beat46 onwards (GRAVITY TYPE B regen, vent hollow strip, barrier naming, cross-session memory, echo-strip cases 2e/2f/6/6b/7, etc.) had gold exemplars written but those exemplars were silent in training.
+
+**Fix:** Dedup-by-name dict scans both locations; `_candidates/` path wins on any filename overlap (8 files in both). Result: 117 unique beat files. build_training_data.py MD5: 59f039cdb8a3230e624c8b4cc44b8d70. Synced to all dist copies and mini.
+
+**Next retrain** (triggered by A_gold.jsonl hash change, within 30 min): first adapter with complete 117-file beat corpus. Comparative read vs n599 required before any promotion.
