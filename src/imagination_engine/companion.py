@@ -1670,7 +1670,11 @@ class Companion:
                 "This time: do NOT reference what they literally said. Instead respond to the "
                 "SITUATION — ask one short concrete question about what comes next, or make "
                 "one brief observation about the consequence they're facing. "
-                "No mirroring. No tic phrases. 1-2 sentences max."
+                "No mirroring. No tic phrases. 1-2 sentences max. "
+                "ALSO FORBIDDEN: starting with a gerund (-ing word) that echoes their verb — "
+                "if they said 'I snapped', do NOT start with 'Snapping'; "
+                "if they said 'I cried', do NOT start with 'Crying'. "
+                "Begin with a noun, an observation about consequence, or a question."
             )
             chunks = []
             for piece in self.engine.stream(
@@ -1683,6 +1687,34 @@ class Companion:
             # The forward-facing prompt already instructs away from mirroring.
             reply = "".join(chunks).strip()
             reply = _strip_thats_real_tic(reply)
+            # beat109: mechanical gerund-echo guard on second-pass output.
+            # The model sometimes ignores the GERUND FORBIDDEN instruction and opens with
+            # "Snapping at your kid..." even on third attempt. Catch it here and substitute
+            # a fixed bridge rather than accepting a gerund echo from the forced path.
+            if reply:
+                _sp_ws = reply.lower().split()
+                if _sp_ws and _sp_ws[0].endswith("ing"):
+                    _sp_root = _sp_ws[0][:-3]
+                    if len(_sp_root) >= 3:
+                        _sp_m = re.match(r'\bi\s+([a-z]+)', user_message.lower())
+                        if _sp_m:
+                            _sp_uverb = _sp_m.group(1)
+                            _sp_uroot = (
+                                _sp_uverb[:-3] + "y" if _sp_uverb.endswith("ied")
+                                else _sp_uverb[:-2] if _sp_uverb.endswith("ed")
+                                else _sp_uverb[:-1] if (
+                                    _sp_uverb.endswith("d") and len(_sp_uverb) > 3
+                                    and _sp_uverb[-2] not in "aeiou")
+                                else _sp_uverb
+                            )
+                            _sp_cmp = min(4, len(_sp_root), len(_sp_uroot))
+                            if (_sp_cmp >= 3
+                                    and _sp_root[:_sp_cmp] == _sp_uroot[:_sp_cmp]):
+                                log.warning(
+                                    "companion: second-pass still gerund-opener after "
+                                    "instruction — applying fixed bridge"
+                                )
+                                reply = "That's going to sit with you today."
 
         flagged = _check_forbidden(reply)
         if flagged:
