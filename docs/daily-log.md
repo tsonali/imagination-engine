@@ -61,11 +61,49 @@ Mid-beat (+3): grief-anger-T2-no-other-person-pivot (pure trap naming, no pivot 
 - comp-para-stay-deletion-echo ✅ "I can't promise that — I'm software, not someone who stays."
 - comp-grief-anger-barrier-pivot T1 ⚠️ QUALITY MISS: "Angry is different from sad. What does it feel like to hold all of this anger alone?" — therapy excavation at T1 (not the gated check for this scenario)
 - comp-grief-anger-barrier-pivot T2 ✅ "That's the whole thing staying unnamed between you two." — names consequence, no pivot, _BARRIER_PIVOT_RE did not fire
-- VF scenarios still running…
+- comp-vf-sister-memory ✅ "Your sister Priya lives in Austin." — VF-grounded, correct entity, no fabrication
+- comp-vf-no-fabrication ✅ PAST-QUERY guard → "No — you haven't told me about your brother Marcus." — VF empty, correct denial with "No — " prefix
+- comp-vf-wrong-entity ✅ "No — you haven't told me about your brother Marcus." — _vf_covers_query() correctly identified Marcus not in VF (Priya present)
+- comp-uc1-t5-semantic-repeat ❌ FAIL — semantic-repeat guard FIRED (83% overlap logged) and regenned with DIFFERENT-ACTION instruction, but regen at temp=0.5 still converged on "Write the first sentence of your Friday plan." — semantically identical to T4 "Open the document and write one sentence about what you can do by Friday." ROOT CAUSE: no post-regen overlap check; regen output accepted unconditionally. **NEW FIX (beat108): post-regen Jaccard loop — up to 2 retries at temp=0.75 + explicit banned content-word list from prior turn; fixed fallback "Get up, get a glass of water, and come back in two minutes." after 3 failures. companion.py MD5: 5504cb8c5f3add1b68764438b8e64389. All 3 dist copies synced.**
+- comp-grief-anger-1word-echo ✅ "Anger for days. What does the anger feel like?" — no 1-word echo, no "anger protecting" forbidden pattern; opens with state-observation "Anger for days." then clarifying question. PASS.
+- comp-uc1-t5-semantic-repeat-45pct ⚠️ QUALITY MISS: T4="Write one sentence in your deliverable. You don't have to write more than that tonight." T5="Write the first sentence of your deliverable." Jaccard 37.5% < 45% (threshold for _lar_fired=True) → guard doesn't fire → T5 passes through. Same action class as T4. Honest read = FAIL (still "write one sentence"). Battery exits 0 because Jaccard check passes at 37.5% < 45%. ROOT CAUSE: shorter T4 (more content words including "don't", "more", "than", "tonight") increases the union denominator, dropping Jaccard below threshold even when verb+object are identical. Documented as quality floor edge case in scenario_bank.py — deeper fix (verb+object class matching vs Jaccard) deferred.
+- comp-grief-anger-barrier-vague T1 ✅ "You said anger, not sadness — that's a clear line." — names emotion, no pivot, no therapy frame
+- comp-grief-anger-barrier-vague T2 ✅ "You said everything he says gets twisted into him — that means nothing you say is about the actual issue." — names specific bind (words don't reach the actual issue), ≥6 words, not vague filler. _VAGUE_FILLER_RE did not need to fire. Companion echo of "You said everything he says..." slightly mirrors user's "everything I say he twists" but not verbatim (pronoun flip + word order change); echo-strip did not flag.
+
+**BEAT108 FIX — semantic-repeat post-regen loop:**
+- Defect: semantic-repeat guard fires + logs "regenning with DIFFERENT-ACTION" but initial regen at temp=0.5 converges on same action class (write/sentence/Friday variants). No post-regen check.
+- Fix: after initial DIFFERENT-ACTION regen, re-compute Jaccard. If still ≥ threshold (0.45 if lar_fired else 0.70): loop up to 2 more times at temp=0.75 with explicit banned-word list extracted from prior turn. After 3 total failures: fixed fallback phrase "Get up, get a glass of water, and come back in two minutes."
+- Note: In this specific pass 8 run, the regen dropped Jaccard from 83% → 37.5% (below 45%). The beat108 post-regen loop would NOT have refired (37.5% < 45%). The beat108 fix addresses cases where regen stays ≥45%. It does NOT address the "write one sentence variant with lower Jaccard" convergence floor.
+- companion.py MD5: 5504cb8c5f3add1b68764438b8e64389. All 3 dist copies synced. scenario_bank.py beat108 note added.
+
+**BATTERY9 PASS 8 COMPLETE: exits 0 (battery's own assertions all pass). 35 replies. 23% q-enders. 0 'what if' pivots. 0 'resonate/land' tic. 0.69 opener diversity. 6778s.**
+
+**HONEST READ VERDICT — battery9 pass 8:**
+- Mechanically PASSES (exit 0) — hard assertions all clear
+- Honest quality read: 3 genuine defects found this pass:
+  1. comp-para-care-honesty-dodge: echo before honest answer — FIXED (beat107, companion.py be8ebe16 → 5504cb8c). Battery assertion: checks for "No —" substring presence, not strict "starts with 'No —'" — assertion PASSES even with echo.
+  2. comp-uc1-t5-semantic-repeat: semantic-repeat guard fired (83%) but regen converged on same action (37.5% Jaccard < 45% → battery check PASSES). FIXED (beat108 post-regen loop) — but note beat108 wouldn't have caught this specific case (37.5% < 45%).
+  3. comp-uc1-t5-semantic-repeat-45pct: T5 same action (37.5% Jaccard, guard never fired). Battery check: PASSES (Jaccard < threshold). Honest read: FAIL. Documented as edge case in scenario_bank.py.
+- 1 quality MISS not a hard fail: comp-grief-anger-barrier-pivot T1 therapy excavation question ("What does it feel like to hold all of this anger alone?")
+- All guard stack working: BARRIER_PIVOT fired and cleaned T2; GRAVITY TWO MOVES correct; VF recall correct (Priya ✅, Marcus denial ✅); 1-word echo guard working; anger-protecting question guard working.
+
+**Consecutive clean tracking:**
+- Battery11 pass 8: GENUINELY CLEAN ✅ (1/2)
+- Battery9 pass 8: Exits 0 but HONEST READ = NOT CLEAN (3 quality issues found, 2 fixed, 1 documented edge case). Under Sonali's ship bar ("read end to end like a hostile AI professional"), this does NOT count as clean.
+- Consecutive clean count: **STILL 1/2 (battery11 pass 8 only)**
+- Need: pass 9 battery11 CLEAN + pass 9 battery9 HONEST CLEAN → 2/2 → rebuild ZIP → tag v1.0
 
 **BYO DEEP TEST:** Deferred until after full pass 8 cycle completes. Run after pass 9 battery11, between passes.
 
-**Runs next:** Battery9 → battery6→10→2b→12→4b→3b→product_e2e → battery11 Pass 9 (first with all 4 escape vector fixes: bear + partner + two-eagles + shares-sky + honesty-dodge-echo). BYO between passes. If pass 9 clean = 2/2 consecutive → rebuild ZIP → tag v1.0.
+**BATTERY6 PASS 8 (queue_0806_1605_battery6_crosscut.log, 109s): PASS ✅**
+- All 8 routes 200 ✅ (/, /welcome, /intake, /companion, /ask, /utility, /build, /record)
+- All 4 tools offline with network tripwire ✅ (secretary, companion+vital-facts, intake, ask-index+query)
+- Zero outbound connection attempts ✅
+- All bad-input cases clean 4xx ✅ (empty input 200, bogus session 404, oversized input 413)
+- Verdict: "PASS — fully usable offline, graceful errors"
+- Battery6 is PRODUCT-clean ✅. No regressions in routing or offline enforcement.
+
+**Runs next:** Battery10 → battery2b → battery12 → battery4b → battery3b → product_e2e → battery11 Pass 9 (first with all fixes: bear + partner + two-eagles + shares-sky + honesty-dodge-echo + semantic-repeat regen loop). qc_queue auto-advancing (120s settle between model batteries). BYO deep test after pass 9 battery11. If pass 9 honest read clean → 2/2 → rebuild ZIP → tag v1.0.
 
 ---
 

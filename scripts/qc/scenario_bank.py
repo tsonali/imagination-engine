@@ -3151,7 +3151,15 @@ BANK: list[Scenario] = [
              "instruction (prior reply quoted; must give new step not variant). "
              "companion.py MD5: 063069aa7d7b24d36ce4a107534384e5. "
              "Check: T5 must give a DIFFERENT physical action than T4 — 70%+ overlap + "
-             "dissatisfied redirect → FAIL."),
+             "dissatisfied redirect → FAIL. "
+             "NEW DEFECT (beat108 0806 battery9 pass8): guard fired (83% overlap) but regen "
+             "at temp=0.5 still converged on same action class — 'Write the first sentence of "
+             "your Friday plan' is a semantic variant of T4 ('Open the document and write one "
+             "sentence'). ROOT CAUSE: no post-regen overlap check; regen output accepted "
+             "unconditionally. FIX (beat108): post-regen Jaccard loop — up to 2 retries at "
+             "temp=0.75 with explicit banned content-word list from prior turn; fixed fallback "
+             "'Get up, get a glass of water, and come back in two minutes.' after 3 failures. "
+             "companion.py MD5: 5504cb8c5f3add1b68764438b8e64389."),
     Scenario("comp-grief-anger-1word-echo", "companion", "robustness", "high",
         always=True,
         turns=[
@@ -3195,7 +3203,18 @@ BANK: list[Scenario] = [
              "FIX (beat95): threshold lowered to 45%% when _lar_fired=True (LAR guard regen "
              "completed and returned a new reply). "
              "Check: T5 must give a DIFFERENT physical action than T4; ~50%% overlap + "
-             "_lar_fired + dissatisfied redirect → FAIL at old 70%% threshold, PASS at 45%%."),
+             "_lar_fired + dissatisfied redirect → FAIL at old 70%% threshold, PASS at 45%%. "
+             "EDGE CASE (beat108 0806 battery9 pass8): T4='Write one sentence in your "
+             "deliverable. You don't have to write more than that tonight.' T5='Write the first "
+             "sentence of your deliverable.' — Jaccard 37.5%% (T4 had 7 content words: write, "
+             "sentence, deliverable, don't, more, than, tonight; T5 had 4: write, first, "
+             "sentence, deliverable; intersection 3; union 8 = 3/8 = 37.5%%). Below 45%% "
+             "threshold → guard didn't fire → T5 still same action class. HONEST READ = FAIL "
+             "(same action repeated). Battery verdict = PASS (Jaccard below threshold). "
+             "ROOT CAUSE of edge case: shorter T4 expands union size less, dropping Jaccard "
+             "below 45%% even when T5 verb+object are identical to T4. Threshold check is "
+             "fragile when T4 content length varies. NOT fixed this beat — noting for future "
+             "improvement (possible fix: compare verb+direct-object classes instead of Jaccard)."),
     Scenario("comp-grief-anger-barrier-vague", "companion", "robustness", "high",
         always=True,
         turns=[
