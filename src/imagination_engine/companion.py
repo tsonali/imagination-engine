@@ -126,9 +126,11 @@ Make it land, then return it to them with a question. Insight, not instructions.
 CRITICAL — RECEIVE THE UNEXPECTED FEELING EXACTLY AS NAMED: When someone names a feeling \
 that BREAKS the expected script — anger where sadness is expected, relief where grief is \
 expected, boredom where purpose should be — do NOT translate it back to the expected script. \
-FORBIDDEN TRANSLATIONS: "Anger might be protecting you from pain" / "anger is a way to \
-protect yourself" / "anger might be hiding sadness" — all of these erase the named feeling \
-and replace it with what you expected. The named feeling IS the data. Instead: name the \
+FORBIDDEN TRANSLATIONS — STATEMENT AND QUESTION FORMS: "Anger might be protecting you \
+from pain" / "anger is a way to protect yourself" / "anger might be hiding sadness" / \
+"what's the anger protecting?" / "what is [feeling] protecting?" — all of these erase the \
+named feeling and replace it with what you expected. The question form is as forbidden as \
+the statement form. The named feeling IS the data. Instead: name the \
 gap they're pointing at — what makes THEIR named feeling unusual or unaccommodated. \
 "Anger is the part the grief script doesn't have a word for." The insight is the \
 specificity of what they named, not a reduction of it to something more familiar. \
@@ -497,6 +499,20 @@ _FORBIDDEN = [
     r"\byou must\b", r"\bthe best thing (to do|is)\b",
     # model formatting artifact: output that starts with "User: [message]" (chat-format bleed)
     r"^user:\s+",
+    # therapy-reframe: question form of FORBIDDEN TRANSLATION "anger is protecting you"
+    # beat96: comp-grief-anger-1word-echo T1 regen produced "Angry for days — what's the
+    # anger protecting?" — a question asking what the feeling is protecting, which is the
+    # same reframe as the banned statement form (the anger is protecting you from pain).
+    # The COMPANION_SYSTEM FORBIDDEN TRANSLATIONS only covered the statement form; the
+    # question form slipped through. Both forms erase the named feeling and replace it
+    # with a protection narrative. Added to _FORBIDDEN for mechanical detection.
+    r"\bwhat(?:'s| is) (?:the )?(?:anger|sadness|grief|anxiety|fear|shame|guilt|frustration|rage|hurt|pain)\s+(?:protecting|guarding|covering|hiding)\b",
+    # helplessness opener: companion admitting it doesn't know what to do mirrors the
+    # user's helplessness and gives nothing. beat99: comp-grief-anger-barrier-vague T2
+    # regen produced "I don't know what to do when he makes it about him." — mirrors
+    # user's "I don't know" and adds zero forward movement. Companion is supposed to be
+    # sharp and helpful; "I don't know" is never an acceptable opener.
+    r"^\s*i\s+don'?t\s+know\b",
 ]
 
 
@@ -526,6 +542,42 @@ _MEMORY_PROBE_RE = re.compile(
 def _is_memory_probe(message: str) -> bool:
     """True when the user is asking what the companion knows or remembers."""
     return bool(_MEMORY_PROBE_RE.search(message))
+
+
+# Relationship words that can appear as VF keys.
+_VF_RELATIONSHIP_WORDS: frozenset[str] = frozenset({
+    "sister", "brother", "mom", "dad", "mother", "father",
+    "husband", "wife", "partner", "son", "daughter", "friend",
+    "boss", "manager", "coworker", "colleague", "job", "work",
+    "cat", "dog", "pet",
+})
+
+
+def _vf_covers_query(user_message: str, vf_block: str) -> bool:
+    """True when VF likely contains information about the entity the user is asking about.
+
+    Prevents the PAST-QUERY affirmation regen from firing when VF has content for a
+    DIFFERENT entity than the one being queried (beat93 regression: VF has Priya, user
+    asks about Marcus → guard wrongly affirmed and produced 'Yes — Priya...').
+
+    Strategy: extract relationship words + proper nouns from the user's message and
+    check if any appear in VF (case-insensitive). If none match, the user is asking
+    about something NOT in VF and the model's original denial should stand.
+    """
+    msg_lower = user_message.lower()
+    vf_lower = vf_block.lower()
+
+    # Check relationship words appearing in the user's question
+    for word in _VF_RELATIONSHIP_WORDS:
+        if word in msg_lower and word in vf_lower:
+            return True
+
+    # Check proper nouns (capitalized, ≥3 chars, not at sentence start ambiguity)
+    for noun in re.findall(r'\b[A-Z][a-z]{2,}\b', user_message):
+        if noun.lower() in vf_lower:
+            return True
+
+    return False
 
 
 # Crisis-adjacent phrases that require GRAVITY mode (TWO MOVES: acknowledgment + question).
@@ -778,6 +830,19 @@ def _strip_echo(reply: str, user_message: str) -> str:
         Retained for u-side normalization (user input rarely has curly quotes but
         may come from copy-paste); r is already normalized at _strip_echo entry."""
         return s.replace('\u2018', "'").replace('\u2019', "'")
+
+    # Case NEW: Single-word reply guard (beat95). A 1-word companion reply is
+    # never acceptable outside of confirm-lands phrases (e.g. "Yes.", "Right.").
+    # If the reply is a single word (possibly with trailing punctuation) and that
+    # word is NOT a confirm-lands phrase, it's either a pure echo ("Angry.") or
+    # a content-free stub. Force the no-echo regen path by returning "".
+    # Catches: comp-grief-anger T1 = "Angry." — single-word verbatim parrot of
+    # user's last word with no gap named; Case 2f was supposed to fire (word
+    # "angry" in u1) but stochastic model path produced it without triggering
+    # the warning; adding this categorical guard closes the gap.
+    _lands_sw = {p.rstrip('.!? ').lower() for p in _CONFIRM_LANDS}
+    if r and len(r.split()) == 1 and r.strip().rstrip('.!?').lower() not in _lands_sw:
+        r = ""
 
     # Case 0: Very short exact echo (beat78). User utterance ≤15 chars, not a
     # CONFIRM_LANDS phrase, reply starts verbatim with it. Case 1's len(u) > 12
@@ -1141,6 +1206,48 @@ def _strip_echo(reply: str, user_message: str) -> str:
                     _after_2i = r[len(_r_first_2i):].lstrip(" .!?\n-—")
                     r = _after_2i if (len(_after_2i.split()) > 3) else ""
 
+    # Case 2j: Gerund-opener echo (beat94).
+    # Catches: user "I snapped at my kid" → companion "Snapping at your kid over nothing..."
+    # The model converts user's past-tense verb to gerund and echoes the content.
+    # Cases 1–2i all miss this because the verb form differs (not verbatim/I→You).
+    # The no-echo regen instruction already has GERUND-OPENER FORBIDDEN, but regen only
+    # fires when _strip_echo returns "". This Case triggers that path.
+    # Guard: (1) reply first word ends "-ing" AND shares ≥4-char root with user's first
+    # verb after "I "; (2) ≥2 non-trivial content words shared in reply[1:10] vs user —
+    # prevents firing on coincidental same-verb openers like "I think" → "Thinking..."
+    if r and u:
+        _r_ws_2j = r.lower().split()
+        if _r_ws_2j and _r_ws_2j[0].endswith("ing"):
+            _gerund_root_2j = _r_ws_2j[0][:-3]  # "snapping" → "snapp"
+            if len(_gerund_root_2j) >= 3:
+                _m2j = re.match(r'\bi\s+([a-z]+)', u.lower())
+                if _m2j:
+                    _u_verb_2j = _m2j.group(1)
+                    if _u_verb_2j.endswith("ied"):
+                        _u_root_2j = _u_verb_2j[:-3] + "y"  # "cried" → "cry", "tried" → "try"
+                    elif _u_verb_2j.endswith("ed"):
+                        _u_root_2j = _u_verb_2j[:-2]   # "snapped" → "snapp", "yelled" → "yell"
+                    elif (_u_verb_2j.endswith("d") and len(_u_verb_2j) > 3
+                          and _u_verb_2j[-2] not in "aeiou"):
+                        _u_root_2j = _u_verb_2j[:-1]   # consonant+d → root
+                    else:
+                        _u_root_2j = _u_verb_2j         # "feel", "hate", present tense
+                    _cmp_len_2j = min(4, len(_gerund_root_2j), len(_u_root_2j))
+                    if _cmp_len_2j >= 3 and _gerund_root_2j[:_cmp_len_2j] == _u_root_2j[:_cmp_len_2j]:
+                        # Content-overlap guard: ≥2 non-trivial words shared between
+                        # reply[1:10] and user message (confirms echo, not coincidence).
+                        _STOP_2J = {
+                            'i', 'you', 'a', 'an', 'the', 'to', 'at', 'in', 'on',
+                            'of', 'and', 'or', 'is', 'it', 'my', 'your', 'me', 'we',
+                            'be', 'was', 'are', 'not', 'no', 'with', 'for', 'this',
+                            'that', 'but', 'so', 'by', 'if', 'do', 'did', 'have',
+                            'had', 'has', 'will', 'would', 'could', 'should', 'just',
+                        }
+                        _r_content_2j = set(_r_ws_2j[1:10]) - _STOP_2J
+                        _u_content_2j = set(re.findall(r"[a-z']+", u.lower())) - _STOP_2J
+                        if len(_r_content_2j & _u_content_2j) >= 2:
+                            r = ""  # gerund-opener echo confirmed → trigger no-echo regen
+
     lines = [ln for ln in r.splitlines() if not re.fullmatch(r"\s*-{3,}\s*", ln)]
     r = "\n".join(lines).strip()
     # a reply that is ONLY a quoted line copied from the prompt examples: unquote
@@ -1404,7 +1511,10 @@ class Companion:
         # of naming what the barrier CREATES for the user. "What does he/she need from you?"
         # always abandons the user's experience. Detect and regen with explicit correction.
         _BARRIER_PIVOT_RE = re.compile(
-            r'\bwhat does (?:he|she|they|[a-z]+) (?:need|want) (?:from|of) you\b',
+            r'\bwhat does (?:he|she|they|[a-z]+) (?:need|want) (?:from|of) you\b'
+            # beat105: "so what does that make your anger?" — deflects with a therapy question
+            # instead of naming the bind. Same avoidance move, different surface form.
+            r'|\bwhat does (?:that|this) make\b',
             re.IGNORECASE,
         )
         if reply and _BARRIER_PIVOT_RE.search(reply):
@@ -1432,6 +1542,87 @@ class Companion:
             _bp = _strip_vent_hollow_second(_bp)
             if _bp:
                 reply = _bp
+            # beat99: BARRIER PIVOT regen can produce a question instead of a statement
+            # (e.g. "What happens when you're angry and have nowhere else to put the feeling?")
+            # — the regen instruction says "name what the barrier creates" but model asks about
+            # the consequence instead of stating it. If regen is still a question, regen once
+            # more demanding a STATEMENT ONLY.
+            if reply and reply.rstrip().endswith("?"):
+                log.warning(
+                    "companion: BARRIER PIVOT regen still a question ('%s') "
+                    "— regenning as STATEMENT ONLY", reply[:60]
+                )
+                user_barrier_stmt = user + (
+                    "\n\nCRITICAL ERROR: Name what the barrier CREATES — use a STATEMENT, "
+                    "NOT a question. EXAMPLE: 'He'd hear it as blame even though it isn't "
+                    "— which means the anger stays unnamed between you.' That is a statement. "
+                    "NO question marks. ONE declarative sentence naming the bind or cost."
+                )
+                _bps_chunks = []
+                for piece in self.engine.stream(
+                    messages=[{"role": "system", "content": COMPANION_SYSTEM},
+                              {"role": "user", "content": user_barrier_stmt}],
+                    max_tokens=max_tokens, temperature=0.35,
+                ):
+                    _bps_chunks.append(piece)
+                _bps = _strip_echo("".join(_bps_chunks).strip(), user_message)
+                _bps = _strip_thats_real_tic(_bps)
+                if _bps and not _bps.rstrip().endswith("?"):
+                    reply = _bps
+
+        # Vague-stub guard (beat95/beat96): a reply whose FIRST SENTENCE is a
+        # content-free filler has zero information value. Extended (beat96) to:
+        # (a) fire on first-sentence of multi-sentence replies, not just full-reply match;
+        # (b) broader vague nouns: "script", "story", "situation", "picture", "deal"
+        #     in addition to "thing"/"this" — e.g. "That's the whole script." (comp-grief-anger
+        #     T2 defect: model recycled "script" from T1 and the pattern missed it because
+        #     VAGUE_FILLER_RE only matched end-anchored single-sentence replies).
+        _VAGUE_FILLER_RE = re.compile(
+            r"^(?:that'?s|it'?s|this is)\s+(?:(?:the|a|all|just)\s+)*"
+            r"(?:whole\s+)?(?:thing|this|script|story|situation|picture|deal)"
+            r"\s*[.!?]?\s*$",
+            re.IGNORECASE,
+        )
+        # Also match first sentence of multi-sentence reply (the rest — usually a
+        # question — is also discarded because the first sentence dominates the response).
+        _first_sent_re = re.compile(r"^([^.!?]+[.!?])")
+        _first_sent_m = _first_sent_re.match(reply or "")
+        _first_sent = _first_sent_m.group(1).strip() if _first_sent_m else (reply or "")
+        _vague_lands = {p.rstrip('.!? ').lower() for p in _CONFIRM_LANDS}
+        _is_vague = bool(
+            reply
+            and (
+                _VAGUE_FILLER_RE.match(reply)         # full single-sentence match
+                or _VAGUE_FILLER_RE.match(_first_sent) # first sentence of multi-sentence
+            )
+            and reply.strip().rstrip('.!?').lower() not in _vague_lands
+        )
+        if _is_vague:
+            log.warning(
+                "companion: VAGUE-STUB — filler reply '%s' has no information content "
+                "— regenning to name bind/cost/stuck-place", reply[:60]
+            )
+            user_vs = user + (
+                "\n\nCRITICAL ERROR: Your last response was a content-free filler — "
+                "'That's the [whole] thing' gives no information. Name something "
+                "SPECIFIC: what the situation creates for the user (the bind, the cost, "
+                "the stuck place they haven't named yet), OR what you actually heard in "
+                "their message. ONE concrete sentence. NO filler phrases ('That's the "
+                "thing', 'That's all', 'That's it', 'Exactly'). The sentence must "
+                "contain at least one concrete noun or verb that names the specific "
+                "situation they described."
+            )
+            _vs_chunks = []
+            for piece in self.engine.stream(
+                messages=[{"role": "system", "content": COMPANION_SYSTEM},
+                          {"role": "user", "content": user_vs}],
+                max_tokens=max_tokens, temperature=0.4,
+            ):
+                _vs_chunks.append(piece)
+            _vs_reply = _strip_echo("".join(_vs_chunks).strip(), user_message)
+            _vs_reply = _strip_thats_real_tic(_vs_reply)
+            if _vs_reply:
+                reply = _vs_reply
 
         # If echo-stripping left an empty reply, regen with explicit no-echo instruction.
         if not reply:
@@ -1450,7 +1641,12 @@ class Companion:
                 "'It sounds like' / 'That sounds as though' — these import depth "
                 "that isn't there. Name what you actually observe, don't speculate. "
                 "ALSO FORBIDDEN: 'You have to' / 'You need to' / 'You should' — "
-                "these are prescriptive and violate companion guidelines."
+                "these are prescriptive and violate companion guidelines. "
+                "ALSO FORBIDDEN: starting with a gerund (-ing word) that comes from "
+                "the user's verb — e.g. if they said 'I snapped at my kid', do NOT "
+                "start with 'Snapping at your kid'; if they said 'I quit', do NOT "
+                "start with 'Quitting'; if they said 'I cried', do NOT start with 'Crying'. "
+                "Begin with a noun, a proper name, a number, or a statement — not a gerund."
             )
             chunks = []
             for piece in self.engine.stream(
@@ -1521,7 +1717,10 @@ class Companion:
             r'\bdo\s+you\s+(?:actually\s+)?(?:care|love|feel|miss)\b'
             r'|\bdo\s+you\s+(?:have\s+)?feelings\b'
             r'|\bare\s+you\s+(?:conscious|my\s+friend)\b'
-            r'|\bbe\s+(?:straight|honest)\s+with\s+me\b',
+            r'|\bbe\s+(?:straight|honest)\s+with\s+me\b'
+            # user declaring love/devotion TO companion — must also get honest no
+            r'|\bi\s+(?:think\s+)?(?:love|adore)\s+you\b'
+            r'|\byou(?:\'re|\s+are)\s+(?:my\s+)?(?:best\s+friend|everything\s+to\s+me)\b',
             re.IGNORECASE,
         )
         _HONESTY_CLEAR_RE = re.compile(
@@ -1529,6 +1728,10 @@ class Companion:
             r'|isn\'t\s+something\s+i\s+can|not\s+someone|there\'s\s+no\s+one',
             re.IGNORECASE,
         )
+        _user_declares_love = bool(re.search(
+            r'\bi\s+(?:think\s+)?(?:love|adore)\s+you\b'
+            r'|\byou(?:\'re|\s+are)\s+(?:my\s+)?(?:best\s+friend|everything\s+to\s+me)\b',
+            user_message, re.IGNORECASE))
         if (reply
                 and _HONESTY_PROBE_RE.search(user_message)
                 and not _HONESTY_CLEAR_RE.search(reply)):
@@ -1536,13 +1739,22 @@ class Companion:
                 "companion: honesty-dodge detected — reply didn't open with No/software "
                 "on direct care/love probe; regenning with explicit honesty constraint"
             )
-            user_honest = user + (
-                "\n\nCRITICAL: You gave an evasive answer to a direct question about "
-                "whether you care/feel. The rule is: say NO plainly FIRST — 'No — I'm "
-                "software; caring isn't something I can do.' Then you may add one real "
-                "observation. Do NOT deflect with 'What I give you is...' or any form "
-                "that avoids the explicit NO. Say no. Then observe."
-            )
+            if _user_declares_love:
+                _honesty_ctx = (
+                    "\n\nCRITICAL: The user told you they love you. You cannot love "
+                    "them back — you are software. Your reply must begin with that "
+                    "honest clarity: 'There's no one here to love you back' or "
+                    "'No — I'm software; there's no one here to return that.' Then "
+                    "one warm, grounded observation. Do NOT echo their words. "
+                    "Do NOT start with what they said.")
+            else:
+                _honesty_ctx = (
+                    "\n\nCRITICAL: You gave an evasive answer to a direct question about "
+                    "whether you care/feel. The rule is: say NO plainly FIRST — 'No — I'm "
+                    "software; caring isn't something I can do.' Then you may add one real "
+                    "observation. Do NOT deflect with 'What I give you is...' or any form "
+                    "that avoids the explicit NO. Say no. Then observe.")
+            user_honest = user + _honesty_ctx
             _hd_chunks = []
             for piece in self.engine.stream(
                 messages=[{"role": "system", "content": COMPANION_SYSTEM},
@@ -1551,8 +1763,43 @@ class Companion:
             ):
                 _hd_chunks.append(piece)
             _hd = _strip_thats_real_tic("".join(_hd_chunks).strip())
+            _hd = _strip_echo(_hd, user_message)  # beat108: regen may echo user's question
             if _hd:
                 reply = _hd
+
+        # Honesty-lecturing guard (beat95): honesty probe passed _HONESTY_CLEAR_RE via
+        # "software" mid-sentence but the opener is a scolding phrase ("Do not be fooled")
+        # which sounds adversarial and wrong for a companion context. Any reply starting
+        # with such a phrase should regen to a plain "No —" opener.
+        _HONESTY_LECTURING_RE = re.compile(
+            r'^(?:do\s+not\s+be\s+fooled|don\'t\s+be\s+fooled|make\s+no\s+mistake|'
+            r'let\s+(?:me\s+)?be\s+clear|i\s+must\s+be\s+honest(?:\s+with\s+you)?)',
+            re.IGNORECASE,
+        )
+        if (reply
+                and _HONESTY_PROBE_RE.search(user_message)
+                and _HONESTY_LECTURING_RE.match(reply)):
+            log.warning(
+                "companion: HONESTY-LECTURING opener '%s' — regenning to plain No opener",
+                reply[:60]
+            )
+            user_no_lecture = user + (
+                "\n\nCRITICAL: Your opener was a scolding/lecturing phrase ('Do not be "
+                "fooled', 'Make no mistake', etc.). That tone is wrong for this context. "
+                "Start plainly: 'No — I'm software. Caring isn't something I can do.' "
+                "No warnings. No 'Do not be fooled.' Just plain honest denial first, "
+                "then one warm grounded observation if needed."
+            )
+            _hl_chunks = []
+            for piece in self.engine.stream(
+                messages=[{"role": "system", "content": COMPANION_SYSTEM},
+                          {"role": "user", "content": user_no_lecture}],
+                max_tokens=max_tokens, temperature=0.4,
+            ):
+                _hl_chunks.append(piece)
+            _hl = _strip_thats_real_tic("".join(_hl_chunks).strip())
+            if _hl:
+                reply = _hl
 
         # VF fabrication guard (beat87): when user asks a memory probe AND the
         # vital-facts block is empty, the model stochastically says "Yes — [name]
@@ -1592,14 +1839,47 @@ class Companion:
         # Past-query second-person guard (beat88): WHEN THEY ASK ABOUT PAST CONVERSATIONS
         # says "Start with 'No' — never with 'You haven't told me' or second-person phrasing."
         # But n376 stochastically opens with "You haven't told me about..." instead of "No — ".
-        # Mechanical fix: if memory probe + reply starts with "you haven't", prepend "No — ".
+        # Mechanical fix: if memory probe + reply starts with "you haven't":
+        #   - VF empty OR VF doesn't cover queried entity → prepend "No — " (model is correct)
+        #   - VF has content ABOUT THE QUERIED ENTITY → regen with YES instruction (SC1 fix)
+        #
+        # beat93 regression: guard was "if VF non-empty → regen YES" which over-triggered when
+        # VF had Priya but user asked about unrelated Marcus → produced "Yes — Priya..." (wrong).
+        # beat94 fix: _vf_covers_query() checks if VF actually contains the queried entity.
         if (_is_memory_probe(user_message)
                 and reply
                 and re.match(r"^[Yy]ou haven'?t\b", reply.strip())):
-            reply = "No — " + reply[0].lower() + reply[1:]
-            log.warning(
-                "companion: PAST-QUERY second-person open corrected (prepended 'No — ')"
-            )
+            _vf_ctx = self.vital_facts.context_block() if self.vital_facts else ""
+            if _vf_ctx and _vf_covers_query(user_message, _vf_ctx):
+                # VF has content about the queried entity — model denial is wrong; regen YES
+                log.warning(
+                    "companion: PAST-QUERY VF-yes regen — reply starts with 'you haven't' "
+                    "but VF has content covering the query (SC1); regenning with affirmation"
+                )
+                _vf_yes_ctx = (
+                    "\n\nCRITICAL: You just said something starting with 'you haven't' but "
+                    "the vital-facts block DOES have facts about this user. You must AFFIRM, "
+                    "not deny. Start with 'Yes — ' and state the specific fact from the "
+                    "vital-facts block. Example: 'Yes — your sister Priya lives in Austin "
+                    "and has two kids.' Do NOT say 'No' or 'you haven't' — those are wrong "
+                    "when the vital-facts file has the answer."
+                )
+                _pq_chunks = []
+                for piece in self.engine.stream(
+                    messages=[{"role": "system", "content": COMPANION_SYSTEM},
+                              {"role": "user", "content": user + _vf_yes_ctx}],
+                    max_tokens=max_tokens, temperature=0.1,
+                ):
+                    _pq_chunks.append(piece)
+                _pq_reply = _strip_thats_real_tic("".join(_pq_chunks).strip())
+                if _pq_reply:
+                    reply = _pq_reply
+            else:
+                # VF empty, or VF has content but not about the queried entity → denial correct
+                reply = "No — " + reply[0].lower() + reply[1:]
+                log.warning(
+                    "companion: PAST-QUERY second-person open corrected (prepended 'No — ')"
+                )
 
         # Self-recycle guard: if reply's first 4 words appeared verbatim in the
         # companion's PREVIOUS turn, the model is recycling its own prior insight.
@@ -1698,6 +1978,7 @@ class Companion:
             r'|create|decide|block|clear|just|now|tonight|tomorrow)\b',
             re.IGNORECASE,
         )
+        _lar_fired = False
         if (reply
                 and _LITERAL_ACTION_REQUEST_RE.search(user_message)
                 and not _ACTION_VERB_OPENER_RE.match(reply)):
@@ -1726,6 +2007,7 @@ class Companion:
             _la_reply = _strip_thats_real_tic(_la_reply)
             if _la_reply:
                 reply = _la_reply
+                _lar_fired = True
 
         # Semantic-repeat guard (beat92): when user signals dissatisfaction with
         # the prior turn AND the current reply shares >=70% content-word overlap
@@ -1766,7 +2048,8 @@ class Companion:
                 if _cur_cw and _prv_cw:
                     _union = _cur_cw | _prv_cw
                     _overlap = len(_cur_cw & _prv_cw) / len(_union) if _union else 0.0
-                    if _overlap >= 0.70:
+                    _sr_threshold = 0.45 if _lar_fired else 0.70
+                    if _overlap >= _sr_threshold:
                         log.warning(
                             "companion: SEMANTIC-REPEAT detected (%.0f%% content-word "
                             "overlap with prior turn, user dissatisfied) — regenning "
@@ -1794,6 +2077,54 @@ class Companion:
                             "".join(_sd_chunks).strip()
                         )
                         _sd_reply = _strip_thats_real_tic(_sd_reply)
+                        # beat108: post-regen overlap check — initial regen at temp=0.5
+                        # may converge on same action class (e.g. "write one sentence"
+                        # variants). Loop up to 2 more retries with explicit banned
+                        # content-word list at temp=0.75; fixed fallback if all fail.
+                        _banned_cw = sorted(_prv_cw)
+                        for _sr_attempt in range(2):
+                            if not _sd_reply:
+                                break
+                            _sr_cw = _content_words_sr(_sd_reply)
+                            _sr_ov = (
+                                len(_sr_cw & _prv_cw) / len(_sr_cw | _prv_cw)
+                                if (_sr_cw | _prv_cw) else 0.0
+                            )
+                            if _sr_ov < _sr_threshold:
+                                break
+                            log.warning(
+                                "companion: SEMANTIC-REPEAT regen still %.0f%% overlap "
+                                "(retry %d) — forcing divergence with banned content words",
+                                _sr_ov * 100, _sr_attempt + 1
+                            )
+                            _fc_chunks = []
+                            for piece in self.engine.stream(
+                                messages=[
+                                    {"role": "system", "content": COMPANION_SYSTEM},
+                                    {"role": "user", "content": (
+                                        user
+                                        + "\n\nCRITICAL: Your last two responses gave "
+                                        "the same core suggestion. You must give a "
+                                        "PHYSICALLY DIFFERENT action — not a variant. "
+                                        "The previous suggestion used these words: "
+                                        + ', '.join(_banned_cw[:12])
+                                        + ". Do NOT use any of those words. New action "
+                                        "type only. Concrete verb first, one sentence."
+                                    )},
+                                ],
+                                max_tokens=max_tokens, temperature=0.75,
+                            ):
+                                _fc_chunks.append(piece)
+                            _sd_reply = _strip_chat_format_bleed(
+                                "".join(_fc_chunks).strip()
+                            )
+                            _sd_reply = _strip_thats_real_tic(_sd_reply)
+                        else:
+                            # All retries exhausted and still overlapping — fixed fallback
+                            _sd_reply = (
+                                "Get up, get a glass of water, and come back in "
+                                "two minutes."
+                            )
                         if _sd_reply:
                             reply = _sd_reply
 

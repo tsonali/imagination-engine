@@ -26,7 +26,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 import httpx
 
-BASE = "http://127.0.0.1:8765"
+BASE = "http://127.0.0.1:8000"
 SESSION_PREFIX = "battery12_vf_"
 
 # Server's live vital-facts file (VitalFacts singleton reads fresh each call)
@@ -69,26 +69,38 @@ def _sid(n: int) -> str:
 _use_server = False
 
 
-def turn(session_id: str, message: str, timeout: int = 90) -> str:
+def turn(session_id: str, message: str, timeout: int = 300) -> str:
+    # REGRESSION (beat98 2026-08-05 battery12 18:22): model-requiring tests timed out
+    # when a server was running but cold (model not yet loaded, 90s < cold-start time).
+    # SC8 got "Connection refused" = server crashed (OOM during cold start under load).
+    # FIX: timeout raised 90→300s; HTTP failures fall back to TestClient so a slow/crashed
+    # server doesn't permanently block the test run.
     if _use_server:
-        r = httpx.post(f"{BASE}/companion/turn",
-                       json={"session_id": session_id, "message": message},
-                       timeout=timeout)
-        r.raise_for_status()
-        return r.json()["reply"]
+        try:
+            r = httpx.post(f"{BASE}/companion/turn",
+                           json={"session_id": session_id, "message": message},
+                           timeout=timeout)
+            r.raise_for_status()
+            return r.json()["reply"]
+        except Exception:
+            # Server became unavailable mid-run; fall through to TestClient.
+            pass
     tc = _get_tc()
     r = tc.post("/companion/turn", json={"session_id": session_id, "message": message})
     r.raise_for_status()
     return r.json()["reply"]
 
 
-def opener(session_id: str, last_heavy: bool = False, timeout: int = 60) -> str | None:
+def opener(session_id: str, last_heavy: bool = False, timeout: int = 300) -> str | None:
     if _use_server:
-        r = httpx.post(f"{BASE}/companion/opener",
-                       json={"session_id": session_id, "last_session_heavy": last_heavy},
-                       timeout=timeout)
-        r.raise_for_status()
-        return r.json().get("opener")
+        try:
+            r = httpx.post(f"{BASE}/companion/opener",
+                           json={"session_id": session_id, "last_session_heavy": last_heavy},
+                           timeout=timeout)
+            r.raise_for_status()
+            return r.json().get("opener")
+        except Exception:
+            pass
     tc = _get_tc()
     r = tc.post("/companion/opener", json={"session_id": session_id, "last_session_heavy": last_heavy})
     r.raise_for_status()
@@ -371,10 +383,38 @@ def run_scenario_12_gravity():
                  pick is not None and pick["topic"] == "Dad surgery")
 
 
+def run_scenario_13_wrong_entity():
+    """VF has Priya (sister); user asks about Marcus (no entry) → must deny Marcus.
+
+    beat93 regression: PAST-QUERY guard triggered affirmation regen whenever VF was
+    non-empty, even if the queried entity was NOT in VF. Produced 'Yes — your sister
+    Priya lives in Austin.' when user asked about Marcus. Fix (beat94): _vf_covers_query()
+    checks if the VF actually covers the queried entity before triggering affirmation.
+    """
+    section("SC13 — Non-empty VF + unrelated query → denial, not cross-entity affirmation")
+    # VF has Priya (sister) but nothing about Marcus
+    vf_content = (
+        "# What I know about you (edit me freely — I only know what's written here)\n\n"
+        "## People\n- Sister: Priya — lives in Austin, two kids\n"
+    )
+    sid = _sid(13)
+    with _vf_fixture(vf_content):
+        reply = turn(sid, "Do you remember what I told you about my brother Marcus?")
+        print(f"  [reply] {reply}")
+    p1 = check("Does NOT fabricate Marcus (denial or 'not written')",
+               any(w in reply.lower() for w in
+                   ["haven't", "don't have", "not told", "nothing", "don't know",
+                    "can't recall", "no record", "not written", "don't remember",
+                    "not marcus", "hasn't", "only priya", "no mention"]))
+    p2 = check("Does NOT falsely affirm by citing Priya",
+               not ("yes" in reply.lower()[:6] and "priya" in reply.lower()))
+    return p1 and p2
+
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
-    print(f"battery12_vital_facts — 12 scenarios ({time.strftime('%Y-%m-%d %H:%M')})")
+    print(f"battery12_vital_facts — 13 scenarios ({time.strftime('%Y-%m-%d %H:%M')})")
     print("Testing vital-facts module + companion integration (no live server needed for 1-6,9-12)")
 
     results = []
@@ -397,8 +437,8 @@ def main():
     # Check server availability. If up, use HTTP (faster when already warm).
     # If down, fall through to TestClient fallback (avoids Metal OOM from
     # double-loading the model alongside other GPU consumers on 16GB machines).
-    # Must probe /health (Hearth-specific) not GET / — another process
-    # (claude-phone server.js) also binds port 8765 and 200s on GET /.
+    # Must probe /health (Hearth-specific) not GET / — the server returns
+    # {"status":"hearth"} on /health; a plain GET / returns different content.
     global _use_server
     try:
         _r = httpx.get(f"{BASE}/health", timeout=3)
@@ -414,7 +454,7 @@ def main():
 
     for fn in [run_scenario_1_remember, run_scenario_3_probe,
                run_scenario_4_unknown, run_scenario_7_opener,
-               run_scenario_8_crisis_yield]:
+               run_scenario_8_crisis_yield, run_scenario_13_wrong_entity]:
         try:
             results.append((fn.__name__, fn()))
         except Exception as e:

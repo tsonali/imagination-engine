@@ -133,6 +133,10 @@ def _b_draft(text, instruction, tone, style):
         "[bracketed blanks] for any names not in the brief, including [Your name] at the "
         "end). Tone shapes the words, not whether the frame exists: "
         "a firm email still opens and signs like an email.\n"
+        "SALUTATION: The brief may begin with an action verb or imperative (e.g. "
+        "'Need to apologize...', 'Write a firm decline...'). NEVER use any such word as "
+        "the recipient's name. If the brief does not explicitly name the recipient, open "
+        "with 'Dear [Recipient Name],' — nothing else.\n"
         "Say only what the brief supports. If it doesn't give a reason, a date, or a "
         "detail you need, put a [bracketed blank] — NEVER invent one (no fabricated "
         "'work commitments', no assumed dates, no invented day names like 'Tuesday' "
@@ -212,12 +216,19 @@ _NAME_STOPWORDS = frozenset({
 })
 
 # Extended stopwords for broad proper-noun extraction in draft briefs — adds abbreviated
-# months and common sentence-initial capitalised words that aren't names.
+# months, common sentence-initial capitalised words, and imperative/action verbs that
+# start briefs (e.g. "Need to apologize..." → "Need" is a verb, not a person name).
 _DRAFT_NAME_STOPWORDS = _NAME_STOPWORDS | frozenset({
     'jan', 'feb', 'mar', 'apr', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec',
     'dear', 'this', 'that', 'from', 'with', 'your', 'their', 'what', 'when',
     'where', 'have', 'will', 'shall', 'just', 'they', 'also', 'subject',
-    'attached', 'please', 'thank', 'formal', 'please', 'regarding',
+    'attached', 'please', 'thank', 'formal', 'regarding',
+    # Common imperative / action verbs that start briefs and look capitalised:
+    'need', 'write', 'send', 'tell', 'make', 'help', 'call', 'ask', 'get',
+    'follow', 'note', 'check', 'reply', 'draft', 'fix', 'add', 'remove',
+    'update', 'create', 'schedule', 'cancel', 'meet', 'apologize', 'confirm',
+    'inform', 'decline', 'accept', 'invite', 'remind', 'forward', 'share',
+    'request', 'inform', 'sorry',
 })
 
 
@@ -553,6 +564,25 @@ class Assistant:
                                         " do NOT round or substitute a different number")
                         else:
                             anti_sub = sib_note
+                        # Cross-line time-unit: if no same-line sibling but a different
+                        # time value with the same unit IS in the output (e.g. "16 months"
+                        # reported, "11 months" base dropped), name both explicitly.
+                        if not sibs_in_out and not anti_sub:
+                            _tm2 = re.match(r'^(\d[\d,]*)\s+(months?|years?|weeks?|days?)\b',
+                                            n.strip(), re.I)
+                            if _tm2:
+                                _unit2 = _tm2.group(2)
+                                _cross2 = [x for x in _extract_numbers(text)
+                                           if x != n
+                                           and re.search(r'\d+\s+' + re.escape(_unit2), x, re.I)
+                                           and _num_present(x, out)]
+                                if _cross2:
+                                    anti_sub = (
+                                        f" — your output mentions {_cross2[0]} but MUST ALSO"
+                                        f" include the base figure {n} (they are separate values:"
+                                        f" {n} is the current figure, {_cross2[0]} is the"
+                                        f" conditional figure)"
+                                    )
                         per_num.append(f"{n} (from source: '{src_ctx}'){anti_sub}")
                     elif "%" in n:
                         per_num.append(f"{n} — use EXACTLY '{n}' with the % symbol;"
@@ -596,7 +626,24 @@ class Assistant:
                 sibs = [x for x in _extract_numbers(_src_ctx)
                         if x != n and _num_present(x, out)]
                 if not sibs:
-                    continue
+                    # Cross-line fallback for time-unit numbers (e.g. "11 months" missing,
+                    # "16 months" in output from a different source line — "extends to 16
+                    # months if deferred to Q3"). The model reports the conditional value
+                    # and drops the base value because they share a unit but not a line.
+                    _tm = re.match(r'^(\d[\d,]*)\s+(months?|years?|weeks?|days?)\b',
+                                   n.strip(), re.I)
+                    if _tm:
+                        _unit = _tm.group(2)
+                        _cross = [x for x in _extract_numbers(text)
+                                  if x != n
+                                  and re.search(r'\d+\s+' + re.escape(_unit), x, re.I)
+                                  and _num_present(x, out)]
+                        if _cross:
+                            sibs = _cross  # use cross-line sib for injection below
+                        else:
+                            continue
+                    else:
+                        continue
                 sib = sibs[0]
                 if "median" in _src_ctx.lower() and "%" in n and "%" in sib:
                     # "median of 2.1%" → "rate of 3.2% (median: 2.1%)"

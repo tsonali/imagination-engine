@@ -57,6 +57,7 @@ from imagination_engine.postcheck import (degeneration_report, drop_collapsed_pa
                                           clean_narrator_possessives, drop_active_body_wildlife,
                                           drop_forbidden_stock_imagery,
                                           drop_hallucinated_she_her,
+                                          drop_hallucinated_he_eagle,
                                           find_degeneration_start, trim_degenerate_tail,
                                           phrase_repeat_count, repair_phrase_repeats,
                                           repair_short_phrase_repeats,
@@ -1180,13 +1181,19 @@ def generate_session(
         _wildlife_tokens = ("hawk", "falcon", "owl", "osprey", "ospreys", "wolf", "wolves",
                              "raven", "crow", "another eagle", "second eagle", "other eagle",
                              "golden eagle", "golden eagles", "mountain lion", "mountain lions",
-                             "another bird", "another birds")
+                             "another bird", "another birds", "young eagle", "young eagles",
+                             "young bird", "young birds", "younger bird", "younger eagle",
+                             "fellow eagle")
         # "the larger one" is eagle-scoped: in a solo eagle script it signals a companion bird;
         # in a running script it matches "the larger runner/tree/etc" → false positive.
         # beat87: caught in imag-eagle-wildlife-plural; fired 3 times in imag-active-scene (FP).
         # Restrict to eagle-in-intake only.
+        # beat106: "a bear"/"the bear" added eagle-scoped — battery11 postcheck catches
+        # article-prefixed bear noun ("a bear and its cubs come into view") but "bear" alone
+        # is a common verb so can't be in the global token list. Eagle context: bear is always
+        # ground wildlife (seen from altitude), never the user's avatar — drop the sentence.
         if _eagle_in_intake:
-            _wildlife_tokens = _wildlife_tokens + ("the larger one",)
+            _wildlife_tokens = _wildlife_tokens + ("the larger one", "a bear", "the bear")
         full, wildlife_dropped = drop_active_body_wildlife(full, _wildlife_tokens)
         if wildlife_dropped:
             log.warning('[v6] %d companion-wildlife sentence(s) dropped',
@@ -1203,7 +1210,19 @@ def generate_session(
     # but is a companion-bird hallucination only in solo eagle scripts. "eagle" in the
     # transcript is the unambiguous eagle-embodiment signal (user said "I want to be an eagle").
     if _is_active_body and _eagle_in_intake and not _companion_wildlife_in_transcript:
-        full, anon_companion_dropped = drop_active_body_wildlife(full, ("you both", "we both"))
+        # beat105: "both of you" added (complement to "you both"/"we both").
+        # beat106: "your partner", "two separate eagles", "two eagles", "we make our way",
+        # "shares your sky" etc. added — new companion escape vectors found in pass 7
+        # imag-eagle-golden-eagle-wildlife: sentences like "Your partner is already
+        # adjusting to match", "You are two separate eagles flying together",
+        # "we make our way higher together today", "shares your sky right now".
+        full, anon_companion_dropped = drop_active_body_wildlife(full, (
+            "you both", "we both", "both of you",
+            "your partner",
+            "two separate eagles", "two eagles",
+            "we make our way",
+            "shares your sky", "shares this sky", "shares the sky", "shares our sky",
+        ))
         if anon_companion_dropped:
             log.warning('[v6] %d anonymous-companion sentence(s) dropped (you/we both in solo eagle active-body)',
                         anon_companion_dropped)
@@ -1222,6 +1241,16 @@ def generate_session(
             if she_dropped:
                 log.warning('[v6] %d hallucinated-female sentence(s) dropped (she/hers in solo active-body)',
                             she_dropped)
+    # Companion-bird male-pronoun filter (beat95): named-token filter catches species names
+    # (hawk/falcon/etc.) but misses sentences where an unnamed companion bird is described
+    # only by gendered pronouns ("He is heading toward his landing spot"). Apply when
+    # eagle is in intake and no companion wildlife appeared in transcript.
+    if _is_active_body and _eagle_in_intake and not _companion_wildlife_in_transcript:
+        full, he_dropped = drop_hallucinated_he_eagle(full)
+        if he_dropped:
+            log.warning('[v6] %d companion-bird he/him/his sentence(s) dropped (eagle solo script)',
+                        he_dropped)
+
     # Talon-metaphor filter: model occasionally hallucinates eagle body-part metaphors
     # ("Your talons are gripping the edge of the table") in non-embodiment scripts such
     # as deposition rehearsal. Drop any sentence containing "talon/talons" when the

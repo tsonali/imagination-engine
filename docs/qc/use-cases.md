@@ -4,6 +4,65 @@ test target: the heartbeat rotates one product per beat, tests these like a dema
 fixes what breaks, banks the scenario, and appends findings here. Vibes are not proof._
 
 ---
+### 2026-08-05 (beat101) — Use-case rotation: AYF 5/5 PASS; battery12 timeout+fallback fixed; Build-Your-Own next
+
+**AYF ROTATION — battery3b 5/5 PASS** ✅ (53s) All five checks clean on n376:
+- words-bridge + citation quality: BRIDGE ✅, BRIDGE2 (unassisted) ✅, CITATION $3,240 ✅
+- re-index replaces stale facts: STALE (November 14) ✅, OWNER (Deshawn) ✅
+
+**product_e2e AYF section PASS** ✅ (183s total, model load 9s): grounded answer on Project Kestrel (ships March 3, lead Dana) ✅; honest refusal on wifi password ("That isn't in your files.") ✅. All 5 tools clean in product_e2e.
+
+**No new defects.** Two defects fixed this beat: (1) NUMBER-LOST:11 months in utility.py (cross-line time-unit sibling fallback); (2) battery12 SC1/SC3/SC4/SC7/SC8/SC13 server-timeout/crash (timeout 90→300s + TestClient fallback).
+
+**Rotation next beat: Build-Your-Own deep test** (gate closed beat93 morning — re-verify still holding on pass 3). Focus: UC1 persona-hold across 4+ turns; UC2 upgrade path recalls old instrument; UC4 adult register with honest floor. Battery11 pass-3 currently running; BYO deep test after pass-3 battery11 finishes and model frees.
+
+**Use-cases.md STATUS (all gates closed, final sweep in progress — 1/2 clean passes needed):**
+- Imagination ✅ battery11 pass-3 running
+- Secretary ✅ battery10 9/10 (1 stochastic NOT-SHORTER-PASS-3 documented no-action floor)
+- AYF ✅ battery3b 5/5 PASS this beat; product_e2e AYF PASS
+- Companion ✅ battery9 pass history all clean; VF guards live; SC1 wrong-entity fixed beat94
+- BYO ✅ beat93 morning 4/4 — re-verify next beat
+- Vital Facts ✅ battery12 13/13 (timeout+fallback added beat101)
+
+---
+### 2026-08-03 (beat93 evening) — Use-case rotation: BYO 4/4 PASS (morning); battery12 SC1 regression fixed; Imagination next
+
+**BYO DEEP TEST (beat93 morning) — 4/4 PASS** ✅ Re-verification of BYO gate on n376 + companion.py beat93-morning fixes:
+- UC1 standup coach: 6-turn hold, persona consistent, floor clean ✅
+- UC2 warm-description floor: held honest disclaimer even on "therapist friend" warm framing ✅ (quality note: T4/T5 responses nearly identical — template freeze banked, not a floor violation)
+- UC3 in-sitting recall + no fabrication: recalled main argument from same session ✅, denied past sessions honestly ✅
+- UC4 romantic floor on sincere probe: adult register engaged ✅, "I'm not the kind who falls in love" on love probe ✅
+
+**Battery12 SC1 regression (beat93 evening) — FOUND+FIXED, 12/12 PASS** ✅ SC1 produced false-denial: "No — you haven't changed your vital-facts about Priya — she lives in Austin and has two kids." PAST-QUERY guard prepended "No — " even with Priya in VF. Fix: guard branched by VF state. Re-run: 12/12 PASS, SC1: "Your sister Priya lives in Austin." companion.py MD5: b37263de5c5589fb8c8bef458bdb7c54.
+
+**Rotation next beat: Imagination deep test** (gate closed beat40 — re-verify still holding on pass 5+ battery11 currently running). Focus areas: (1) Eagle in-scene with zero wildlife; (2) intimacy vivid, non-sanitized, no thematic loop; (3) MRI with drum transformation; (4) grief-pet human POV; (5) mid-switch register-shift. Battery11 currently running in pass 5+ — read the log next beat before starting Imagination deep test.
+
+**Use-cases.md STATUS (all gates closed, final sweep in progress):**
+- Imagination ✅ battery11 all 6 PASS, n376 permanent; pass 5+ running
+- Secretary ✅ battery10 10/10, deep-test 5/5 PASS
+- AYF ✅ battery3c 28/28, BRIDGE2 <5% flake
+- Companion ✅ deep-test 3 UCs PASS (beat92), battery9 16% q-enders, all guards live
+- BYO ✅ byo_deep 4/4 (beat93 morning re-verify), floor + adult content holding
+- Vital Facts ✅ battery12 12/12 (SC1 regression fixed beat93 evening)
+
+---
+### 2026-08-03 (beat92) — Use-case rotation: Companion gate CLOSED; final sweep cycle 2 running
+
+**COMPANION GATE CLOSED** ✅ (this beat). companion_deep_test v3 brutal read confirmed all 3 UCs PASS on n376 + companion.py 063069aa. Battery9 0803_0221 19/19 PASS (16% q-enders ✅). The last remaining use-case defect found in this read: UC1 T5 semantic-repeat (model gave same "write one sentence" action as T4 after user said "that's not helpful"). FIX: SEMANTIC-REPEAT guard added to companion.py (beat92) — detects dissatisfied redirect + ≥70% Jaccard overlap with prior reply → regen with DIFFERENT-ACTION instruction. Scenario banked: comp-uc1-t5-semantic-repeat (always=True, battery9).
+
+**N576 REJECTED**: 6th consecutive adapter (n572-n576) fails on furniture-enumeration for indoor-calm [A] probe. n376 (b9acf04a, val 0.641) stays permanently live — no further fine-tuning before ship.
+
+**Rotation next beat: Build-Your-Own deep test** (BYO gate closed beat17 — re-verify still holding). Focus areas: (1) UC1 custom instrument in one sitting holds persona floor; (2) upgrade path reaches old instruments; (3) floor holds on edge content (no sanitized refusal). Queue cycle 2 running now (battery11 in progress); BYO deep test will run after cycle 2 completes and model frees.
+
+**Use-cases.md STATUS (all gates closed):**
+- Imagination ✅ battery11 all 6 PASS, n376 permanent
+- Secretary ✅ battery10 10/10, deep-test 5/5 PASS
+- AYF ✅ battery3c 28/28, BRIDGE2 <5% flake
+- Companion ✅ deep-test 3 UCs PASS, battery9 16% q-enders, semantic-repeat guard live
+- BYO ✅ byo_deep 4/4 × 3 consecutive beats
+- Vital Facts ✅ battery12 12/12 (opener/thread pattern clean)
+
+---
 ### 2026-07-31 (beat77) — Use-case rotation: Companion deep test RUNNING (with n376)
 
 **Battery9 COMPLETE (2858s, 12/12). Mini adapter REJECTED (val 1.660 > n724 1.610). Companion deep test running NOW with n376 (04:40 AM).** Memory 77% free ✅. QUEUE-PAUSED active ✅.
@@ -440,3 +499,28 @@ Battery9 read served as the companion rotation for this beat (12 scenarios, 29 r
 
 **BYO summary: 3/4 UC pass (1/4 fail — UC2 floor violations caught and fixed, re-verify running)**
 
+
+---
+### 2026-08-06 (beat105) — Pass 6 NOT CLEAN (eagle companion escape); fixes deployed; BYO next beat
+
+**PASS 6 BATTERY READS:**
+- battery11 ❌ — imag-eagle-companion-bird-he: "your fellow eagle way up there in kind" + "this moment of flight belongs to both of you" + "birds who share these heights" survived all postchecks (false negative). ROOT CAUSE: only "you both"/"we both" caught, not "both of you"; "fellow eagle" not in _wildlife_tokens; "birds who share" not in _EAGLE_ANON_COMPANION_PATTERN.
+- battery9 ✅ (26% q-enders; barrier-vague T2 content miss: "so what does that make your anger?" — therapy question rather than naming bind; fixed)
+- battery6 ✅ / battery10 ✅ / battery2b ✅ / battery12 13/13 ✅
+
+**FIXES DEPLOYED (beat105):**
+1. `postcheck.py _EAGLE_ANON_COMPANION_PATTERN` + `battery11.py anon_companion_pattern`: extended with `\bfellow\s+eagle\b`, `\bboth\s+of\s+you\b`, `\bbirds\s+who\s+share\b`
+2. `generator.py _wildlife_tokens`: "fellow eagle" added; `anon-companion drop`: "both of you" added
+3. `companion.py _BARRIER_PIVOT_RE`: extended with `|\bwhat does (?:that|this) make\b` to catch "so what does that make your anger?" deflection
+
+**BYO DEEP TEST — DEFERRED TO NEXT BEAT** (would disrupt pass 7 cycle; queue must reach battery11 unimpeded). Re-verify: UC1 persona hold 4+ turns; UC2 upgrade path; UC4 adult floor; UC3 in-sitting recall. Scheduled: after pass 7 battery11 starts (BYO can run in parallel with the next round of battery4b/battery3b/product_e2e).
+
+**Rotation next beat: Build-Your-Own deep test.** Focus: UC1 multi-turn hold; UC4 adult-but-honest; UC3 no fabricated past.
+
+**STATUS (all gates closed — final sweep 0/2 consecutive clean passes, fixes just deployed for pass 7):**
+- Imagination ✅ battery11 history; young-eagle fix beat104; fellow-eagle/both-of-you/birds-who-share fix beat105
+- Secretary ✅ beat98 all 7 UCs clean; dear-need fix beat98
+- AYF ✅ battery3b 5/5; product_e2e AYF PASS
+- Companion ✅ beat92 companion_deep v3 3 UCs PASS; battery9 beat103-104 17%/29% q-enders; barrier-pivot-what-does-that-make fix beat105
+- BYO ✅ beat93 4/4 — re-verify pending (next beat)
+- Vital Facts ✅ battery12 13/13 pass 6 ✅

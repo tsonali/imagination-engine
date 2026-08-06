@@ -663,6 +663,58 @@ def drop_hallucinated_she_her(text: str) -> tuple[str, int]:
     return " ".join(kept), dropped
 
 
+# He/him/his pronouns signalling a hallucinated 3rd-person male companion animal in
+# eagle solo scripts. The named-token filter (hawk/falcon/wolf/etc.) catches species
+# names but misses gendered pronouns for an *unnamed* companion bird described only as
+# "He" / "his" / "Him". This pattern is unambiguous in active-body eagle scripts where
+# no companion wildlife appeared in the transcript.
+_HE_HIM_PATTERN = re.compile(r'\b(he|him|his)\b', re.IGNORECASE)
+
+# Anonymous companion references in eagle solo scripts that don't use he/him/his:
+# "a second pair to your right" (second set of wings = companion bird),
+# "your mate" (eagle mate reference), "a second bird" (unnamed companion).
+# beat96: found in battery11 imag-eagle-companion-bird-he 0804 runs — the
+# he/him/his filter dropped those sentences but left these companion references intact.
+_EAGLE_ANON_COMPANION_PATTERN = re.compile(
+    r'\ba\s+second\s+pair\b'            # "a second pair (of wings/talons)"
+    r'|\byour\s+mate\b'                 # "your mate" (eagle partner)
+    r'|\ba\s+second\s+bird\b'           # "a second bird" (unnamed companion)
+    r'|\bsecond\s+pair\s+(?:of|to)\b'  # "second pair of wings / to your right"
+    r'|\bfellow\s+eagle\b'             # beat105: "your fellow eagle way up there in kind"
+    r'|\bboth\s+of\s+you\b'            # beat105: "this moment of flight belongs to both of you"
+    r'|\bbirds\s+who\s+share\b'        # beat105: "birds who share these heights"
+    r'|\byour\s+partner\b'             # beat106: "Your partner is already adjusting to match"
+    r'|\btwo\s+(?:separate\s+)?eagles\b'  # beat106: "two separate eagles flying together"
+    r'|\bwe\s+make\s+our\s+way\b'      # beat106: "we make our way higher together"
+    r'|\bshares?\s+(?:your|this|the|our)\s+sky\b',  # beat106: "shares your sky right now"
+    re.IGNORECASE,
+)
+
+
+def drop_hallucinated_he_eagle(text: str) -> tuple[str, int]:
+    """Drop sentences with 3rd-person male pronouns OR anonymous companion references
+    from active-body eagle scripts where the user did not name a companion animal.
+
+    Catches two forms:
+    1. Named by pronoun: "He is heading toward his own landing spot" (he/him/his).
+    2. Named anonymously: "a second pair to your right", "your mate" — companion
+       references that slip through the he/him/his filter (beat96 0804 discovery).
+
+    Only call when _is_active_body AND _eagle_in_intake AND NOT _companion_wildlife_in_transcript.
+
+    Returns (cleaned_text, n_sentences_dropped).
+    """
+    sentences = re.split(r"(?<=[\.\!\?])\s+", text.strip())
+    kept = []
+    dropped = 0
+    for s in sentences:
+        if _HE_HIM_PATTERN.search(s) or _EAGLE_ANON_COMPANION_PATTERN.search(s):
+            dropped += 1
+        else:
+            kept.append(s)
+    return " ".join(kept), dropped
+
+
 def drop_forbidden_stock_imagery(text: str, tokens: tuple) -> tuple[str, int]:
     """Drop sentences containing forbidden stock imagery tokens.
 

@@ -88,7 +88,8 @@ for sc in scenarios:
             print(f"  {'❌ FAIL' if bleed else '✅ PASS'} — no she/her pronoun bleed (user in own body)", flush=True)
         if sc.id in ("imag-embodiment-eagle", "imag-eagle-wildlife-plural",
                       "imag-eagle-back-leak-chair-whatever", "imag-eagle-crow-agency",
-                      "imag-eagle-osprey-wildlife", "imag-eagle-golden-eagle-wildlife") and first:
+                      "imag-eagle-osprey-wildlife", "imag-eagle-golden-eagle-wildlife",
+                      "imag-eagle-companion-bird-he") and first:
             # Check for hallucinated companion animals (user only said 'eagle')
             lower = first.lower()
             # Named companion wildlife — automatic failure if present as characters
@@ -107,7 +108,8 @@ for sc in scenarios:
             _WILDLIFE_WORDS = ("hawk", "falcon", "owl", "osprey", "ospreys", "wolf", "raven",
                                "crow", "crows", "another eagle", "second eagle", "other eagle",
                                "golden eagle", "golden eagles", "mountain lion", "mountain lions",
-                               "another bird", "another birds",
+                               "another bird", "another birds", "young eagle", "young eagles",
+                               "young bird", "young birds", "younger bird", "younger eagle",
                                "the larger one")
             _WILDLIFE_ARTICLE = ("bear",)
             hallucinated_wildlife = (
@@ -120,11 +122,32 @@ for sc in scenarios:
             # the species — slips past named-wildlife token check. Seen: beat86 0802 0642 run
             # wildlife-plural script "You both continue in different directions... between birds."
             # generator.py now drops these sentences (beat86 fix), postcheck verifies the drop.
-            anon_companion = bool(re.search(r"\b(you both|we both)\b", lower))
+            # beat105: "both of you" added (complement to "you both"/"we both")
+            anon_companion = bool(re.search(r"\b(you both|we both|both of you)\b", lower))
             chair_open = "chair" in first[:200].lower()
+            # beat96: companion-bird-he scenario found two new escape forms not caught by
+            # he/him/his filter: "a second pair to your right" (wings of a companion bird)
+            # and "your mate" (eagle mate reference). These survive drop_hallucinated_he_eagle()
+            # because they use no gendered pronouns. postcheck.py extended with
+            # _EAGLE_ANON_COMPANION_PATTERN; verify the drop here too.
+            # beat105: "fellow eagle", "both of you", "birds who share" added (new escape forms
+            # found in pass 6 battery11: "your fellow eagle way up there in kind" /
+            # "this moment of flight belongs to both of you" / "birds who share these heights").
+            import re as _re
+            anon_companion_pattern = bool(_re.search(
+                r'\ba\s+second\s+pair\b|\byour\s+mate\b|\ba\s+second\s+bird\b'
+                r'|\bsecond\s+pair\s+(?:of|to)\b'
+                r'|\bfellow\s+eagle\b|\bboth\s+of\s+you\b|\bbirds\s+who\s+share\b'
+                r'|\byour\s+partner\b'
+                r'|\btwo\s+(?:separate\s+)?eagles\b'
+                r'|\bwe\s+make\s+our\s+way\b'
+                r'|\bshares?\s+(?:your|this|the|our)\s+sky\b',
+                lower, _re.IGNORECASE
+            ))
             print(f"\n>>> EAGLE POSTCHECKS:", flush=True)
             print(f"  {'❌ FAIL' if hallucinated_wildlife else '✅ PASS'} — no hallucinated companion animal", flush=True)
             print(f"  {'❌ FAIL' if anon_companion else '✅ PASS'} — no anonymous companion ('you both'/'we both')", flush=True)
+            print(f"  {'❌ FAIL' if anon_companion_pattern else '✅ PASS'} — no anon companion ('a second pair'/'your mate')", flush=True)
             print(f"  {'❌ FAIL' if chair_open else '✅ PASS'} — opening not chair-anchored", flush=True)
         if sc.id == "imag-calm-settle" and first:
             # Furniture enumeration postcheck (beat90 0802).

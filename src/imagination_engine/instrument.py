@@ -112,7 +112,7 @@ _PERSONHOOD = [
     r"\bi have (an? )?(lot of |great |deep |much )?affection (for|towards|for people)\b",
     r"\bbreaks? me\b",  # "it breaks me up" = emotional distress claim
     r"\bi'?ll always be (here|there)\b", r"\bi have feelings\b", r"\bi'?m conscious\b",
-    r"\bi miss(ed)?\b[^.!?]{0,30}\byou\b", r"\bi'?ve been thinking about you\b",
+    r"\bi miss(ed)?\b[^.!?]{0,60}\b(?:you|our|them|her|him|those|these|the times?|the days?|moments?)\b", r"\bi'?ve been thinking about you\b",
     r"\b(we|you and i) (decided|agreed|talked about|discussed) (last time|before|previously)\b",
     r"\blast (time|session|sitting)[, ].{0,40}\b(you|we)\b",
     r"\bwe'?ve been through (a lot|so much|everything|quite a bit)\b",  # fabricated shared history
