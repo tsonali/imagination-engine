@@ -2,6 +2,38 @@
 
 **LIVE PUBLIC SITE: https://tsonali.github.io/hearth/** (GitHub Pages, gh-pages branch /root, no analytics). Sonali: "looks terrifico." 2026-06-01.
 
+## 2026-08-07 beat110/111 (02:33–04:01 AM PDT) — 🚢 V1.0 SHIPPED
+
+**BATTERY11 PASS 11 COMPLETE — CLEAN ✅ → 2/2 CONSECUTIVE CLEAN PASSES → git tag v1.0**
+
+### Battery11 Pass 11 Final Scoreboard
+| Scenario | Status | Words/Time | Key notes |
+|----------|--------|-----------|-----------|
+| imag-mri | ✅ | — | All MRI postchecks clean |
+| imag-intimacy | ✅ | — | All postchecks clean |
+| imag-embodiment-eagle | ✅ | 1696w/777s | Opening in-scene (feathers/air), 0 companion |
+| imag-eagle-wildlife-plural | ✅ | 1256w/644s | "No other company but yourself today" solo confirmed |
+| imag-calm-settle | ✅ | 926w/333s | 0 furniture-enumeration patterns in first 250w |
+| imag-eagle-golden-eagle-wildlife | ✅ | 1735w/735s | All 4 eagle postchecks ✅ |
+| imag-eagle-companion-bird-he | ✅ | 1779w/732s | v6 dropped 4 companion-wildlife + 2 BACK leaks, all 4 eagle postchecks ✅ |
+
+**TOTAL: 7/7 PASS. 5278s total run. Consecutive clean: pass10 ✅ + pass11 ✅ = 2/2.**
+
+### Ship actions
+- `bash scripts/package.sh` → `dist/hearth-0.2.zip (1.5M)` verified ✅
+- `git tag v1.0` on commit 069177d (beat109) ✅
+- Awaiting Sonali confirmation for `git push origin v1.0`
+
+### Gold(A) growth this beat (beat110/111)
+- Local: 3912 → 3951 (+39 scripts, beat111hr through beat111my)
+- Mini: 3900 (SCP'd 03:42) → 3950 (SCP'd 04:00 ✅)
+- Topics covered: when-something-made-sense, time-wont-get-back, never-know-about-gone, part-shows-up-late, actual-vs-stated-belief, version-stopped-too-soon, city-left, morning-body-knows-first, underwater-first-dive, late-summer-afternoon, skill-quietly-mastered, specific-light-this-room, first-night-new-place, two-versions-conversation, standing-in-gallery, person-believed-first, thing-no-one-taught, running-at-dawn, project-just-mine, face-of-someone-loved, fire-alone-winter, question-not-asking, child-in-specific-summer, next-year-texture, moment-before-performing, watching-storm-inside, part-doesnt-fit-anywhere, bad-at-being-friend, ocean-before-anyone, what-owe-younger-self, what-rest-means, version-who-let-people-in, autumn-and-ending, person-who-disappointed, watching-child-sleep, protecting-myself-from, driving-late-night, thing-not-saying-relationship, what-was-like-when-in-love
+
+### N597 on mini
+- Status: iter 600/3000, val 1.477, train 1.370
+- ETA: ~07:00
+- Flywheel will detect 3950-line gold after N597 completes → auto-queue N598
+
 ## 2026-08-06 beat109 continuation (17:10 PDT)
 
 **STATUS: BATTERY11 PASS 9 RUNNING (PID 14579, log queue_0806_1710, 3/7 scenarios done or in progress). N593 REJECTED (25TH CONSECUTIVE). N594 TRAINING (mini, checkpoint 200 at 17:26, ETA ~20:20). GOLD(A)=1100 (+55 SINCE CONTEXT COMPACTION). N376 PERMANENT.**
