@@ -1183,7 +1183,7 @@ def generate_session(
                              "golden eagle", "golden eagles", "mountain lion", "mountain lions",
                              "another bird", "another birds", "young eagle", "young eagles",
                              "young bird", "young birds", "younger bird", "younger eagle",
-                             "fellow eagle")
+                             "fellow eagle", "bird of prey", "birds of prey")
         # "the larger one" is eagle-scoped: in a solo eagle script it signals a companion bird;
         # in a running script it matches "the larger runner/tree/etc" → false positive.
         # beat87: caught in imag-eagle-wildlife-plural; fired 3 times in imag-active-scene (FP).

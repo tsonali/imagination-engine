@@ -110,7 +110,7 @@ for sc in scenarios:
                                "golden eagle", "golden eagles", "mountain lion", "mountain lions",
                                "another bird", "another birds", "young eagle", "young eagles",
                                "young bird", "young birds", "younger bird", "younger eagle",
-                               "the larger one")
+                               "the larger one", "bird of prey", "birds of prey")
             _WILDLIFE_ARTICLE = ("bear",)
             hallucinated_wildlife = (
                 any(re.search(r"\b" + re.escape(w) + r"\b", lower)
