@@ -685,8 +685,10 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     r'|\bbirds\s+who\s+share\b'        # beat105: "birds who share these heights"
     r'|\byour\s+partner\b'             # beat106: "Your partner is already adjusting to match"
     r'|\btwo\s+(?:separate\s+)?eagles\b'  # beat106: "two separate eagles flying together"
+    r'|\btwo\s+birds\b'                # beat109: "two birds sharing one part of sky"
     r'|\bwe\s+make\s+our\s+way\b'      # beat106: "we make our way higher together"
-    r'|\bshares?\s+(?:your|this|the|our)\s+sky\b',  # beat106: "shares your sky right now"
+    r'|\bshares?\s+(?:your|this|the|our)\s+sky\b'   # beat106: "shares your sky right now"
+    r'|\bsharing\s+(?:one\s+part\s+of|this|the|your)\s+sky\b',  # beat109: "sharing one part of sky"
     re.IGNORECASE,
 )
 

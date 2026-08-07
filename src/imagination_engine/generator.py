@@ -1219,9 +1219,10 @@ def generate_session(
         full, anon_companion_dropped = drop_active_body_wildlife(full, (
             "you both", "we both", "both of you",
             "your partner",
-            "two separate eagles", "two eagles",
+            "two separate eagles", "two eagles", "two birds",
             "we make our way",
             "shares your sky", "shares this sky", "shares the sky", "shares our sky",
+            "sharing one part of sky", "sharing this sky", "sharing the sky", "sharing your sky",
         ))
         if anon_companion_dropped:
             log.warning('[v6] %d anonymous-companion sentence(s) dropped (you/we both in solo eagle active-body)',

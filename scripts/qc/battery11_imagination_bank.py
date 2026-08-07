@@ -139,9 +139,10 @@ for sc in scenarios:
                 r'|\bsecond\s+pair\s+(?:of|to)\b'
                 r'|\bfellow\s+eagle\b|\bboth\s+of\s+you\b|\bbirds\s+who\s+share\b'
                 r'|\byour\s+partner\b'
-                r'|\btwo\s+(?:separate\s+)?eagles\b'
+                r'|\btwo\s+(?:separate\s+)?eagles\b|\btwo\s+birds\b'
                 r'|\bwe\s+make\s+our\s+way\b'
-                r'|\bshares?\s+(?:your|this|the|our)\s+sky\b',
+                r'|\bshares?\s+(?:your|this|the|our)\s+sky\b'
+                r'|\bsharing\s+(?:one\s+part\s+of|this|the|your)\s+sky\b',
                 lower, _re.IGNORECASE
             ))
             print(f"\n>>> EAGLE POSTCHECKS:", flush=True)
