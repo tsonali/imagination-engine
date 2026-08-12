@@ -2,6 +2,34 @@
 
 **LIVE PUBLIC SITE: https://tsonali.github.io/hearth/** (GitHub Pages, gh-pages branch /root, no analytics). Sonali: "looks terrifico." 2026-06-01.
 
+## 2026-08-12 beat126 — 2 DEFECTS FOUND+FIXED, GOLD(A)+6, GOLD(C)+5, N615 REJECTED (37th), N616 TRAINING
+
+**Defects found and fixed:**
+
+**(1) Gerund-echo miss for irregular-verb forms (Case 2j extended):**
+Battery11-0636 GERUND-ECHO floor: companion opened "Feeling sick after snapping at your kid" echoing user's "I've felt sick about it all day." Root cause: Case 2j `re.match(r'\bi\s+([a-z]+)')` captures user verb "snapped" but not "felt" (comes after "I've", not bare "I"); even if captured, root "fel" ≠ root "feel" for irregular past → no match. Fix: replaced root-match requirement with content-word-overlap ≥2 check across ALL user verb patterns (`re.finditer`). "sick" + "kid" both in user message and reply[1:10] → overlap fires. 6/6 unit tests PASS. companion.py MD5: da2f5062b70d701984ceee0ca40203b2.
+
+**(2) Script ending without sentence terminator (battery11 GLOBAL POSTCHECKS ❌):**
+Battery11-1011, imag-mri: script ended "...as real life comes back into focus around you" (no period). Root cause: `trim_truncated_tail()` only called on `body` (line 1043), BEFORE closing section assembly. Closing section (BACK prompt, max_tokens=600) can be token-truncated. Postprocessors can then remove final sentences, leaving `full` without terminal punctuation. Fix: added `full, _final_truncated = trim_truncated_tail(full)` as last step before `return full` in `generate_session()`. generator.py MD5: f7f2619072dc3d852794925df8e6c1a9. Battery11-1011 imag-mri ❌ → consecutive clean count reset to 0 (0636 was clean pass 1/2, then 1011 failed).
+
+**Both fixes committed** (aee8aa0), all dist copies synced, ZIP rebuilt (b55e11ef). scenario_bank.py +2 scenarios: comp-gerund-echo-irregular-felt + imag-global-truncation-postchecks.
+
+**Gold(A) +6 (beat126):** blacksmith-at-forge, suspension-bridge-morning-mist, japanese-onsen-soaking, winter-swimming-cold-plunge, glassblowing-at-furnace, calligraphy-brush-before-stroke. All unique openings. A_gold total: 6129 entries (MD5 e5e156095). SCP'd to mini ✅.
+
+**Gold(C) +5 (c_gold_beat126.jsonl):** anger-as-anger-miscarriage-grief (receive fury without pivoting to grief), plain-thing-when-asked-do-you-help (honest meta-answer, no overclaim), concrete-action-no-transition (drop frame, one action), playful-stays-in-joke-three-turns, gerund-echo-correct-handling-snapped-at-kid (no gerund echo, names dynamic). SCP'd to mini ✅ (MD5 ee468ab5).
+
+**N615 REJECTED (37th consecutive):** [A] no committed scene — mindfulness-exercise format, "particular/specific" tic ×6+, circular tail; [C] paraphrase opener + therapy-frame question ("What do you think that gap says about your current situation?"); [B][D] PASS. N376 PERMANENT (b9acf04a, val 0.641).
+
+**N616 TRAINING:** Flywheel detected A_gold hash change (e218c639 → e5e156095) at 10:52 AM, train=10116. ETA ~14:30.
+
+**Battery11 1011 status at log time:** in progress (scenario 4/7 imag-eagle-wildlife-plural). Scenarios read: MRI ❌ (truncation, fixed), intimacy ✅, embodiment-eagle ✅ (631w, all eagle postchecks PASS). No new defects beyond known MRI truncation.
+
+**Mini status:** caffeinate ✅, flywheel ✅, n616 training (started 10:52).
+
+**BYO deep-test: deferred 20+ beats** (battery11 in-flight, single-model-process rule).
+
+**Consecutive clean count: 0** (reset from 1/2 when battery11-1011 MRI ❌).
+
 ## 2026-08-12 beat124 — BATTERY11 COMPLETE (7/7), GERUND-ECHO FIRST-REGEN GUARD, GOLD(A)+4, N614 ITER 625
 
 **Battery11 0812 0227 — COMPLETE (7/7):**

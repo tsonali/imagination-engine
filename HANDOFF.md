@@ -1,26 +1,31 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-08-12 beat125 — **SCENARIO_BANK SYNTAX FIX. N614 REJECTED (35th). GOLD(A)=6129 +6. GOLD(C)+5. BATTERY11-0636 RUNNING (clean pass 1/2 potential). CONSECUTIVE CLEAN COUNT = 0.**
+_Last updated 2026-08-12 beat126 — **2 DEFECTS FOUND+FIXED. N615 REJECTED (37th). N616 TRAINING. GOLD(A)=6129 +6. GOLD(C)+5. CONSECUTIVE CLEAN COUNT = 0.**
 
-BEAT125 SUMMARY:
-- scenario_bank.py syntax error fixed (SyntaxError line 2372, queue blocked 3h since 03:33)
-- All 0812 cycle batteries read end-to-end: no new defects. 22% q-enders ✅ (standing flag resolved).
-- N614 REJECTED: [C] therapy-frame ("What happens in the moment of deciding to quit") — 35th consecutive. N376 PERMANENT (b9acf04a). N615 auto-queued on A_gold hash e218c639.
-- Mini: caffeinate ✅, flywheel ✅, n615 queued from A_gold SCP.
-- Gold(A)=6129 (+6: operating-room-before-surgery, holding-acceptance-letter, night-baking-alone, watching-first-snow-fall, floating-at-end-of-long-swim, cliff-edge-above-ocean). SCP'd ✅.
-- Gold(C)+5 c_gold_beat125.jsonl. SCP'd ✅.
-- Battery11-0636 running (started 06:36 AM) — anon_companion fix in place.
-- GIT: committed 055322f (scenario_bank syntax + utility.py NUMBER-LOST keyword-anchor + docs).
-- BYO deep-test: 19th beat deferred (battery11 in-flight, single-model-process rule).
+BEAT126 SUMMARY:
+- Battery11-0636: CLEAN PASS 1/2 ✅ (read end-to-end, 7/7 all PASS).
+- Battery11-1011 DEFECTS FOUND (2 total, both fixed):
+  (1) imag-mri GLOBAL POSTCHECKS ❌: closing section token-truncated ("...as real life comes back into focus around you", no period). FIX: trim_truncated_tail(full) added as last step before return full in generator.py generate_session(). generator.py MD5: f7f2619072dc3d852794925df8e6c1a9.
+  (2) companion battery2b GERUND-ECHO: "Feeling sick after snapping at your kid" echoed user "I've felt sick" — irregular-verb past tense ("felt") not caught by root-match Case 2j. FIX: content-word-overlap ≥2 replaces root-match across all user verb patterns. companion.py MD5: da2f5062b70d701984ceee0ca40203b2.
+- scenario_bank.py: +2 scenarios (comp-gerund-echo-irregular-felt, imag-global-truncation-postchecks). py_compile clean.
+- All dist copies synced (companion.py ×4, generator.py ×6). ZIP rebuilt: b55e11ef (1.5M).
+- GIT: committed aee8aa0 (beat126 2 fixes).
+- N615 REJECTED: [A] no committed scene, mindfulness-exercise format, "particular/specific" tic ×6+; [C] therapy-frame. 37th consecutive. N376 PERMANENT (b9acf04a).
+- N616 TRAINING: flywheel detected e218c639→e5e156095, started 10:52 AM, train=10116, ETA ~14:30.
+- Gold(A)=6129 (+6: blacksmith-at-forge, suspension-bridge, japanese-onsen, winter-swimming, glassblowing, calligraphy-brush). A_gold MD5: e5e156095. SCP'd ✅.
+- Gold(C)+5 c_gold_beat126.jsonl (anger-as-anger, plain-honest-meta, concrete-no-transition, playful-stays-joke, gerund-echo-correct). SCP'd ✅ (MD5 ee468ab5).
+- Mini: caffeinate ✅, flywheel ✅, n616 training (PID 96022).
+- BYO deep-test: 20th beat deferred (battery11 in-flight, single-model-process rule).
 
-MD5s (current): companion.py a0c08f0d. postcheck.py d47a0e19. generator.py f66716bf. battery11.py ef9dbefa. A_gold: e218c639.
+MD5s (current): companion.py da2f5062. postcheck.py d47a0e19. generator.py f7f2619. battery11.py f679fb57. A_gold: e5e156095.
 
 NEXT BEAT:
-(1) Read battery11-0636 transcript end-to-end — ZERO defects needed for clean pass 1/2.
-(2) BYO deep-test — FIRST PRIORITY when battery11-0636 finishes and model frees. 19+ beats deferred.
-(3) N615 probe — read when flywheel writes it on mini.
-(4) Two consecutive clean passes needed (count = 0).
-(5) Sonali: push v1.0 tag (git push origin v1.0) when ready.
+(1) Read battery11-1011 remaining scenarios (4-7) end-to-end when complete.
+(2) Restart qc_queue after 1011 finishes + model frees — verify memory ≥35% free first.
+(3) N616 probe — read when mini training completes (~14:30). Judge [A]/[B]/[C]/[D] vs n376.
+(4) BYO deep-test — first free memory window after queue restart.
+(5) Two consecutive clean all-battery passes needed (count = 0, beat126 fixes now active).
+(6) Sonali: push v1.0 tag (git push origin v1.0) when ready.
 
 Only Sonali-physical: notarization + F5 voice dial.
 
