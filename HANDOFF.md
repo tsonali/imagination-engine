@@ -11,21 +11,21 @@ BEAT126 SUMMARY:
 - All dist copies synced (companion.py ×4, generator.py ×6). ZIP rebuilt: b55e11ef (1.5M).
 - GIT: committed aee8aa0 (beat126 2 fixes).
 - N615 REJECTED: [A] no committed scene, mindfulness-exercise format, "particular/specific" tic ×6+; [C] therapy-frame. 37th consecutive. N376 PERMANENT (b9acf04a).
-- N616 TRAINING: flywheel detected e218c639→e5e156095, started 10:52 AM, train=10116, ETA ~14:30.
-- Gold(A)=6129 (+6: blacksmith-at-forge, suspension-bridge, japanese-onsen, winter-swimming, glassblowing, calligraphy-brush). A_gold MD5: e5e156095. SCP'd ✅.
+- N616 TRAINING: flywheel detected e218c639→e5e156095, started 10:52 AM, train=10116, iter 250 at 11:XX (loss 1.323), ETA ~14:17. Will detect 0c1b4a7a→2e6d154a after n616 finishes → auto-queue n617.
+- Gold(A)=6146 (+17 total this beat: +6 pre-compaction + +11 session: falconry, darkroom, ramen, ice-climbing, piano, telescope, surf, leather-stitching, new-city-morning, beekeeper, marathoner). A_gold MD5: 2e6d154a. SCP'd ✅.
 - Gold(C)+5 c_gold_beat126.jsonl (anger-as-anger, plain-honest-meta, concrete-no-transition, playful-stays-joke, gerund-echo-correct). SCP'd ✅ (MD5 ee468ab5).
-- Mini: caffeinate ✅, flywheel ✅, n616 training (PID 96022).
-- BYO deep-test: 20th beat deferred (battery11 in-flight, single-model-process rule).
+- Mini: caffeinate ✅, flywheel ✅, n616 training (PID 96022, iter 250/3000 at log time).
+- All 0812 cycle batteries read (battery9/6/10/2b/12/4b/3b/e2e all PASS; battery2b GERUND-ECHO floor was OLD code, beat126 fix now active).
+- BYO deep-test: 20th+ beat deferred (battery11 in-flight, single-model-process rule).
 
-MD5s (current): companion.py da2f5062. postcheck.py d47a0e19. generator.py f7f2619. battery11.py f679fb57. A_gold: e5e156095.
+MD5s (current): companion.py da2f5062. postcheck.py d47a0e19. generator.py f7f2619. battery11.py f679fb57. A_gold: 2e6d154a.
 
 NEXT BEAT:
-(1) Read battery11-1011 remaining scenarios (4-7) end-to-end when complete.
-(2) Restart qc_queue after 1011 finishes + model frees — verify memory ≥35% free first.
-(3) N616 probe — read when mini training completes (~14:30). Judge [A]/[B]/[C]/[D] vs n376.
-(4) BYO deep-test — first free memory window after queue restart.
-(5) Two consecutive clean all-battery passes needed (count = 0, beat126 fixes now active).
-(6) Sonali: push v1.0 tag (git push origin v1.0) when ready.
+(1) Read battery11-1011 scenarios 5-7 when complete (5/imag-calm-settle still generating at log time).
+(2) Read n616 probe when mini training completes (~14:17). Judge [A]/[B]/[C]/[D] vs n376.
+(3) BYO deep-test — first free memory window after queue restart; 20+ beats deferred.
+(4) Two consecutive clean all-battery passes needed (count = 0, beat126 fixes now active in queue).
+(5) Sonali: push v1.0 tag (git push origin v1.0) when ready.
 
 Only Sonali-physical: notarization + F5 voice dial.
 
