@@ -1,5 +1,31 @@
 # HANDOFF — resume here (read this first)
 
+_Last updated 2026-08-12 beat125 — **SCENARIO_BANK SYNTAX FIX. N614 REJECTED (35th). GOLD(A)=6129 +6. GOLD(C)+5. BATTERY11-0636 RUNNING (clean pass 1/2 potential). CONSECUTIVE CLEAN COUNT = 0.**
+
+BEAT125 SUMMARY:
+- scenario_bank.py syntax error fixed (SyntaxError line 2372, queue blocked 3h since 03:33)
+- All 0812 cycle batteries read end-to-end: no new defects. 22% q-enders ✅ (standing flag resolved).
+- N614 REJECTED: [C] therapy-frame ("What happens in the moment of deciding to quit") — 35th consecutive. N376 PERMANENT (b9acf04a). N615 auto-queued on A_gold hash e218c639.
+- Mini: caffeinate ✅, flywheel ✅, n615 queued from A_gold SCP.
+- Gold(A)=6129 (+6: operating-room-before-surgery, holding-acceptance-letter, night-baking-alone, watching-first-snow-fall, floating-at-end-of-long-swim, cliff-edge-above-ocean). SCP'd ✅.
+- Gold(C)+5 c_gold_beat125.jsonl. SCP'd ✅.
+- Battery11-0636 running (started 06:36 AM) — anon_companion fix in place.
+- GIT: committed 055322f (scenario_bank syntax + utility.py NUMBER-LOST keyword-anchor + docs).
+- BYO deep-test: 19th beat deferred (battery11 in-flight, single-model-process rule).
+
+MD5s (current): companion.py a0c08f0d. postcheck.py d47a0e19. generator.py f66716bf. battery11.py ef9dbefa. A_gold: e218c639.
+
+NEXT BEAT:
+(1) Read battery11-0636 transcript end-to-end — ZERO defects needed for clean pass 1/2.
+(2) BYO deep-test — FIRST PRIORITY when battery11-0636 finishes and model frees. 19+ beats deferred.
+(3) N615 probe — read when flywheel writes it on mini.
+(4) Two consecutive clean passes needed (count = 0).
+(5) Sonali: push v1.0 tag (git push origin v1.0) when ready.
+
+Only Sonali-physical: notarization + F5 voice dial.
+
+---
+
 _Last updated 2026-08-12 beat124 — **BATTERY11 0227 COMPLETE (7/7). GERUND-ECHO FIRST-REGEN GUARD. GOLD(A)=6123 +4. N614 ITER 625. CONSECUTIVE CLEAN COUNT = 0.**
 
 BATTERY11 (0812 0227) — ALL 7 COMPLETE:
