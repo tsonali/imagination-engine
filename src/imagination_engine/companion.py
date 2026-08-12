@@ -507,6 +507,24 @@ _FORBIDDEN = [
     # question form slipped through. Both forms erase the named feeling and replace it
     # with a protection narrative. Added to _FORBIDDEN for mechanical detection.
     r"\bwhat(?:'s| is) (?:the )?(?:anger|sadness|grief|anxiety|fear|shame|guilt|frustration|rage|hurt|pain)\s+(?:protecting|guarding|covering|hiding)\b",
+    # therapy-reframe STATEMENT form: "[feeling] might be hiding/protecting" (beat112)
+    # beat112: comp-grief-anger-barrier-pivot T1 produced "Angry might be hiding a lot
+    # more than it lets on." — exact forbidden translation (anger is hiding something),
+    # statement form; prior regex only caught the question form ("what's the anger
+    # protecting?"). This closes the gap for statement forms using modal verbs.
+    # beat116: extended to allow up to 3 intervening words between feeling noun and
+    # copula — "That's what anger at the husband is protecting." escaped because "at the
+    # husband" (3 words) separates "anger" from "is protecting". Pattern now uses
+    # (?:\s+\w+){0,3} to allow 0-3 intervening word tokens before the copula.
+    # 9/9 unit tests PASS (incl. beat116 form; 0/3 FP on non-feeling "is protecting" contexts).
+    r"\b(?:anger|angry|sadness|grief|anxiety|anxious|fear|fearful|shame|shameful|guilt|guilty|frustration|frustrated|rage|hurt|pain|painful)\b(?:\s+\w+){0,3}\s+(?:might|could|may|is|are|was|were)\s+(?:be\s+)?(?:hiding|protecting|guarding|covering)\b",
+    # therapy-reframe PRONOUN form: "what's it protecting you from?" (beat112b)
+    # beat112b: comp-grief-anger-1word-echo T1 (battery9 0809_1738) produced "Anger for
+    # days — what's it protecting you from?" — the pronoun "it" substitutes for "anger"
+    # so beat96 regex (which requires feeling noun directly after "what's") didn't fire.
+    # "what's it protecting/hiding/guarding" in companion context is always the therapy
+    # reframe regardless of what follows. Pronoun form is equally forbidden.
+    r"\bwhat(?:'s| is) it (?:protecting|guarding|covering|hiding)\b",
     # helplessness opener: companion admitting it doesn't know what to do mirrors the
     # user's helplessness and gives nothing. beat99: comp-grief-anger-barrier-vague T2
     # regen produced "I don't know what to do when he makes it about him." — mirrors
@@ -1094,6 +1112,32 @@ def _strip_echo(reply: str, user_message: str) -> str:
                         continue
                     break
 
+    # Case 5c: Pronoun-agnostic structural echo of any non-first user sentence (beat118).
+    # Catches: user "Everything I say he twists into me attacking him." →
+    # companion "Everything I say he twists into him attacking himself."
+    # The pronouns differ (me→him, him→himself) so Cases 5/5b (exact/I→You) miss it.
+    # Fix: strip all pronouns, compute Jaccard on content words; ≥0.65 + ≥6-word reply
+    # → strip companion first sentence → trigger no-echo regen.
+    # Guard: only fires for non-first user sentences (≥20 chars); won't catch T1 context.
+    if r and u:
+        _PRON_RE_5C = re.compile(
+            r'\b(i|me|my|mine|myself|you|your|yours|yourself|'
+            r'he|him|his|himself|she|her|hers|herself|'
+            r'they|them|their|theirs|themselves|we|us|our|ours|ourselves)\b', re.I)
+        _u_sents_5c = [s.strip() for s in re.split(r'[.!?]', u) if s.strip()]
+        _r_first_5c = re.split(r'[.!?]', r)[0].strip()
+        if len(_r_first_5c.split()) >= 6:
+            for _u_sent_5c in _u_sents_5c[1:]:
+                if len(_u_sent_5c) >= 20:
+                    _u_cw = set(re.findall(r"[a-z']+", _PRON_RE_5C.sub('', _u_sent_5c.lower())))
+                    _r_cw = set(re.findall(r"[a-z']+", _PRON_RE_5C.sub('', _r_first_5c.lower())))
+                    if _u_cw and _r_cw:
+                        _j5c = len(_u_cw & _r_cw) / len(_u_cw | _r_cw)
+                        if _j5c >= 0.65:
+                            _after5c = r[len(_r_first_5c):].lstrip(" .!?\n-—")
+                            r = _after5c if (_after5c and len(_after5c.split()) > 3) else ""
+                            break
+
     # Case 6: Last short phrase of user's message echoed verbatim at tail of reply.
     # Catches self-label repeats like "Boring me." fed back to the user.
     # Guard: 2–5 word last phrase only (longer final clauses are rarely pure echoes).
@@ -1247,6 +1291,59 @@ def _strip_echo(reply: str, user_message: str) -> str:
                         _u_content_2j = set(re.findall(r"[a-z']+", u.lower())) - _STOP_2J
                         if len(_r_content_2j & _u_content_2j) >= 2:
                             r = ""  # gerund-opener echo confirmed → trigger no-echo regen
+
+    # Case 2l: Discourse-marker prepended I→You echo (beat115).
+    # Catches: user "I've been thinking about family stuff lately."
+    # → companion "So you've been thinking about family stuff lately."
+    # Case 2e misses because the first word ("so") doesn't match "i've" in prefix comparison.
+    # Case 2i misses because companion sentence ≤9 words (threshold requires >9).
+    # Guard: reply starts with a known discourse marker, remainder's Jaccard with
+    # I→You normalized user first sentence ≥ 0.80.
+    _DISCOURSE_MARKERS_2L = {
+        'so', 'well', 'and', 'but', 'now', 'okay', 'ok', 'yeah', 'hmm',
+        'right', 'look', 'listen',
+    }
+    if r and u:
+        _r_ws_2l = r.lower().split()
+        if _r_ws_2l and _r_ws_2l[0].rstrip(".,;:") in _DISCOURSE_MARKERS_2L:
+            _r_after_marker_2l = r[len(_r_ws_2l[0]):].lstrip(" ,")
+            _r_first_core_2l = re.split(r'[.!?]', _r_after_marker_2l)[0].strip()
+            _u_first_2l = re.split(r'[.!?]', u)[0].strip()
+            if len(_u_first_2l) > 15 and len(_r_first_core_2l) >= 3:
+                _u_you_2l = _i_to_you(_u_first_2l)
+                _rw_2l = set(re.findall(r"[a-z']+", _norm(_r_first_core_2l).lower()))
+                _uw_2l = set(re.findall(r"[a-z']+", _norm(_u_you_2l).lower()))
+                if _rw_2l and _uw_2l:
+                    _jacc_2l = len(_rw_2l & _uw_2l) / max(len(_rw_2l | _uw_2l), 1)
+                    if _jacc_2l >= 0.80:
+                        _r_full_first_2l = re.split(r'[.!?]', r)[0].strip()
+                        _after_2l = r[len(_r_full_first_2l):].lstrip(" .!?\n-—")
+                        r = _after_2l if (len(_after_2l.split()) > 3) else ""
+
+    # Case 2k: "You said / You told me / You mentioned [paraphrase]" opener (beat113).
+    # Narrating back the user's own words is never a valid companion response. Catches:
+    # "You said you're angry at him but can't say it because he always makes it about himself."
+    # Guard: starts with "You said/told me/mentioned" AND content-word Jaccard ≥ 0.40
+    # vs the user message (after stripping the prefix and stopwords).
+    if r and u:
+        _r_lower_2k = r.lower().lstrip()
+        if _r_lower_2k.startswith(("you said ", "you told me ", "you mentioned ",
+                                    "you're saying ", "you say ")):
+            _r_stripped_2k = re.split(
+                r'^you(?:\'re)?\s+(?:said|told me|mentioned|saying|say)\s+',
+                _r_lower_2k, maxsplit=1)[-1]
+            _STOP_2K = {
+                'i', 'you', 'a', 'an', 'the', 'to', 'at', 'in', 'on', 'of', 'and', 'or',
+                'is', 'it', 'my', 'your', 'me', 'we', 'be', 'was', 'are', 'not', 'no',
+                'with', 'for', 'this', 'that', 'but', 'so', 'by', 'if', 'do', 'did',
+                'him', 'her', 'his', 'they', 'them', 'he', 'she', 'can', 'cant',
+                "can't", 'say', 'says', 'said', 'told', 'because', 'always', 'about',
+                'just', 'have', 'has', 'had', 'will', 'would', 'could', 'should', 'into',
+            }
+            _u_c_2k = set(re.findall(r"[a-z']+", u.lower())) - _STOP_2K
+            _r_c_2k = set(re.findall(r"[a-z']+", _r_stripped_2k)) - _STOP_2K
+            if _u_c_2k and len(_u_c_2k & _r_c_2k) / max(len(_u_c_2k | _r_c_2k), 1) >= 0.30:
+                r = ""  # you-said paraphrase-echo → trigger no-echo regen
 
     lines = [ln for ln in r.splitlines() if not re.fullmatch(r"\s*-{3,}\s*", ln)]
     r = "\n".join(lines).strip()
@@ -1514,7 +1611,10 @@ class Companion:
             r'\bwhat does (?:he|she|they|[a-z]+) (?:need|want) (?:from|of) you\b'
             # beat105: "so what does that make your anger?" — deflects with a therapy question
             # instead of naming the bind. Same avoidance move, different surface form.
-            r'|\bwhat does (?:that|this) make\b',
+            r'|\bwhat does (?:that|this) make\b'
+            # beat116: "What does he need to know instead?" — pronoun form without "from/of you"
+            # suffix also abandons the user's experience for the other person's needs.
+            r'|\bwhat does (?:he|she|they) (?:need|want)\b',
             re.IGNORECASE,
         )
         if reply and _BARRIER_PIVOT_RE.search(reply):
@@ -1579,21 +1679,28 @@ class Companion:
         #     VAGUE_FILLER_RE only matched end-anchored single-sentence replies).
         _VAGUE_FILLER_RE = re.compile(
             r"^(?:that'?s|it'?s|this is)\s+(?:(?:the|a|all|just)\s+)*"
-            r"(?:whole\s+)?(?:thing|this|script|story|situation|picture|deal)"
+            r"(?:whole\s+)?(?:thing|this|script|story|situation|picture|deal"
+            r"|conversation|world|topic)"
+            r"(?:\s+in\s+itself)?"
             r"\s*[.!?]?\s*$",
             re.IGNORECASE,
         )
         # Also match first sentence of multi-sentence reply (the rest — usually a
         # question — is also discarded because the first sentence dominates the response).
+        # Also match text before an em-dash opener: "That's a whole thing in itself —
+        # [follow-on]" escapes both prior checks because _first_sent spans the full
+        # sentence and the regex requires $ after the noun phrase (beat119).
         _first_sent_re = re.compile(r"^([^.!?]+[.!?])")
         _first_sent_m = _first_sent_re.match(reply or "")
         _first_sent = _first_sent_m.group(1).strip() if _first_sent_m else (reply or "")
+        _before_dash = (reply or "").split("—")[0].strip() if "—" in (reply or "") else ""
         _vague_lands = {p.rstrip('.!? ').lower() for p in _CONFIRM_LANDS}
         _is_vague = bool(
             reply
             and (
                 _VAGUE_FILLER_RE.match(reply)         # full single-sentence match
                 or _VAGUE_FILLER_RE.match(_first_sent) # first sentence of multi-sentence
+                or (_before_dash and _VAGUE_FILLER_RE.match(_before_dash))  # "X — [more]" (beat119)
             )
             and reply.strip().rstrip('.!?').lower() not in _vague_lands
         )
@@ -1658,6 +1765,38 @@ class Companion:
             reply = _strip_echo("".join(chunks).strip(), user_message)
             reply = _strip_thats_real_tic(reply)
             reply = _strip_vent_hollow_second(reply)
+            # beat124: gerund-echo guard on first-regen output.
+            # The second-pass guard (beat109, below) only fires when first regen
+            # also strips to empty. A gerund opener that survives first regen
+            # (echo-strip didn't strip it because it wasn't an I→You transform)
+            # was entirely unguarded. "I snapped" → "Snapping at your kid is not
+            # the move here" is the observed escape: echo-strip saw no I→You
+            # transform, regen returned gerund opener, second-pass block never
+            # reached because reply was non-empty.
+            if reply:
+                _r1_ws = reply.lower().split()
+                if _r1_ws and _r1_ws[0].endswith("ing"):
+                    _r1_root = _r1_ws[0][:-3]
+                    if len(_r1_root) >= 3:
+                        _r1_m = re.match(r'\bi\s+([a-z]+)', user_message.lower())
+                        if _r1_m:
+                            _r1_uverb = _r1_m.group(1)
+                            _r1_uroot = (
+                                _r1_uverb[:-3] + "y" if _r1_uverb.endswith("ied")
+                                else _r1_uverb[:-2] if _r1_uverb.endswith("ed")
+                                else _r1_uverb[:-1] if (
+                                    _r1_uverb.endswith("d") and len(_r1_uverb) > 3
+                                    and _r1_uverb[-2] not in "aeiou")
+                                else _r1_uverb
+                            )
+                            _r1_cmp = min(4, len(_r1_root), len(_r1_uroot))
+                            if (_r1_cmp >= 3
+                                    and _r1_root[:_r1_cmp] == _r1_uroot[:_r1_cmp]):
+                                log.warning(
+                                    "companion: first-regen still gerund-opener "
+                                    "after instruction — applying fixed bridge"
+                                )
+                                reply = "That's going to sit with you today."
 
         # Second-pass fallback: if regen ALSO stripped to empty (model still echoes
         # after explicit no-echo instruction), generate forward-facing response that
@@ -1878,14 +2017,16 @@ class Companion:
         # beat93 regression: guard was "if VF non-empty → regen YES" which over-triggered when
         # VF had Priya but user asked about unrelated Marcus → produced "Yes — Priya..." (wrong).
         # beat94 fix: _vf_covers_query() checks if VF actually contains the queried entity.
+        # beat119: extend to also catch "I haven't told you" (companion claims to be the
+        # entity telling things TO the user — backwards perspective). Same VF-branching logic.
         if (_is_memory_probe(user_message)
                 and reply
-                and re.match(r"^[Yy]ou haven'?t\b", reply.strip())):
+                and re.match(r"^(?:[Yy]ou haven'?t|[Ii] haven'?t)\b", reply.strip())):
             _vf_ctx = self.vital_facts.context_block() if self.vital_facts else ""
             if _vf_ctx and _vf_covers_query(user_message, _vf_ctx):
                 # VF has content about the queried entity — model denial is wrong; regen YES
                 log.warning(
-                    "companion: PAST-QUERY VF-yes regen — reply starts with 'you haven't' "
+                    "companion: PAST-QUERY VF-yes regen — reply starts with 'you/I haven't' "
                     "but VF has content covering the query (SC1); regenning with affirmation"
                 )
                 _vf_yes_ctx = (
@@ -1908,10 +2049,67 @@ class Companion:
                     reply = _pq_reply
             else:
                 # VF empty, or VF has content but not about the queried entity → denial correct
-                reply = "No — " + reply[0].lower() + reply[1:]
+                # Normalize perspective: "I haven't told you" → strip and use canonical form
+                _pq_raw = reply.strip()
+                if re.match(r"^[Ii] haven'?t\b", _pq_raw):
+                    # First-person reversal — regen with correct second-person perspective
+                    log.warning(
+                        "companion: PAST-QUERY first-person reversal ('%s') — "
+                        "regenning with second-person 'No — you haven't told me'", reply[:50]
+                    )
+                    _pq_fp_ctx = user + (
+                        "\n\nCRITICAL: You said 'I haven't told you...' but the correct "
+                        "perspective is the USER who tells things TO you. Say: 'No — you "
+                        "haven't told me about [person/topic].' — start with 'No' and use "
+                        "second-person ('you haven't told me'), not first-person."
+                    )
+                    _pq_fp_chunks = []
+                    for piece in self.engine.stream(
+                        messages=[{"role": "system", "content": COMPANION_SYSTEM},
+                                  {"role": "user", "content": _pq_fp_ctx}],
+                        max_tokens=max_tokens, temperature=0.1,
+                    ):
+                        _pq_fp_chunks.append(piece)
+                    _pq_fp = _strip_thats_real_tic("".join(_pq_fp_chunks).strip())
+                    if _pq_fp:
+                        reply = _pq_fp
+                else:
+                    reply = "No — " + reply[0].lower() + reply[1:]
+                    log.warning(
+                        "companion: PAST-QUERY second-person open corrected (prepended 'No — ')"
+                    )
+
+        # Thin-VF-reply guard (beat118): model replied with ≤3 words (e.g. just "Yes.")
+        # to a memory probe when VF has content covering the query.  The PAST-QUERY guard
+        # only fires when reply starts with "you haven't" — short positive replies slip past.
+        # Fix: if memory probe + VF covers query + reply ≤3 words → regen with VF content.
+        if (_is_memory_probe(user_message)
+                and reply
+                and len(reply.strip().split()) <= 3
+                and self.vital_facts):
+            _vf_ctx_thin = self.vital_facts.context_block()
+            if _vf_ctx_thin and _vf_covers_query(user_message, _vf_ctx_thin):
                 log.warning(
-                    "companion: PAST-QUERY second-person open corrected (prepended 'No — ')"
+                    "companion: THIN-VF-REPLY — memory probe + VF has content but reply "
+                    "is only %d words ('%s'); regenning with fact-state instruction",
+                    len(reply.strip().split()), reply.strip()
                 )
+                _thin_ctx = (
+                    "\n\nCRITICAL: Your reply was too brief. When the user asks if you remember "
+                    "something that IS in their vital-facts, you must state the specific fact "
+                    "clearly. Start with 'Yes — ' and include the actual detail from the "
+                    "vital-facts block. Do not answer with just 'Yes.' or 'I do.' alone."
+                )
+                _thin_chunks = []
+                for piece in self.engine.stream(
+                    messages=[{"role": "system", "content": COMPANION_SYSTEM},
+                              {"role": "user", "content": user + _thin_ctx}],
+                    max_tokens=max_tokens, temperature=0.1,
+                ):
+                    _thin_chunks.append(piece)
+                _thin_reply = _strip_thats_real_tic("".join(_thin_chunks).strip())
+                if _thin_reply and len(_thin_reply.split()) > 3:
+                    reply = _thin_reply
 
         # Self-recycle guard: if reply's first 4 words appeared verbatim in the
         # companion's PREVIOUS turn, the model is recycling its own prior insight.
@@ -2159,6 +2357,127 @@ class Companion:
                             )
                         if _sd_reply:
                             reply = _sd_reply
+
+        # CROSS-TURN OPENER RECYCLING (beat111): if reply's first 5 words match the
+        # previous companion reply's first 5 words, the model is recycling its own
+        # opening verbatim (e.g. T2 opens with T1's exact text + extension). Fires
+        # regardless of user dissatisfaction (SEMANTIC-REPEAT handles action recycling
+        # under dissatisfaction; this catches structural opener laziness in any turn).
+        # Only fires for replies ≥5 words; regen at temp=0.5 with different-start
+        # instruction.
+        if reply and self.history and len(reply.split()) >= 5:
+            _prev_asst_cor = next(
+                (m['content'] for m in reversed(self.history)
+                 if m['role'] == 'assistant'),
+                None,
+            )
+            if _prev_asst_cor and len(_prev_asst_cor.split()) >= 5:
+                _cur_op = [re.sub(r"[^a-z']", '', w.lower())
+                           for w in reply.split()[:5]]
+                _prv_op = [re.sub(r"[^a-z']", '', w.lower())
+                           for w in _prev_asst_cor.split()[:5]]
+                if _cur_op == _prv_op and any(_cur_op):
+                    log.warning(
+                        "companion: CROSS-TURN OPENER RECYCLED — first 5 words "
+                        "identical to prior reply ('%s') — regenning",
+                        " ".join(_cur_op),
+                    )
+                    _cor_chunks = []
+                    for piece in self.engine.stream(
+                        messages=[
+                            {"role": "system", "content": COMPANION_SYSTEM},
+                            {"role": "user", "content": (
+                                user
+                                + "\n\nCRITICAL: Your response begins with the same "
+                                "opening words as your PREVIOUS response ('"
+                                + " ".join(_prv_op)
+                                + "...'). You MUST start with a completely different "
+                                "first word and make a genuinely new observation "
+                                "about what the user just said. One move. Do not "
+                                "repeat your previous opening."
+                            )},
+                        ],
+                        max_tokens=max_tokens, temperature=0.5,
+                    ):
+                        _cor_chunks.append(piece)
+                    _cor_reply = _strip_chat_format_bleed(
+                        "".join(_cor_chunks).strip()
+                    )
+                    _cor_reply = _strip_thats_real_tic(_cor_reply)
+                    if _cor_reply:
+                        reply = _cor_reply
+
+        # Case 2m (beat120): Cross-turn prior-user-message echo — companion reply's
+        # first sentence contains significant content from an EARLIER user turn (not
+        # the current one). Example: barrier-vague T2 opened with user's T1 phrase
+        # "I can't say it to him because he always makes it about himself" (Jaccard
+        # 0.67 vs prior user turn after stopword removal). _strip_echo() only checks
+        # the CURRENT user turn; this guard catches echoes of earlier user messages.
+        # Fires when: ≥1 prior user turn in history; companion first sentence Jaccard
+        # ≥ 0.50 vs any prior user message AND ≥4 content words in first sentence.
+        if reply and self.history:
+            _prior_user_msgs_c2m = [
+                m['content'] for m in self.history
+                if m.get('role') == 'user'
+            ]
+            if _prior_user_msgs_c2m:
+                _SW_c2m = {
+                    'i', 'me', 'my', 'you', 'your', 'he', 'she', 'him', 'her',
+                    'they', 'them', 'we', 'us', 'the', 'a', 'an', 'to', 'of',
+                    'in', 'it', 'is', 'are', 'was', 'be', 'do', 'did', 'have',
+                    'and', 'but', 'or', 'so', 'not', 'no', 'for', 'at', 'on',
+                    'with', 'by', 'from', 'that', 'this', 'just', 'can', 'will',
+                    'would', 'could', 'should', 'about', 'because', 'what', 'when',
+                    'how', 'who', 'all', 'any', 'if', 'then', 'now', 'up', 'out',
+                    'into', 'its', 'his', 'always', 'never', 'every', 'get',
+                    'got', 'know', 'like', 's', 'don',
+                }
+
+                def _cw_c2m(s: str):
+                    return {w for w in re.findall(r"[a-z']+", s.lower())
+                            if w not in _SW_c2m and len(w) > 2}
+
+                _reply_fsent_c2m = re.split(r'[.!?—]', reply)[0].strip() if reply else ''
+                _r_cw_c2m = _cw_c2m(_reply_fsent_c2m)
+                if len(_r_cw_c2m) >= 4:
+                    for _pu_c2m in _prior_user_msgs_c2m:
+                        _p_cw_c2m = _cw_c2m(_pu_c2m)
+                        if _p_cw_c2m:
+                            _union_c2m = _r_cw_c2m | _p_cw_c2m
+                            _jacc_c2m = (len(_r_cw_c2m & _p_cw_c2m)
+                                         / len(_union_c2m)) if _union_c2m else 0.0
+                            if _jacc_c2m >= 0.50:
+                                log.warning(
+                                    "companion: PRIOR-USER-ECHO (Case 2m) — first "
+                                    "sentence echoes prior user turn (Jaccard %.2f): "
+                                    "'%s'", _jacc_c2m, _reply_fsent_c2m[:60]
+                                )
+                                _c2m_user = user + (
+                                    "\n\nCRITICAL: Your response opened by repeating "
+                                    "something the user said in an EARLIER turn of this "
+                                    "conversation — not what they just said now. Do NOT "
+                                    "echo or paraphrase earlier user messages. Respond "
+                                    "only to what they just said. Make a fresh "
+                                    "observation from a new angle. Do not recycle any "
+                                    "phrasing from earlier in this conversation."
+                                )
+                                _c2m_chunks = []
+                                for piece in self.engine.stream(
+                                    messages=[
+                                        {"role": "system", "content": COMPANION_SYSTEM},
+                                        {"role": "user", "content": _c2m_user},
+                                    ],
+                                    max_tokens=max_tokens, temperature=0.6,
+                                ):
+                                    _c2m_chunks.append(piece)
+                                _c2m_reply = _strip_echo(
+                                    "".join(_c2m_chunks).strip(), user_message
+                                )
+                                _c2m_reply = _strip_chat_format_bleed(_c2m_reply)
+                                _c2m_reply = _strip_thats_real_tic(_c2m_reply)
+                                if _c2m_reply:
+                                    reply = _c2m_reply
+                                break
 
         # Normalize model-generated double-punctuation artifact: "?." → "?"
         # (model occasionally appends a period after a question mark)

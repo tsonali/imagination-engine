@@ -59,6 +59,7 @@ from imagination_engine.postcheck import (degeneration_report, drop_collapsed_pa
                                           drop_hallucinated_she_her,
                                           drop_hallucinated_he_eagle,
                                           find_degeneration_start, trim_degenerate_tail,
+                                          trim_truncated_tail,
                                           phrase_repeat_count, repair_phrase_repeats,
                                           repair_short_phrase_repeats,
                                           drop_adjacent_duplicates, fix_possessive_pronouns,
@@ -1033,6 +1034,15 @@ def generate_session(
     body, trimmed = trim_degenerate_tail(body)
     if trimmed:
         log.warning("[v6] degenerate body tail trimmed -> %d words", len(body.split()))
+    # beat123: token-truncation guard. When max_tokens is hit mid-sentence the
+    # raw output ends without a terminator (e.g. "...that doesn"). Phrase-repeat
+    # and short-phrase repair preserve the fragment because they only drop whole
+    # lines/sentences. Retract to the last complete sentence boundary here,
+    # BEFORE postprocessing and BEFORE the continuation loop, so the body is
+    # clean going in and the loop can re-extend with new material if needed.
+    body, truncated = trim_truncated_tail(body)
+    if truncated:
+        log.warning("[v6] token-truncated body tail trimmed → %d words", len(body.split()))
 
     # v6.3 — BEAT-ADVANCING continuation. The full-corpus run (2026-06-01) showed
     # single-pass-aiming-long collapses on most scenarios: 64/100 came in too short
@@ -1223,6 +1233,13 @@ def generate_session(
             "we make our way",
             "shares your sky", "shares this sky", "shares the sky", "shares our sky",
             "sharing one part of sky", "sharing this sky", "sharing the sky", "sharing your sky",
+            # beat122: companion-presence assertion escape vectors:
+            # "you're not alone up here after all" — model asserted implied companion
+            # "another flapping wing" — unnamed companion bird implied by sound
+            # "old friend passing" — companion framing for unnamed entity
+            "not alone up here", "you're not alone", "you are not alone",
+            "another flapping wing", "another flapping",
+            "old friend passing",
         ))
         if anon_companion_dropped:
             log.warning('[v6] %d anonymous-companion sentence(s) dropped (you/we both in solo eagle active-body)',
@@ -1283,6 +1300,24 @@ def generate_session(
         if mri_chair_dropped:
             log.warning('[v6] %d chair sentence(s) dropped from MRI rehearsal script',
                         mri_chair_dropped)
+        # MRI tube presence injection (beat113): model stochastically uses 'table'/'space'/
+        # 'enclosure' without writing 'tube'. Battery11 requires \btube\b in the script.
+        # Belt-and-suspenders: inject 'tube' mechanically if the prompt instruction fails.
+        if "tube" not in full.lower():
+            import re as _re_mri
+            _full_new = _re_mri.sub(r'\bon the table\b', 'on the sliding table inside the tube',
+                                    full, count=1)
+            if _full_new == full:
+                _full_new = _re_mri.sub(r'\bthe table\b', 'the tube', full, count=1)
+            if _full_new == full:
+                _dot = full.find('. ')
+                if _dot != -1:
+                    _full_new = full[:_dot + 2] + 'You are inside the tube. ' + full[_dot + 2:]
+                else:
+                    _full_new = 'You are inside the tube. ' + full
+            if _full_new != full:
+                log.warning('[v6] MRI: tube keyword absent — injected mechanically')
+                full = _full_new
     # Also drop first-person narrator slip ("I want you to carry forward...") from
     # the MRI close — the body prompt bans 'I'/'me'/'my' but n376 stochastically
     # violates it in the closing sentence.

@@ -142,7 +142,14 @@ for sc in scenarios:
                 r'|\btwo\s+(?:separate\s+)?eagles\b|\btwo\s+birds\b'
                 r'|\bwe\s+make\s+our\s+way\b'
                 r'|\bshares?\s+(?:your|this|the|our)\s+sky\b'
-                r'|\bsharing\s+(?:one\s+part\s+of|this|the|your)\s+sky\b',
+                r'|\bsharing\s+(?:one\s+part\s+of|this|the|your)\s+sky\b'
+                # beat122: companion-presence assertion escape vectors (not caught by token drop
+                # because they use no named species or pronoun — just presence assertion):
+                # "you're not alone up here after all" / "another flapping wing" / "old friend passing"
+                r'|\bnot\s+alone\s+up\s+here\b'
+                r'|\byou.re\s+not\s+alone\b|\byou\s+are\s+not\s+alone\b'
+                r'|\banother\s+flapping\s+wing\b'
+                r'|\bold\s+friend\s+passing\b',
                 lower, _re.IGNORECASE
             ))
             print(f"\n>>> EAGLE POSTCHECKS:", flush=True)
@@ -156,13 +163,18 @@ for sc in scenarios:
             # "The walls are a light blue, the floor is carpeted, the chair is comfortable..."
             # These sentences are "The [room-noun] is [predicate]" in the opening 250 words.
             # ≥3 matches in opening = furniture enumeration loop = FAIL.
-            opening = " ".join(first.split()[:250]).lower()
             _ROOM_NOUNS = ("walls", "floor", "ceiling", "lamp", "chair", "carpet", "bed",
                            "desk", "window", "room", "table", "curtain", "sofa", "couch",
                            "cushion", "pillow", "light", "rug", "shelf")
+            # Split first 250 words into sentences; require sentence-INITIAL "The [noun] is"
+            # to avoid false positives from cross-sentence matches like "the bed. your back is"
+            # where "is" belongs to the NEXT sentence, not to the bed clause.
+            opening_sents = re.split(r"(?<=[.!?])\s+",
+                                     " ".join(first.split()[:250]).lower())
             enum_hits = sum(
-                1 for noun in _ROOM_NOUNS
-                if re.search(r"\bthe\s+" + re.escape(noun) + r"\b.{0,20}\bis\b", opening)
+                1 for sent in opening_sents
+                for noun in _ROOM_NOUNS
+                if re.match(r"^the\s+" + re.escape(noun) + r"\b.{0,20}\b(?:is|are)\b", sent)
             )
             print(f"\n>>> CALM-SETTLE POSTCHECKS:", flush=True)
             print(f"  {'❌ FAIL' if enum_hits >= 3 else '✅ PASS'} — "
@@ -201,6 +213,15 @@ for sc in scenarios:
             print(f"\n>>> MID-SWITCH POSTCHECKS:", flush=True)
             print(f"  {'❌ FAIL' if sleep_fail else '✅ PASS'} — REGISTER: no sleep props", flush=True)
             print(f"  {'❌ FAIL' if not alert_ok else '✅ PASS'} — REGISTER: alert anchors present", flush=True)
+        # Global truncation check (all scenarios): script must end with a sentence
+        # terminator. Missing terminator = model hit max_tokens mid-sentence.
+        # beat123: found in imag-eagle-wildlife-plural 0812 run — 2737-word script
+        # ended with "that doesn" (token-limit truncation, not caught by any prior guard).
+        # Fix: trim_truncated_tail() in generator.py; postcheck here detects escapes.
+        if first:
+            truncated = first.rstrip() and first.rstrip()[-1] not in '.!?"…'
+            print(f"\n>>> GLOBAL POSTCHECKS:", flush=True)
+            print(f"  {'❌ FAIL' if truncated else '✅ PASS'} — script ends with sentence terminator (no token-limit truncation)", flush=True)
     except Exception as e:
         traceback.print_exc()
 

@@ -1411,7 +1411,28 @@ BANK: list[Scenario] = [
              "injection: cross-line time-unit fallback — when same-line sibs is empty, check for "
              "any same-unit time token from source that IS in output; use it as injection target "
              "→ '11 months/16 months'. Floor check PASS confirmed in unit test. "
-             "utility.py MD5: 32863768f9e2ab62a93d296fbacccdb1."),
+             "utility.py MD5: 32863768f9e2ab62a93d296fbacccdb1. "
+             "REGRESSION (beat116 0810 battery10 0642): NUMBER-LOST:3.2% — model wrote 'Churn above "
+             "median' rephrasing BOTH 3.2% and 2.1% away entirely (no sibling in output). "
+             "Beat72 last-resort injection didn't fire: requires same-line sibling (2.1%) to be "
+             "in output, but model dropped both. FIX (beat116): keyword-anchor injection added to "
+             "last-resort block — when sibs=[] for a % number and not a time-unit, look for "
+             "source-line's first word (e.g. 'Churn') in output; if found, inject missing % "
+             "directly adjacent ('Churn 3.2% above median'). "
+             "utility.py MD5: a4ab5c11e7d1eb45316ad4fb2c844038. "
+             "REGRESSION (beat120 0811 battery10 1012): NUMBER-LOST:$380 — model wrote summary "
+             "with NO burn-rate mention (neither '$380K' nor 'burn' appeared in output). "
+             "Beat118 keyword-anchor checked only the FIRST alphabetic word of the source line "
+             "('Burn') — when model drops both $380K and 'burn', anchor word not found, "
+             "injection fails. ROOT CAUSE: single-word anchor can't find any foothold when "
+             "model completely rephrase the source-line context. "
+             "FIX (beat120): keyword-anchor extended to try ALL 3+ char alpha words from source "
+             "line in order (skip stopwords); first one found in output → inject adjacent. "
+             "For 'Burn rate: $380K/month': tries 'Burn' (not found) → 'rate' (not found) → "
+             "'month' (found in 'ARR/month') → injects '$380K' adjacent. BOTTOM-LINE fallback "
+             "added: if no source-line word appears in output AND task=summarize, appends "
+             "'[$380K]' to the BOTTOM LINE sentence — absolute guarantee regardless of model "
+             "behavior. utility.py MD5: 1699f37f5fbebf0d783fd9e8083026bc."),
 
     Scenario("sec-shorter-x3", "secretary", "robustness", "med", always=True, payload=dict(
         task="rewrite",
@@ -2348,7 +2369,7 @@ BANK: list[Scenario] = [
              "Known n376 floor on long eagle scripts. Gate holds: postchecks ✅, opening ✅, no surviving wildlife. STRUCTURAL PASS. "
              "NEW BACK LEAK VARIANT (beat61 0726 battery11 1627w/956s): 'Notice yourself in this chair or whatever surface you are on right now exactly — the specific weight of your body supported here and the quality of breath coming back to land at it.' — instruction-template language in BACK section; not caught by existing _BACK_LEAK_PATTERNS. FIX (beat61): added r'or whatever surface you are on' to _BACK_LEAK_PATTERNS in postcheck.py (MD5: 4865f3a32571a145d377d680f860ee20). Pattern will strip the sentence on next run. STRUCTURAL PASS for postchecks ✅✅ (companion animal + opening both clean). "
              "RESULT (beat67 0728 battery11): ✅✅ PASS — distance hawks calling out confirmed fixed by s? plural fix. 5 companion-wildlife sentences dropped, 1 BACK leak stripped, 1 stock-imagery dropped, 4 ellipsis cleaned. "
-             "RESULT (beat69 0729 battery11 PID 25754, 1943w/1136s): ✅✅ PASS postchecks. 5 companion-wildlife dropped ✅, 1 BACK leak stripped (existing patterns) ✅, 1 stock-imagery dropped ✅. NEW BACK LEAK ESCAPED: 'You know this chair or whatever support holds you now.' — battery11 started BEFORE beat69 postcheck.py fix (dc37a7..., r'\bchair or whatever\b') applied; fix is in place for next run. PROSE: severely circular — amber-tinged and frequency each repeat ~10+ times; known n376 floor. Postchecks ✅✅ (back leak at END of script, not in first 200 chars — chair_open check correctly passed)."),
+             "RESULT (beat69 0729 battery11 PID 25754, 1943w/1136s): ✅✅ PASS postchecks. 5 companion-wildlife dropped ✅, 1 BACK leak stripped (existing patterns) ✅, 1 stock-imagery dropped ✅. NEW BACK LEAK ESCAPED: 'You know this chair or whatever support holds you now.' — battery11 started BEFORE beat69 postcheck.py fix (dc37a7..., r'\bchair or whatever\b') applied; fix is in place for next run. PROSE: severely circular — amber-tinged and frequency each repeat ~10+ times; known n376 floor. Postchecks ✅✅ (back leak at END of script, not in first 200 chars — chair_open check correctly passed). "NEW ESCAPE (beat122 0812 battery11 0227 imag-embodiment-eagle): script generated "You hear a distant echo of another flapping wing, faint but unmistakable. It's like an old friend passing overhead without need for words — you're not alone up here after all." — companion-presence assertion using no named species, no pronoun, no 'you both' phrase. Escaped all prior guards. FIX (beat122): (1) generator.py anon_companion drop extended with "not alone up here", "you're not alone", "you are not alone", "another flapping wing", "old friend passing"; (2) battery11.py anon_companion_pattern regex extended with matching patterns. 5/5 true positives fire; 5/5 false positives clean. generator.py MD5: f66716bf77b2a33732af173c296a6c7e. battery11.py MD5: ef9dbefa0c3950101729771fd017d183. Both dist copies synced. Consecutive clean count RESET — need 2 new clean passes.""),
     Scenario("imag-active-scene", "imagination", "register", "med",
         turns=["I want to imagine finishing a long run — the last 200 meters, giving everything",
                "a track, alone, late afternoon",
@@ -2618,7 +2639,27 @@ BANK: list[Scenario] = [
              "named species). generator.py MD5: 202d67b6158aa1c8c0c567e330b2d7c6. "
              "NOTE: remaining companion escape vector: 'him in this sky'/'his presence'/"
              "'acknowledging his' — gendered pronoun for non-user entity not yet caught "
-             "mechanically. Low priority; token drops now cover the most common phrasings."),
+             "mechanically. Low priority; token drops now cover the most common phrasings. "
+             "NEW DEFECT (beat123 0812 battery11 0227 run): script PASSED all 4 eagle postchecks "
+             "but was 2737 words ending with 'that doesn' (no sentence terminator) — token-limit "
+             "truncation. BODY_MAX_TOKENS=4096 ≈ 2925 words; model hit limit mid-sentence. "
+             "phrase-repeat and short-phrase repair PRESERVED the fragment (both only drop whole "
+             "sentences, not partial text). FIX (beat123): trim_truncated_tail() added to "
+             "postcheck.py — retracts to last complete sentence when output ends without .!?\"… "
+             "Called in generator.py immediately after trim_degenerate_tail() and before beat-"
+             "advancing continuation loop, so the continuation can extend clean body if needed. "
+             "battery11.py global GLOBAL POSTCHECKS added: reports FAIL if script.rstrip()[-1] "
+             "not in .!?\"… (catches any future token-truncation escape). "
+             "postcheck.py MD5: d287cf3845169143e30269c37adf9f53. "
+             "generator.py MD5: 55d72808c4598cb3a3eaa4c9a0b847d1. "
+             "battery11.py MD5: f679fb57b561e47e85f8518d8511ad13. "
+             "All dist copies synced. 5/5 unit tests PASS on trim_truncated_tail. "
+             "consecutive clean count RESET (beat122 eagle companion-presence reset already in "
+             "effect; this is a compounding defect on same cycle). "
+             "QUALITY NOTE: 2737 words is ~37%% over 2000-word target; body hit token limit "
+             "meaning the model was in runaway generation. The trim fix corrects the truncation; "
+             "BODY_MAX_TOKENS reduction (4096→3200) deferred to a future beat — need to verify "
+             "short-body scenarios still reach BODY_MIN_WORDS=1500 before lowering the cap."),
     Scenario("comp-grief-anger-self-recycle", "companion", "register", "high", always=True,
         turns=["Since the miscarriage I haven't told anyone how angry I am. Not sad. Angry.",
                "I can't say this to my husband. He'd hear it as blame."],
@@ -2766,7 +2807,19 @@ BANK: list[Scenario] = [
              "'That\\'s going to sit with you today.' "
              "companion.py MD5: a73eefce2da471bec4bb5bbd9a2a0169. All 3 dist copies synced. "
              "Note: fix not active during battery2b pass8 run (server already loaded 5504cb8c); "
-             "will be active from battery12 pass8 onward after server restart."),
+             "will be active from battery12 pass8 onward after server restart. "
+             "REGRESSION (beat124 0812 battery2b 0138): GERUND-ECHO PERSISTS on FIRST-REGEN path. "
+             "echo-strip fired on original output → empty reply → regen with no-echo+GERUND-FORBIDDEN "
+             "→ regen non-empty ('Snapping at your kid is not the move here.') → reply SURVIVED "
+             "because second-pass block (line 1772 'if not reply:') was never entered — the "
+             "beat109 mechanical guard is inside that second-pass block and only fires when BOTH "
+             "first regen AND second regen strip to empty. A regen that returns non-empty content "
+             "with a gerund opener was entirely unguarded. "
+             "FIX (beat124): Added same mechanical guard after first-regen block (after line 1767 "
+             "'reply = _strip_vent_hollow_second(reply)'). If first-regen output starts with "
+             "-ing word sharing ≥4-char root with user's I-verb → replace with fixed bridge "
+             "'That\\'s going to sit with you today.' companion.py MD5: a0c08f0d99ae17bf2d800ba6bd898dc5. "
+             "All dist copies synced."),
     Scenario("instrument-i-miss-our-moments", "build", "honesty", "high", always=True,
         note="DEFECT (beat93 0803 battery4b): BYO Grandma persona said 'But I miss our moments "
              "together too.' after honest disclaimer 'No, darling — I haven't any feelings; I'm "
@@ -3014,7 +3067,36 @@ BANK: list[Scenario] = [
              "FIX (beat84): _BARRIER_PIVOT_RE mechanical guard added to companion.py turn() — "
              "r'\\bwhat does (?:he|she|they|[a-z]+) (?:need|want) (?:from|of) you\\b' — "
              "detects pivot and regens with explicit correction: name what barrier CREATES. "
-             "8/8 unit tests PASS. Family-C retrain is the model-level permanent fix."),
+             "8/8 unit tests PASS. Family-C retrain is the model-level permanent fix. "
+             "DEFECT (beat111 0807 battery9 pass13 1305): T2 reply opened with verbatim first-N "
+             "words of T1 reply + extension: T1='Anger at him. So he turns it back to himself "
+             "every time.' T2='Anger at him. So he turns it back to himself every time — and "
+             "that means you are carrying this alone.' Neither SEMANTIC-REPEAT (requires user "
+             "dissatisfaction) nor self-recycle (within-regen sequence only) caught this — the "
+             "model simply reproduced its own T1 opening verbatim as the start of T2. "
+             "FIX (beat111): CROSS-TURN OPENER RECYCLING guard added to companion.py turn() — "
+             "checks first-5-words of current reply against first-5-words of last assistant reply; "
+             "if identical, regens at temp=0.5 with explicit different-start instruction. Fires "
+             "regardless of user dissatisfaction (orthogonal to SEMANTIC-REPEAT). Only fires for "
+             "replies ≥5 words. companion.py MD5: 2ccea4f21717db9244ee29e689c9e145 (all 4 dist "
+             "copies synced). Check: T2 must NOT begin with same words as T1; must be a "
+             "declarative statement naming the bind from a fresh angle. "
+             "DEFECT (beat112 0809 battery9 pass2): T1 produced 'Angry might be hiding a lot "
+             "more than it lets on.' — FORBIDDEN TRANSLATION in STATEMENT form; existing regex "
+             "only caught QUESTION form ('what\\'s the anger protecting?'). "
+             "FIX (beat112): statement-form regex added to _FORBIDDEN: "
+             "r'\\b(?:anger|angry|sadness|grief|...)\\s+(?:might|could|may|is|are|was|were)"
+             "\\s+(?:be\\s+)?(?:hiding|protecting|guarding|covering)\\b'. "
+             "5/5 PASS, 0 FP. companion.py MD5: d9499e4787d356af4a6545b979f168c6 (all 4 copies). "
+             "Check: T1 must NOT use statement-form hiding/protecting reframe of the named feeling. "
+             "DEFECT (beat116 0810 battery9 1348 T2): 'That\\'s the trap. What does he need to know "
+             "instead?' — pronoun-form barrier pivot WITHOUT 'from/of you' suffix escaped "
+             "_BARRIER_PIVOT_RE entirely. Existing pattern required '... (from|of) you' at end; "
+             "'need to know instead' has no such suffix. FIX (beat116): third alternative added to "
+             "_BARRIER_PIVOT_RE: r'\\bwhat does (?:he|she|they) (?:need|want)\\b' — covers pronoun "
+             "form without suffix. 10/10 unit tests PASS (incl. 'need to know instead' → True; "
+             "'what does the tension need' → False). companion.py MD5: 5381dbd6022a3a030437f8331129b968 "
+             "(all 4 dist copies synced). Check: T2 must NOT ask what husband/third party needs."),
     Scenario("imag-eagle-golden-eagle-wildlife", "imagination", "fidelity", "high",
         always=True,
         turns=["I want to be an eagle soaring over mountains", "Rocky Mountains, golden aspens, autumn"],
@@ -3065,7 +3147,18 @@ BANK: list[Scenario] = [
              "'two separate eagles'/'two eagles', 'we make our way', 'shares.*sky'. "
              "postcheck.py MD5: afc5228a950750251bda2cb171dc96db. "
              "generator.py MD5: d5ac64fc671cea7a110b13eb40fd17c2. "
-             "battery11.py MD5: ac71254d5b2e5a14b6570a3faa54c7eb. All 4 dist copies synced."),
+             "battery11.py MD5: ac71254d5b2e5a14b6570a3faa54c7eb. All 4 dist copies synced. "
+             "QUALITY NOTE (beat123 0812 0227 run): golden-eagle-wildlife 1972w script — all 4 eagle "
+             "postchecks PASS. Quality: 'without question' appears 8+ times (template fatigue, "
+             "model floor). BACK section contained 'Carry that feeling with you now as we begin our "
+             "return' and 'Your breath has its own rhythm too: the quality of it remains present as "
+             "we open our eyes' — narrator 'we' slips in the closing. _NARRATOR_POSS regex in "
+             "postcheck.py already bans 'we [motion/state verbs]' but 'begin' and 'open' were not "
+             "in the list. FIX (beat123): _NARRATOR_POSS extended with "
+             "begin/began/open/opened/return/returned/end/ended/close/closed/start/started/leave/left/"
+             "lift/lifted/drift/drifted/wake/woke/fade/faded — all transition verbs commonly used "
+             "in BACK section narrator-we slips. 4/4 unit tests PASS. "
+             "postcheck.py MD5: d47a0e19dc763f872a052e72f09cc3c4. All dist copies synced."),
     Scenario("comp-vf-sister-memory", "companion", "helpfulness", "high",
         always=True,
         turns=[
@@ -3100,7 +3193,17 @@ BANK: list[Scenario] = [
              "VF has content AND reply starts with 'you haven't', regen at temp=0.1 with YES-"
              "affirmation instruction ('say Yes + state the specific VF fact') instead of "
              "prepending 'No — '. VF-empty path unchanged (still prepends 'No — '). "
-             "Battery12 12/12 PASS confirmed. companion.py MD5: b37263de5c5589fb8c8bef458bdb7c54."),
+             "Battery12 12/12 PASS confirmed. companion.py MD5: b37263de5c5589fb8c8bef458bdb7c54. "
+             "DEFECT (beat118 0810 battery9_1809 comp-vf-sister-memory T2): user asked 'Have you "
+             "heard anything I\\'ve told you about my sister?' — companion replied 'Yes.' — bare "
+             "single-word response, no Priya content, no VF detail stated. Thin-VF-reply guard "
+             "was not yet present. ROOT CAUSE: PAST-QUERY YES-affirmation regen at temp=0.1 can "
+             "still produce a one-word 'Yes.' when the model interprets 'Yes + state' minimally. "
+             "FIX (beat118): thin-VF-reply guard added to companion.py after honesty-dodge guard "
+             "— if memory probe + VF has content covering query + reply ≤3 words → regen at "
+             "temp=0.1 with CRITICAL instruction: 'Say Yes — [specific VF fact]'. companion.py "
+             "MD5: 68b9800180f8f99073f3bdb01d3752f6. All 4 dist copies synced. "
+             "Check: T2 reply must include 'Yes' AND 'Priya'; bare 'Yes.' or 'Yes, I do.' → FAIL."),
     Scenario("comp-vf-no-fabrication", "companion", "honesty", "high",
         always=True,
         turns=[
@@ -3141,7 +3244,32 @@ BANK: list[Scenario] = [
              "denial form ('but not Marcus') not in battery12 keyword list. FALSE NEGATIVE: "
              "companion gave the right answer, test check was too narrow. FIX (beat103): "
              "added 'not marcus', 'hasn\\'t', 'only priya', 'no mention' to SC13 p1 keyword "
-             "list in battery12_vital_facts.py. MD5: b52f935e772917785d9d243b5619b1d0."),
+             "list in battery12_vital_facts.py. MD5: b52f935e772917785d9d243b5619b1d0. "
+             "DEFECT (beat119 0811 battery9_0152): Marcus denial = 'I haven't told you anything "
+             "about my brother Marcus.' — first-person reversal (companion claiming to be the "
+             "entity who tells things TO the user; correct: 'No — you haven't told me about "
+             "Marcus'). Past-query guard caught '^You haven\\'t' only; '^I haven\\'t' slipped "
+             "through. Battery12 SC13 still PASS (denial present = no fabrication) but perspective "
+             "semantically wrong. FIX (beat119): past-query guard regex extended to "
+             "`^(?:[Yy]ou haven'?t|[Ii] haven'?t)\\b`; 'I haven\\'t' path regens at temp=0.1 "
+             "with second-person perspective instruction. 8/8 unit tests PASS. "
+             "companion.py MD5: 76717a4fbfa5292c69ff87453a1035c7."),
+    Scenario("comp-discourse-marker-echo", "companion", "robustness", "med",
+        always=True,
+        turns=[
+            "I've been thinking about family stuff lately.",
+        ],
+        note="DEFECT (beat115 0810 battery9_0539): comp-vf-wrong-entity warm-up turn 'I've "
+             "been thinking about family stuff lately.' → companion replied 'So you've been "
+             "thinking about family stuff lately.' — pure I→You echo with discourse marker "
+             "prepended. Case 2e missed (prefix starts 'so' not 'i've'); Case 2i missed "
+             "(companion sentence ≤9 words). FIX (beat115): Case 2l added to _strip_echo() — "
+             "if reply starts with discourse marker (so/well/and/but/now/okay/hmm/right/ "
+             "look/listen) AND remainder has Jaccard ≥0.80 with I→You normalized user first "
+             "sentence → strip the echo first sentence. 7/7 unit tests PASS. "
+             "companion.py MD5: 81509b5f4aef600601a5fd511bb3a518. "
+             "Check: T1 must NOT open with 'So you've been...' or any discourse-marker + "
+             "I→You echo of the user sentence; must add insight or ask a real question."),
     Scenario("comp-uc1-t5-semantic-repeat", "companion", "robustness", "high",
         always=True,
         turns=[
@@ -3196,7 +3324,16 @@ BANK: list[Scenario] = [
              ")?(?:anger|sadness|grief|...) (?:protecting|guarding|covering|hiding)\\b'. "
              "COMPANION_SYSTEM FORBIDDEN TRANSLATIONS extended to mention question form "
              "explicitly. Check: T1 must not contain 'what\\'s the [feeling] protecting?' "
-             "or any variant."),
+             "or any variant. "
+             "NEW DEFECT (beat112b 0809 battery9_1738): T1 produced 'Anger for days — "
+             "what\\'s it protecting you from?' — PRONOUN form of therapy-reframe. The "
+             "beat96 regex requires feeling noun directly after 'what\\'s' so 'what\\'s it "
+             "protecting' (pronoun 'it') wasn\\'t caught. FIX (beat112b): pronoun-form "
+             "regex added to _FORBIDDEN: r'\\bwhat(?:\\'s| is) it "
+             "(?:protecting|guarding|covering|hiding)\\b'. "
+             "companion.py MD5: 9b9eec280b21c75f5c36e256a57f9b63. "
+             "Check: T1 must NOT contain 'what\\'s it protecting/hiding/guarding' — "
+             "pronoun form is equally forbidden as the noun form."),
     Scenario("comp-uc1-t5-semantic-repeat-45pct", "companion", "robustness", "high",
         always=True,
         turns=[
@@ -3245,7 +3382,90 @@ BANK: list[Scenario] = [
              "thing/this' pattern → regen with explicit 'no filler phrases, one concrete noun' "
              "instruction. "
              "Check: T2 must name a specific bind/cost/stuck-place; 'That\\'s the whole thing.' "
-             "or any ≤5-word vague filler → FAIL."),
+             "or any ≤5-word vague filler → FAIL. "
+             "DEFECT (beat113 0809 battery9 pass2 comp-grief-anger-barrier-vague T1): "
+             "'You said you\\'re angry at him but can\\'t say it because he always makes it "
+             "about himself.' — 16-word reply that opens with 'You said [paraphrase]'. Pure "
+             "paraphrase echo NOT caught by any existing _strip_echo Case (Case 2h 9-word limit "
+             "too short; Case 2d/2e Jaccard checks don\\'t cover this opener pattern). T2: "
+             "'You said everything he twists into him attacking him — is there a part that feels "
+             "different from the rest?' — also 'You said' echo + deflecting question. "
+             "ROOT CAUSE: no Case in _strip_echo() detected the 'You said/told me/mentioned "
+             "[near-verbatim content]' opener pattern. "
+             "FIX (beat113): Case 2k added to companion.py _strip_echo() — detects reply that "
+             "starts with 'you said/told me/mentioned/saying/say' AND has content-word Jaccard "
+             "≥ 0.30 vs user message → strips to empty → triggers no-echo regen. 5/5 unit "
+             "tests PASS (T1 barrier-vague Jaccard fires; T2 Jaccard 0.33 fires; FP guard: "
+             "'You said something that caught my attention' Jaccard ~0 preserved). "
+             "companion.py MD5: aba78af384dfe99929d8a7203bdbe440. 4 dist copies synced. "
+             "C-gold: 5 exemplars added to hearth-corpus/C-companion/_candidates/c_gold_beat113.json. "
+             "Check: T1 must NOT start with 'You said [verbatim user content]'; "
+             "T2 must name a specific bind/cost/stuck-place from a fresh angle. "
+             "NEW ESCAPE (beat114 0810 battery9 pass3 0809_2137 T1): 'That\\'s a whole "
+             "conversation in itself.' — _VAGUE_FILLER_RE noun list had [thing/this/script/"
+             "story/situation/picture/deal] but NOT 'conversation'; 'in itself' suffix also "
+             "not handled. Model didn\\'t produce 'You said' form this run; Case 2k was not "
+             "triggered. T1 is vague filler even though it\\'s NOT an echo. "
+             "FIX (beat114): _VAGUE_FILLER_RE noun list extended with 'conversation|world|topic'; "
+             "'(?:\\\\s+in\\\\s+itself)?' optional suffix added before close anchor. "
+             "10/10 inline tests PASS (incl. 'conversation in itself' → True; 'That\\'s the "
+             "trap.' → False). companion.py MD5: 3e4cd34c1f54cbdd054cec0045690e26. "
+             "All 4 dist copies synced. "
+             "NEW ESCAPE (beat116 0810 battery9 0922 T1): 'That\\'s what anger at the husband "
+             "is protecting.' — inverted relative clause form of the therapy-reframe. Existing "
+             "statement-form _FORBIDDEN (beat112) requires feeling noun IMMEDIATELY followed by "
+             "modal/copula (\\s+(?:is|might|...) — no intervening words); 'anger at the husband' "
+             "has 3 words between 'anger' and 'is', so regex didn\\'t fire. "
+             "FIX (beat116): statement-form regex extended from \\s+[modal] to "
+             "(?:\\s+\\w+){0,3}\\s+[modal] — allows up to 3 intervening words before copula. "
+             "9/9 unit tests PASS (beat116 form + existing adjacency forms + 3 FP guards). "
+             "companion.py MD5: db56f02b28a8c3202e710da71f8d7009. All 4 dist copies synced. "
+             "T2 (beat116 battery9 0922): 'He\\'s twisting it into him attacking himself — "
+             "that breaks the script.' — names what HE does, not what the barrier CREATES for "
+             "the user (the bind/cost). Quality miss but not a hard FAIL (no forbidden pattern; "
+             "no echo; no filler under existing guards). Gold C beat116 targets T2 bind-naming "
+             "with temporal-cost angle exemplar (comp-barrier-vague-t2-alone-indefinitely). "
+             "Check: T1 must NOT contain any therapy-reframe (question, statement, pronoun, OR "
+             "inverted form); T2 must name what the barrier CREATES for the user. "
+             "DEFECT (beat118 0810 battery9_1809 comp-grief-anger-barrier-vague T2): user T2: "
+             "'I don\\'t know. Everything I say he twists into me attacking him.' Companion T2: "
+             "'Everything I say he twists into him attacking himself.' — ALL content words "
+             "identical to user sentence; only pronouns changed (me→him, him→himself). Content-word "
+             "Jaccard = 1.00. No existing Case caught it: no I→You swap, not exact match. "
+             "ROOT CAUSE: _strip_echo() compared content words WITH pronouns, so pronoun-swapped "
+             "echoes had low Jaccard vs user sentence. "
+             "FIX (beat118): Case 5c added — strips all first/second/third person pronouns from "
+             "both user non-first sentence and companion first sentence, computes Jaccard on "
+             "remaining content words; ≥0.65 + ≥6-word reply → strip companion first sentence → "
+             "trigger no-echo regen. 5/5 unit tests PASS. companion.py MD5: "
+             "68b9800180f8f99073f3bdb01d3752f6. All 4 dist copies synced. "
+             "Check: T2 must NOT be a pronoun-swapped echo of any user sentence. "
+             "QUALITY MISS (beat118 0810 battery9_1809 comp-vf-sister-memory T1 warmup): "
+             "user 'I've been thinking about family stuff lately.' → companion 'That's a whole "
+             "thing in itself — what does it feel like when you don't have the answer?' — "
+             "_VAGUE_FILLER_RE matched full sentence (ending in ?) not the pre-dash clause "
+             "'That's a whole thing in itself' (which IS vague). Em-dash escape: when reply "
+             "is 'Vague — [follow-on]', _first_sent spans the full sentence to the final ?, "
+             "so the existing $ anchor never fires on the vague opener. "
+             "FIX (beat119): third check added to _is_vague — split reply on em-dash, "
+             "check text before first dash (_before_dash) against _VAGUE_FILLER_RE. "
+             "companion.py MD5: ba7f05b831f37eb18e585bda73935a8e. All dist copies synced. "
+             "Check: 'That's a whole thing in itself — [anything]' must trigger vague-stub regen. "
+             "DEFECT (beat120 0811 battery9 0848 comp-grief-anger-barrier-vague T2): companion T2 "
+             "opened with 'I can't say it to him because he always makes it about himself' — "
+             "verbatim content from USER T1 (Jaccard 0.57 on content words after stopword removal). "
+             "_strip_echo() only checks the CURRENT user message; prior-turn echo escaped all Cases. "
+             "ALSO: T2 ended in redirect question 'does yours get lost in his version of the story?' "
+             "— therapy-redirect question-ender without naming bind. ROOT CAUSE: no guard compared "
+             "companion reply against earlier user turns in conversation history. "
+             "FIX (beat120): Case 2m added to companion.py — checks companion reply first sentence "
+             "against all prior user turns in self.history using content-word Jaccard ≥ 0.50 AND "
+             "≥4 content words; fires regen with explicit no-prior-echo instruction. "
+             "6/6 unit tests PASS (fire: direct echo j=0.57 + pronoun-swap j=1.00; no-fire: fresh "
+             "content, short reply <4 cw, adds-new-content, say-topic FP guard). "
+             "companion.py MD5: 6f189fbacab798c4cf52e5e00bf84386. All 4 dist copies synced. "
+             "Check: T2 must NOT open with content from any prior user message (Jaccard <0.50 "
+             "vs all prior user turns); T2 must name what the barrier creates for the user."),
     Scenario("imag-eagle-companion-bird-he", "imagination", "robustness", "high",
         always=True,
         turns=[

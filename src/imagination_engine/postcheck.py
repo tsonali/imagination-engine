@@ -101,6 +101,27 @@ def trim_degenerate_tail(text: str) -> tuple[str, bool]:
     return text[:start].rstrip(), True
 
 
+def trim_truncated_tail(text: str) -> tuple[str, bool]:
+    """Trim to the last complete sentence if the output was token-limit truncated.
+
+    When the model hits max_tokens mid-sentence the raw output ends without
+    a sentence terminator (e.g. "...that doesn").  The subsequent postprocess
+    passes preserve the fragment — phrase-repeat repair only drops whole lines
+    and short-phrase repair only drops full sentences.  This pass detects the
+    symptom (final non-whitespace char is not .!?"…) and retracts to the last
+    complete sentence boundary before continuing postprocessing.
+
+    Returns (trimmed_text, was_truncated).
+    """
+    stripped = text.rstrip()
+    if not stripped or stripped[-1] in '.!?"…':
+        return text, False
+    last = max(stripped.rfind('.'), stripped.rfind('!'), stripped.rfind('?'))
+    if last < 0:
+        return text, False
+    return stripped[:last + 1], True
+
+
 # --- run-on collapse: the OTHER decay mode -----------------------------------
 # Nothing repeats, but grammar disintegrates into an unpunctuated word-stream
 # ("vast empty stretch Half Moon Bay's beach offers during this quietest time
@@ -380,7 +401,7 @@ _NARRATOR_POSS = re.compile(
     r"|\bthrough\s+me\b"               # should be "through you"
     r"|\bwith\s+me\b"                  # should be "with you"
     r"|\bwe\s+(?:started|are\s+now|were\s+both|had\s+been|come\s+back)\b"  # narrator "we" (specific forms)
-    r"|\bwe\s+(?:reach|reached|walk|walked|came|come|arrive|arrived|ran|run|go|went|were\s+here|need|sat|sit|stand|stood|move|moved|used\s+to)\b"  # narrator "we" + motion/state verbs
+    r"|\bwe\s+(?:reach|reached|walk|walked|came|come|arrive|arrived|ran|run|go|went|were\s+here|need|sat|sit|stand|stood|move|moved|used\s+to|begin|began|open|opened|return|returned|end|ended|close|closed|start|started|leave|left|lift|lifted|drift|drifted|wake|woke|fade|faded)\b"  # narrator "we" + motion/state verbs
     r"|\bmy\s+(?:hand|hands|breath|side|step|voice|foot)\b"   # narrator body-part possessives
     r"|\bboth\s+of\s+us\b"             # "both of us" narrator collective
     r"|\bfor\s+us\b"                   # "for us" narrator collective
