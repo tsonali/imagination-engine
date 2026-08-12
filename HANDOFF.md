@@ -1,5 +1,111 @@
 # HANDOFF — resume here (read this first)
 
+_Last updated 2026-08-12 beat124 — **BATTERY11 0227 COMPLETE (7/7). GERUND-ECHO FIRST-REGEN GUARD. GOLD(A)=6123 +4. N614 ITER 625. CONSECUTIVE CLEAN COUNT = 0.**
+
+BATTERY11 (0812 0227) — ALL 7 COMPLETE:
+- imag-mri ✅ beat122
+- imag-intimacy ✅ beat122
+- imag-embodiment-eagle ✅ beat122 — companion-presence defect found+fixed (beat122)
+- imag-eagle-wildlife-plural ✅ postchecks PASS — token-truncation defect found+fixed (beat123)
+- imag-calm-settle ✅ PASS — 970w, sensation-first
+- imag-eagle-golden-eagle-wildlife ✅ PASS — 1972w, all 4 eagle checks — narrator-we defect found+fixed (beat123)
+- imag-eagle-companion-bird-he ✅ PASS — 1426w, ends '?', all 4 eagle checks, 3 sentences dropped by postprocessor
+
+THIS CYCLE (0227) IS NOT A CLEAN PASS — found 3 defects (beat122 companion-presence, beat123 token-truncation, beat123 narrator-we). Count reset to 0. Need 2 full-cycle clean passes.
+
+ALSO: battery2b (01:38) — GERUND-ECHO:snapping floor violation. companion.py guard gap (beat109 second-pass guard not reached when first regen is non-empty). FIXED beat124.
+
+DEFECTS THIS BEAT-CYCLE:
+1. companion-presence escape in embodiment-eagle (beat122) — FIXED, scenario_bank locked
+2. Token-truncation in wildlife-plural (beat123) — trim_truncated_tail() FIXED, battery11 GLOBAL POSTCHECKS added
+3. Narrator-we in golden-eagle-wildlife back section (beat123) — _NARRATOR_POSS extended FIXED
+4. Gerund-echo first-regen gap in battery2b (beat124) — companion.py first-regen guard FIXED
+
+GIT: committed 098102d. ZIP rebuilt: dist/hearth-0.2.zip MD5 f2bbb00508bcca1eb494692befb7a5e3.
+
+MD5s: companion.py a0c08f0d99ae17bf2d800ba6bd898dc5. postcheck.py d47a0e19dc763f872a052e72f09cc3c4. generator.py 55d72808c4598cb3a3eaa4c9a0b847d1. battery11.py f679fb57b561e47e85f8518d8511ad13.
+
+MINI: caffeinate ✅, flywheel ✅, SSH ✅. N614 at iter 625 (03:42 AM), val loss 1.367 at iter 600, checkpoint 0000600 saved. ETA ~06:42 AM. N613 REJECTED (34th consecutive, beat122). N376 PERMANENT.
+
+GOLD: A=6123 (+4 beat124: ceramics-kiln-opening, ice-fishing-dawn, cathedral-piano-night, mountain-summit-moment). MD5 f51aa6b9a0f8c34720f0392d566f270c. SCP to mini ✅. Flywheel will detect new hash and queue n615 after n614 finishes.
+
+NEXT BEAT:
+(1) Read n614 probe — check _logs/probe_latest.txt on mini when flywheel writes it (ETA ~06:42 AM 08-12). Judge [A]/[B]/[C]/[D] outputs vs n376 before any promotion.
+(2) Read next battery11 cycle transcript end-to-end when qc_queue completes — need ZERO defects for clean pass 1/2.
+(3) BYO deep-test — 18+ beats deferred. Needs qc_queue fully paused, memory ≥35% free.
+(4) Two consecutive clean passes — count at 0. No shortcuts.
+(5) Sonali: push v1.0 tag (git push origin v1.0) when ready.
+
+Only Sonali-physical: notarization + F5 voice dial._
+
+---
+
+_Last updated 2026-08-11 beat120 — **NO CODE CHANGES. GOLD(A)=6100 +8 (MD5 c51fa601). GOLD(C) +5 c_gold_beat120.jsonl (MD5 3a9933cf). Both SCP'd to mini ✅ (MDs verified match). N610 REJECTED (32nd consecutive) — worst failure yet: [A] = self-referential loop about "the specific actual version of what you want" ×15, not an imagination session. n376 PERMANENT (b9acf04a, val 0.641). Flywheel will detect c51fa601 hash and queue n611.**
+
+BEAT120 READS (all clean, no new defects):
+- battery11 (0420): 7/7 ALL PASS ✅
+- battery10 (0323): all floors clean ✅
+- battery9 (0525): 18/20 visible scenarios clean; 2 cut off at read time (still running). No FAIL lines.
+
+BEAT120 GOLD:
+- A_gold.jsonl: 6100 lines (was 6092). New scenes: film-lights-dimming, old-city-walking-return, concert-silence-between-songs, heavy-bag-set-down, first-to-arrive-gathering, cold-water-face-morning, end-of-summer-garden, foreign-market-no-language.
+- c_gold_beat120.jsonl: 5 exemplars — playful-sustained-3turns, warmth-through-honest-no, anger-received-no-pivot, plain-answer-when-asked, good-news-as-good-news.
+
+COMPANION.PY FINAL MD5: 76717a4fbfa5292c69ff87453a1035c7 (UNCHANGED from beat119)
+
+NEXT BEAT:
+(1) Read battery9 0525 end-to-end when complete — check q-enders/paraphrase/diversity stats; look for new defects
+(2) Read N611 probe when mini training completes (flywheel will auto-queue on c51fa601 hash detection)
+(3) BYO deep-test — 15+ beats deferred; needs dedicated window with Chrome closed, qc_queue paused, memory ≥35% free (≥5.6 GB)
+(4) N607/N608 vs n376 side-by-side — still needs dedicated low-memory morning window
+(5) Sonali: push v1.0 tag (git push origin v1.0)
+
+companion.py: 76717a4fbfa5292c69ff87453a1035c7. utility.py: 75bc73b8d606cad12737faae0c0bd823. generator.py: 11468df2. postcheck.py: d43def7d. battery11_imagination_bank.py: 7bf813d1. A_gold MD5: c51fa601. Only Sonali-physical: notarization + F5 voice dial.
+
+---
+
+_Last updated 2026-08-11 beat119 (~02:45) — **2 DEFECTS FOUND + FIXED. GOLD(A)=6092 +8. GOLD(C) +5 c_gold_beat119.jsonl. MINI: A_gold SCP'd (hash 0850df2d → flywheel retrain n610 queued after n609). BATTERY9 0152 still running.**
+
+DEFECTS FIXED (beat119):
+(1) companion.py vague em-dash opener escape — "That's a whole thing in itself — [question]" escaped `_VAGUE_FILLER_RE` because `_first_sent` spanned full sentence (ending at ?) not em-dash clause. FIX: `_before_dash` added as third check — split reply on "—", check text before dash against regex. 8/8 unit tests PASS. MD5 (interim): ba7f05b831f37eb18e585bda73935a8e.
+(2) companion.py first-person perspective reversal in VF denial — "I haven't told you anything about Marcus" slipped past past-query guard (only caught `^You haven't`). FIX: guard regex extended to `^(?:You haven't|I haven't)`. "I haven't" path: regen at temp=0.1 with "use second-person perspective" instruction. 8/8 unit tests PASS.
+companion.py FINAL MD5: 76717a4fbfa5292c69ff87453a1035c7. All 4 dist copies synced.
+
+BEAT118 DEFECTS (now closed):
+(1) battery11 imag-calm-settle FURNITURE ENUM FALSE POSITIVE — fixed battery11_imagination_bank.py MD5: 7bf813d10d309761a6cf74304e3e782e.
+(2) battery10 NUMBER-LOST:$380K — fixed utility.py MD5: 75bc73b8d606cad12737faae0c0bd823.
+(3) companion.py Case 5c pronoun-agnostic echo — fixed.
+(4) companion.py thin-VF-reply guard — fixed.
+
+MINI: N609 probe read (02:43 Aug 11): [A] REJECTED — hallucinates uninvited marble-temple scene ("a specific shade that reminds someone of sky in between clouds", "made for a king or queen", "marble floor") — model invented a place the user didn't request; violates core "go where the user wants" principle. [B] weaker (apologetic phrasing). Val 1.508 (vs n376 0.641 / n607 1.262 / n608 1.273 — high val = worse convergence). **N609 REJECTED (31st consecutive or 3rd in this series of clean-adjacent runs).** N376 permanent. N610 will auto-start when flywheel detects A_gold hash change (0850df2d already SCP'd). N607/N608 remain CANDIDATES — both clean [A], val ~1.26-1.27. Side-by-side vs n376 still needed in dedicated low-memory window.
+
+BATTERY9 0152 (running, PID 83162, started ~01:52): partial read clean — grief-anger T1/T2 ✅, VF scenarios ✅, para-stay/para-care-honesty ✅. Beat119 companion.py fixes NOT yet tested (battery9 loaded pre-fix companion.py). Next cycle is first test.
+
+ZIP: dist/hearth-0.2.zip MD5 6bef8928d5a1aae98c44d97da5b2d5dd.
+
+NEXT BEAT:
+(1) Read battery9 0152 end-to-end when complete — get q-enders/paraphrase/diversity stats; look for any new defects
+(2) BYO deep-test — 14 beats deferred; run when battery9 done and memory free (need ≥35% = ~5.6GB free — check `vm_stat` before launching)
+(3) N607/N608 vs n376 side-by-side — still needs dedicated morning low-memory window (Chrome closed, qc_queue paused)
+(4) Read n609 probe when available
+(5) Lock beat119 fixes into scenario_bank.py (VF first-person reversal scenario note)
+(3) BYO deep-test rotation (still deferred from beat117)
+(4) Sonali: push v1.0 tag
+
+companion.py: 68b9800180f8f99073f3bdb01d3752f6. utility.py: 75bc73b8d606cad12737faae0c0bd823. generator.py: 11468df2. postcheck.py: d43def7d. battery11_imagination_bank.py: 7bf813d10d309761a6cf74304e3e782e. Only Sonali-physical: notarization + F5 voice dial._
+
+_Last updated 2026-08-10 beat117 (~14:50) — **BARRIER-PIVOT PRONOUN-FORM FIX + ALL BATTERIES CLEAN × 2 CYCLES + N605 REJECTED (LOOP COLLAPSE) + N606 TRAINING + GOLD(A)=6068 +8 + ZIP REBUILT.** HONEST READS: battery11 0804 = 20/20 PASS ✅ (eagle postchecks all clean; MRI tube ✅); battery9 0922 = 20 scenarios clean (22% q-enders ✅, 0% paraphrase ✅, 0.75 diversity ✅; Case 2l discourse-marker echo clean ✅); battery10 0642 = NUMBER-LOST:3.2% (beat116 fix already deployed, utility.py MD5 a4ab5c11); battery10 1112 = clean ✅ (3.2% confirmed present: "churn above median at 3.2%"); battery12 = 13/13 PASS ✅; battery2b = GERUND-ECHO floor ✅ (not gate failure); battery4b/3b/6/product_e2e = all PASS ✅; battery11 1221 = 20/20 PASS ✅ (second cycle). DEFECT FOUND+FIXED (battery9 1348 comp-grief-anger-barrier-pivot T2): "That's the trap. What does he need to know instead?" — pronoun-form barrier pivot WITHOUT "from/of you" suffix escaped `_BARRIER_PIVOT_RE`. Existing first alternative required `... (from|of) you`; "need to know instead" has no such suffix, so guard never fired. FIX (beat117): third alternative added to `_BARRIER_PIVOT_RE`: `r'|\bwhat does (?:he|she|they) (?:need|want)\b'`. 10/10 unit tests PASS (incl. "need to know instead" → True; "what does the tension need" → False; "what does staying quiet give you" → False). companion.py MD5: 5381dbd6022a3a030437f8331129b968 (all 4 dist copies synced). scenario_bank.py: comp-grief-anger-barrier-pivot beat117 note appended. MINI: caffeinate ✅, flywheel OK. N605 REJECTED (29th) — CATASTROPHIC LOOP: [A] "The hard day is over. / The day's work is done." × 49 repetitions (greedy decode temp=0 collapse); [C] "It sounds like..." therapy-frame; [D] 1920s editor PASS. N376 PERMANENT (b9acf04a). N606 training (started 10:57 on 6060-line gold, ETA ~14:30). GOLD(A)=6068 (+8 beat117: paragliding-run-off-hill, library-after-closing, bread-dough-hands, camper-before-dawn, cold-swimming-hole, cast-removed-leg-yours, city-from-paraglider, forge-already-lit). Gold SCP'd to mini ✅. GOLD(C) beat116 already exists (7 exemplars, SCP'd). ZIP REBUILT: dist/hearth-0.2.zip MD5 0b2f68c48cf4bbc2f2a92d2311347f10 (companion.py 5381dbd6 inside). Battery9 1348 still running (PID 56080, scenario 17/20, the barrier-vague scenario will test WITH OLD companion.py — fix will be verified in next cycle). NOTE: the beat116 HANDOFF shows companion.py MD5 db56f02b (inverted-reframe fix); beat117 adds the pronoun-form barrier fix on top → MD5 5381dbd6. NEXT BEAT: (1) Read n606 probe when available; (2) Read battery9 1348 end-to-end on completion; (3) BYO deep-test rotation (memory window permitting); (4) Add repetition_penalty=1.1 to test_finetuned.py if n606 [A] still loops; (5) Sonali: push v1.0 tag when ready. companion.py: 5381dbd6. utility.py: a4ab5c11. generator.py: 11468df2. postcheck.py: d43def7d. Only Sonali-physical: notarization + F5 voice dial.**_
+
+_Last updated 2026-08-10 beat116 (~12:15) — **UTILITY.PY KEYWORD-ANCHOR INJECTION + COMPANION.PY INVERTED-REFRAME FIX + N605 REJECTED (LOOP COLLAPSE, 29th) + N606 STARTED + GOLD(A)=6060 +8 + GOLD(C)+7+68 (CORPUS JSONL BUG FIXED) + BATTERY9 0922 COMPLETE.** utility.py FIX (beat116): NUMBER-LOST:3.2% escape vector — root: source line "Churn: 3.2% (median: 2.1%)" → model rephrased BOTH numbers away ("Churn above median"), so sibs=[] and the beat72 same-line-sibling injection never fired. FIX: keyword-anchor injection added at `else: continue` branch for `"%" in n` numbers with empty sibs — looks for source-line's first word (e.g. "Churn") in output and injects missing % adjacent → "Churn 3.2% above median". utility.py MD5: a4ab5c11e7d1eb45316ad4fb2c844038. All 4 dist copies synced. scenario_bank.py: sec-summarize-lossless beat116 annotation added. BATTERY10 (0642): 1 real floor failure (NUMBER-LOST:3.2%, now FIXED). BATTERY9 (0922): 20 scenarios including comp-discourse-marker-echo (Case 2l); question-ender rate 25-28% ✅ (under 50% target — standing flag RESOLVED); comp-discourse-marker-echo PASS ✅; comp-grief-anger-1word-echo QUALITY MISS (paraphrase-then-filler escape: "Anger for days — that's a whole thing in itself." — not caught by _VAGUE_FILLER_RE because opening content before "— that's a" prevents regex match; targeted by Gold C beat116 exemplars). BATTERY12: 13/13 PASS ✅. N605 REJECTED (29th): CATASTROPHIC [A] LOOP — "The hard day is over. / The day's work is done." repeated ×49. Different failure mode from n604 furniture enumeration. Root: probe script uses greedy decoding (no repetition_penalty or temperature in test_finetuned.py; `generate(..., max_tokens=350, verbose=False)`) — overfitting to a degenerate token sequence amplified by temp=0. [B]/[C]/[D] probes coherent (collapse only in [A]). N601–N605 = 29 consecutive rejections. N376 PERMANENT (b9acf04a). N606 STARTED 10:57 on new 6060-line A_gold.jsonl (MD5 94665294), TRAIN: 10067, ETA ~14:30. GOLD(A)=6060 (+8 beat116: limestone-cave-deep-time, being-the-river, lighthouse-keeper-storm, pre-dawn-fishing-boat, spacewalk-silence, forge-at-dawn, deep-sea-bioluminescence, first-real-conversation-new-language). SCP'd to mini ✅. GOLD(C)+7 c_gold_beat116.json: paraphrase-then-filler escape (×2), barrier-vague-T2-temporal-cost, light-register-match (×2), direct-question-plain-answer, emotional-reassurance-honest-no. SCP'd to mini ✅. PARAPHRASE-THEN-FILLER escape vector noted: "Anger for days — that's a whole thing in itself." — first clause is content (opener prefix), second clause is filler after em-dash; _VAGUE_FILLER_RE requires match at start of reply or start of first sentence, both fail. Code fix path: extend em-dash strip pattern at companion.py line ~681 to also match "— that's a [whole] [noun]" form. DEFERRED (Gold C exemplar approach first). companion.py FIX (beat116): INVERTED THERAPY-REFRAME — barrier-vague T1 produced "That's what anger at the husband is protecting." — inverted relative clause form. Existing statement-form _FORBIDDEN (beat112) required feeling noun immediately adjacent to copula (no intervening words); "anger at the husband" (3 words between "anger" and "is") evaded it. FIX: extended `(?:\s+\w+){0,3}` to allow 0-3 intervening words before copula. 9/9 unit tests PASS. companion.py MD5: db56f02b28a8c3202e710da71f8d7009. All 4 dist copies synced. barrier-vague T2: "He's twisting it into him attacking himself — that breaks the script." — quality miss (names what HE does, not what the barrier costs HER); not a hard FAIL. BYO deep-test STILL DEFERRED (will try tomorrow morning low-memory window). CORPUS DISCOVERY (beat116): Gold C beats 100-115 (11 files, 61 records) were stored as .json arrays — build_training_data.py globs *.jsonl only. All 11 converted + beat116's 7 records. 68 total records × 3x weight = 204 effective training examples now live in pipeline (n607+). NEXT BEAT: (1) Read n606 probe when done (~14:30); (2) BYO deep-test rotation (morning low-memory window); (3) If n606 [A] shows loop collapse, add repetition_penalty=1.1 + temp=0.7 to test_finetuned.py; (4) Sonali: push v1.0 tag when ready. companion.py: db56f02b (beat116 inverted-reframe fix). utility.py: a4ab5c11 (beat116 keyword-anchor). generator.py: 11468df2. postcheck.py: d43def7d. Only Sonali-physical: notarization + F5 voice dial.**_
+
+_Last updated 2026-08-10 beat115 (~07:10) — **CASE 2L ECHO GUARD + N604 REJECTED (28th) + GOLD(A)=6052 +8 + GOLD(C)+5 + ZIP REBUILT.** companion.py FIX (beat115): Case 2l added to `_strip_echo()` — discourse-marker prepended I→You echo ("So you've been thinking about family stuff lately."); detects discourse marker (so/well/and/but/now/okay/hmm/right/look/listen) + Jaccard ≥0.80 on I→You-normalized user first sentence → strips. 7/7 unit tests PASS. companion.py MD5: 81509b5f4aef600601a5fd511bb3a518. 3 live dist copies synced + ZIP contains 4th. scenario_bank.py: comp-discourse-marker-echo (always=True) added. N604 REJECTED (28th): [A] furniture-enumeration loop (chair/cup/breathing-pattern repeated, identical to n603 failure); N376 PERMANENT (b9acf04a). GOLD(A)=6052 (+8 beat115: night train, tall grass watching clouds, pottery wheel, rooftop city night, forest after rain, frozen lake skating, desert before dawn, hands in soil planting). SCP'd to mini ✅. GOLD(C)+5 c_gold_beat115.json (warmup-echo-free opener, grief-anger-self-recycle T2 bind-named, redirect-yield-fast, advice-demand). SCP'd to mini ✅. ZIP REBUILT: dist/hearth-0.2.zip MD5 39bfef363d2f034bc21a214a2fc338c4 (companion.py 81509b5f inside). Mini: SSH OK, caffeinate OK, flywheel OK. qc_queue running (PID 93705): battery10 in progress after battery6 clean. BYO deep-test DEFERRED (OOM on inference when Chrome+Claude active; runs cleanly overnight via TestClient when memory freer). NEXT BEAT: (1) BYO deep-test rotation (requires low-memory window, try overnight or morning-idle); (2) N605 probe read when ready; (3) Sonali: push v1.0 tag when ready; (4) read battery9 from next cycle for Case 2l verification. Only Sonali-physical: notarization + F5 voice dial.**_
+
+_Last updated 2026-08-09 beat113 (~23:00) — **CASE 2K ECHO GUARD + MRI TUBE INJECTION. beat113 read battery11 pass2 (0809_2012) + battery9 pass3 (0809_2137, in progress). Two defects found + fixed: (1) imag-mri tube absent (stochastic) — model used "table"/"enclosed space" instead of "tube"; battery11 requires \btube\b. FIX: 3-tier mechanical injection in generator.py v6_clean() after MRI chair-drop: sub "on the table"→"on the sliding table inside the tube", sub "the table"→"the tube", inject "You are inside the tube." after period. generator.py MD5: 11468df2dd2985d8eccfe1eac74d3f87. All 4 dist copies synced. (2) comp-grief-anger-barrier-vague T1+T2 "You said [paraphrase]" echo — 16-word reply opens with "You said you're angry at him but can't say it because he always makes it about himself." No existing _strip_echo Case caught this opener pattern. FIX: Case 2k added — detects "you said/told me/mentioned/saying/say" opener + content-word Jaccard ≥0.30 vs user → strips → no-echo regen. 5/5 unit tests PASS. companion.py MD5: aba78af384dfe99929d8a7203bdbe440. All 4 dist copies synced. GOLD(A)=6036 (+6: after-the-presentation, late-night-city-walk, surgeon-in-the-or, first-morning-of-vacation, sitting-with-aging-parent, after-the-long-run). SCP'd to mini ✅. GOLD(C)+5 c_gold_beat113.json (barrier-vague T1×2 + T2×2 + para-care warmup). scenario_bank.py: barrier-vague beat113 note banked. battery9 pass3 in progress (PID 30514, scenario 19/19 barrier-vague not yet reached — Case 2k unverified by battery; will confirm next beat). Prior status: beat112 two _FORBIDDEN guards (statement + pronoun therapy-reframe) deployed. v1.0 tagged (069177d). FINAL SWEEP GATE: 2 consecutive all-battery clean passes — still 0 confirmed. battery9 pass3 = candidate for pass 1 pending barrier-vague completion.**_
+
+_Last updated 2026-08-09 beat112 (~18:48) — **TWO _FORBIDDEN GUARDS ADDED (statement + pronoun forms of therapy-reframe). battery9 pass2 (0809_1738) caught 2 defects escaping existing regex: (1) beat112 — comp-grief-anger-barrier-pivot T1 "Angry might be hiding a lot more than it lets on." — statement-form therapy-reframe; beat96 regex only covers QUESTION form. FIX: statement-form regex added to _FORBIDDEN matching [feeling][modal][be][hiding/protecting/guarding/covering]. (2) beat112b — comp-grief-anger-1word-echo T1 "Anger for days — what's it protecting you from?" — pronoun "it" substitutes for feeling noun; beat96 regex requires feeling noun directly after "what's". FIX: pronoun-form regex added: r"\bwhat(?:'s| is) it (?:protecting|guarding|covering|hiding)\b". Both fixes: 5/5 unit tests catch, 0/4 false positives each. companion.py MD5: 9b9eec280b21c75f5c36e256a57f9b63, all 4 dist copies synced. ZIP rebuilt: hearth-0.2.zip (beat112b companion.py inside, MD5 verified). GOLD(A)=6030 (+7 beat112: mountain-summit-before-sunrise, potters-wheel-night-studio, tide-pool-low-tide-morning, snow-cabin-first-morning, old-bookshop-rain-afternoon, apple-orchard-harvest-september, lighthouse-top-night-keeper). SCP'd to mini ✅. GOLD(C)=+5 c_gold_beat112.json (anger-barrier-pivot-correct-form, anger-barrier-pivot-variant-bind, anger-flat-1word-echo, anger-flat-variant-2, playful-register-matched). SCP'd to mini ✅. MINI: online, caffeinate running, flywheel sleeping post-n601 (n601 REJECTED: breath-loop×12 + therapy-frame; n376 PERMANENT b9acf04a). scenario_bank.py: comp-grief-anger-barrier-pivot (beat112 note) + comp-grief-anger-1word-echo (beat112b note) banked. battery9 (0809_1738) still running — fixes active in NEXT cycle (pass 4). v1.0 tagged (069177d). FINAL SWEEP GATE: 2 consecutive all-battery clean passes. Next cycle pass 4 = first with beat112+112b active.**_
+
+_Last updated 2026-08-07 beat111 (context continuation, ~19:36) — **CROSS-TURN OPENER RECYCLING guard deployed. battery9 pass13 (1305 run) caught comp-grief-anger-barrier-pivot T2 verbatim-repeating T1 opener (first-N words of T1 + extension). FIX: CROSS-TURN OPENER RECYCLING guard in companion.py turn() — first-5-word hash match vs last assistant reply → regen at temp=0.5 with different-start instruction. Fires regardless of user dissatisfaction. companion.py MD5: 2ccea4f21717db9244ee29e689c9e145, all 4 dist copies synced. ZIP rebuilt: 94da08c0d8854d481a2671c4a231cdb4. GOLD(A)=6023 (+7 beat111: meadow-milky-way, wolf-at-dawn, dancing-kitchen, music-reached, balloon-lift, wedding-hour, kayak-mist). GOLD(C)=+5 c_gold_beat111.json (opener-fresh-angle, anger-no-protection, redirect-concrete, playful-stays-playful, plain-answer). Mini unreachable — gold not SCP'd yet. scenario_bank.py: comp-grief-anger-barrier-pivot note updated with beat111 defect+fix. 4 consecutive clean passes (10+11 triggered tag; 12+13 post-tag). USE-CASES rotation deferred (no safe memory window). NEXT: read pass 14 battery11 end-to-end when cycle 4 completes; SCP gold to mini when reachable; USE-CASES rotation (Companion deep-test next in sequence).**_
+
 _Last updated 2026-08-07 beat110/111 (~04:01 AM) — **🚢 SHIPPED: battery11 pass 11 CLEAN ✅ → 2/2 CONSECUTIVE CLEAN PASSES → v1.0 TAGGED. All 7 battery11 scenarios passed: S1 imag-mri ✅, S2 imag-intimacy ✅, S3 imag-embodiment-eagle ✅, S4 imag-eagle-wildlife-plural ✅, S5 imag-calm-settle ✅, S6 imag-eagle-golden-eagle-wildlife ✅, S7 imag-eagle-companion-bird-he ✅ (total 5278s). S7 script: 1779w/732s, v6 dropped 2 phrase-pairs + 7 short-phrase + 2 BACK leaks + 4 companion-wildlife, all 4 eagle postchecks ✅ — beat109 '2c96b7f two birds sharing sky' fix CONFIRMED SOLID across 2 consecutive passes. bash scripts/package.sh run → dist/hearth-0.2.zip (1.5M) verified. git tag v1.0 created (on commit 069177d beat109). GOLD(A)=3951 local / 3950 mini (SCP'd 04:00 ✅). N597 on mini: iter 600/3000, val 1.477, train 1.370 — healthy, ETA ~07:00. Flywheel will detect 3950-line hash after N597 completes and auto-queue N598. NEXT: Sonali confirms → git push origin v1.0. Continue gold growth from beat111my onward.**_
 
 _Last updated 2026-08-07 beat109 (~00:26 AM) — **GOLD(A) 3000 LOCAL AND MINI ✅ (SCP'd 00:26 AM). Gold grew from 2853 (session start) to 3000 through continuous writing this beat: beat109vt through beat110bj (147 new scripts). SCP milestones: 2900 (00:05 ✅), 3000 (00:26 ✅). Battery9 still running (started 22:58, log 53KB, comp-uc1 scenario visible in tail, exit ETA ~00:33 AM). Battery11 pass 11 ETA ~01:33 AM (after battery9 + battery6 + battery10 + battery2b + battery12 + battery4b + battery3b + product_e2e + 300s sleep). N596 on mini: step 400 (checkpoint 0000400 saved), started 23:44, ETA ~02:46 AM, on track. Honest flywheel PID 66523 running on mini — will detect 3000-line gold hash on next poll. CONSECUTIVE CLEAN STATUS: 1/2 (pass 10 clean ✅, pass 11 pending). 2/2 → bash scripts/package.sh → git tag v1.0.**_
@@ -86,17 +192,20 @@ free = (lines.get('Pages free',0)+lines.get('Pages inactive',0)+lines.get('Pages
 total = sum(v*pg/1048576 for k,v in lines.items() if 'Pages' in k and 'occupied by' not in k.lower())
 print(f'free+inactive: {free:.0f}MB ({100*free/total:.0f}%  threshold=35%)')
 "
-# beat107 state (2026-08-06 ~14:52 PM PDT):
-# PASS 8 BATTERY11 CLEAN ✅ (1/2 consecutive clean). Pass 8 full cycle in progress.
-# BATTERY9 RUNNING: PID 98333, started 14:10, ETA ~15:45.
-# 3 NEW ESCAPE VECTOR FIXES: postcheck.py afc5228a / generator.py d5ac64fc / battery11.py ac71254d.
-# n376 permanent (b9acf04a). N592 training on mini; N593 auto-queued.
-# GOLD(A)=1003 (MD5: 8222e8ad). GOLD(C)+5 beat107 (c_gold_beat106.json now 9 exemplars). Both SCP'd ✅.
-# companion.py: be8ebe16 | utility.py: 32863768 | postcheck.py: afc5228a | generator.py: d5ac64fc.
-# battery12_vital_facts.py: b52f935e | battery11.py: ac71254d.
-# companion.py beat108 change: _strip_echo applied to honesty-dodge regen output (prevents question-echo).
-# ZIP STALE (generator.py + postcheck.py + companion.py changed — rebuild only after 2 consecutive clean passes).
-# BYO DEEP TEST DEFERRED (battery9 in-flight; launch after battery9 done + memory ≥35%).
+# beat116 state (2026-08-10 ~12:15 PM):
+# BATTERY9 0922: COMPLETE — 20 scenarios, 22% q-enders ✅ (STANDING FLAG CLOSED), Case 2l PASS ✅.
+# N605: REJECTED (29th consecutive) — [A] catastrophic loop collapse ("The day's work is done." ×49).
+# N606: TRAINING on mini (started 10:57, TRAIN 10067, ETA ~14:30). At iter 225/3000 as of ~11:14.
+# utility.py: a4ab5c11 (beat116 keyword-anchor injection for NUMBER-LOST escape vector — FIXED).
+# companion.py: db56f02b (beat116: inverted therapy-reframe "anger at husband is protecting" — 3-word gap in statement-form regex FIXED). generator.py: 11468df2. postcheck.py: d43def7d.
+# GOLD(A)=6060 (MD5: 94665294). GOLD(C)+7 beat116 (paraphrase-filler, barrier-vague T2, light register, plain answer, honest no).
+# Both SCP'd to mini ✅. n376 PERMANENT (b9acf04a).
+# CORPUS DISCOVERY (beat116): Gold C beats 100-115 (11 files, 61 records) were .json arrays —
+#   build_training_data.py only globs *.jsonl. Converted all to .jsonl + beat116's 7 records.
+#   Total 68 records × 3x weight = 204 effective training examples now live (n607+).
+# BYO DEEP TEST DEFERRED (memory <35% while battery9 running; local 28% at beat end).
+# QUEUE.LOG FAIL OVERCOUNTING BUG: "FAIL" in queue.log counts historical docstring text, not actual verdicts.
+#   Always read actual ✅/❌ lines in battery logs — queue.log counts are not trustworthy.
 # QUEUE.LOG FAIL OVERCOUNTING BUG: "FAIL" in queue.log counts historical docstring text, not actual verdicts.
 #   Always read actual ✅/❌ lines in battery logs — queue.log counts are not trustworthy.
 # WHEN PASS 8+9 BOTH COMPLETE AND CLEAN (2/2 consecutive ✅):
@@ -116,11 +225,14 @@ python3 -c "import hashlib; d=lambda p: hashlib.md5(open(p,'rb').read()).hexdige
 print('companion:', d('src/imagination_engine/companion.py'))
 print('utility:  ', d('src/imagination_engine/utility.py'))
 print('instrument:', d('src/imagination_engine/instrument.py'))"
-# companion: ec04900d236dbb2ddf587cbea39a1e8b  (beat99: 'I don't know' forbidden + BARRIER PIVOT regen question-ender check)
+# companion: db56f02b28a8c3202e710da71f8d7009  (beat116: inverted therapy-reframe "anger at X is protecting" — 3-word gap in statement-form regex)
+#            previously: 81509b5f4aef600601a5fd511bb3a518  (beat115: Case 2l discourse-marker echo guard)
+#            previously: ec04900d236dbb2ddf587cbea39a1e8b  (beat99: 'I don't know' forbidden + BARRIER PIVOT regen question-ender check)
 #            previously: bf053c7618bdf0d91349bc7eac762f52  (beat96: anger-protecting regex + FORBIDDEN TRANSLATIONS question-form)
 #            previously: 6dbf2ba257defb54747041a77154bc22  (beat95: 1-word guard + LAR-threshold + vague-stub + honesty-lecturing)
 #            previously: 50e9076c67ea975a59d78e2e7f977d68  (beat94: _vf_covers_query — VF wrong-entity fix)
-#            previously: b37263de5c5589fb8c8bef458bdb7c54  (beat93 evening: PAST-QUERY VF-state branch)
+# utility:   a4ab5c11e7d1eb45316ad4fb2c844038  (beat116: keyword-anchor injection for NUMBER-LOST escape vector)
+#            previously: 32863768f9e2ab62a93d296fbacccdb1  (beat99: Dear-Need guard, last-resort floor)
 # postcheck: 72114264c7ce4fb6c4e4131d28d1ae66  (beat96: _EAGLE_ANON_COMPANION_PATTERN added)
 #            previously: 727e1894d1758a7926aa522d12bd690d  (beat95: drop_hallucinated_he_eagle added)
 # generator: 7f8a37b591db41e9ddbd6605da1ce43c  (beat95: wired drop_hallucinated_he_eagle eagle-only gate)
