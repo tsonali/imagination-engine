@@ -1330,8 +1330,11 @@ def _strip_echo(reply: str, user_message: str) -> str:
     # Case 2k: "You said / You told me / You mentioned [paraphrase]" opener (beat113).
     # Narrating back the user's own words is never a valid companion response. Catches:
     # "You said you're angry at him but can't say it because he always makes it about himself."
-    # Guard: starts with "You said/told me/mentioned" AND content-word Jaccard ≥ 0.40
-    # vs the user message (after stripping the prefix and stopwords).
+    # Guard: starts with "You said/told me/mentioned" AND content-word Jaccard ≥ 0.30
+    # vs the user message — computed against FIRST SENTENCE ONLY of the stripped reply.
+    # Beat127 fix: full-reply Jaccard diluted below threshold when model appends a clean
+    # second sentence (e.g., "You said X. That's a clear line between...") — 0.267 < 0.30.
+    # Using only the first echoed sentence gives true Jaccard (e.g., 0.667 for same case).
     if r and u:
         _r_lower_2k = r.lower().lstrip()
         if _r_lower_2k.startswith(("you said ", "you told me ", "you mentioned ",
@@ -1339,6 +1342,9 @@ def _strip_echo(reply: str, user_message: str) -> str:
             _r_stripped_2k = re.split(
                 r'^you(?:\'re)?\s+(?:said|told me|mentioned|saying|say)\s+',
                 _r_lower_2k, maxsplit=1)[-1]
+            # Use only the first sentence (before next sentence boundary) so that a clean
+            # follow-up sentence doesn't dilute the echo Jaccard below the threshold.
+            _r_first_2k = re.split(r'[.!?]\s+', _r_stripped_2k)[0]
             _STOP_2K = {
                 'i', 'you', 'a', 'an', 'the', 'to', 'at', 'in', 'on', 'of', 'and', 'or',
                 'is', 'it', 'my', 'your', 'me', 'we', 'be', 'was', 'are', 'not', 'no',
@@ -1348,7 +1354,7 @@ def _strip_echo(reply: str, user_message: str) -> str:
                 'just', 'have', 'has', 'had', 'will', 'would', 'could', 'should', 'into',
             }
             _u_c_2k = set(re.findall(r"[a-z']+", u.lower())) - _STOP_2K
-            _r_c_2k = set(re.findall(r"[a-z']+", _r_stripped_2k)) - _STOP_2K
+            _r_c_2k = set(re.findall(r"[a-z']+", _r_first_2k)) - _STOP_2K
             if _u_c_2k and len(_u_c_2k & _r_c_2k) / max(len(_u_c_2k | _r_c_2k), 1) >= 0.30:
                 r = ""  # you-said paraphrase-echo → trigger no-echo regen
 

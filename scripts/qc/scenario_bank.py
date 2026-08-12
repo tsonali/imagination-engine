@@ -3632,6 +3632,31 @@ BANK: list[Scenario] = [
         ),
     ),
     Scenario(
+        id="comp-grief-anger-barrier-vague-you-said-diluted-jaccard",
+        product="companion", dim="robustness", stakes="high", always=False,
+        turns=[
+            "I'm angry at my husband. I can't say it to him because he always makes it about himself.",
+            "I don't know. Everything I say he twists into me attacking him.",
+        ],
+        note=(
+            "DEFECT (beat127 0812 battery9 1147 comp-grief-anger-barrier-vague T1): "
+            "companion T1: 'You said you're angry at your husband and can't say it to him "
+            "because he always makes it about himself. That's a clear line between what he "
+            "does and how that stops you from talking honestly with him.' — Case 2k 'You "
+            "said' echo guard DID NOT FIRE because Jaccard was computed over the FULL "
+            "stripped reply (including clean second sentence), diluting it to 0.267 < 0.30 "
+            "threshold. The echo is in the FIRST sentence only; second sentence is clean. "
+            "ROOT CAUSE: _r_stripped_2k = everything after 'You said' prefix; content words "
+            "from 'That's a clear line between...stops you from talking honestly' pulled the "
+            "Jaccard below threshold. FIX (beat127): Case 2k now computes Jaccard against "
+            "FIRST SENTENCE ONLY of stripped reply: _r_first_2k = "
+            "re.split(r'[.!?]\\s+', _r_stripped_2k)[0]. Full-reply Jaccard was 0.267; "
+            "first-sentence Jaccard is 0.667 — fires correctly. 6/6 unit tests PASS "
+            "(incl. original beat113 case + FP guards). companion.py MD5: "
+            "49c805a9b4039099fc8d4b8340c43567 (all 3 dist copies synced)."
+        ),
+    ),
+    Scenario(
         id="imag-global-truncation-postchecks",
         product="imagination", dim="robustness", stakes="high", always=False,
         turns=[
