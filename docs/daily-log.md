@@ -7248,3 +7248,35 @@ CONSECUTIVE CLEAN PASS COUNT RESET — genuine defect found in eagle (stochastic
 
 **Queue:** RUNNING, FLYWHEEL-PAUSED active. scenario_bank.py fixed and verified.
 
+
+---
+
+## 2026-08-12 beat127
+
+**Batteries read (0812 second cycle — post beat126 fixes):**
+- **battery9-1147**: 20 scenarios PASS. paraphrase 3%, question-enders 31% ✅ (standing flag resolved), diversity 0.78. **DEFECT FOUND (not a hard assert fail):** comp-grief-anger-barrier-vague T1: "You said you're angry at your husband and can't say it to him because he always makes it about himself. That's a clear line between what he does and how that stops you from talking honestly with him." — Case 2k guard DID NOT FIRE. Root cause: Jaccard computed over full stripped reply (0.267 < 0.30), not just the echo sentence. Second sentence added clean content that diluted Jaccard below threshold.
+- **battery6-1344**: PASS ✅ (offline, all 4xx clean).
+- **battery10-1349**: floors clean ✅ (10/10, all numbers, no invented dates).
+- **battery2b-1400**: floors clean ✅ — gerund-echo second-pass produced "The guilt over snapping at your kid is real." (passes floor: starts with "The", not a gerund verb opener).
+- **battery12-0937**: 13/13 PASS ✅ (from prior cycle, beat126 confirmed read).
+- **battery11-0636** (prior cycle): CLEAN ✅ read confirmed; battery11-1011: imag-mri FAIL (truncation — beat126 fix deployed).
+
+**Defect fixed — Case 2k first-sentence Jaccard:**
+Root cause: `_r_stripped_2k` is the FULL reply after stripping the "You said" prefix. When model appends a clean second sentence, the Jaccard over the full reply is diluted below the 0.30 threshold. Fix: `_r_first_2k = re.split(r'[.!?]\s+', _r_stripped_2k)[0]` — Jaccard computed against first sentence only. Defect case: 0.267 full → 0.667 first-sentence → fires correctly. 6/6 unit tests PASS. companion.py MD5: 49c805a9b4039099fc8d4b8340c43567. All 3 dist copies synced.
+Scenario banked: comp-grief-anger-barrier-vague-you-said-diluted-jaccard. ZIP rebuilt: 2a8ba36e.
+
+**N616 read + REJECTED (38th):**
+[A] catastrophic repetition loop: "The particular quality of the calmness you need right now is available in this place... The particular kind of stillness you need is fully around you, the specific quality that only exists in this place right now." — ×10+ repetitions. N615's "particular/specific" tic amplified into a full degenerate loop. [B] apologetic opener "I'm sorry, I can't". [C] clinical analysis "Your statement about keeping to say you'll quit...". Val loss 1.518. N376 PERMANENT (b9acf04a).
+N617 auto-started at 14:47 on 6162-line gold (10183 train examples, +8 beat127: aurora-field, ocean-swim, thesis-defense, solo-flight, concert-hall, book-deal, clear-diagnosis, recovery-room).
+
+**Gold(A) +8** (beat127): aurora-borealis-field-alone, ocean-swim-far-out, thesis-defense-committee, first-solo-flight, empty-concert-hall-pre-performance, book-deal-signing, clear-diagnosis-the-call, waking-recovery-room-surgery-clear. All unique openings, all ≥900 words, vivid sensory-first construction. A_gold=6162. SCP'd ✅.
+
+**Gold(C) +5** (beat127): barrier-vague-t1-names-bind-not-paraphrase, barrier-vague-t2-names-what-it-costs-her, you-said-echo-stripped-correct-replacement, good-news-received-as-good-news, redirect-yield-fast-drop-frame. All target known companion defects. SCP'd ✅.
+
+**Battery12 hung:** battery12-1431 stuck 2+ hours (server died, companion echo-strip loop waiting for response that never came). Killed + queue restarted at 14:46.
+
+**Battery11-1446:** RUNNING (queue restart, first battery11 with beat127 companion.py active). This is the first attempt toward clean-pass 1/2 with all fixes current. ETA ~16:30.
+
+**Mini:** caffeinate ✅, flywheel ✅, N617 training (started 14:47, ETA ~18:30).
+
+**Consecutive clean pass count:** 0. Next clean = battery11-1446 if all 7 scenarios pass.

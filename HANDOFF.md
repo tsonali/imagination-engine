@@ -1,6 +1,34 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-08-12 beat126 — **2 DEFECTS FOUND+FIXED. N615 REJECTED (37th). N616 TRAINING. GOLD(A)=6129 +6. GOLD(C)+5. CONSECUTIVE CLEAN COUNT = 0.**
+_Last updated 2026-08-12 beat127 — **1 DEFECT FOUND+FIXED. N616 REJECTED (38th). N617 TRAINING. GOLD(A)=6162 +8. GOLD(C)+5. CONSECUTIVE CLEAN COUNT = 0 (battery11-1446 running — first attempt with beat127 fix).**
+
+BEAT127 SUMMARY:
+- 0812 cycle batteries ALL READ end-to-end (battery9/6/10/2b/12/4b/3b/e2e all PASS; battery11-0636 clean ✅; battery11-1011 FAIL imag-mri truncation — beat126 fix already deployed).
+- DEFECT FOUND+FIXED (battery9-1147 comp-grief-anger-barrier-vague T1):
+  Companion produced "You said you're angry at your husband and can't say it to him because he always makes it about himself. That's a clear line between what he does and how that stops you from talking honestly with him." — Case 2k guard DID NOT FIRE because Jaccard computed over FULL stripped reply (including clean 2nd sentence), giving 0.267 < 0.30 threshold. The echo is in the first sentence only; second sentence is clean content.
+  FIX: Case 2k now computes Jaccard against FIRST SENTENCE ONLY of stripped reply (_r_first_2k = re.split(r'[.!?]\s+', _r_stripped_2k)[0]). Full-reply Jaccard 0.267 → first-sentence Jaccard 0.667 → fires correctly. 6/6 unit tests PASS. companion.py MD5: 49c805a9b4039099fc8d4b8340c43567. All 3 dist copies synced.
+- scenario_bank.py: +1 scenario (comp-grief-anger-barrier-vague-you-said-diluted-jaccard). py_compile clean.
+- ZIP rebuilt: 2a8ba36e110af66ad82bff520ae05962 (1.5M).
+- GIT: committed cb84bd2 (beat127 Case 2k first-sentence Jaccard fix).
+- N616 REJECTED (38th consecutive): [A] catastrophic repetition loop on "particular quality/specific kind" phrase (N615 "particular/specific" tic amplified into full loop at temp=0.7); [C] clinical analysis frame ("Your statement about keeping to say you'll quit..."). Val loss 1.518. N376 PERMANENT (b9acf04a).
+- N617 TRAINING: flywheel detected 645f2486 → started 14:47, train=10183 (6162-line A_gold, +8 beat127: aurora-field, ocean-swim, thesis-defense, solo-flight, concert-hall, book-deal, clear-diagnosis, recovery-room), ETA ~18:30.
+- Gold(A)=6162 (+8 beat127). A_gold MD5: 645f2486ae965a7c5728831992216ea9. SCP'd ✅ (mini verified).
+- Gold(C)+5 c_gold_beat127.jsonl (barrier-vague-t1-names-bind, barrier-vague-t2-names-cost, you-said-stripped-correct-replacement, good-news-as-good-news, redirect-yield-fast). SCP'd ✅ (MD5 135ffd89).
+- Mini: caffeinate ✅, flywheel ✅, N617 training (PID 96022, iter 200-ish, ETA ~18:30).
+- battery11-1446: RUNNING (PID 26611, started 14:46, imag-mri intake in progress, first battery11 cycle with beat127 companion.py active). ETA ~16:30.
+- Battery12-1431 WAS HUNG (server dead, 2+ hours stuck). Killed, queue restarted at 14:46.
+- BYO deep-test: 21+ beats deferred (memory 16.9%, battery11 in-flight).
+
+MD5s (current): companion.py 49c805a9. postcheck.py d47a0e19. generator.py f7f2619. battery11.py f679fb57. A_gold: 645f2486.
+
+NEXT BEAT:
+(1) Read battery11-1446 end-to-end when complete (~16:30). Check imag-mri for truncation (beat126 fix), all 7 scenarios. ZERO defects = clean pass 1/2.
+(2) Read N617 probe when mini completes (~18:30). Judge [A]/[B]/[C]/[D] vs n376.
+(3) BYO deep-test — needs qc_queue paused + memory ≥35% free. Try overnight or early morning.
+(4) Two consecutive clean all-battery passes needed (count = 0).
+(5) Sonali: push v1.0 tag (git push origin v1.0) when ready.
+
+Only Sonali-physical: notarization + F5 voice dial.
 
 BEAT126 SUMMARY:
 - Battery11-0636: CLEAN PASS 1/2 ✅ (read end-to-end, 7/7 all PASS).
