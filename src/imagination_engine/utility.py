@@ -643,6 +643,52 @@ class Assistant:
                         else:
                             continue
                     else:
+                        # Keyword-anchor injection: when no same-line sibling number is
+                        # in output, look for source-line keywords in the output and inject
+                        # the missing number directly adjacent.
+                        # beat120: extended from first-word-only to ALL alphabetic words
+                        # from source line — handles case where model drops BOTH the number
+                        # AND its primary context word (e.g. drops "$380K" and "burn").
+                        # Fallback (summarize only): append to BOTTOM LINE when no anchor
+                        # word from source line appears in output.
+                        if "%" in n or n.lstrip().startswith("$"):
+                            _kw_stop = {'the', 'and', 'for', 'with', 'that', 'this',
+                                        'from', 'per', 'its', 'are', 'not', 'but',
+                                        'has', 'was', 'all'}
+                            _kw_cands = re.findall(r'[A-Za-z]{3,}', _src_ctx)
+                            _kw_injected = False
+                            for _kw in _kw_cands:
+                                if _kw.lower() in _kw_stop:
+                                    continue
+                                _kw_re = re.compile(
+                                    r'\b' + re.escape(_kw) + r'\b', re.I)
+                                if _kw_re.search(out):
+                                    _n_cap = n  # capture for lambda
+                                    out = _kw_re.sub(
+                                        lambda m, _nc=_n_cap: m.group(0) + f" {_nc}",
+                                        out, count=1,
+                                    )
+                                    log.info(
+                                        "secretary[%s]: keyword-anchor inject '%s'"
+                                        " after '%s'", task_key, n, _kw)
+                                    _kw_injected = True
+                                    break
+                            if not _kw_injected and task_key == "summarize":
+                                # Absolute fallback: append bracket note to BOTTOM LINE.
+                                # Fires only when model drops the number AND every source-
+                                # line context word — should be extremely rare.
+                                _bl_m = re.search(r'^(BOTTOM LINE:[^\n]+)', out, re.M)
+                                if _bl_m:
+                                    out = (out[:_bl_m.end()]
+                                           + f" [{n}]"
+                                           + out[_bl_m.end():])
+                                else:
+                                    out += f"\n[Key figure: {n}]"
+                                log.info(
+                                    "secretary[%s]: BOTTOM-LINE fallback inject '%s'",
+                                    task_key, n)
+                            if _kw_injected:
+                                continue
                         continue
                 sib = sibs[0]
                 if "median" in _src_ctx.lower() and "%" in n and "%" in sib:

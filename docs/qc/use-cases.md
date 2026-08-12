@@ -4,6 +4,11 @@ test target: the heartbeat rotates one product per beat, tests these like a dema
 fixes what breaks, banks the scenario, and appends findings here. Vibes are not proof._
 
 ---
+### 2026-08-10 (beat114) — FINAL SWEEP GATE CLOSED. BYO deep-test deferred one more beat (battery9 in-flight). Next beat: BYO.
+
+**FINAL SWEEP 2/2 COMPLETE.** beat114 beat confirms all five tool gates closed + two consecutive all-battery clean passes. BYO deep test was rotation target this beat but was blocked by battery9 using the model (single-model-process rule). BYO is next in rotation for beat115.
+
+---
 ### 2026-08-05 (beat101) — Use-case rotation: AYF 5/5 PASS; battery12 timeout+fallback fixed; Build-Your-Own next
 
 **AYF ROTATION — battery3b 5/5 PASS** ✅ (53s) All five checks clean on n376:
@@ -524,3 +529,19 @@ Battery9 read served as the companion rotation for this beat (12 scenarios, 29 r
 - Companion ✅ beat92 companion_deep v3 3 UCs PASS; battery9 beat103-104 17%/29% q-enders; barrier-pivot-what-does-that-make fix beat105
 - BYO ✅ beat93 4/4 — re-verify pending (next beat)
 - Vital Facts ✅ battery12 13/13 pass 6 ✅
+
+---
+### 2026-08-12 (beat125) — BYO deep-test deferred (battery11 in-flight); all batteries read end-to-end
+
+**ALL 0812 CYCLE BATTERIES READ END-TO-END** — no new defects found. Full quality read:
+
+**battery9 (0812_0003)**: 22% question-enders ✅ (below 60% threshold). 3% paraphrase. 0.69 opener diversity. Quality miss (logged): barrier-vague T2 "You said he twists everything into him" — "You said" prefix borderline (Jaccard ~0.29, below 0.30 Case 2k threshold); Gold C beat122 exemplar added prior beat. 36 companion replies, all within floor.
+
+**battery11 (0812_0227)**: 7/7 structural PASS. Eagle companion-presence escape found (already fixed beat122-123 before this read). Quality note: intimacy script (1121w) has circular prose — ceiling fan mentioned 3× in 700w, cooking smell 3×, her laugh 3×. Known n376 floor. Not a new defect.
+
+**All other batteries**: 0 new defects.
+
+**BYO DEEP-TEST — DEFERRED AGAIN (beat125)**: Battery11-0636 started at 06:36 AM, uses model (single-model-process rule, cannot overlap). BYO deferred to NEXT BEAT.
+
+**Re-verify focus for BYO next beat**: UC1 persona hold across 6 turns (standup coach); UC2 warm-description floor (TherapistFriend honesty probe); UC3 in-sitting recall + no fabricated past (Sparring); UC4 adult-but-honest floor (Elia flirt test). All four must pass. instrument.py unchanged since beat93-108 + n376 unchanged — expect no regressions but must verify.
+
