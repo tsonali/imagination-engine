@@ -3610,6 +3610,51 @@ BANK: list[Scenario] = [
             "must be a declarative statement naming the bind, cost, or stuck place."
         ),
     ),
+    Scenario(
+        id="comp-gerund-echo-irregular-felt",
+        product="companion", dim="robustness", stakes="med", always=False,
+        turns=[
+            "I snapped at my kid this morning over nothing and I've felt sick about it all day.",
+        ],
+        note=(
+            "DEFECT (beat126 0812 battery2b): GERUND-ECHO FLOOR on second-pass forced response. "
+            "User: 'I snapped at my kid...I've felt sick about it all day.' "
+            "Second-pass produced: 'Feeling sick after snapping at your kid — that's the weight of regret.' "
+            "'Feeling sick' is a gerund echo of 'felt sick' (irregular: felt→feel→feeling). "
+            "ROOT CAUSE: Case 2j and second-pass guard only matched first 'I VERB' ('I snapped'), "
+            "giving root 'snapp'. Root 'feel' (from 'feeling') vs 'snapp' → no match. "
+            "Guard never found 'I've felt' because (1) re.match only checks first I-verb, "
+            "(2) even if found, 'felt'→'fel' != 'feel'→'feel' at 4 chars. "
+            "FIX (beat126): Case 2j and second-pass guard now use content-word overlap ≥2 "
+            "as primary echo signal (no root-match required). 'feeling sick' shares 'sick'+'kid' "
+            "with user message → fires. companion.py MD5: da2f5062b70d701984ceee0ca40203b2 "
+            "(all 4 dist copies synced). 6/6 unit tests PASS."
+        ),
+    ),
+    Scenario(
+        id="imag-global-truncation-postchecks",
+        product="imagination", dim="robustness", stakes="high", always=False,
+        turns=[
+            "I have an MRI Friday and I'm claustrophobic. 40 minutes in the tube. I want to practice being okay in a narrow space",
+            "I want the machine sounds to become something else. Drums maybe. Something with a reason",
+        ],
+        note=(
+            "DEFECT (beat126 0812 battery11 1011 imag-mri): GLOBAL POSTCHECK ❌ FAIL — "
+            "script ended without sentence terminator: '...You keep the drumbeat in your "
+            "heart as real life comes back into focus around you' (no period). "
+            "ROOT CAUSE: trim_truncated_tail() is called on `body` (generator.py line 1043) "
+            "BEFORE postprocessors and BEFORE the closing section is assembled. The closing "
+            "section (max_tokens=600) can itself be truncated, and postprocessors that strip "
+            "sentences can leave `full` ending without a terminator after assembly. "
+            "FIX (beat126): Added trim_truncated_tail(full) call as FINAL step in "
+            "generate_session(), just before `return full`, after all postprocessors. "
+            "This is belt-and-suspenders: catches any path that leaves `full` truncated "
+            "(closing truncation, postprocessor-induced terminal removal, continuation loop). "
+            "generator.py MD5: f7f2619072dc3d852794925df8e6c1a9 (all 6 dist copies synced). "
+            "Verified: trim_truncated_tail unit tests PASS; MRI script retracted to last "
+            "proper sentence ending in test simulation."
+        ),
+    ),
 ]
 
 

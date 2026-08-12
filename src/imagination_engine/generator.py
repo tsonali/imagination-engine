@@ -1338,6 +1338,14 @@ def generate_session(
     rep = degeneration_report(full)
     if rep.get("degenerate"):
         log.warning("[v6] degeneration STILL detected post-trim: %s", rep)
+    # Final truncation guard (beat126): trim_truncated_tail() is called on `body`
+    # before postprocessors (line ~1043), but the closing section and postprocessors
+    # that drop sentences can leave `full` ending without a sentence terminator.
+    # Apply one more pass here — after all postprocessors — as a belt-and-suspenders
+    # guarantee that the final output always ends cleanly.
+    full, _final_truncated = trim_truncated_tail(full)
+    if _final_truncated:
+        log.warning("[v6] final output trimmed to last sentence terminator (closing truncated)")
     log.info(
         "[v6] session ready: %d total words (open=%d, body=%d from %d-beat plan, back=%d)",
         len(full.split()),

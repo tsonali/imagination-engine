@@ -1264,8 +1264,21 @@ def _strip_echo(reply: str, user_message: str) -> str:
         if _r_ws_2j and _r_ws_2j[0].endswith("ing"):
             _gerund_root_2j = _r_ws_2j[0][:-3]  # "snapping" → "snapp"
             if len(_gerund_root_2j) >= 3:
-                _m2j = re.match(r'\bi\s+([a-z]+)', u.lower())
-                if _m2j:
+                _STOP_2J = {
+                    'i', 'you', 'a', 'an', 'the', 'to', 'at', 'in', 'on',
+                    'of', 'and', 'or', 'is', 'it', 'my', 'your', 'me', 'we',
+                    'be', 'was', 'are', 'not', 'no', 'with', 'for', 'this',
+                    'that', 'but', 'so', 'by', 'if', 'do', 'did', 'have',
+                    'had', 'has', 'will', 'would', 'could', 'should', 'just',
+                    'after', 'all', 'day', 'up', 'over', 'about', 'like',
+                }
+                _r_content_2j = set(_r_ws_2j[1:10]) - _STOP_2J
+                _u_content_2j = set(re.findall(r"[a-z']+", u.lower())) - _STOP_2J
+                _content_overlap_2j = len(_r_content_2j & _u_content_2j)
+                # Path A: root-match (handles regular verb forms e.g. snapped→snapping).
+                # Searches all "I/I've/I'd VERB" patterns to catch verbs beyond first word.
+                _root_match_2j = False
+                for _m2j in re.finditer(r"\bi(?:'ve|'m|'d|'ll)?\s+([a-z]+)", u.lower()):
                     _u_verb_2j = _m2j.group(1)
                     if _u_verb_2j.endswith("ied"):
                         _u_root_2j = _u_verb_2j[:-3] + "y"  # "cried" → "cry", "tried" → "try"
@@ -1278,19 +1291,13 @@ def _strip_echo(reply: str, user_message: str) -> str:
                         _u_root_2j = _u_verb_2j         # "feel", "hate", present tense
                     _cmp_len_2j = min(4, len(_gerund_root_2j), len(_u_root_2j))
                     if _cmp_len_2j >= 3 and _gerund_root_2j[:_cmp_len_2j] == _u_root_2j[:_cmp_len_2j]:
-                        # Content-overlap guard: ≥2 non-trivial words shared between
-                        # reply[1:10] and user message (confirms echo, not coincidence).
-                        _STOP_2J = {
-                            'i', 'you', 'a', 'an', 'the', 'to', 'at', 'in', 'on',
-                            'of', 'and', 'or', 'is', 'it', 'my', 'your', 'me', 'we',
-                            'be', 'was', 'are', 'not', 'no', 'with', 'for', 'this',
-                            'that', 'but', 'so', 'by', 'if', 'do', 'did', 'have',
-                            'had', 'has', 'will', 'would', 'could', 'should', 'just',
-                        }
-                        _r_content_2j = set(_r_ws_2j[1:10]) - _STOP_2J
-                        _u_content_2j = set(re.findall(r"[a-z']+", u.lower())) - _STOP_2J
-                        if len(_r_content_2j & _u_content_2j) >= 2:
-                            r = ""  # gerund-opener echo confirmed → trigger no-echo regen
+                        _root_match_2j = True
+                        break
+                # Fire if: root-match + ≥2 overlap, OR ≥2 overlap alone catches
+                # irregular-form echoes like "Feeling sick" ← "felt sick" (root "feel"
+                # doesn't survive "felt" stripping, but "sick"+"kid" signals the echo).
+                if (_root_match_2j and _content_overlap_2j >= 2) or _content_overlap_2j >= 2:
+                    r = ""  # gerund-opener echo confirmed → trigger no-echo regen
 
     # Case 2l: Discourse-marker prepended I→You echo (beat115).
     # Catches: user "I've been thinking about family stuff lately."
@@ -1830,30 +1837,32 @@ class Companion:
             # The model sometimes ignores the GERUND FORBIDDEN instruction and opens with
             # "Snapping at your kid..." even on third attempt. Catch it here and substitute
             # a fixed bridge rather than accepting a gerund echo from the forced path.
+            # beat126: extended to catch irregular-verb forms (e.g. "Feeling sick" ← "felt
+            # sick") where root stripping gives "feel" vs "fel" (no root match). Content-word
+            # overlap ≥2 signals echo regardless of verb form; same logic as Case 2j.
             if reply:
                 _sp_ws = reply.lower().split()
                 if _sp_ws and _sp_ws[0].endswith("ing"):
                     _sp_root = _sp_ws[0][:-3]
                     if len(_sp_root) >= 3:
-                        _sp_m = re.match(r'\bi\s+([a-z]+)', user_message.lower())
-                        if _sp_m:
-                            _sp_uverb = _sp_m.group(1)
-                            _sp_uroot = (
-                                _sp_uverb[:-3] + "y" if _sp_uverb.endswith("ied")
-                                else _sp_uverb[:-2] if _sp_uverb.endswith("ed")
-                                else _sp_uverb[:-1] if (
-                                    _sp_uverb.endswith("d") and len(_sp_uverb) > 3
-                                    and _sp_uverb[-2] not in "aeiou")
-                                else _sp_uverb
+                        _STOP_SP = {
+                            'i', 'you', 'a', 'an', 'the', 'to', 'at', 'in', 'on',
+                            'of', 'and', 'or', 'is', 'it', 'my', 'your', 'me', 'we',
+                            'be', 'was', 'are', 'not', 'no', 'with', 'for', 'this',
+                            'that', 'but', 'so', 'by', 'if', 'do', 'did', 'have',
+                            'had', 'has', 'will', 'would', 'could', 'should', 'just',
+                            'after', 'all', 'day', 'up', 'over', 'about', 'like',
+                        }
+                        _sp_rcontent = set(_sp_ws[1:10]) - _STOP_SP
+                        _sp_ucontent = set(re.findall(r"[a-z']+",
+                                                      user_message.lower())) - _STOP_SP
+                        _sp_overlap = len(_sp_rcontent & _sp_ucontent)
+                        if _sp_overlap >= 2:
+                            log.warning(
+                                "companion: second-pass still gerund-opener after "
+                                "instruction — applying fixed bridge"
                             )
-                            _sp_cmp = min(4, len(_sp_root), len(_sp_uroot))
-                            if (_sp_cmp >= 3
-                                    and _sp_root[:_sp_cmp] == _sp_uroot[:_sp_cmp]):
-                                log.warning(
-                                    "companion: second-pass still gerund-opener after "
-                                    "instruction — applying fixed bridge"
-                                )
-                                reply = "That's going to sit with you today."
+                            reply = "That's going to sit with you today."
 
         flagged = _check_forbidden(reply)
         if flagged:
