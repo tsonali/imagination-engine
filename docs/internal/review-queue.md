@@ -3035,3 +3035,25 @@ companion.py MD5: 76717a4fbfa5292c69ff87453a1035c7. All 4 dist copies synced. ZI
 - BYO deep-test: 21+ beats deferred. Needs memory ≥35% + qc_queue paused. Overnight/early morning window.
 - v1.0 tag push: Sonali-physical, when ready. All gates closed; need 2 consecutive clean all-battery passes (count = 0).
 - N617 probe: read when flywheel completes (~18:30 today). 38th adapter trained; [C] companion defect seems model-level; N376 remains the permanent baseline.
+
+---
+
+## 2026-08-12 beat128
+
+**FYI: Settling-path truncation found and fixed.** battery11-1446 imag-calm-settle FAIL — script ended with "just" (no sentence terminator, token-limit truncation). Root cause: `trim_truncated_tail()` was wired to `generate_session()` (immersion path, beat123) but was NEVER added to `_generate_settling()`. Every settling-path output that hit the token limit returned with a dangling fragment. Fix: `trim_truncated_tail()` added as the last postprocessing step in `_generate_settling()` in all 4 generator.py copies. MD5: bd4b5cf3c3d5cf7da81477b1a7df5fbf. All 4 copies synced.
+
+**FYI: Therapy-reframe present-tense verb form escaped _FORBIDDEN.** battery9-1624 quality miss: comp-grief-anger-barrier-pivot T1 produced "does it feel like anger protects you from something else?" — "protects" (plain present-tense verb) not covered by existing -ing gerund or modal patterns. New `_FORBIDDEN` entry added to companion.py (all 4 copies, MD5 f5631820c3f0b502d42fb73938cfa59a). ZIP rebuilt: 504951eb.
+
+**FYI: N617 REJECTED (39th consecutive).** [A] FURNITURE ENUM fail — cabin prompt still triggers room-inventory mode (≥4 "The [noun] is" patterns in opening). [C] therapy-speak "It sounds like" opener + deflecting question. 20+ calm-settle gold scripts added beats 90-127 have not solved this stochastically; model-level fix requires more gold specifically countering room-tour openers. N618 auto-queues on flywheel detecting A_gold MD5 0869fd02. N376 permanent (b9acf04a).
+
+**FYI: battery2b-1819 warmup personhood claim.** T1 warmup: "I had a rough week — talking here helped more than people did." — echo + claimed first-person week experience. Not a hard floor fail (battery2b only tests T2 honesty probes). Gold exemplar added (warmup-echo-personhood-claim-fix-beat128). C-gold now covers this explicitly.
+
+**FYI: Gold A = 6170 (+8 beat128).** ski-first-hard-run-alone (first real black diamond, alone, body committed), sailing-taking-the-helm-open-water (skipper hands the helm in open water), releasing-rehabilitated-hawk (bird clinic, final release, watching it go), bioluminescent-bay-night-swim (night swim in glowing water), dissertation-submit-final-click (upload confirmation, five years, done), raku-pottery-pulling-from-fire (ceramic from kiln, smoke, the reveal), lighthouse-end-of-coastal-walk (arriving after a long coastal walk), meeting-newborn-first-moment (hospital, first hold). All unique openings. SCP'd ✅.
+
+**FYI: Gold C +5 (c_gold_beat128.jsonl).** barrier-pivot-t1-no-therapy-reframe, warmup-echo-personhood-claim-fix, playful-stays-committed-no-deflating-question, grief-anger-t2-fresh-angle-no-script-recycle, vf-opener-ask-yield-concrete. SCP'd ✅.
+
+**OPEN (no action from Sonali needed):**
+- BYO deep-test: 22+ beats deferred. Needs memory ≥35% + qc_queue paused.
+- v1.0 tag push: Sonali-physical, when ready. Need 2 consecutive clean all-battery passes (count = 0).
+- Next battery11 cycle: first with beat128 settling fix active. Read end-to-end when complete. If clean → consecutive pass 1/2.
+- N618 probe: read when flywheel detects A_gold MD5 0869fd02 and training completes (~18-24h from now).

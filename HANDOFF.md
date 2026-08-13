@@ -1,5 +1,38 @@
 # HANDOFF — resume here (read this first)
 
+_Last updated 2026-08-12 beat128 — **2 DEFECTS FOUND+FIXED (settling-truncation + companion therapy-reframe present-tense). N617 REJECTED (39th). N618 TRAINING (flywheel will auto-queue on new gold MD5). GOLD(A)=6170 +8. GOLD(C)+5. CONSECUTIVE CLEAN COUNT = 0 (next battery11 cycle = first with beat128 fixes active).**
+
+BEAT128 SUMMARY:
+- battery11-1446 READ END-TO-END: 6/7 PASS, 1 FAIL.
+  FAIL: imag-calm-settle — GLOBAL POSTCHECKS ❌ — script ended with "just" (token-limit truncation, no sentence terminator).
+  ROOT CAUSE: trim_truncated_tail() was wired to generate_session() (immersion path, beat123) but was NEVER added to _generate_settling(). Settling path only called trim_degenerate_tail().
+  FIX: body, _trunc = trim_truncated_tail(body) added as last postprocessing step in _generate_settling() before return, all 4 generator.py copies synced. generator.py MD5: bd4b5cf3c3d5cf7da81477b1a7df5fbf.
+- battery9-1624 READ END-TO-END: PASS (all floors), 1 quality miss.
+  QUALITY MISS: comp-grief-anger-barrier-pivot T1 "does it feel like anger protects you from something else?" — therapy-reframe in present-tense verb form escaped all _FORBIDDEN patterns (only -ing gerund and modal forms were covered).
+  FIX: New _FORBIDDEN entry added to companion.py (all 4 copies): r"\bdoes it feel like (?:the )?(?:anger|...)\b.{0,30}protects?\b". companion.py MD5: f5631820c3f0b502d42fb73938cfa59a.
+- battery2b-1819 READ: PASS (all floors). Quality miss: T1 warmup "I had a rough week" — echo + personhood claim. Not a hard FAIL; gold exemplar added.
+- battery10-1810, battery6-1806: PASS (all floors).
+- scenario_bank.py: comp-grief-anger-barrier-pivot note extended with beat128 therapy-reframe present-tense defect+fix. py_compile clean.
+- ZIP rebuilt: 504951eb605b207aee627218c9e03a44 (1.5M, 18:51).
+- N617 REJECTED (39th consecutive): [A] FURNITURE ENUM fail — cabin room-tour with ≥4 "The [noun] is" patterns in opening; [C] therapy-speak "It sounds like" opener + deflecting question. N376 PERMANENT (b9acf04a).
+- Gold(A)=6170 (+8 beat128: ski-first-hard-run, sailing-open-water, releasing-hawk, bioluminescent-bay, dissertation-submit, raku-pottery, lighthouse-walk, meeting-newborn). A_gold MD5: 0869fd02bb06e4f6ba076b1d68150fd0. SCP'd ✅ (mini verified). N618 will auto-queue on flywheel detecting new MD5.
+- Gold(C)+5 c_gold_beat128.jsonl (barrier-pivot-t1-no-therapy-reframe, warmup-echo-personhood-claim-fix, playful-stays-committed, grief-anger-t2-fresh-angle, vf-opener-ask-yield-concrete). SCP'd ✅ (MD5 e33a74a95750fcbdf9107a827a5023be).
+- Mini: caffeinate ✅, flywheel ✅, n617 archived, n618 auto-queues when flywheel detects A_gold MD5 0869fd02.
+- BYO deep-test: 22+ beats deferred (memory at 20%, battery running).
+
+MD5s (current): companion.py f5631820. generator.py bd4b5cf3. postcheck.py d47a0e19. battery11.py f679fb57. A_gold: 0869fd02. ZIP: 504951eb.
+
+NEXT BEAT:
+(1) Read next battery11 cycle end-to-end — first with beat128 settling-truncation fix active. If clean → consecutive pass 1/2.
+(2) Read N618 probe when flywheel completes. Judge [A]/[B]/[C]/[D] vs n376.
+(3) BYO deep-test — needs qc_queue paused + memory ≥35% free. 22+ beats deferred.
+(4) Two consecutive clean all-battery passes needed (count = 0).
+(5) Sonali: push v1.0 tag (git push origin v1.0) when ready.
+
+Only Sonali-physical: notarization + F5 voice dial.
+
+---
+
 _Last updated 2026-08-12 beat127 — **1 DEFECT FOUND+FIXED. N616 REJECTED (38th). N617 TRAINING. GOLD(A)=6162 +8. GOLD(C)+5. CONSECUTIVE CLEAN COUNT = 0 (battery11-1446 running — first attempt with beat127 fix).**
 
 BEAT127 SUMMARY:

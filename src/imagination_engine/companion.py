@@ -525,6 +525,14 @@ _FORBIDDEN = [
     # "what's it protecting/hiding/guarding" in companion context is always the therapy
     # reframe regardless of what follows. Pronoun form is equally forbidden.
     r"\bwhat(?:'s| is) it (?:protecting|guarding|covering|hiding)\b",
+    # therapy-reframe DOES-IT-FEEL-LIKE form (beat128): battery9-1624 comp-grief-anger-
+    # barrier-pivot T1 produced "Angry is a word that breaks the grief script — does it
+    # feel like anger protects you from something else?" — "protects" (plain present-tense
+    # verb) escaped all -ing regex forms. "does it feel like [feeling] protects" is the
+    # same forbidden reframe (translating the named feeling into protection narrative).
+    # Pattern: "does it feel like [optional the] [feeling noun]" followed within 30 chars
+    # by "protects?" (singular or plural present-tense protect).
+    r"\bdoes it feel like (?:the )?(?:anger|angry|sadness|grief|anxiety|anxious|fear|fearful|shame|guilt|guilty|frustration|frustrated|rage|hurt|pain|painful)\b.{0,30}protects?\b",
     # helplessness opener: companion admitting it doesn't know what to do mirrors the
     # user's helplessness and gives nothing. beat99: comp-grief-anger-barrier-vague T2
     # regen produced "I don't know what to do when he makes it about him." — mirrors

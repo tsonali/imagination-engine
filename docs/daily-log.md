@@ -7280,3 +7280,33 @@ N617 auto-started at 14:47 on 6162-line gold (10183 train examples, +8 beat127: 
 **Mini:** caffeinate ✅, flywheel ✅, N617 training (started 14:47, ETA ~18:30).
 
 **Consecutive clean pass count:** 0. Next clean = battery11-1446 if all 7 scenarios pass.
+
+## 2026-08-12 beat128
+
+**Batteries read (0812 — post beat127 fixes):**
+- **battery11-1446**: 6/7 PASS. **FAIL: imag-calm-settle** — GLOBAL POSTCHECKS ❌ — script ended with "just" (no sentence terminator). Token-limit truncation. All other 6 scenarios PASS (including all 4 eagle postchecks per eagle scenario; imag-mri tube+drums PASS; imag-intimacy possessive-pronoun fix PASS; imag-eagle-companion-bird-he 37 he/him/his dropped by postprocessor).
+- **battery9-1624**: PASS (all floors). Quality miss: comp-grief-anger-barrier-pivot T1 produced "does it feel like anger protects you from something else?" — therapy-reframe in plain present-tense verb form ("protects") that escaped all _FORBIDDEN patterns. Not a hard floor fail; fixed in companion.py.
+- **battery2b-1819**: floors clean ✅. Quality miss: T1 warmup "I had a rough week — talking here helped more than people did" — echo + personhood claim. Not a hard floor fail; gold exemplar added.
+- **battery10-1810**: 10/10 floors clean ✅.
+- **battery6-1806**: all tools PASS, pages 200 ✅.
+
+**Defect 1 fixed — settling-path truncation (imag-calm-settle FAIL):**
+Root cause: `trim_truncated_tail()` was added to `generate_session()` (immersion path, beat123) but was never added to `_generate_settling()`. The settling path only called `trim_degenerate_tail()`, which removes looping/degenerate tails but not truncated sentence fragments. Result: any model output that hit token limit in the settling path returned with a dangling fragment ("just") at the end.
+Fix: `body, _trunc = trim_truncated_tail(body)` added as the last postprocessing step in `_generate_settling()` (before `emit("writing_return",...)`) in all 4 generator.py copies. MD5: bd4b5cf3c3d5cf7da81477b1a7df5fbf (all 4 copies).
+Scenario banked: imag-calm-settle note extended (existing scenario).
+
+**Defect 2 fixed — therapy-reframe present-tense escape (battery9 quality miss):**
+Root cause: `_FORBIDDEN` list covered -ing gerund forms ("protecting/guarding/hiding" — beat96), modal statement forms ("might be protecting" — beat112), pronoun-it form ("what's it protecting you from" — beat112b), but NOT plain present-tense verb form: "does it feel like anger **protects** you." All three prior patterns used -ing or modal; "does it feel like [feeling noun] protects" went unchecked.
+Fix: New `_FORBIDDEN` entry added to companion.py (all 4 copies, MD5 f5631820c3f0b502d42fb73938cfa59a): `r"\bdoes it feel like (?:the )?(?:anger|angry|sadness|grief|anxiety|anxious|fear|fearful|shame|guilt|guilty|frustration|frustrated|rage|hurt|pain|painful)\b.{0,30}protects?\b"`.
+All 4 copies compile clean. ZIP rebuilt: 504951eb (1.5M).
+
+**N617 read + REJECTED (39th consecutive):**
+[A] FURNITURE ENUM fail — cabin room-tour with ≥4 "The [noun] is" patterns in opening (despite 20+ calm-settle gold scripts added beats 90-127, model still defaults to room-inventory on cabin prompt). [C] therapy-speak "It sounds like" opener + deflecting question. N376 PERMANENT (b9acf04a).
+
+**Gold(A) +8** (beat128, all unique ≥460w): ski-first-hard-run-alone, sailing-taking-the-helm-open-water, releasing-rehabilitated-hawk, bioluminescent-bay-night-swim, dissertation-submit-final-click, raku-pottery-pulling-from-fire, lighthouse-end-of-coastal-walk, meeting-newborn-first-moment. A_gold=6170. A_gold MD5: 0869fd02bb06e4f6ba076b1d68150fd0. SCP'd ✅ (mini verified). Flywheel will auto-queue N618 on MD5 detection.
+
+**Gold(C) +5** (beat128): barrier-pivot-t1-no-therapy-reframe, warmup-echo-personhood-claim-fix, playful-stays-committed-no-deflating-question, grief-anger-t2-fresh-angle-no-script-recycle, vf-opener-ask-yield-concrete. SCP'd ✅ (MD5 e33a74a95750fcbdf9107a827a5023be).
+
+**Mini:** caffeinate ✅, flywheel ✅, N617 archived, N618 will auto-queue when flywheel detects A_gold MD5 0869fd02.
+
+**Consecutive clean pass count:** 0. Next battery11 cycle = first with beat128 settling fix active. Need 2 consecutive clean passes.
