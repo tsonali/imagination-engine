@@ -631,6 +631,9 @@ def _generate_settling(engine: Engine, transcript: list[dict], emit) -> str:
     body, obj_fixed = fix_object_pronouns(body)
     if obj_fixed:
         log.warning('[settling] %d object-pronoun error(s) fixed (she→her after preposition)', obj_fixed)
+    body, _trunc = trim_truncated_tail(body)
+    if _trunc:
+        log.warning('[settling] final output trimmed to last sentence terminator (closing truncated)')
     emit("writing_return", "Softening the close.", 3, 3, 3.0)
     log.info("[settling] session ready: %d words", len(body.split()))
     return body
