@@ -1338,6 +1338,35 @@ def _strip_echo(reply: str, user_message: str) -> str:
                         _after_2l = r[len(_r_full_first_2l):].lstrip(" .!?\n-—")
                         r = _after_2l if (len(_after_2l.split()) > 3) else ""
 
+    # Case 2l': Multi-word hollow-opener prepended I→Y echo (beat135).
+    # Catches "It sounds like / It seems like / It looks like / It feels like [I→Y echo]".
+    # These phrases add nothing and echo the user's content with paraphrase framing.
+    # Lower Jaccard threshold (0.30) because the extra stopword-heavy prefix inflates union.
+    # FP guard: requires ≥15-char user first sentence (prevents triggering on very short inputs).
+    # Example: user "I've been thinking about family stuff lately."
+    #   → companion "It sounds like family stuff has been on your mind lately." — STRIP
+    # Example: user "I made the right call." → companion "It sounds like you made the right call."
+    #   — Jaccard 0.625 ≥ 0.30 → STRIP (correct: adds nothing, pure positive echo)
+    if r and u:
+        _HOLLOW_MWORD_RE_2L2 = re.compile(
+            r'^(?:it sounds like|it seems like|it looks like|it feels like)\s+', re.IGNORECASE
+        )
+        _m_2l2 = _HOLLOW_MWORD_RE_2L2.match(r)
+        if _m_2l2:
+            _r_core_2l2 = r[_m_2l2.end():]
+            _r_first_2l2 = re.split(r'[.!?]', _r_core_2l2)[0].strip()
+            _u_first_2l2 = re.split(r'[.!?]', u)[0].strip()
+            if len(_u_first_2l2) > 15 and len(_r_first_2l2) >= 3:
+                _u_you_2l2 = _i_to_you(_u_first_2l2)
+                _rw_2l2 = set(re.findall(r"[a-z']+", _norm(_r_first_2l2).lower()))
+                _uw_2l2 = set(re.findall(r"[a-z']+", _norm(_u_you_2l2).lower()))
+                if _rw_2l2 and _uw_2l2:
+                    _jacc_2l2 = len(_rw_2l2 & _uw_2l2) / max(len(_rw_2l2 | _uw_2l2), 1)
+                    if _jacc_2l2 >= 0.30:
+                        _r_full_first_2l2 = re.split(r'[.!?]', r)[0].strip()
+                        _after_2l2 = r[len(_r_full_first_2l2):].lstrip(" .!?\n-—")
+                        r = _after_2l2 if (len(_after_2l2.split()) > 3) else ""
+
     # Case 2k: "You said / You told me / You mentioned [paraphrase]" opener (beat113).
     # Narrating back the user's own words is never a valid companion response. Catches:
     # "You said you're angry at him but can't say it because he always makes it about himself."

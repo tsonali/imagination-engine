@@ -110,7 +110,9 @@ for sc in scenarios:
                                "golden eagle", "golden eagles", "mountain lion", "mountain lions",
                                "another bird", "another birds", "young eagle", "young eagles",
                                "young bird", "young birds", "younger bird", "younger eagle",
-                               "the larger one", "bird of prey", "birds of prey")
+                               "the larger one", "bird of prey", "birds of prey",
+                               # beat135: ground wildlife with agency in eagle scripts
+                               "mountain sheep", "mountain goat", "bighorn sheep", "bighorn")
             _WILDLIFE_ARTICLE = ("bear",)
             hallucinated_wildlife = (
                 any(re.search(r"\b" + re.escape(w) + r"\b", lower)
@@ -155,7 +157,10 @@ for sc in scenarios:
                 # "you fly with someone else" / "a fellow traveler at such height"
                 r'|\bsilent\s+partner\b'
                 r'|\bfellow\s+traveler\b'
-                r'|\bfly\s+with\s+someone\b',
+                r'|\bfly\s+with\s+someone\b'
+                # beat135: same-species bystander at altitude — "a pair of eagles flying opposite
+                # directions below" implies other-eagle presence in a solo-eagle script
+                r'|\ba\s+pair\s+of\s+eagles\b|\bpair\s+of\s+eagles\b',
                 lower, _re.IGNORECASE
             ))
             print(f"\n>>> EAGLE POSTCHECKS:", flush=True)

@@ -1196,7 +1196,9 @@ def generate_session(
                              "golden eagle", "golden eagles", "mountain lion", "mountain lions",
                              "another bird", "another birds", "young eagle", "young eagles",
                              "young bird", "young birds", "younger bird", "younger eagle",
-                             "fellow eagle", "bird of prey", "birds of prey")
+                             "fellow eagle", "bird of prey", "birds of prey",
+                             # beat135: ground wildlife with agency that escaped in eagle scripts
+                             "mountain sheep", "mountain goat", "bighorn sheep", "bighorn")
         # "the larger one" is eagle-scoped: in a solo eagle script it signals a companion bird;
         # in a running script it matches "the larger runner/tree/etc" → false positive.
         # beat87: caught in imag-eagle-wildlife-plural; fired 3 times in imag-active-scene (FP).
@@ -1249,6 +1251,8 @@ def generate_session(
             "silent partner",
             "fellow traveler",
             "fly with someone",
+            # beat135: eagle bystanders at same altitude — same-species companions implied
+            "a pair of eagles", "pair of eagles",
         ))
         if anon_companion_dropped:
             log.warning('[v6] %d anonymous-companion sentence(s) dropped (you/we both in solo eagle active-body)',

@@ -18,6 +18,31 @@ battery9-1006 read in progress showed "Promise I'll always be here. That's not p
 **Mini:** UNREACHABLE (6th consecutive beat). SSH config resolves to `julios-mac-mini.local` via Bonjour — DNS fails consistently.
 **Memory:** 11-17% during beat135 (battery9-1006 model active). BYO deep-test DEFERRED 27th consecutive beat — must wait for battery9-1006 to complete and memory to reach ≥35%.
 
+**CODE FIX beat135 (continued — after context compaction):**
+
+*Fix A — Case 2l' (hollow-opener I→Y echo):*
+battery9-1006 read found "It sounds like family stuff has been on your mind lately" — vf-wrong-entity warmup T1 paraphrase echo of user "I've been thinking about family stuff lately." Not caught by any existing Case because: Case 2i requires ≤9 words; Case 2l covers single-word discourse markers (so/well/hmm/etc.) not multi-word openers. New Case 2l' added to companion.py `_strip_echo()`: detects reply starting with "it sounds like / it seems like / it looks like / it feels like" + Jaccard ≥0.30 (lower threshold because stopword-heavy paraphrase dilutes content-word intersection) + user first sentence >15 chars FP guard. 4/4 unit tests PASS (TP1 Jacc 0.333, TP2 Jacc 0.364, FP1 short user preserved, FP2 Jacc 0.143 preserved). All 4 dist copies synced. companion.py MD5: c544f4dc.
+
+*Fix B — eagle wildlife: "mountain sheep" / "pair of eagles":*
+battery11-1328 golden-eagle-wildlife 1144w PASSED all 4 postcheck assertions mechanically, but honest end-to-end read found two escape forms:
+1. "A mountain sheep moves out from behind a rock face... its black eyes briefly lock onto you" — ground wildlife with scripted agency (mountain sheep/mountain goat/bighorn sheep/bighorn). Not in `_wildlife_tokens` or `_WILDLIFE_WORDS`. Added to both.
+2. "You come across a pair of eagles flying opposite directions below — their heads turn towards you briefly before continuing on, indifferent to your presence in this sky." — same-species bystanders at altitude. Not in any companion drop pattern. Added to generator.py anon_companion_dropped (eagle-scoped), postcheck.py _EAGLE_ANON_COMPANION_PATTERN, battery11.py anon_companion_pattern.
+All 4 dist copies synced. generator.py MD5: 33d39791. postcheck.py MD5: e8aa4571. scenario_bank.py notes updated for both. ZIP rebuilt: e166ad7b.
+
+NOTE: These fixes were applied AFTER battery11-1328 was launched. This run had the escapes present; postchecks passed with pre-fix code. Next battery11 cycle = first to test beat135 fixes.
+
+**Gold(A) = 6205 valid (+3 this session, +7 prior = +10 beat135 total):**
+beat135h: horse-full-gallop (478w) — "The horse is already moving faster than you expected."
+beat135i: train-leaving-city (571w) — "The platform is still there through the window."
+beat135j: blank-canvas-first-mark (535w) — "The canvas is white."
+Total: 6205 valid entries. NOT SCP'd (mini unreachable).
+
+**Gold(C) +5 (c_gold_beat135b.json, this session):**
+warmup-hollow-opener-echo-stripped, grief-anger-t1-names-gap-no-excavation, grief-anger-t1-declarative-short-variant, vf-wrong-entity-warmup-concrete-engagement, playful-direct-question-answered-without-deflection. NOT SCP'd.
+
+**Batteries status (0817 cycle):**
+battery9-1006 ✅, battery6-1207 ✅, battery10-1212 ✅ (floors clean; NOT-SHORTER-PASS-3 = known stochastic), battery2b-1222 ✅, battery12-1249 ✅ (13/13), battery4b-1311 ✅, battery3b-1314 ✅, product_e2e-1317 ✅, battery11-1328 IN PROGRESS (companion-bird-he still generating as of this write).
+
 ---
 
 ## 2026-08-17 beat134 — FIX: 3 ANON-COMPANION ESCAPE FORMS (SILENT PARTNER / FELLOW TRAVELER / FLY WITH SOMEONE); GOLD(A)=6207 +7; GOLD(C)+5; 0817 CYCLE RUNNING

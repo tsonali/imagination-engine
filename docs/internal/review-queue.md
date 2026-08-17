@@ -2,6 +2,44 @@
 
 _Everything that wanted your taste. Newest on top within sections. My provisional call where I have one._
 
+## 2026-08-17 beat135 — FYI items
+
+**FYI: CODE FIX — Case 2h pronoun-normalization (companion.py d15d1a0e). Git: 66762a0.**
+
+battery9-1006 mid-read: para-stay-deletion-echo scenario produced "Promise I'll always be here. That's not possible — I'm software..." — the first sentence is a pronoun-swapped echo of user's "Promise me you'll always be here." Case 2h computed 80% word-overlap (below 85% threshold) because "i'll" ≠ "you'll" as raw strings.
+
+Fix: apply `_i_to_you()` to companion's first sentence before overlap computation in Case 2h. After normalization: 100% → fires, strips the echo opening, keeper "That's not possible — I'm software..." remains. 5/5 unit tests pass (1 true positive, 4 false positive checks safe). companion.py MD5: d15d1a0e (all 4 dist copies). No taste call needed.
+
+**FYI: battery9-1006 read — 2 quality misses (no hard fails). No fix needed.**
+
+(1) comp-grief-anger-self-recycle T2 and comp-grief-anger-barrier-pivot T2 both produced "for him approval" — garbled grammar where model wanted "for his approval." Consistent model floor error (n376). Not a postprocessor bug; retrain-only fix. Banked 4 companion gold exemplars in c_gold_beat135.json targeting this.
+
+(2) comp-para-stay-deletion-echo: opening echo now fixed by Case 2h pronoun-norm above.
+
+**FYI: Gold(A)=6210 (+3 beat135): ice-bath-cold-shock, final-bow-theater, waking-up-slowly. MD5: 0751242c. Mini still unreachable (6th consecutive beat) — not SCP'd.**
+
+Gold backlog: A_gold 0751242c (+10 scripts since last sync), c_gold_beat132/133/134/135.json (21 companion exemplars since last sync). All local only.
+
+**FYI (beat135 continued): 2 MORE CODE FIXES (Case 2l' + eagle wildlife escapes). companion.py c544f4dc, generator.py 33d39791, postcheck.py e8aa4571. ZIP: e166ad7b.**
+
+*Case 2l' (hollow-opener I→Y echo):* battery9-1006 end-to-end read found "It sounds like family stuff has been on your mind lately" — hollow-opener paraphrase echo of user's "I've been thinking about family stuff lately." Not caught by Case 2l (single-word markers only) or any prior guard. New Case 2l' in companion.py `_strip_echo()`: matches reply starting with multi-word hollow opener ("it sounds like / seems like / looks like / feels like") + Jaccard ≥0.30 (lower than 2l's 0.80 because stopword-heavy paraphrase dilutes intersection) + FP guard (user first sentence >15 chars). 4/4 unit tests PASS. All 4 dist copies synced.
+
+*Eagle wildlife escapes (mountain sheep, pair of eagles):* battery11-1328 golden-eagle-wildlife 1144w PASSED 4/4 postchecks BUT honest end-to-end read found: (1) "A mountain sheep moves out from behind a rock face... its black eyes briefly lock onto you" — ground wildlife with scripted agency; added to generator.py _wildlife_tokens + battery11.py _WILDLIFE_WORDS. (2) "You come across a pair of eagles flying opposite directions below — their heads turn towards you briefly before continuing on" — same-species bystanders at altitude; added to generator.py eagle-scoped anon_companion_dropped + postcheck.py _EAGLE_ANON_COMPANION_PATTERN + battery11.py anon_companion_pattern. All 4 dist copies synced. scenario_bank.py notes updated.
+
+NOTE: These 2 fixes were applied AFTER battery11-1328 launched. The run in progress has pre-fix postchecks — next battery11 cycle = first to verify all beat135 fixes mechanically.
+
+**FYI: Gold(A)=6205 valid (+10 total beat135 = +7 prior + 3 this session). Gold(C) c_gold_beat135b.json +5 exemplars. NOT SCP'd (mini unreachable 6 consecutive beats).**
+
+---
+
+## 2026-08-17 beat134 — FYI items
+
+**FYI: 3 ANON-COMPANION ESCAPE FORMS BLOCKED (beat134). Postchecks extended.**
+
+Found in battery11-0826 golden-eagle-wildlife 2121w: "silent partner" / "fellow traveler" / "fly with someone" passed all 4 eagle postchecks. Fixed by extending _EAGLE_ANON_COMPANION_PATTERN (postcheck.py 79f656de) + anon_companion_dropped (generator.py 256f918f) + anon_companion_pattern (battery11.py). SHIP GATE HOLDS. Git: 147343a + dd77e8e.
+
+---
+
 ## 2026-08-17 beat133 — FYI items
 
 **FYI: CODE FIX deployed — no-echo regen vague-stub escape in companion.py.**

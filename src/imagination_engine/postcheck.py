@@ -716,7 +716,9 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     # "a fellow traveler at such height" — companion framing for unnamed entity
     r'|\bsilent\s+partner\b'           # beat134: "as silent partner until separate paths"
     r'|\bfellow\s+traveler\b'          # beat134: "a fellow traveler at such height"
-    r'|\bfly\s+with\s+someone\b',      # beat134: "you fly with someone else"
+    r'|\bfly\s+with\s+someone\b'       # beat134: "you fly with someone else"
+    # beat135: same-species bystanders at altitude — "a pair of eagles flying opposite directions"
+    r'|\ba\s+pair\s+of\s+eagles\b|\bpair\s+of\s+eagles\b',
     re.IGNORECASE,
 )
 

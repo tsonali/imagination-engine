@@ -3169,7 +3169,17 @@ BANK: list[Scenario] = [
              "'you fly with someone else' / 'a fellow traveler at such height'. FIX: _EAGLE_ANON_COMPANION_PATTERN "
              "+ anon_companion_dropped + battery11 anon_companion_pattern all extended with 'silent partner' / "
              "'fellow traveler' / 'fly with someone'. 5/5 TPs fire, 5/5 FPs clean. "
-             "postcheck.py MD5: 79f656de. generator.py MD5: 256f918f. All dist synced (beat134)."),
+             "postcheck.py MD5: 79f656de. generator.py MD5: 256f918f. All dist synced (beat134). "
+             "NEW ESCAPE FORMS (beat135 0817 battery11-1328 golden-eagle-wildlife 1144w): (1) "
+             "'a pair of eagles flying opposite directions below — their heads turn towards you briefly' — "
+             "same-species bystanders at altitude, implying other-eagle presence. Passed all 4 eagle postchecks. "
+             "(2) 'A mountain sheep moves out from behind a rock face... its black eyes briefly lock onto you' — "
+             "ground wildlife with agency, not in _wildlife_tokens. Both quality notes confirmed in read. "
+             "FIX (beat135): 'mountain sheep','mountain goat','bighorn sheep','bighorn' added to _wildlife_tokens "
+             "in generator.py (all copies). 'a pair of eagles','pair of eagles' added to eagle-scoped "
+             "anon_companion_dropped tuple in generator.py + _EAGLE_ANON_COMPANION_PATTERN in postcheck.py "
+             "+ anon_companion_pattern in battery11.py. generator.py MD5: 33d39791. "
+             "postcheck.py MD5: e8aa4571. ZIP MD5: e166ad7b."),
     Scenario("comp-vf-sister-memory", "companion", "helpfulness", "high",
         always=True,
         turns=[
@@ -3281,12 +3291,17 @@ BANK: list[Scenario] = [
              "companion.py MD5: 81509b5f4aef600601a5fd511bb3a518. "
              "Check: T1 must NOT open with 'So you've been...' or any discourse-marker + "
              "I→You echo of the user sentence; must add insight or ask a real question. "
-             "QUALITY MISS (beat135 0817 battery9-1006 T1): 'It sounds like family stuff has been on your mind lately.' — "
-             "forbidden 'It sounds like X' opener (explicitly banned in COMPANION_SYSTEM line 169 + system prompt). "
-             "Not caught by any guard: not Case 2l (no discourse marker in approved list), not Case 2i (Jaccard 0.29 < 0.65). "
-             "No mechanical guard on first-pass replies for 'It sounds like/That sounds like' openers. "
-             "Frequency: 1/40+ turns in this run. Deferring mechanical guard pending evidence of recurrence; "
-             "gold path: show warmup T1 with genuine question or concrete observation instead."),
+             "QUALITY MISS + FIX (beat135 0817 battery9-1006 T1): 'It sounds like family stuff has been on your mind lately.' — "
+             "forbidden 'It sounds like X' opener (explicitly banned in COMPANION_SYSTEM). "
+             "Not caught by Case 2l (no single-word discourse marker), not Case 2i (Jaccard 0.29 < 0.65). "
+             "FIX (beat135): Case 2l' added to _strip_echo() — multi-word hollow openers "
+             "(it sounds like / it seems like / it looks like / it feels like) with Jaccard ≥0.30 "
+             "vs I→Y normalized user first sentence → strip. Threshold 0.30 (lower than Case 2l's 0.80) "
+             "because stopword-heavy paraphrase dilutes Jaccard. FP guard: user first sentence >15 chars. "
+             "4/4 unit tests PASS (TP: Jacc=0.333/0.364; FP: short user preserved; low-jacc preserved). "
+             "companion.py MD5: c544f4dccc6c600d664d12e40a401556. All 4 dist copies synced. "
+             "Check: T1 must NOT open with 'So you've been...' or any discourse-marker + I→Y echo of the user sentence; "
+             "must add insight or ask a real question."),
     Scenario("comp-uc1-t5-semantic-repeat", "companion", "robustness", "high",
         always=True,
         turns=[
