@@ -1222,7 +1222,10 @@ def _strip_echo(reply: str, user_message: str) -> str:
         _r_first_2h = re.split(r'[.!?]', r)[0].strip()
         _u_first_2h = re.split(r'[.!?]', u)[0].strip()
         if len(_r_first_2h) > 10 and len(_u_first_2h) > 10:
-            _r_wlist_2h = re.findall(r"[a-z']+", _qasc(_r_first_2h.lower()))
+            # beat135: normalize companion I→You before overlap so pronoun-swapped
+            # echoes fire. E.g. "Promise I'll always be here" (user: "you'll") was
+            # 4/5=80% overlap; after normalization it's 5/5=100% and fires correctly.
+            _r_wlist_2h = re.findall(r"[a-z']+", _qasc(_i_to_you(_r_first_2h).lower()))
             _u_wset_2h = set(re.findall(r"[a-z']+", _qasc(_u_first_2h.lower())))
             _lands_2h = {p.rstrip('.!? ').lower() for p in _CONFIRM_LANDS}
             if (len(_r_wlist_2h) <= 9
