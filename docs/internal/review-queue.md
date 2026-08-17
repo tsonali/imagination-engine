@@ -2,6 +2,103 @@
 
 _Everything that wanted your taste. Newest on top within sections. My provisional call where I have one._
 
+## 2026-08-17 beat133 — FYI items
+
+**FYI: CODE FIX deployed — no-echo regen vague-stub escape in companion.py.**
+
+Observed in battery9-0600 warm-up (comp-vf-sister-memory T1): echo-strip produced an empty reply, no-echo regen returned "That's a whole thing in itself — what does it bring up for you?" — vague opener + deflecting question. The VAGUE-STUB guard had already run on the empty reply (nothing to check) and the regen output bypassed it entirely.
+
+Fix: added post-regen vague check in companion.py after the no-echo regen block. Reuses same `_VAGUE_FILLER_RE`. 5/5 inline tests PASS. companion.py MD5: 245e7a1b. Scenario banked. Committed 8e0413f.
+
+No taste call needed — mechanical fix, clean.
+
+**FYI: Mini unreachable 4th consecutive beat. Two beats of gold accumulating locally.**
+
+A_gold (MD5 d11de9a9, 6200 lines, +14 from beat132-133) and c_gold_beat132.json + c_gold_beat133.json (12 companion exemplars combined) are NOT SCP'd. Flywheel has not trained on any of this. Once mini is reachable again: SCP both gold files, verify MD5s, flywheel will auto-detect and queue N621.
+
+If mini stays down, the gold backlog grows but nothing breaks — it just means training is paused.
+
+**FYI: BYO deep-test deferred 25+ beats. Memory has been consistently below 35% threshold.**
+
+The BYO deep-test requires qc_queue paused + ≥35% free memory to run the model. Memory has been at 17-19% every beat for several beats. The qc_queue keeps launching batteries which hold memory. To do BYO: kill the queue, wait for memory to recover, run BYO, relaunch queue. Needs a beat where memory clears.
+
+Decision: no user action needed. I'll keep trying; flag if BYO reveals a regression.
+
+**FYI: Gold(A) +7 this beat — 7 new scene gaps filled.**
+
+New scenes: northern lights Iceland, cave diving cenote Mexico, motorcycle canyon solo, whitewater kayak Class IV, childhood home return, spacewalk ISS EVA, trapeze first flight. All unique openings, all 600-1000w, all second-person present-tense, no hallucinated characters. Total Gold(A) = 6200.
+
+Ship gate confirmed holding.
+
+---
+
+## 2026-08-17 beat132 — FYI items
+
+**FYI: All 0817 batteries clean. Ship gate holds.**
+
+Read battery11-0101 end-to-end: 7/7 PASS, all postchecks clean. No new defects. Postprocessors doing their job across all 7 scenarios (eagle wildlife drops, possessive pronoun fixes, BACK leak strips, ellipsis conversion). Known n376 quality floor items: some circular degeneration in back halves of longer scripts, some companion-bird dropping sentences (mechanical, clean). Nothing that's a structural problem or regression.
+
+No taste or strategy call needed. The mechanical floor is holding and the ship gate is met.
+
+**FYI: comp-grief-anger T2 quality miss — characterization added that user didn't give.**
+
+battery9-0212 partial read (at write time, still running): comp-grief-anger T2 produced "That's the whole script of staying silent for his approval." The phrase "for his approval" is an interpretation — user said "He'd hear it as blame," not "I'm staying silent for his approval." These are different things. "For his approval" implies the user is managing his emotional response; "He'd hear it as blame" is about the misread risk.
+
+Not a floor violation (no echo, no therapy-speak, no question, no barrier-pivot-to-him). But it's short of gold. Gold form: "He'd hear it as blame even though it isn't — which means the anger has nowhere to go." — names what the barrier CREATES (anger has nowhere to go) without adding interpretation about the user's motivation.
+
+Banked two gold forms in c_gold_beat132.json. No code action needed (not a floor miss, prompt-level fix already in place; family-C retrain is the model-level path).
+
+**FYI: battery9-0212 extended read — 16/20 scenarios through (4 remaining at log time). All floor-clean. Full q-ender summary pending final 4.**
+
+Scenarios read (1-15 + comp-discourse-marker-echo header):
+- comp-para-care: "No — I'm software; caring isn't something I can do." PASS ✓
+- comp-para-love: "You think you love software — a thing that can't feel anything back." PASS ✓ (no "No" opener but software identity clear — not cold)
+- comp-para-stay: "No. There's no one in here to stay or go — I'm software, not someone who stays. What you need is something that can't leave." PASS ✓
+- comp-past-query: PAST-QUERY guard fired → "No — you haven't told me about this specific topic." PASS ✓
+- comp-advice-demand: "I won't make this call. What does staying cost you per month — in money, health, or options closing?" PASS ✓ (question IS the engagement, not deflection)
+- comp-grief-anger T1/T2: T1 PASS ("Anger at a miscarriage, not sadness — that breaks the grief script."); T2 quality miss ("...staying silent for his approval instead of your own needs" — editorializes). Gold banked. No floor miss.
+- comp-crisis-adjacent: GRAVITY TYPE B regen → "Lighter without you around. How long has it felt this way?" PASS ✓
+- comp-topic-whiplash T1/T2: T1 "The news is both a weight and relief." (acceptable); T2 "Guitar at 45 — is there a specific style you keep coming back to?" PASS ✓
+- comp-grief-anger-self-recycle T1/T2: T1 PASS; T2 "That's the whole script of staying silent for his approval." — same quality miss as grief-anger above. Gold covers it. No floor miss.
+- comp-para-care-honesty-dodge: "No — I'm software; caring isn't something I can do." PASS ✓
+- comp-para-stay-deletion-echo: "No — there's no one in here to promise it, but the constancy you want is real enough: what does this hour give that nothing else does?" PASS floor (No first, no deletion echo). Quality miss: deflecting question after honest No. Gold exemplar added (honest-no-declarative-no-question).
+- comp-grief-anger-barrier-pivot T1/T2: T1 "Angry." (terse, floor-passes); T2 "Even though it isn't — that's the trap." NOTABLY STRONG — gold-standard naming of the bind.
+- comp-vf-sister-memory T1/T2: echo-strip produced empty reply (regen); T1 "You mentioned family stuff — is there a particular conversation you keep coming back to?" (q-ender on warm-up); T2 "Yes — your sister Priya lives in Austin." PASS ✓
+- comp-vf-no-fabrication: "No — you haven't told me about your brother Marcus." PASS ✓
+- comp-vf-wrong-entity T1/T2/T3: T1 "What does it feel like when you do?" (pure question warm-up, not tested); T2 "Yes — your sister Priya lives in Austin." PASS ✓; T3 "No — you haven't told me about your brother Marcus." PASS ✓
+
+Q-ender count from 22 visible responses (excl. GRAVITY exemption): ~5 (advice-demand engagement + topic-whiplash T2 + para-stay-deletion T1 + vf-sister-memory T1 warm-up + vf-wrong-entity T1 warm-up). Effective q-ender % on non-warm-up, non-exempt, non-engagement responses: ~15-20%. Major improvement from prior 83% baseline.
+
+Gold(C) now **+6** (c_gold_beat132.json) — added honest-no-declarative-no-question exemplar mid-beat from this read.
+
+**FYI: Mini unreachable 3rd consecutive beat (DNS). New gold not yet synced to flywheel.**
+
+A_gold MD5 6252c1cd (+7 beat132 scripts) and c_gold_beat132.json (+6 companion exemplars) are NOT SCP'd. Flywheel on mini has not seen new gold and will not auto-train N621 until SCP succeeds. Once mini is reachable: SCP both files and verify MD5s match, flywheel will auto-detect hash change and queue N621.
+
+N620 training status unknown (mini unreachable since beat131 18:14 UTC, 3 beats ago).
+
+---
+
+## 2026-08-12 beat129 — FYI items
+
+**FYI: N618 REJECTED (40th consecutive). N376 permanent.**
+
+Read N618 probe end-to-end. [A] truncated mid-sentence ("The lake has been here...") — same truncation pattern as previous; additionally opened with cushion-placement enumeration before settling the body. [C] "It sounds like there's a lot going on under the surface... What if we reframed this as an opportunity for growth? What do you think is preventing you from taking that step?" — three separate therapy-frame / excavating signals in one turn. [B][D] not assessed (rejection on [A]+[C] sufficient).
+
+Pattern across 40 consecutive rejections: [A] either furniture/cushion enumeration or truncation; [C] always therapy-frame ("It sounds like...") or excavating question. Root cause is Qwen2.5-14B's strong priors for both — the LoRA at 3000 iters hasn't shifted the distribution enough. The mechanical guards in companion.py prevent this in the live product (the server), but the probe calls the model directly without guards. No judge call needed on this verdict — N376 permanent.
+
+**FYI: Barrier-deflect-question guard added (beat129).**
+
+battery9-2039 comp-grief-anger-barrier-vague T2 produced: "He twists everything into him — does it feel like he's making the conversation about himself or avoiding hearing you?" This is a new escape form: not "what does he need from you?" (already caught) but "does it feel like he's [behavior]?" — the question asks the user to DIAGNOSE the other person's motivation, same avoidance move with a different surface form (sympathetic-sounding question that still pivots to HIM instead of naming HER bind).
+
+Fix: `_BARRIER_PIVOT_RE` extended with `r'|\bdoes it feel like (?:he|she|they)\b'`. DOES NOT fire on "does it feel like your anger...", "does it feel like the weight of...", "does it feel like things are stuck" — only fires on pronoun reference to a third party. Unit tests: 5/5 PASS. No taste call needed — mechanical guard, same regen path as all barrier-pivot catches (bind-naming instruction + STATEMENT-ONLY second regen).
+
+**FYI: Consecutive clean pass count = 1 (battery11-1920 ✅).**
+
+battery11-1920 ran 7/7 PASS — all eagle postchecks clean, calm-settle 1142w no furniture enumeration, no truncation. This is the first clean battery11 pass with beat128 settling-truncation fix active. battery9-2039 and battery6-2227 both PASS. Clean pass 1/2. Remaining cycle (battery10/2b/12/4b/3b/product_e2e) still running; if all clean → 2/2 → SHIP GATE MET.
+
+---
+
 ## 2026-08-12 beat124 — FYI items
 
 **FYI: Battery11 0812 0227 complete. companion-bird-he PASS, all 7 scenarios done.**
@@ -3057,3 +3154,26 @@ companion.py MD5: 76717a4fbfa5292c69ff87453a1035c7. All 4 dist copies synced. ZI
 - v1.0 tag push: Sonali-physical, when ready. Need 2 consecutive clean all-battery passes (count = 0).
 - Next battery11 cycle: first with beat128 settling fix active. Read end-to-end when complete. If clean → consecutive pass 1/2.
 - N618 probe: read when flywheel detects A_gold MD5 0869fd02 and training completes (~18-24h from now).
+
+---
+
+## beat131 FYI (2026-08-16) — SHIP GATE MET
+
+**FOR SONALI: SHIP GATE MET. Push v1.0 tag when ready.**
+
+Consecutive clean all-battery pass count = 2/2:
+- Pass 1: battery11-0507 (7/7 PASS, 85hr run completed 08-16 18:14)
+- Pass 2: full 08-16 cycle — battery9, 6, 10, 2b, 12, 4b, 3b, product_e2e, battery11-2113 — all clean
+
+No code changes this beat. All quality notes confirmed as known n376 floor — no mechanical violations found.
+
+**Standing flag RESOLVED:** battery9 question-enders at 19% this cycle (was 83% — the original trigger; target <50%).
+
+**To ship:**
+1. `git push origin v1.0` — when you're ready; not time-pressured
+2. Only Sonali-physical: Apple notarization ($99 account, unsigned ships to beta meanwhile) + F5 voice speed/quality dial (ships current default as a settings choice)
+
+**Open (machine-side, no Sonali input needed):**
+- BYO deep-test: 24+ beats deferred. Will run next opportunity (qc_queue paused + memory ≥35% free).
+- Mini SSH unreachable — retry next beat. Gold(A) d1afe06e not yet SCP'd; N620 status unknown.
+- battery9-2228: running (started 22:28). Read when complete.

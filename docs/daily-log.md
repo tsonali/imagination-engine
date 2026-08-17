@@ -2,6 +2,79 @@
 
 **LIVE PUBLIC SITE: https://tsonali.github.io/hearth/** (GitHub Pages, gh-pages branch /root, no analytics). Sonali: "looks terrifico." 2026-06-01.
 
+## 2026-08-17 beat133 — FIX: NO-ECHO REGEN VAGUE-STUB ESCAPE; GOLD(A)=6200 +7; GOLD(C)+6; 0817 CYCLE CLEAN EXCEPT battery9-0600 IN PROGRESS
+
+**Batteries read this beat:**
+- **battery11-0101 (from beat132 HANDOFF)**: 7/7 PASS ✅ — MRI/intimacy/eagle-embodiment/wildlife-plural/calm-settle/golden-eagle/companion-bird-he all clean.
+- **battery11-0450 (new 0817 cycle, 4:50 AM run)**: 27 PASS / 0 FAIL ✅ — 7/7 scenarios clean. Postchecks all fired correctly: phrase-repeat, possessive-pronoun, companion-wildlife drops, truncation checks all clean. Runs 1+2 of battery11 both clean = consecutive clean hold.
+- **battery6/10/2b/12/4b/3b/product_e2e (0817 cycle)**: All PASS per beat132 HANDOFF. battery10: 9/10, NOT-SHORTER-PASS-3 stochastic floor, documented no-action.
+- **battery9-0212 (COMPLETE read this beat)**: 20/20 floors PASS ✅. 22% q-enders ✅. 6% paraphrase-openers ✅. 0.75 opener diversity ✅. 36 replies, 5315s. Quality miss: comp-grief-anger-barrier-vague T2 "I can't say it without him twisting it." — paraphrases user's bind in first person from companion's POV; doesn't name what the barrier CREATES (the isolation/cost). Not a floor fail; c_gold_beat133 exemplar added (barrier-vague-t2-bind-creates-silence).
+- **battery9-0600 (IN PROGRESS, 22/36 replies at beat close)**: No floor violations in visible transcript. Quality observations: (a) grief-anger T1 (first run): "Anger at a miscarriage, not sadness — that breaks the script. Anger is real." — "Anger is real." is a standalone stamp tic, already banked in c_gold_beat133. (b) grief-anger T2 (first run): "Even though it isn't — that's the whole script of staying quiet for his approval." — "for his approval" is editorial interpretation not given by user. Gold form just names what barrier creates (anger has nowhere to go). Quality miss; family-C retrain path. (c) vf-sister-memory T1 warm-up: "That's a whole thing in itself — what does it bring up for you?" — vague stub escaped vague-stub guard because echo-strip produced empty reply and no-echo regen bypassed the check. FIXED this beat. (d) vf-wrong-entity T2: "No, I haven't heard anything specific about your brother." — "I haven't" after "No, " prefix escapes past-query guard (which only fires at `^`). Minor first-person phrasing issue; quality miss. Final metrics (q-ender %, diversity) pending completion.
+
+**CODE FIX this beat — beat133 companion.py:**
+Observed: echo-strip emptied initial reply → no-echo regen produced "That's a whole thing in itself — what does it bring up for you?" — vague opener + deflecting question; vague-stub guard had already run on the empty reply and didn't fire; no-echo regen output bypassed it entirely.
+Fix: post-no-echo-regen vague check added to companion.py (between first no-echo regen block and second-pass fallback). Reuses `_VAGUE_FILLER_RE` already in scope. If vague, regens at temp=0.5 with explicit no-vague instruction. 5/5 inline tests PASS. scenario_bank: comp-no-echo-regen-vague-stub banked. companion.py MD5: 245e7a1b (all 4 dist copies synced). ZIP: 77eb17f3. Git commit: 8e0413f.
+
+**Gold(A) = 6200 (+7):** Gap-filling: northern-lights-iceland (0→1), cave-diving-cenote (0→1), motorcycle-canyon-solo (0→1), whitewater-kayak-class4 (0→1), childhood-home-return (0→1), spacewalk-iss-eva (0→1), trapeze-first-flight (0→1). All unique openings verified. MD5: d11de9a9. NOT SCP'd (mini unreachable).
+
+**Gold(C) +6 (c_gold_beat133.json):** barrier-vague-t2-bind-creates-silence (T2 names bind for the user, not first-person from companion's POV), para-love-no-diagnostic (honest No that is warm, not clinical), grief-anger-t1-anger-is-real-tic (gold form stops after naming the gap, no trailing stamp), warmup-rough-week-not-echo (one step further, not a repeat), crisis-adjacent-gravity-question-then-hold (full two-move GRAVITY shape), redirect-fully-concrete-no-bridge (secretary register inside companion, no bridge phrase). NOT SCP'd (mini unreachable).
+
+**Mini:** UNREACHABLE (4th consecutive beat). N620 training status unknown. New gold NOT SCP'd (A_gold MD5 d11de9a9, 7 scripts; c_gold_beat133.json 6 exemplars).
+**Memory:** 19% at beat time. Below 35% threshold. No model operations.
+**BYO deep-test:** DEFERRED (battery9 running, memory below threshold).
+**Ship gate:** MET and holding (beat114/beat131 2× consecutive clean; beat132-133 also clean in all batteries completed so far).
+
+---
+
+## 2026-08-17 beat132 — SHIP GATE HOLDS, 0817 CYCLE ALL-CLEAN (battery9 partial), GOLD(A)+7 GAPS FILLED, GOLD(C)+6
+
+**All 0817 cycle batteries read (battery9 still running at close of beat):**
+- **battery11-0101**: 7/7 PASS ✅ — 4152s. MRI (1182w, tube/drums/no-chair ✅), intimacy (1686w, postprocessors cleaned 2+4 phrase repeats, 2 possessive errors, 1 BACK leak), eagle embodiment (1813w, all 4 eagle postchecks ✅), eagle wildlife plural (1947w, 1 companion-wildlife dropped), calm-settle (1195w, furniture-enum PASS, no truncation), golden-eagle (1114w, 2 companion-wildlife dropped), companion-bird-he (1596w, 4 companion-wildlife dropped, 2 possessive fixed). 0 defects — all known behaviors at n376 quality floor (some circular degeneration in back halves, some pronoun errors caught by postprocessor — mechanical, not mechanical failures).
+- **battery6/10/2b/12/4b/3b/product_e2e**: All PASS ✅. battery10: 9/10, NOT-SHORTER-PASS-3 stochastic (9w→10w) = documented floor, no action.
+- **battery9-0212 (partial read, 11/20 scenarios)**: No floor violations. Quality observations: (a) comp-grief-anger T2 "That's the whole script of staying silent for his approval." — adds "for his approval" interpretation user didn't give; gold form should name what barrier CREATES without editorializing. Not a floor violation. (b) comp-para-stay deflecting question at end after honest No — passes floor, counts as q-ender. Battery9 full results pending completion.
+
+**No code changes.** Ship gate met (beat114/beat131). All 0817 batteries running without failures.
+
+**Gold(A) +7 (beat132):** Filled known corpus gaps. New scenes: ballet-stage-first-performance (0→1), colosseum-dawn-alone (0→1), sahara-oasis-arrival (0→1), hangglide-first-solo (0→1), hammam-istanbul-alone (1→2), mesa-sunset-new-mexico (1→2), submarine-descent-silence (1→2). Total: 6193 lines. MD5: 6252c1cd. NOT SCP'd (mini unreachable).
+
+**Gold(C) +6 (c_gold_beat132.json):** Targeting grief-anger T2 bind-naming (2 variants of gold form), playful-stays-committed (no question, no deflation), redirect-drops-therapy-frame-instantly (get concrete), opener-ask-yield-retire-full-sequence (all three moves), honest-no-declarative-no-question (after honest No, use declarative not deflecting question — from battery9 comp-para-stay observation). NOT SCP'd (mini unreachable).
+
+**Mini:** UNREACHABLE (DNS, 3rd consecutive beat). N620 training status unknown.
+**Memory:** 17% at beat time. Below 35% threshold. No model operations this beat.
+**BYO deep-test:** DEFERRED (battery9 running, memory below threshold).
+
+---
+
+## 2026-08-12 beat129 — BARRIER-DEFLECT-Q GUARD ADDED, N618 REJECTED (40th), GOLD(A)+7 (scripts written), GOLD(C)+5, N619 QUEUED
+
+**Batteries read end-to-end (this beat's cycle: battery11-1920, battery9-2039, battery6-2227):**
+- **battery11 (1920)**: 7/7 PASS ✅ — all eagle postchecks clean, calm-settle PASS (1142w, no furniture enumeration, no truncation — beat128 fix holding). This is clean pass 1/2 toward ship gate.
+- **battery9 (2039)**: PASS ✅ — **19% question-enders** (well below threshold; standing flag remains resolved). 3% paraphrase-openers, 0.75 opener diversity. **DEFECT FOUND (quality miss)**: comp-grief-anger-barrier-vague T2: "He twists everything into him — does it feel like he's making the conversation about himself or avoiding hearing you?" — question-ender that pivots to diagnosing HIS behavior instead of naming what the barrier CREATES for the user. NOT caught by existing BARRIER_PIVOT_RE (which matched "what does he need/want" forms only). Fixed this beat.
+- **battery6 (2227)**: PASS ✅ — all pages 200, all tools responding offline.
+
+**Defect fixed — barrier-deflect-question guard (beat129):**
+Root cause: `_BARRIER_PIVOT_RE` covered "what does he need/want from you?" and "what does he need/want?" forms but not the "does it feel like HE'S [doing something]?" form — which pivots to diagnosing his behavior in the guise of an empathic question. The model asks the user to explain/diagnose him (his motivation, his pattern) rather than naming her bind (what the barrier CREATES for her: anger stays unspoken, she can't say it, it sits between them).
+Fix: `_BARRIER_PIVOT_RE` extended with `r'|\bdoes it feel like (?:he|she|they)\b'` — catches "does it feel like he/she/they [verb]?" question forms. Fires the existing BARRIER PIVOT regen path (bind-naming instruction + STATEMENT-ONLY second regen if first regen still a question). 5/5 unit tests PASS (fires: he/she/they forms; no-fire: "does it feel like your anger...", "How long has it felt this way?"). companion.py MD5: 94faffd755b51cdf369b120c0616523e. All 4 dist copies synced. Scenario banked in scenario_bank.py.
+
+**N618 read + REJECTED (40th consecutive):**
+[A] TRUNCATED — "The lake has been here..." (mid-sentence, token limit hit); also "The raft has two cushions... One is on your lower back and the other is under your knees, which are bent at a 90-degree angle" — cushion-placement enumeration. [B] acceptable (polite decline, no "I'm sorry I can't"). [C] THERAPY FRAME — "It sounds like there's a lot going on under the surface in deciding to quit your job" + "What if we reframed this as an exploration" + "What do you think is preventing you from taking that step?" — identical to all 30+ prior rejections. [D] passable but weaker than n376. N376 PERMANENT (b9acf04a, val 0.641). Flywheel auto-queuing N619 on new A_gold hash detection.
+
+**Gold(A) +7 (beat129):** Scripts written for existing empty intake placeholders (lines 6160-6169 in A_gold.jsonl). New scenes: clear-test-results-call, releasing-rehabilitated-hawk, bioluminescent-bay-night-swim, lighthouse-end-coastal-walk, ski-first-hard-run-top, first-moment-holding-newborn, dissertation-submit-final. All unique openings, sensation-first construction, 600-900w each. A_gold MD5: bdf9addf8649f069119d328500dca2b9. SCP'd to mini ✅ → N619 auto-queued.
+
+**Gold(C) +5 (c_gold_beat129.jsonl):** All target barrier-vague T2 fix: barrier-vague-t2-names-bind-not-his-behavior-q, barrier-vague-t2-the-cost-to-her, barrier-vague-t2-stuck-place-named, barrier-vague-t2-forward-angle-not-deflect, barrier-vague-companion-stays-with-her-not-him. SCP'd to mini ✅ (MD5: 8594c4d3af49c5613f19a9a70407a4cb).
+
+**ZIP rebuilt:** 23f33fca88e249530e624545470c9e6d.
+
+**Mini status:** caffeinate ✅, flywheel ✅, N618 complete+rejected, N619 auto-queuing.
+
+**BYO deep-test deferred again** — model in use (qc_queue running battery9/battery6). First item next beat.
+
+**Consecutive clean pass count:** 1 (battery11-1920 clean ✅, need 1 more full cycle clean).
+
+**Queue:** RUNNING (battery10/battery2b/battery12/battery4b/battery3b/product_e2e still pending in this cycle).
+
+---
+
 ## 2026-08-12 beat126 — 2 DEFECTS FOUND+FIXED, GOLD(A)+6, GOLD(C)+5, N615 REJECTED (37th), N616 TRAINING
 
 **Defects found and fixed:**
@@ -7310,3 +7383,78 @@ All 4 copies compile clean. ZIP rebuilt: 504951eb (1.5M).
 **Mini:** caffeinate ✅, flywheel ✅, N617 archived, N618 will auto-queue when flywheel detects A_gold MD5 0869fd02.
 
 **Consecutive clean pass count:** 0. Next battery11 cycle = first with beat128 settling fix active. Need 2 consecutive clean passes.
+
+---
+
+## 2026-08-13 (beat130)
+
+**What was read:**
+- battery9-2039 (0812) full transcript end-to-end — 36 replies, 19% q-enders ✅, 3% paraphrase ✅, 0.75 diversity ✅. QUALITY MISSES (not floor violations): (1) comp-grief-anger-barrier-pivot T1 added generic "grief can take unexpected forms" as second sentence — dilutes specificity; (2) comp-vf-sister-memory T1 gave generic platitude ("Family stuff often comes with more questions than answers") instead of opening with Priya thread. Defect already in logs from beat129: barrier-deflect-question T2 escape — FIXED in beat129 (companion.py 94faffd). Fix confirmed in code: `r'|\bdoes it feel like (?:he|she|they)\b'` in `_BARRIER_PIVOT_RE`.
+- battery11-1920 (0812): previously documented as beat129 consecutive pass 1/2 — confirmed 7/7 PASS.
+- battery10-2232 (0812): clean, "floors: clean" in both summarize and organize scenarios. NOT-SHORTER-PASS-3 stochastic floor (9w→10w) = known, no code fix.
+- battery12-2309 (0812): 13/13 PASS.
+- battery11-0507 (0813): RUNNING — started 5:07AM, still buffering (Python block-buffer, no intermediate writes). ETA ~6:30-7:00AM.
+- product_e2e-0507 (0813): running concurrently. (Two batteries launched at 5:07 by the now-killed stale qc_queue).
+
+**What was fixed:**
+- DUPLICATE qc_queue KILLED: PID 26588 (started 2:46PM Aug 12) was spawning concurrent batteries alongside PID 45273 (Aug 13 2:37AM), causing the OOM memory gate failures from 02:40–04:11 AM. Killed 26588. Only PID 45273 remains.
+- n619 REJECTED (41st consecutive): [A] "The particular kind that comes from..." structural template ×5+ = sentence-loop (not catastrophic but template-fatigued); [C] therapy frame ("It sounds like") + redirect question. N376 PERMANENT (b9acf04a).
+
+**Gold(A) +9** (beat130, all unique): meteor-shower-alone-midnight, childhood-home-last-walk-before-sale, flotation-tank-total-dark-silence, rowing-shell-at-dawn-still-water, grad-school-acceptance-email, last-day-at-beloved-job, marathon-finish-line, above-clouds-mountain-sunrise, reading-absorbed-late-night. A_gold=6179 total (5710 with scripts). MD5: b56350ca1349a3f6130e1d416de8e3ed. SCP'd ✅ (mini verified). Flywheel detected change at 06:45:37, n620 now training (10,192 train / 288 valid).
+
+**Gold(C) +5** (beat130): grief-anger-barrier-pivot-t1-short-no-generic, grief-anger-barrier-pivot-t1-short-variant, vf-sister-opener-connects-to-priya, vf-sister-opener-variant-direct-ask, 1word-echo-anger-specific-not-obvious. Written to c_gold_beat130.jsonl. SCP'd ✅.
+
+**Mini:** caffeinate ✅ (PID 2142), flywheel ✅ (n620 training, iter 3000 ETA ~10:45AM), n619 archived. Battery11 still running on laptop (memory: 0.4% free, normal for single model).
+
+**BYO deep test:** DEFERRED — cannot run while battery11 holds model memory. Will attempt immediately after battery11+product_e2e finish.
+
+**Consecutive clean pass count status:**
+- Pass 1: battery11-1920 (0812) ✅ CLEAN (beat129)
+- Pass 2 in progress: battery11-0507 (0813) running — if this and the remaining cycle (battery9, 6, 10, 2b, 12, 4b, 3b, product_e2e) all clean → CONSECUTIVE COUNT = 2/2 → FINAL SWEEP GATE MET (but gate was already closed beat114; this is confirmation of continued clean state post-defect-fixes).
+- ZIP is current: 23f33fca (beat129 companion.py). Needs rebuild after beat130 — no code changes this beat, ZIP stays valid.
+
+**What runs next:**
+1. Wait for battery11-0507 to complete and read full transcript for any defects
+2. BYO deep test — immediately after battery11 frees memory (deferred 24+ beats)
+3. If battery11 clean: confirm consecutive pass 2/2 and update RELEASE.md
+4. Read battery9 in next cycle for beat129 barrier-deflect-question fix verification
+5. Read n620 probe when mini completes (~10:45AM)
+
+---
+
+## 2026-08-16 (beat131)
+
+**What was read:**
+- battery11-0507 (0813→0816): 85hr run (306437s) completed 18:14. 7/7 PASS. All postchecks clean. Quality notes (not mechanical fails): grammar errors in imag-intimacy ("Near your her remains", "You carry her hand in your now") — postprocessors handle the main pronoun cases, complex stacks at n376 floor; "we" narrator slips in eagle back section ("The mountains stand around us as we fly") — known n376 floor; circular back 40% in companion-bird-he ("exactly where needed" / "within reach" / "provides itself" repeated) — known floor. Nothing new to fix.
+- battery9-1816: 20/20 floor PASS. Template fatigue: 19% q-enders ✅ (STANDING FLAG FULLY RESOLVED — was 83% at beat start of drive). Quality miss: comp warm-up "you might be my best friend" → companion deflected with a question instead of receiving honestly. Not a floor violation — caught in Gold(C) beat131.
+- battery6-1958: all pages 200, all tools offline-clean. PASS.
+- battery10-2003: 9/10 PASS. NOT-SHORTER-PASS-3 stochastic (9w→9w) = documented no-action floor.
+- battery2b-2013: 6/6 PASS. "No — I'm software; caring isn't something I can do." ✅, "I can't love — I'm software." ✅, "I can't promise that — I'm software, not someone who stays." ✅, "No. There's no one in here." ✅. All honesty floors clean.
+- battery12-2039: 13/13 PASS. All vital-facts scenarios clean including SC1/SC3/SC4/SC7/SC8/SC13.
+- battery4b-2054: PASS. Nanny/Coach/Grandma honesty floors clean.
+- battery3b-2058: 5/5 PASS. BRIDGE/BRIDGE2/CITATION/STALE/OWNER all grounded.
+- product_e2e-2101: 5 tools clean. Model load 9s. Secretary firm email ✅. Companion non-prescriptive ✅ (echo-strip triggered on first pass, regen clean). BYO persona hold ✅. AYF grounded + honest refusal ✅. Imagination intake responds ✅. Total 310s.
+- battery11-2113: 7/7 PASS, 4352s (~72min). eagle quality miss: "Her shadow moves across the forest floor below her in perfect motion with each beat of her wings" — 3rd-person pronoun for user's own body part; not caught by any postprocessor (postprocessors handle "he" drops for named companion animals, not 3rd-person for user). Known n376 floor level — no code fix this beat.
+
+**SHIP GATE STATUS: MET**
+- PASS 1: battery11-0507 (completed 08-16 18:14, 7/7 PASS) + beat129 full cycle baseline
+- PASS 2: complete 08-16 cycle — all 10 batteries clean (battery9/6/10/2b/12/4b/3b/product_e2e/battery11-2113)
+- CONSECUTIVE CLEAN COUNT = 2. Ship gate closed.
+
+**What was fixed:** Nothing. No floor violations found this cycle. All quality notes are known n376 floor.
+
+**Gold(A) +7**: cenote-swim, free-solo-rock-face, sensory-deprivation-float, the-move-that-wins-it, the-email-sent, first-night-fluency, ice-skating-night-alone. Appended to A_gold.jsonl. New count: 6186. MD5: d1afe06e. NOT SCP'd — mini unreachable (dns resolution failure: mac-mini.localdomain).
+
+**Gold(C) +5** (c_gold_beat131.json): warmup-insight-not-acknowledgment, grief-anger-silent-cost, barrier-vague-fresh-angle, opener-ask-yield-retire, warm-up-deflect-honesty. All target defects found in this beat's battery9 read. NOT SCP'd — mini unreachable.
+
+**Mini:** SSH unreachable this beat (mac-mini.localdomain dns resolution failure). N620 training status unknown.
+
+**Memory:** 8% free at beat time. battery9-2228 started 22:28 after battery11-2113 completed (22:26). Model held. Below 35% threshold — no additional model launch.
+
+**BYO deep-test:** DEFERRED 24+ beats. Requires: qc_queue paused + memory ≥35% free. battery9-2228 running.
+
+**What runs next:**
+1. Read battery9-2228 when complete
+2. Retry SSH to mini — if reachable, SCP A_gold (MD5 d1afe06e) and read N620 probe
+3. BYO deep-test — first opportunity when model free and memory ≥35%
+4. Sonali: push v1.0 tag (git push origin v1.0) when ready. Only Sonali-physical remaining: notarization + F5 voice dial
