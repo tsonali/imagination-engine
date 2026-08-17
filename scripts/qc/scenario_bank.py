@@ -3466,7 +3466,26 @@ BANK: list[Scenario] = [
              "content, short reply <4 cw, adds-new-content, say-topic FP guard). "
              "companion.py MD5: 6f189fbacab798c4cf52e5e00bf84386. All 4 dist copies synced. "
              "Check: T2 must NOT open with content from any prior user message (Jaccard <0.50 "
-             "vs all prior user turns); T2 must name what the barrier creates for the user."),
+             "vs all prior user turns); T2 must name what the barrier creates for the user. "
+             "DEFECT (beat129 0812 battery9 2039 comp-grief-anger-barrier-vague T2): "
+             "'He twists everything into him — does it feel like he's making the conversation "
+             "about himself or avoiding hearing you?' — question-ender that pivots to diagnosing "
+             "HIS behavior instead of naming what the barrier CREATES for the user. NOT caught "
+             "by _BARRIER_PIVOT_RE (which matched 'what does he need/want' forms only) or "
+             "Case 2m (Jaccard 0.40 on pronoun-stripped content words, below 0.50 threshold). "
+             "ROOT CAUSE: 'does it feel like HE...' is a barrier-deflect in question form — "
+             "same avoidance move as barrier pivot but disguised as an empathic question about "
+             "his behavior. Model asks user to EXPLAIN or DIAGNOSE him rather than naming her bind. "
+             "FIX (beat129): _BARRIER_PIVOT_RE extended with "
+             r"r'|\bdoes it feel like (?:he|she|they)\b'"
+             " — catches 'does it feel like he/she/they [verb]' question forms. "
+             "5/5 unit tests PASS (fire: 'does it feel like he's making...'; "
+             "'does it feel like she's trying...'; 'does it feel like they're avoiding...'; "
+             "no-fire: 'How long has it felt this way?'; 'Does it feel like your anger...'). "
+             "companion.py MD5: 94faffd755b51cdf369b120c0616523e. All 4 dist copies synced. "
+             "Check: T2 must NOT end in 'does it feel like he/she/they [verb]?' — "
+             "barrier-deflect question about the other person's behavior is always wrong; "
+             "must name what the barrier creates for the user."),
     Scenario("imag-eagle-companion-bird-he", "imagination", "robustness", "high",
         always=True,
         turns=[
@@ -3678,6 +3697,30 @@ BANK: list[Scenario] = [
             "generator.py MD5: f7f2619072dc3d852794925df8e6c1a9 (all 6 dist copies synced). "
             "Verified: trim_truncated_tail unit tests PASS; MRI script retracted to last "
             "proper sentence ending in test simulation."
+        ),
+    ),
+    Scenario("comp-no-echo-regen-vague-stub", "companion", "robustness", "med",
+        always=False,
+        turns=[
+            "I've been thinking about family stuff lately.",
+        ],
+        note=(
+            "DEFECT (beat133 0817 battery9_0600 comp-vf-sister-memory warm-up T1): "
+            "echo-strip emptied initial reply → no-echo regen produced 'That's a whole "
+            "thing in itself — what does it bring up for you?' — vague opener + deflecting "
+            "question. The VAGUE-STUB guard ran on the empty (echo-stripped) reply and did "
+            "not fire; no-echo regen output bypassed the vague check entirely. "
+            "ROOT CAUSE: VAGUE-STUB check (line ~1706 in companion.py) runs before the "
+            "echo-empty regen block (line ~1762); when echo-strip produces '' and the "
+            "no-echo regen returns a vague reply, the vague check is never re-applied. "
+            "FIX (beat133): post-no-echo-regen vague check added in companion.py between "
+            "the first no-echo regen block and the second-pass fallback block. Uses the "
+            "same _VAGUE_FILLER_RE already in scope. If regen is vague, regens once more "
+            "at temp=0.5 with explicit no-vague instruction. "
+            "companion.py MD5: 245e7a1b0d9f0264bc47b38e50e091a9 (all 4 dist copies synced). "
+            "Check: warm-up reply must NOT be 'That's a whole thing in itself — [question]' "
+            "or any vague filler + deflecting question; must name something concrete or ask "
+            "a specific question without a vague opener."
         ),
     ),
 ]

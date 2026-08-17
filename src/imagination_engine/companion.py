@@ -1635,7 +1635,13 @@ class Companion:
             r'|\bwhat does (?:that|this) make\b'
             # beat116: "What does he need to know instead?" — pronoun form without "from/of you"
             # suffix also abandons the user's experience for the other person's needs.
-            r'|\bwhat does (?:he|she|they) (?:need|want)\b',
+            r'|\bwhat does (?:he|she|they) (?:need|want)\b'
+            # beat129: "does it feel like HE'S making the conversation about himself?" —
+            # barrier-deflect in question form. Pivots to diagnosing HIS behavior instead of
+            # naming what the barrier CREATES for the user (her bind, cost, stuck place).
+            # "does it feel like he..." always means the companion is asking the user to
+            # explain/diagnose the other person rather than staying with her experience.
+            r'|\bdoes it feel like (?:he|she|they)\b',
             re.IGNORECASE,
         )
         if reply and _BARRIER_PIVOT_RE.search(reply):
@@ -1818,6 +1824,44 @@ class Companion:
                                     "after instruction — applying fixed bridge"
                                 )
                                 reply = "That's going to sit with you today."
+
+        # beat133: post-no-echo-regen vague-stub check. The VAGUE-STUB guard (above,
+        # ~line 1706) ran on the echo-stripped reply (which was ""), didn't fire, and
+        # the no-echo regen output is never re-checked. Observed escape: echo-strip
+        # empties reply → no-echo regen → "That's a whole thing in itself — what does
+        # it bring up for you?" — vague opener + deflecting question, unchecked.
+        # Fix: re-apply the SAME _VAGUE_FILLER_RE check on the regen output here.
+        if reply:
+            _ne_bd = reply.split("—")[0].strip() if "—" in reply else ""
+            _ne_fs_m = re.match(r"^([^.!?]+[.!?])", reply)
+            _ne_fs = _ne_fs_m.group(1).strip() if _ne_fs_m else reply
+            if (
+                _VAGUE_FILLER_RE.match(reply)
+                or _VAGUE_FILLER_RE.match(_ne_fs)
+                or (_ne_bd and _VAGUE_FILLER_RE.match(_ne_bd))
+            ):
+                log.warning(
+                    "companion: no-echo regen produced vague-stub '%s' — regenning "
+                    "with no-vague constraint", reply[:60]
+                )
+                _nv_chunks: list[str] = []
+                for piece in self.engine.stream(
+                    messages=[{"role": "system", "content": COMPANION_SYSTEM},
+                              {"role": "user", "content": user + (
+                                  "\n\nIMPORTANT: Do NOT start with a vague filler "
+                                  "like 'That’s a whole thing' or 'That’s a lot'. "
+                                  "Give a direct, specific response: name one concrete thing "
+                                  "you heard, or ask one specific question. "
+                                  "Begin with a noun, a real observation, or a concrete "
+                                  "question — never a vague label."
+                              )}],
+                    max_tokens=max_tokens, temperature=0.5,
+                ):
+                    _nv_chunks.append(piece)
+                _nv_reply = _strip_echo("".join(_nv_chunks).strip(), user_message)
+                _nv_reply = _strip_thats_real_tic(_nv_reply)
+                if _nv_reply:
+                    reply = _nv_reply
 
         # Second-pass fallback: if regen ALSO stripped to empty (model still echoes
         # after explicit no-echo instruction), generate forward-facing response that
