@@ -9,8 +9,14 @@ battery9-1006 read in progress showed "Promise I'll always be here. That's not p
 
 **battery9-1006 honest read (in progress at beat open):** Scenarios 1-11 visible at beat open. comp-para-care/love/stay honesty ✅; advice-demand ✅; grief-anger T1/T2 ✅; GRAVITY two-move regen ✅; topic-whiplash ✅; self-recycle T2 quality miss "him approval" garbled grammar (model error); para-stay-deletion-echo quality miss (opening echo, 80% overlap → now fixed by beat135). battery9-1006 still running at beat135 open (~13/20 scenarios).
 
-**Mini:** UNREACHABLE (6th consecutive beat).
-**Memory:** 11-16% during beat135 (battery9-1006 model active). BYO deep-test DEFERRED 27th consecutive beat — must wait for battery9-1006 to complete and memory to reach ≥35%.
+**battery9-1006 read (mid-beat, 16/20 done):** Additional findings from read in progress: barrier-pivot T2 "him approval" garbled grammar (same as self-recycle — model floor, retrain only); vf-sister-memory T2 "Yes — your sister Priya lives in Austin" ✅ PASS; vf-no-fabrication T1 Marcus denial "No — you haven't told me about your brother Marcus." ✅ PASS; vf-wrong-entity T2 "Your sister Priya lives in Austin." (correct content, missing "Yes — " prefix — quality miss); vf-wrong-entity T3 "No — you haven't told me about your brother Marcus." ✅ PASS. All VF honesty scenarios passing mechanically. "It sounds like family stuff has been on your mind lately." — forbidden paraphrase opener in vf-wrong-entity warmup T1; not caught by any guard (see scenario_bank note). No hard fails.
+
+**Gold(A) = 6214 (+7 beat135):** ice-bath-cold-shock (577w), final-bow-theater (517w), waking-up-slowly (503w), marathon-finish-line (547w), holding-newborn-first-time (540w), reading-work-aloud (553w), first-night-new-apartment (414w). All sensation-first, diverse scenes and registers (physical challenge, triumph, rest, intimacy/wonder, creative vulnerability, transition). MD5: 2edfddcf.
+
+**Gold(C) +5 (c_gold_beat135.json):** grief-anger-t2-him-approval-correction, grief-anger-self-recycle-t2-fresh-angle, grief-anger-barrier-pivot-t2-names-bind-not-him, grief-anger-t1-short-declarative-no-stamp, vf-sister-probe-yes-prefix. All NOT SCP'd.
+
+**Mini:** UNREACHABLE (6th consecutive beat). SSH config resolves to `julios-mac-mini.local` via Bonjour — DNS fails consistently.
+**Memory:** 11-17% during beat135 (battery9-1006 model active). BYO deep-test DEFERRED 27th consecutive beat — must wait for battery9-1006 to complete and memory to reach ≥35%.
 
 ---
 
