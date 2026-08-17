@@ -149,7 +149,13 @@ for sc in scenarios:
                 r'|\bnot\s+alone\s+up\s+here\b'
                 r'|\byou.re\s+not\s+alone\b|\byou\s+are\s+not\s+alone\b'
                 r'|\banother\s+flapping\s+wing\b'
-                r'|\bold\s+friend\s+passing\b',
+                r'|\bold\s+friend\s+passing\b'
+                # beat134: three new escape forms found in 0826 battery11 golden-eagle-wildlife 2121w:
+                # "someone else who might join you in sky as silent partner"
+                # "you fly with someone else" / "a fellow traveler at such height"
+                r'|\bsilent\s+partner\b'
+                r'|\bfellow\s+traveler\b'
+                r'|\bfly\s+with\s+someone\b',
                 lower, _re.IGNORECASE
             ))
             print(f"\n>>> EAGLE POSTCHECKS:", flush=True)

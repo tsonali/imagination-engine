@@ -1243,6 +1243,12 @@ def generate_session(
             "not alone up here", "you're not alone", "you are not alone",
             "another flapping wing", "another flapping",
             "old friend passing",
+            # beat134: three new escape forms found in 0826 battery11 golden-eagle-wildlife 2121w script:
+            # "someone else who might join you in sky as silent partner" / "you fly with someone else"
+            # "a fellow traveler at such height"
+            "silent partner",
+            "fellow traveler",
+            "fly with someone",
         ))
         if anon_companion_dropped:
             log.warning('[v6] %d anonymous-companion sentence(s) dropped (you/we both in solo eagle active-body)',

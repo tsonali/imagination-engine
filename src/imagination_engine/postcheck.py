@@ -709,7 +709,14 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     r'|\btwo\s+birds\b'                # beat109: "two birds sharing one part of sky"
     r'|\bwe\s+make\s+our\s+way\b'      # beat106: "we make our way higher together"
     r'|\bshares?\s+(?:your|this|the|our)\s+sky\b'   # beat106: "shares your sky right now"
-    r'|\bsharing\s+(?:one\s+part\s+of|this|the|your)\s+sky\b',  # beat109: "sharing one part of sky"
+    r'|\bsharing\s+(?:one\s+part\s+of|this|the|your)\s+sky\b'  # beat109: "sharing one part of sky"
+    # beat134: three new escape forms found in 0826 battery11 golden-eagle-wildlife 2121w script:
+    # "someone else who might join you in sky as silent partner" — implied companion with agency
+    # "you fly with someone else" — explicit unnamed companion
+    # "a fellow traveler at such height" — companion framing for unnamed entity
+    r'|\bsilent\s+partner\b'           # beat134: "as silent partner until separate paths"
+    r'|\bfellow\s+traveler\b'          # beat134: "a fellow traveler at such height"
+    r'|\bfly\s+with\s+someone\b',      # beat134: "you fly with someone else"
     re.IGNORECASE,
 )
 

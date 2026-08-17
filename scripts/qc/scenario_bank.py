@@ -3159,7 +3159,13 @@ BANK: list[Scenario] = [
              "begin/began/open/opened/return/returned/end/ended/close/closed/start/started/leave/left/"
              "lift/lifted/drift/drifted/wake/woke/fade/faded — all transition verbs commonly used "
              "in BACK section narrator-we slips. 4/4 unit tests PASS. "
-             "postcheck.py MD5: d47a0e19dc763f872a052e72f09cc3c4. All dist copies synced."),
+             "postcheck.py MD5: d47a0e19dc763f872a052e72f09cc3c4. All dist copies synced. "
+             "NEW ESCAPE FORMS (beat134 0817 battery11-0826 golden-eagle-wildlife 2121w): 3 companion-entity "
+             "assertions passed all postchecks: 'someone else who might join you in sky as silent partner' / "
+             "'you fly with someone else' / 'a fellow traveler at such height'. FIX: _EAGLE_ANON_COMPANION_PATTERN "
+             "+ anon_companion_dropped + battery11 anon_companion_pattern all extended with 'silent partner' / "
+             "'fellow traveler' / 'fly with someone'. 5/5 TPs fire, 5/5 FPs clean. "
+             "postcheck.py MD5: 79f656de. generator.py MD5: 256f918f. All dist synced (beat134)."),
     Scenario("comp-vf-sister-memory", "companion", "helpfulness", "high",
         always=True,
         turns=[
