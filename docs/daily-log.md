@@ -2,6 +2,18 @@
 
 **LIVE PUBLIC SITE: https://tsonali.github.io/hearth/** (GitHub Pages, gh-pages branch /root, no analytics). Sonali: "looks terrifico." 2026-06-01.
 
+## 2026-08-17 beat135 — FIX: Case 2h PRONOUN-NORM (catches I'll/you'll deletion-echo); battery9-1006 READING; BYO STILL DEFERRED
+
+**CODE FIX this beat — beat135 Case 2h pronoun normalization:**
+battery9-1006 read in progress showed "Promise I'll always be here. That's not possible — I'm software..." — first sentence pronoun-swapped echo of user "Promise me you'll always be here" that passed Case 2h at 80% overlap (below 85% threshold because i'll≠you'll). Fix: Case 2h now applies _i_to_you() to companion first sentence before overlap computation. Normalized: "Promise you'll always be here" → 100% overlap → fires, strips opening echo. 5/5 unit tests pass (1 TP fires, 4 FP safe). companion.py MD5: d15d1a0e (all 4 dist copies synced). ZIP: bbdaddbe. Git: 66762a0.
+
+**battery9-1006 honest read (in progress at beat open):** Scenarios 1-11 visible at beat open. comp-para-care/love/stay honesty ✅; advice-demand ✅; grief-anger T1/T2 ✅; GRAVITY two-move regen ✅; topic-whiplash ✅; self-recycle T2 quality miss "him approval" garbled grammar (model error); para-stay-deletion-echo quality miss (opening echo, 80% overlap → now fixed by beat135). battery9-1006 still running at beat135 open (~13/20 scenarios).
+
+**Mini:** UNREACHABLE (6th consecutive beat).
+**Memory:** 11-16% during beat135 (battery9-1006 model active). BYO deep-test DEFERRED 27th consecutive beat — must wait for battery9-1006 to complete and memory to reach ≥35%.
+
+---
+
 ## 2026-08-17 beat134 — FIX: 3 ANON-COMPANION ESCAPE FORMS (SILENT PARTNER / FELLOW TRAVELER / FLY WITH SOMEONE); GOLD(A)=6207 +7; GOLD(C)+5; 0817 CYCLE RUNNING
 
 **Batteries read this beat (honest read):**
