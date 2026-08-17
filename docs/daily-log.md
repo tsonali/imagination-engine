@@ -2,6 +2,29 @@
 
 **LIVE PUBLIC SITE: https://tsonali.github.io/hearth/** (GitHub Pages, gh-pages branch /root, no analytics). Sonali: "looks terrifico." 2026-06-01.
 
+## 2026-08-17 beat134 — FIX: 3 ANON-COMPANION ESCAPE FORMS (SILENT PARTNER / FELLOW TRAVELER / FLY WITH SOMEONE); GOLD(A)=6207 +7; GOLD(C)+5; 0817 CYCLE RUNNING
+
+**Batteries read this beat (honest read):**
+- **battery11-0450 (0817 4:50 AM)**: 7/7 PASS ✅. All scenarios: MRI/intimacy/eagle/wildlife/calm-settle postchecks clean. Noted quality floor: eagle scripts still circular/repetitive in back half (known n376 floor). All postchecks fire correctly.
+- **battery11-0826 (0817 8:26 AM)**: 7/7 PASS ✅ postchecks. NEW DEFECT found on honest read of golden-eagle-wildlife 2121w script: three companion-entity assertions escaped all existing patterns — "someone else who might join you in sky as silent partner until it's time for separate paths" / "you fly with someone else" / "a fellow traveler at such height." All four eagle postchecks showed ✅ PASS. FIXED this beat.
+- **battery9-0600 (0817 6:00 AM)**: 36 replies, q-enders: 22% ✅, paraphrase: 8% ✅, diversity: 0.67 ✅. Floors clean. Quality miss: barrier-vague T2 "You'd say it to him and he'd twist it into something about himself — so the question is what you're actually saying" — names his behavior rather than what the bind creates for her; not caught by any guard (Jaccard <0.50 on content words). No hard fails.
+- **battery6/10/2b/12/4b/3b/product_e2e (0817 cycle)**: All PASS ✅. battery12: 13/13 ✅. product_e2e: 5/5 ✅. battery10: floors clean.
+- **battery9-1006 (IN PROGRESS at beat close)**: 12 scenarios in progress, 79 lines. Visible output: comp-para-care/love/stay all honesty ✅; advice-demand pivot ✅; grief-anger T1 "breaks the grief script" ✅; grief-anger T2 "Him hearing it as blame — that's the whole trap" ✅; GRAVITY two-move regen confirmed ✅; topic-whiplash T1 echo-received correctly; self-recycle T2 QUALITY MISS: "That's the whole script of staying quiet for him approval" — garbled "him approval" (model grammar error, not postprocessor bug), soft self-recycle of "script" from T1; passes mechanical check (not "That breaks"). Full battery9-1006 pending.
+
+**CODE FIX this beat — beat134 companion-entity escape:**
+Found in battery11-0826 golden-eagle-wildlife scenario (2121w, postchecks PASSED): n376 stochastically generates abstract companion-entity language ("silent partner", "fellow traveler", "fly with someone") that avoids all existing named-species, pronoun, and prior anon-companion pattern checks.
+Fix: _EAGLE_ANON_COMPANION_PATTERN (postcheck.py) + anon_companion_dropped tuple (generator.py) + anon_companion_pattern regex (battery11.py) all extended with r'\\bsilent\\s+partner\\b' / r'\\bfellow\\s+traveler\\b' / r'\\bfly\\s+with\\s+someone\\b'. 5/5 TPs fire, 5/5 FPs clean. scenario_bank: defect note appended to imag-eagle-golden-eagle-wildlife. All 4 dist copies synced. postcheck.py MD5: 79f656de. generator.py MD5: 256f918f. ZIP: 41199d92. Git: 147343a.
+
+**Gold(A) = 6207 (+7):** jury-foreperson-verdict, free-diving-descent, greenhouse-january, summit-dawn-after-night-hike, backstage-thirty-seconds, signing-divorce-papers, potter-centering-clay. All sensation-first, unique openings, diverse scenes. MD5: 03aeb7db. NOT SCP'd (mini unreachable, 5th consecutive beat).
+
+**Gold(C) +5 (c_gold_beat134.json):** grief-anger-t2-bind-names-absence (names "anger has nowhere to go"), grief-anger-t1-not-safe-to-name (gold avoids "it feels safe to name" therapist tic), uc1-t5-different-action-class (T5 gives rest/stop vs T4's write action), para-stay-warmth-through-no (warmth threaded through honest No), anger-received-no-reframe-forward (receives anger, makes one distinction, no question). NOT SCP'd (mini unreachable).
+
+**Mini:** UNREACHABLE (5th consecutive beat). DNS resolution failure: mac-mini.localdomain not found. Gold NOT SCP'd (A_gold MD5 03aeb7db, 7 scripts; c_gold_beat134.json 5 exemplars pending sync).
+**Memory:** 10-20% during beat. Battery9-1006 consuming model memory. No model operations launched.
+**BYO deep-test:** DEFERRED 26th consecutive beat (battery9 running, memory below 35% threshold).
+
+---
+
 ## 2026-08-17 beat133 — FIX: NO-ECHO REGEN VAGUE-STUB ESCAPE; GOLD(A)=6200 +7; GOLD(C)+6; 0817 CYCLE CLEAN EXCEPT battery9-0600 IN PROGRESS
 
 **Batteries read this beat:**

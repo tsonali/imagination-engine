@@ -1,5 +1,13 @@
 # HANDOFF — resume here (read this first)
 
+_Last updated 2026-08-17 beat134 — **SHIP GATE MET (holds). 1 CODE FIX (3 anon-companion escape forms blocked: silent partner / fellow traveler / fly with someone). battery11-0450+0826 BOTH 7/7 PASS. battery9-0600 FULLY READ (22% q-enders). battery9-1006 IN PROGRESS. GOLD(A)=6207 +7. GOLD(C)+5. Mini UNREACHABLE (5th consecutive beat). BYO deep-test DEFERRED 26 beats. Sonali: push v1.0 tag when ready.**
+
+BEAT134 SUMMARY: FIX — blocked 3 new anon-companion escape forms in eagle scripts (silent partner, fellow traveler, fly with someone), found in battery11-0826 golden-eagle-wildlife 2121w which PASSED all postchecks. All 4 dist copies synced (postcheck.py 79f656de, generator.py 256f918f). battery9-0600 FULLY READ: 22% q-enders, 8% paraphrase, 0.67 diversity, floors clean. battery9-1006 IN PROGRESS: 12 replies seen, grief-anger T2 strong (Him hearing it as blame — that's the whole trap), self-recycle T2 quality miss (garbled grammar, not postprocessor bug). Gold(A)=6207 +7 sensation-first unique scripts. Gold(C)+5 targeting bind-naming, grammar-not-safe-to-name, different-action-class, warmth-through-No, anger-received-no-reframe.
+
+NEXT: (1) Read battery9-1006 complete end-to-end when done. (2) Mini SSH retry. (3) BYO deep-test when battery9-1006 finishes and memory >=35% free — 26 beats deferred, MUST happen. (4) Sonali: git push origin v1.0 when ready.
+
+---
+
 _Last updated 2026-08-17 beat133 — **SHIP GATE MET (holds). 1 CODE FIX (companion.py no-echo regen vague-stub escape). battery11-0450 7/7 PASS ✅. battery9-0212 FULLY READ (20/20 PASS, 22% q-enders ✅). battery9-0600 IN PROGRESS (22/36 replies, no floor violations). GOLD(A)=6200 +7 (d11de9a9). GOLD(C)+6 (c_gold_beat133.json). Mini UNREACHABLE (4th consecutive beat). Memory 19% — below 35% threshold. BYO deep-test DEFERRED. Sonali: push v1.0 tag when ready.**
 
 BEAT133 SUMMARY:

@@ -3177,3 +3177,20 @@ No code changes this beat. All quality notes confirmed as known n376 floor — n
 - BYO deep-test: 24+ beats deferred. Will run next opportunity (qc_queue paused + memory ≥35% free).
 - Mini SSH unreachable — retry next beat. Gold(A) d1afe06e not yet SCP'd; N620 status unknown.
 - battery9-2228: running (started 22:28). Read when complete.
+
+## beat134 FYI (2026-08-17) — SHIP GATE HOLDS; 1 CODE FIX (anon-companion escape)
+
+**FOR SONALI: SHIP GATE MET (holds). Push v1.0 tag when ready.**
+
+**Defect found + fixed:** battery11-0826 golden-eagle-wildlife 2121w script PASSED all 4 postcheck assertions but contained three companion-entity phrases — "someone else who might join you in sky as silent partner", "you fly with someone else", "a fellow traveler at such height." These are n376 stochastically generating abstract companion framing that avoids named-species and pronoun guards. Fixed by extending all three guard locations (postcheck.py, generator.py, battery11.py). This pattern of abstract companion language is a systematic model behavior — expect one or two more variants to surface over the next 10-15 beats before the pattern is fully covered.
+
+**Mini unreachable — 5th consecutive beat.** DNS resolution failure (mac-mini.localdomain). Gold not SCP'd (A_gold 03aeb7db = 7 new scripts; c_gold_beat132/133/134 = 16 exemplars pending sync). If you're near the mini, try: ssh smaitra@[IP-ADDRESS]. If it's on, the flywheel should restart on A_gold change detection.
+
+**BYO deep-test — 26 beats deferred.** Needs qc_queue paused + memory ≥35% free. Will happen next clear window.
+
+**Standing flags resolved:**
+- q-enders: 22% this cycle ✅ (was 83% at release-blocker status)
+- battery9: 20/20 PASS consistently ✅
+- battery11: 7/7 PASS consecutive ✅
+
+**Only Sonali-physical remaining:** git push origin v1.0 / Apple notarization / F5 voice dial.
