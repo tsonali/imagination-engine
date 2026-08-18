@@ -1,6 +1,29 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-08-18 beat141 — **SHIP GATE MET (holds). 2 CODE FIXES (drop_tail_duplicates + fix_your_contraction). ALL 0818 BATTERIES READ END-TO-END: battery11 6/6 ✅, battery9 19%/28% q-enders ✅, battery6/10/2b/12/4b/3b/product_e2e all clean. postcheck.py MD5: 9903ad54. generator.py MD5: 489ebd03. Gold(A)=6252 (+7). Gold(C)+5. Mini UNREACHABLE (13th consecutive). BYO DEFERRED 34 beats (memory <5%). Sonali: push v1.0 tag when ready.**
+_Last updated 2026-08-18 beat142 — **SHIP GATE MET (holds). 2 CODE FIXES (Case 2l' I-hear-you contraction fix + Case 2n I-don't-know mirror guard). battery9_1052 FULLY READ (22% q-enders ✅, 3% para-openers ✅). secretary_deep_0805 5/5 ✅. All afternoon batteries clean. companion.py MD5: d8d8ea89772d49ec696d59d588f57f14. ZIP MD5: 7e6963d65fecfa9df5e06b6f446fee3b. Gold(A)=6259 (+7). Gold(C)+5. Mini UNREACHABLE (14th consecutive). BYO DEFERRED 35 beats (memory 10%). Sonali: push v1.0 tag when ready.**
+
+BEAT142 SUMMARY:
+- READ: battery9_1052 full transcript (20 scenarios, 22% q-enders, 3% para-openers, 0.72 diversity). All floors clean.
+- READ: battery10_1301: floors clean; battery2b_1313: floors clean; battery12 (0349+0835): 13/13 PASS ✅.
+- READ: secretary_deep_0805: 5/5 UC passes — all numbers lossless, all register clean.
+- DEFECT + FIX 1 (beat142): comp-discourse-marker-echo T1 "I hear you've been thinking about family stuff lately." — Case 2l' regex `^i hear you\s+` required `\s+` (space) after "you" but "you've" is a contraction. Root: regex couldn't match "I hear you've" because "'" is not whitespace. FIX: `_HOLLOW_MWORD_RE_2L2` extended to `i hear you(?:[''](?:ve|re|d|ll|s))?)\s+` — handles all common I-hear-you contractions. 6/6 standalone regex tests PASS. companion.py MD5: d8d8ea89772d49ec696d59d588f57f14. Git: 52deca7.
+- DEFECT + FIX 2 (beat142): comp-grief-anger-barrier-vague T2 "I don't know what staying silent costs you." after user "I don't know. Everything he twists..." — companion mirrored user's opener. All echo Cases require content-word Jaccard; "I don't know" has no content words. FIX: Case 2n added — fires when user first sentence ≤4 words starts "I don't know" AND companion reply also starts "I don't know"; regens at temp 0.5 with no-mirror instruction. 5/5 guard logic tests PASS. Git: 52deca7.
+- scenario_bank.py updated: discourse-marker + barrier-vague notes extended. Git: d23001f.
+- QUALITY MISSES (no fix — gold path):
+  - comp-vf-sister-memory warm-up: after echo-strip, regen "What does that feel like for you?" — generic; should thread Priya. Gold(C) exemplar added.
+  - comp-grief-anger T1 second sentence: "Anger is something different from what grief looks like in your version of it" — padding. Gold(C) exemplar added.
+  - comp-past-query: user "Did we talk about this before?" → companion returned vital facts without YES/NO. VF-past-query interaction when referent is unclear. Gold(C) exemplar added.
+- Mini: SSH unreachable 14th consecutive beat. Pending SCP: A_gold (9814be60, 6259 entries), c_gold_beat132-142 (67+ exemplars). Flywheel stalled.
+- BYO deep-test: DEFERRED 35th consecutive beat. Memory 10% — below 35% threshold.
+- ZIP rebuilt: 7e6963d65fecfa9df5e06b6f446fee3b (beat142 companion.py).
+- Gold(A) +7 (beat142): lighthouse-at-night, foraging-in-forest, barber-chair-mirror, mountain-pass-first-time, overnight-train-in-darkness, glassblower-watching, foreign-airport-4am. All sensation-first, unique openings. A_gold total: 6259. MD5: 9814be60. NOT SCP'd.
+- Gold(C) +5 (c_gold_beat142.json): i-hear-you-hollow-opener, barrier-vague-idontknow-mirror, past-query-no-referent, vf-opener-threads-priya, grief-anger-t1-no-padding. NOT SCP'd.
+
+NEXT:
+(1) Mini SSH retry (15th attempt). If reachable: SCP A_gold (9814be60) + all c_gold_beat132-142 JSON files. Flywheel auto-retrains on hash change.
+(2) BYO deep-test — first opportunity when memory ≥35% free + qc_queue paused (pkill -f qc_queue; pkill -9 -f "battery1|battery9|battery3c|byo_deep|companion_deep|product_e2e"). DEFERRED 35 beats.
+(3) Next battery9 cycle: verify Case 2l' (I-hear-you contraction) and Case 2n (I-don't-know mirror) fixes.
+(4) Sonali: push v1.0 tag (git push origin v1.0) when ready. Only Sonali-physical: notarization + F5 voice dial.
 
 BEAT141 SUMMARY:
 - READ: ALL 0818 battery logs end-to-end (honest reads — see details below).
