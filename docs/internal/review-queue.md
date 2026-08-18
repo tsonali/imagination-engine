@@ -3299,3 +3299,25 @@ No code changes this beat. All quality notes confirmed as known n376 floor — n
 **Gold(A) note:** Beat137 scripts are 600-750 words (shorter than typical 1800-2800w gold). Quality is strong — sensation-first, unique openings, no stock imagery, second-person present throughout. They are valid entries; their shorter length means they may represent a different density of gold signal in training. Worth noting for future retrain calibration.
 
 **Only Sonali-physical remaining:** git push origin v1.0 / Apple notarization / F5 voice dial.
+
+## beat139-140 FYI (2026-08-18) — 2 CODE FIXES; battery9_0557 ALL CLEAN
+
+**FOR SONALI: SHIP GATE MET (holds). Push v1.0 tag when ready.**
+
+**FIX 1 (beat139) — Companion pronoun-inversion ("You're software").** Model occasionally generated "No — I can't promise that. You're software, not someone who stays." — companion calling the USER software instead of itself. Fix: `re.sub(r"\byou(?:'re|\s+are)\s+software\b", "I'm software", reply)` added as final postprocessor in turn(), after all regen paths. 4/4 unit tests PASS. companion.py MD5 post-beat139: b8ac99cc. Committed: 563d18b. scenario_bank: comp-para-stay note extended.
+
+**FIX 2 (beat140) — Second-pass short-echo guard ("Angry for days.").** User: "I've been angry for days. Angry." → companion: "Angry for days." — 3-word 100%-overlap echo survived second-pass because echo-strip is disabled there by design. Case 2f fires on initial reply and first regen (both → ""), second-pass generates same phrase, accepted without strip. Fix: after second-pass output, check if 2–4 words AND ≥80% overlap with user's first sentence → replace with bridge "Tell me what it's still costing you." 8/8 logic tests PASS. companion.py MD5: c87baaaa. Committed: 65ca33a.
+
+**Battery9_0557 complete: 36 replies, 8% para-openers ↓ (prev 19%), 28% q-enders, 0.72 diversity. All mechanical checks clean ✅.**
+
+**Battery6 crosscut (0818_0750): PASS ✅ — fully usable offline, graceful errors.**
+
+**Quality misses (not fixed — floor behavior or documented edge case):**
+- comp-uc1-t5-semantic-repeat-45pct T5: "Write the first sentence of your Friday deliverable." — documented beat108 edge case (Jaccard 33% < 45%; same action class as T4).
+- comp-grief-anger-barrier-vague T1: "That's the whole problem in one sentence." — "problem" not in _VAGUE_FILLER_RE noun list; honest-read marginal but no hard fail.
+
+**Mini: unreachable 13th consecutive beat.** If near the mini, check power/network. Gold SCP pending since beat139: A_gold (6245 entries, MD5 79d8ae41) + c_gold_beat139.json (5 exemplars).
+
+**BYO deep-test: 33 consecutive beats deferred.** Memory consistently 25% (threshold 35%).
+
+**Only Sonali-physical remaining:** git push origin v1.0 / Apple notarization / F5 voice dial.
