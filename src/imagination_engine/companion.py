@@ -1338,18 +1338,23 @@ def _strip_echo(reply: str, user_message: str) -> str:
                         _after_2l = r[len(_r_full_first_2l):].lstrip(" .!?\n-—")
                         r = _after_2l if (len(_after_2l.split()) > 3) else ""
 
-    # Case 2l': Multi-word hollow-opener prepended I→Y echo (beat135).
-    # Catches "It sounds like / It seems like / It looks like / It feels like [I→Y echo]".
+    # Case 2l': Multi-word hollow-opener prepended I→Y echo (beat135 + beat142).
+    # Catches "It sounds like / It seems like / It looks like / It feels like [I→Y echo]"
+    # and "I hear you [I→Y echo]" (beat142: "I hear you've been thinking about family
+    # stuff lately." — discourse echo not caught by Case 2l single-marker list).
     # These phrases add nothing and echo the user's content with paraphrase framing.
     # Lower Jaccard threshold (0.30) because the extra stopword-heavy prefix inflates union.
     # FP guard: requires ≥15-char user first sentence (prevents triggering on very short inputs).
     # Example: user "I've been thinking about family stuff lately."
     #   → companion "It sounds like family stuff has been on your mind lately." — STRIP
+    #   → companion "I hear you've been thinking about family stuff lately." — STRIP (beat142)
     # Example: user "I made the right call." → companion "It sounds like you made the right call."
     #   — Jaccard 0.625 ≥ 0.30 → STRIP (correct: adds nothing, pure positive echo)
     if r and u:
         _HOLLOW_MWORD_RE_2L2 = re.compile(
-            r'^(?:it sounds like|it seems like|it looks like|it feels like)\s+', re.IGNORECASE
+            r'^(?:it sounds like|it seems like|it looks like|it feels like'
+            r"|i hear you(?:['’](?:ve|re|d|ll|s))?)\s+",
+            re.IGNORECASE
         )
         _m_2l2 = _HOLLOW_MWORD_RE_2L2.match(r)
         if _m_2l2:
@@ -2596,6 +2601,43 @@ class Companion:
                                 if _c2m_reply:
                                     reply = _c2m_reply
                                 break
+
+        # Case 2n (beat142): "I don't know" user-opener mirror — companion must never
+        # open with "I don't know" after the user says "I don't know" as their first
+        # sentence.  The companion KNOWS what the bind is; mirroring the user's
+        # uncertainty is always wrong and sounds like a broken bot.
+        # Example: user "I don't know. Everything I say he twists into me attacking him."
+        #   → companion "I don't know what staying silent costs you." — STRIP → regen.
+        # Guard: fires only when user message starts with "I don't know" (≤4 words in
+        # first sentence) AND companion reply starts with "I don't know" (case-insensitive).
+        _u_first_sent_c2n = re.split(r'[.!?]', user_message.strip())[0].strip()
+        if (len(_u_first_sent_c2n.split()) <= 4
+                and _u_first_sent_c2n.lower().startswith("i don't know")
+                and reply.lower().startswith("i don't know")):
+            log.warning(
+                "companion: IDONTKNOW-MIRROR (Case 2n) — companion echoed user's "
+                "'I don't know' opener: '%s'", reply[:60]
+            )
+            _c2n_user = user_message + (
+                "\n\nCRITICAL: Do NOT begin your response with 'I don't know' — "
+                "the user said that; you should name what the situation creates "
+                "for them. Respond with a concrete observation or the bind they're "
+                "facing. Start with a content word, not 'I don't know'."
+            )
+            _c2n_chunks = []
+            for _piece_c2n in self.engine.stream(
+                messages=[
+                    {"role": "system", "content": COMPANION_SYSTEM},
+                    {"role": "user", "content": _c2n_user},
+                ],
+                max_tokens=max_tokens, temperature=0.5,
+            ):
+                _c2n_chunks.append(_piece_c2n)
+            _c2n_reply = _strip_echo("".join(_c2n_chunks).strip(), user_message)
+            _c2n_reply = _strip_chat_format_bleed(_c2n_reply)
+            _c2n_reply = _strip_thats_real_tic(_c2n_reply)
+            if _c2n_reply:
+                reply = _c2n_reply
 
         # Normalize model-generated double-punctuation artifact: "?." → "?"
         # (model occasionally appends a period after a question mark)
