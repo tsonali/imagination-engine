@@ -3343,3 +3343,31 @@ No code changes this beat. All quality notes confirmed as known n376 floor — n
 **BYO deep-test: 34 consecutive beats deferred.** Memory 4-17% throughout (threshold 35%). First opportunity when qc_queue paused + memory clears.
 
 **Only Sonali-physical remaining:** git push origin v1.0 / Apple notarization / F5 voice dial.
+
+---
+
+## 2026-08-18 beat142 FYI
+
+**SHIP GATE HOLDS. 2 CODE FIXES in companion.py.**
+
+**FIX 1 (beat142) — Case 2l' I-hear-you contraction escape.** battery9_1052 comp-discourse-marker-echo: companion returned "I hear you've been thinking about family stuff lately." — near-verbatim I→You echo with "I hear you" prefix. Case 2l' regex `^i hear you\s+` required `\s+` (whitespace) after "you" but "you've" is a contraction. Fix: regex extended to `i hear you(?:[''](?:ve|re|d|ll|s))?)\s+`. companion.py MD5: d8d8ea89772d49ec696d59d588f57f14. Git: 52deca7.
+
+**FIX 2 (beat142) — Case 2n "I don't know" user-opener mirror.** battery9_1052 comp-grief-anger-barrier-vague T2: user said "I don't know." (first sentence) and companion replied "I don't know what staying silent costs you." — companion mirroring user's uncertainty when it should name the bind. New guard (Case 2n) catches this pattern and regens. 5/5 logic tests PASS. Same MD5/commit.
+
+**ZIP rebuilt: 7e6963d65fecfa9df5e06b6f446fee3b** (beat142 companion.py).
+
+**QUALITY MISSES noted (no code fix — for your taste judgment):**
+- comp-past-query with vital facts in scope: user "Did we talk about this before?" (no specific referent) → companion returned vital facts without YES/NO. The WHEN THEY ASK ABOUT PAST CONVERSATIONS instruction says "YES or NO first" but when "this" has no referent and vital facts are present, model treats any VF as the topic. Behavioral quirk — not a floor violation; Gold(C) exemplar added showing correct response ("No — nothing specific comes up. What were you thinking of?").
+- comp-vf-sister-memory warm-up post-echo-strip: regen produces generic "What does that feel like for you?" instead of threading Priya from vital facts. Gold(C) exemplar added (should ask "Is Priya part of what's coming up?").
+
+**secretary_deep_0805: 5/5 PASS ✅** — all number-lossless, all register clean. Secretary deep test confirmed solid for this beat.
+
+**Gold(A) = 6259** (+7: lighthouse-at-night, foraging-in-forest, barber-chair-mirror, mountain-pass-first-time, overnight-train-in-darkness, watching-glassblower, foreign-airport-4am). NOT SCP'd (mini unreachable 14th consecutive).
+
+**Gold(C) +5** (c_gold_beat142.json). NOT SCP'd.
+
+**Mini: 14th consecutive unreachable.** SCP backlog now: A_gold (9814be60, 6259 entries) + c_gold_beat132-142 (67+ exemplars). Flywheel stalled since mini went down. If you can check: power + network on mac-mini.localdomain.
+
+**BYO deep-test: 35 consecutive beats deferred.** Memory 10% throughout (threshold 35%).
+
+**Only Sonali-physical remaining:** git push origin v1.0 / Apple notarization / F5 voice dial.
