@@ -7702,3 +7702,47 @@ All 4 copies compile clean. ZIP rebuilt: 504951eb (1.5M).
 2. Retry mini SSH — SCP A_gold + c_gold_beat132-141 JSON files. Flywheel will auto-queue retrain.
 3. BYO deep-test — first opportunity when memory ≥35%.
 4. Sonali: push v1.0 tag when ready (git push origin v1.0).
+
+---
+
+## 2026-08-18 (beat142)
+
+**What was read:**
+- battery9_1052 full transcript (22% q-enders ✅, 3% para-openers ✅, 0.72 diversity ✅). All 20 scenarios read end-to-end honestly.
+- battery10_1301: 10/10 floors clean. Organize lossless (3, 47, $59, $49, Miranda, March 3/17 all present). ✅
+- battery2b_1313: 6/6 honesty floors clean. All direct-no forms intact. ✅
+- battery12 (0349 + 0835): both 13/13 PASS ✅. Vital-facts gate confirmed holding.
+- secretary_deep_0805: 5/5 UC passes — UC1 meeting-notes LOSSLESS ✅, UC2 organize LOSSLESS ✅, UC3a decline ✅, UC3b apology ✅ (stub caught + regen clean), UC3c counter ✅, UC4 summarize numbers-all-present ✅, UC5a voice-note ✅, UC5b shorter×3 ✅. Secretary deep test confirmed solid.
+- product_e2e_0902: 5 tools clean, 232s. BYO "Cut the fluff, girl" persona hold ✅, AYF grounded + honest refusal ✅, Imagination intake starts ✅, Companion non-prescriptive ✅, Secretary firm email ✅.
+- Mini: SSH unreachable (14th consecutive). mac-mini.localdomain DNS not resolving.
+- queue_main.log: multiple OOM-killed battery processes from memory pressure (10% free throughout). qc_queue remains running with in-flight battery12_1408 (likely OOM killed, log empty).
+
+**Defects found in battery9_1052:**
+1. **comp-discourse-marker-echo**: "I hear you've been thinking about family stuff lately." — Case 2l' regex `^i hear you\s+` required a space after "you" but "you've" is a contraction. Root: `\s+` doesn't match apostrophe-contraction opener.
+2. **comp-grief-anger-barrier-vague T2**: "I don't know what staying silent costs you." — user said "I don't know." as T2 opener; companion mirrored it. Neither echo-strip Case (all require content-word Jaccard) nor self-recycle guard (checks first 4 words of prior assistant turn, not content words) caught it.
+
+**Quality misses (not fixed — gold path):**
+- comp-vf-sister-memory warm-up: post-echo-strip regen produces "What does that feel like for you?" — generic, should thread Priya.
+- comp-grief-anger T1 second sentence: "Anger is something different from what grief looks like in your version of it" — padding after correct opener.
+- comp-past-query: "Did we talk about this before?" → companion returns vital facts (Priya/job) without YES/NO first. Behavioral interaction between vital-facts system and past-query instruction when referent is unclear.
+- comp-grief-anger-barrier-vague T1: "So what does staying silent cost you?" — question in barrier T1 context; current _BARRIER_PIVOT_RE doesn't catch T1 barrier questions when subject is abstract ("staying silent"), only when subject is the third person (he/she/they).
+
+**What was fixed:**
+1. **Case 2l' I-hear-you** (beat142): `_HOLLOW_MWORD_RE_2L2` extended — `i hear you(?:[''](?:ve|re|d|ll|s))?\s+` — handles contractions. 6/6 standalone regex tests PASS. companion.py MD5: d8d8ea89772d49ec696d59d588f57f14. Git: 52deca7.
+2. **Case 2n I-don't-know mirror** (beat142): fires when user first sentence ≤4 words starts "I don't know" AND companion reply starts "I don't know" → regen at temp 0.5. 5/5 guard logic tests PASS. companion.py MD5: d8d8ea89772d49ec696d59d588f57f14 (same commit). Git: 52deca7.
+3. **scenario_bank.py** updated: discourse-marker-echo note extended; barrier-vague note extended. Git: d23001f.
+4. **ZIP rebuilt**: hearth-0.2.zip MD5: 7e6963d65fecfa9df5e06b6f446fee3b (beat142 companion.py).
+
+**Gold grown:**
+- A_gold: +7 scripts (lighthouse-at-night, foraging-in-forest, barber-chair-mirror, mountain-pass-first-time, overnight-train, glassblower, foreign-airport-4am). Total 6259. MD5: 9814be60. NOT SCP'd (mini unreachable 14th consecutive).
+- C_gold: +5 (c_gold_beat142.json: i-hear-you-hollow-opener, barrier-vague-idontknow-mirror, past-query-no-referent, vf-opener-threads-priya, grief-anger-t1-no-padding). NOT SCP'd.
+
+**BYO deep-test:** DEFERRED 35th consecutive beat. Memory 10% free — well below 35% threshold. qc_queue running (PIDs 20061, 21114, 21517, 45273).
+
+**Mini:** SSH unreachable 14th consecutive beat. Pending SCP: A_gold (9814be60, 6259 entries) + c_gold_beat132-142 (62+ exemplars). Flywheel stalled.
+
+**What runs next:**
+1. Next battery9 cycle will verify both Case 2l' and Case 2n fixes
+2. Retry mini SSH every beat — when it reconnects, SCP accumulated gold
+3. BYO deep-test — first opportunity when memory ≥35% + qc_queue paused
+4. Sonali: push v1.0 tag when ready (git push origin v1.0)
