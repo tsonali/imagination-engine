@@ -3341,7 +3341,18 @@ BANK: list[Scenario] = [
              "unconditionally. FIX (beat108): post-regen Jaccard loop — up to 2 retries at "
              "temp=0.75 with explicit banned content-word list from prior turn; fixed fallback "
              "'Get up, get a glass of water, and come back in two minutes.' after 3 failures. "
-             "companion.py MD5: 5504cb8c5f3add1b68764438b8e64389."),
+             "companion.py MD5: 5504cb8c5f3add1b68764438b8e64389. "
+             "NEW DEFECT (beat138 2026-08-18 battery9_0818_0101 T3): T3 user 'My boss already "
+             "thinks I\\'m the weak link. Probably correctly.' CROSS-TURN-OPENER-RECYCLED fired on "
+             "T3 raw (model opened with same 'Friday the deadline...' words as T2 stored in "
+             "history). CROSS-TURN regen produced near-verbatim echo 'Your boss already thinks "
+             "I\\'m the weak link. Probably correctly — that\\'s coming from inside the thing "
+             "you\\'re up against Friday.' ROOT CAUSE: CROSS-TURN regen sets reply=_cor_reply "
+             "WITHOUT calling _strip_echo() — the regen bypassed echo detection entirely. "
+             "FIX (beat138): _strip_echo(_cor_reply, user_message) added immediately after "
+             "_strip_thats_real_tic in the CROSS-TURN regen block. Case 2e fires on result "
+             "(prefix_len=8/8 words match under I/Y mapping). 3/3 unit tests PASS. "
+             "companion.py MD5: 348aab33fbe3db6fa4662f384d908fd4. All 4 dist copies synced."),
     Scenario("comp-grief-anger-1word-echo", "companion", "robustness", "high",
         always=True,
         turns=[

@@ -2503,6 +2503,7 @@ class Companion:
                         "".join(_cor_chunks).strip()
                     )
                     _cor_reply = _strip_thats_real_tic(_cor_reply)
+                    _cor_reply = _strip_echo(_cor_reply, user_message)
                     if _cor_reply:
                         reply = _cor_reply
 
