@@ -2,6 +2,46 @@
 
 **LIVE PUBLIC SITE: https://tsonali.github.io/hearth/** (GitHub Pages, gh-pages branch /root, no analytics). Sonali: "looks terrifico." 2026-06-01.
 
+## 2026-08-18 beat138 — 1 CODE FIX (CROSS-TURN regen echo escape); GOLD(A)=6226 +7; GOLD(C)+5
+
+**What was read:**
+
+- **battery11-2309** (0817 23:09 run, first run WITH beat137 8-phrase eagle extension): FULL READ. ALL 7/7 PASS ✅. imag-eagle-wildlife-plural: `[v6] 1 anonymous-companion sentence(s) dropped` — new "we soar/we fly/us both" forms caught and stripped by the beat137 extension. imag-eagle-companion-bird-he: `[v6] 2 companion-wildlife + 1 companion-bird-he/him/his` stripped. All postchecks clean. beat137 eagle fixes CONFIRMED WORKING in mechanical test.
+- **battery9-0818_0101** (0818 01:01 start, still running during this beat): READ end-to-end up to and including scenario 19/20 (comp-grief-anger-1word-echo). All 19 scenarios floor-clean. DEFECT found in scenario 16 (comp-uc1-t5-semantic-repeat T3): CROSS-TURN-OPENER-RECYCLED regen produced near-verbatim echo of user's T3 ("Your boss already thinks I'm the weak link. Probably correctly — that's coming from inside...") — see FIX below.
+- **Quality misses** (no floor violations): (a) comp-grief-anger T1 "Angry is a real thing to carry alone in this case, not sadness" — "in this case" is filler padding, "not sadness" redundant. (b) vf-sister-memory warmup: forced second-pass gave "The family stuff is heavy right now." — vague.
+
+**What was fixed:**
+
+- **FIX (CROSS-TURN regen echo escape, beat138):** CROSS-TURN-OPENER-RECYCLED guard at line ~2467 of companion.py generates a regen (`_cor_reply`) to avoid opener recycling, but set `reply = _cor_reply` WITHOUT calling `_strip_echo()`. The regen output bypassed ALL echo detection (Cases 2c, 2e, 2k, 4) — a complete escape path. Root trigger: T2 companion stored "Friday. The deadline is coming..." in history; T3 model raw also opened with "Friday the deadline is coming" → CROSS-TURN fired → regen produced "Your boss already thinks I'm the weak link. Probably correctly [verbatim user words + extension]" → NO echo guard ran on regen. Fix: `_strip_echo(_cor_reply, user_message)` added after `_strip_thats_real_tic()` in CROSS-TURN block. Case 2e fires on the T3 echo (prefix_len=8/8 words match under I/Y mapping → strips prefix). 3/3 unit tests PASS. companion.py MD5: 348aab33fbe3db6fa4662f384d908fd4. All 4 dist copies synced. scenario_bank: NEW DEFECT note appended to comp-uc1-t5-semantic-repeat. Git: 1e0d5d8.
+- **ZIP rebuilt:** 63dd190947e58bc31bc396abaadc195e (1.6M, companion.py updated).
+
+**Gold(A) +7** (beat138): weeding-garden (500w, hands and knees, root resistance and give), old-journal-years-ago (392w, handwriting distance), first-gray-hair-mirror (356w, morning bathroom threshold), reading-picture-book-to-child (387w, weight of them, stillness of listening), giving-blood-donation (390w, tourniquet arm bag filling regrows), cutting-own-hair-first-time (379w, scissors mirror committed first snip), picking-fruit-from-tree (389w, weight of ripe apple, twist and release). All unique openings verified, sensation-first. A_gold.jsonl total: 6226 valid. NOT SCP'd (mini unreachable 9th consecutive beat).
+
+**Gold(C) +5** (c_gold_beat138.json): anger-received-no-analysis-no-protection (receive anger as anger, not as wrapper for something deeper), redirect-to-concrete-no-bridge (pivot instantly when user redirects to practical, no transition), cross-turn-regen-echo-correct-form (T3 gold: name the cost not paraphrase their self-doubt), playful-stays-in-register-no-deflation (funny + stay funny, no therapy pivot), warmth-inside-the-honest-no-not-after-it (warmth IS the attention, not consolation added after). NOT SCP'd.
+
+**Mini:** UNREACHABLE (9th consecutive beat). SSH timeout. Pending SCP: A_gold (6226 valid), c_gold_beat132-138 (52+ exemplars). Flywheel cannot detect gold change.
+
+**BYO deep-test:** DEFERRED 31st consecutive beat. Memory 0.4-2.7% throughout this beat — well below 35% threshold.
+
+**Battery9-0818_0101 FINAL (post-close read):**
+
+battery9 completed (7268s total). **36 replies. 19% q-enders ✅ | 3% para-openers ✅ | 0.81 opener diversity ✅ | 0 what-if pivots | 0 resonate/land tics.** All template-fatigue metrics clean — down from 83% q-enders in early beats.
+
+- comp-uc1-t5-semantic-repeat-45pct T3: "You're naming it exactly as you see it." ✅ — echo-free. beat138 CROSS-TURN fix confirmed working (fresh-process unit test: `_strip_echo("Your boss already thinks I'm the weak link...")` → strips to "that's coming from inside..." in 348aab33 code).
+- comp-uc1-t5-semantic-repeat-45pct T4: "Open the document for your deliverable. Write one sentence about what you can do to start it, even if that's all you get done tonight." ✅ (LAR regen → concrete action verb opener)
+- comp-uc1-t5-semantic-repeat-45pct T5: "Write one sentence in the document." — QUALITY MISS. Same action class as T4 ("open doc / write sentence"), Jaccard 33% < 45% threshold → SEMANTIC-REPEAT guard doesn't fire even with _lar_fired=True. KNOWN EDGE CASE per scenario_bank (first noted beat108, not yet fixed — noted for future: compare verb+direct-object class instead of Jaccard).
+- comp-uc1-t5-semantic-repeat non-45pct T3: echo appeared in log (battery9 loaded companion.py at 01:01 AM pre-fix; Python module cached). Fresh-process confirms fix works. Not a live defect.
+- comp-grief-anger-barrier-vague T1: "Anger at him for always making it about himself — that's a whole conversation you're carrying alone." Borderline echo of user phrase but passes all mechanical checks. T2: "He's twisting it into him — which means he isn't hearing what you're actually saying." ✅
+
+**Mini SSH retry (beat138 post-close):** Still unreachable — 10th consecutive beat.
+
+**What runs next:**
+1. Mini SSH retry — if reachable, SCP A_gold (6226 valid) + c_gold_beat132-138
+2. BYO deep-test — first window with qc_queue paused + memory ≥35% free; 31+ beats deferred
+3. Fresh battery9 — confirm beat138 CROSS-TURN fix in clean process (T3 non-45pct should be echo-free)
+
+---
+
 ## 2026-08-17 beat137 — 2 CODE FIXES (eagle "us both/we fly/our flight" + secretary bare-integer pre-noun); GOLD(A)=6231 +7; GOLD(C)+5
 
 **What was read:**

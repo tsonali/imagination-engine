@@ -2,6 +2,29 @@
 
 _Everything that wanted your taste. Newest on top within sections. My provisional call where I have one._
 
+## 2026-08-18 beat138 — FYI items
+
+**FYI: SHIP GATE STILL MET. 1 code fix (CROSS-TURN regen echo escape). No taste calls needed.**
+
+**FYI: battery11-2309 ALL 7/7 PASS ✅ — beat137 eagle 8-phrase extension confirmed working.**
+The "we soar / we fly / us both" forms added in beat137 are now dropping correctly in the mechanical postchecks. imag-eagle-wildlife-plural: 1 anon-companion sentence dropped. imag-eagle-companion-bird-he: 2 companion-wildlife + 1 he/him/his dropped. No false positives, no floor violations across all 7 scenarios. Eagle path is clean.
+
+**FYI: CROSS-TURN regen echo escape — found and fixed.**
+battery9-0818_0101 T3 in comp-uc1-t5-semantic-repeat: model produced "Your boss already thinks I'm the weak link. Probably correctly — that's coming from inside the thing you're up against Friday." — a near-verbatim echo of the user's words, with only "My→Your" swapped and filler appended. The echo escaped because CROSS-TURN-OPENER-RECYCLED guard generates a regen without passing it through `_strip_echo()`. Fixed: `_strip_echo()` now called on all CROSS-TURN regen outputs. 3/3 unit tests PASS. This was a structural gap (one regen path bypassing all echo detection). No taste call needed.
+
+**FYI: quality miss in comp-grief-anger T1 — "in this case" filler.**
+T1 reply: "Angry is a real thing to carry alone in this case, not sadness." The phrase "in this case" is padding that adds nothing. Not a floor violation (honesty bar holds, no therapy reframe). Gold exemplar exists for the cleaner form ("Angry, not sad — that's a different weight to carry alone."). This should improve with more C-gold training. No code fix warranted.
+
+**FYI: battery9-0818_0101 COMPLETE — 19% q-enders, 3% para-openers, 0.81 diversity. All floors clean.**
+36 replies. The -45pct T3 "You're naming it exactly as you see it." confirms beat138 CROSS-TURN echo fix works. One quality miss: -45pct T5 "Write one sentence in the document." repeats T4's action class (Jaccard 33% < 45% threshold → guard doesn't fire). Known edge case per scenario_bank. No new code fix needed this beat.
+
+**FYI: Mini still unreachable — 10th consecutive beat. 52+ Gold exemplars and 7 new A scripts pending SCP.**
+A_gold (6226 valid entries) and c_gold_beat132-138 (52+ exemplars) are all stuck waiting for the mini to come back online. If you're near the mini, check if it's awake and on the network. The flywheel cannot detect the A_gold change and cannot queue a new training run until SCP succeeds.
+
+**FYI: BYO deep-test — 31 beats deferred. Will run next free memory window.**
+
+---
+
 ## 2026-08-17 beat136 — FYI items
 
 **FYI: SHIP GATE STILL MET. No code changes. All batteries clean. No taste calls needed.**

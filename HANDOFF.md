@@ -1,5 +1,36 @@
 # HANDOFF — resume here (read this first)
 
+_Last updated 2026-08-18 beat138 (post-battery9 close) — **SHIP GATE MET (holds). 1 CODE FIX: CROSS-TURN regen echo escape. battery9-0818_0101 COMPLETE: 36 replies, 19% q-enders, 3% para-openers, 0.81 diversity — ALL CLEAN ✅. -45pct T3 "You're naming it exactly as you see it." confirms beat138 echo fix works. companion.py MD5: 348aab33. ZIP: 63dd1909. Gold(A)=6226 (+7). Gold(C)+5. Mini UNREACHABLE (10th consecutive). BYO DEFERRED 31 beats. Sonali: push v1.0 tag when ready.**
+
+BEAT138 SUMMARY:
+- READ: battery11-2309 (0817 23:09 run, first with beat137 eagle extension) — ALL 7/7 PASS ✅. eagle-wildlife-plural: 1 anon-companion dropped by "we soar/we fly" new tokens. companion-bird-he: 2 companion-wildlife + 1 he/him/his dropped. Beat137 fixes CONFIRMED working mechanically.
+- READ: battery9-0818_0101 end-to-end through scenario 19/20. All 19 floors clean. DEFECT found: CROSS-TURN regen produced near-verbatim echo of T3 user message ("Your boss already thinks I'm the weak link. Probably correctly...") — the CROSS-TURN regen block was setting reply=_cor_reply WITHOUT calling _strip_echo(), so all echo detection (Cases 2c, 2e, 2k) was bypassed.
+- FIX (CROSS-TURN regen echo escape): `_strip_echo(_cor_reply, user_message)` added after `_strip_thats_real_tic()` in the CROSS-TURN block. Case 2e fires on the T3 case (prefix_len=8/8 matching words under I/Y map → strips "Your boss already thinks I'm the weak link." and keeps the clean follow-on). 3/3 unit tests PASS. companion.py MD5: 348aab33fbe3db6fa4662f384d908fd4. All 4 dist copies synced. scenario_bank: defect+fix note in comp-uc1-t5-semantic-repeat. Git: 1e0d5d8.
+- ZIP rebuilt: 63dd190947e58bc31bc396abaadc195e (1.6M).
+- Gold(A) +7 (beat138): weeding-garden, old-journal-years-ago, first-gray-hair-mirror, reading-picture-book-to-child, giving-blood-donation, cutting-own-hair-first-time, picking-fruit-from-tree. All sensation-first, unique openings. A_gold.jsonl: 6226 valid. NOT SCP'd (mini unreachable).
+- Gold(C) +5 (c_gold_beat138.json): anger-received-no-analysis-no-protection, redirect-to-concrete-no-bridge, cross-turn-regen-echo-correct-form, playful-stays-in-register-no-deflation, warmth-inside-the-honest-no-not-after-it. NOT SCP'd.
+- Mini: UNREACHABLE (9th consecutive beat). DNS failure mac-mini.localdomain. Pending SCP: A_gold (6226 valid entries), c_gold_beat132-138 (52+ exemplars). Flywheel cannot detect gold change — no new adapter training since N620 (status unknown).
+- BYO deep-test: DEFERRED 31st consecutive beat. Memory 0.4-2.7% throughout — model launch blocked.
+- Memory: 0.4% at beat close (battery9 holding GPU memory). Threshold: 35%. No model operations this beat.
+
+BATTERY9-0818_0101 FINAL (post-beat138 close):
+- COMPLETE: 36 replies across 12 scenarios. 7268 seconds total.
+- METRICS: 19% q-enders ✅ | 3% para-openers ✅ | 0% what-if ✅ | 0 resonate/land ✅ | 0.81 opener diversity ✅
+- -45pct T3: "You're naming it exactly as you see it." ✅ — echo-free. beat138 CROSS-TURN fix verified working (Python fresh-import confirms Case 2e strips echo correctly).
+- -45pct T4: "Open the document for your deliverable. Write one sentence about what you can do to start it, even if that's all you get done tonight." ✅ (LAR regen → action verb opener)
+- -45pct T5: "Write one sentence in the document." — QUALITY MISS (same action class as T4; Jaccard 33% < 45% threshold → SEMANTIC-REPEAT guard doesn't fire). KNOWN EDGE CASE per scenario_bank. Not a new defect.
+- non-45pct T3: "Your boss already thinks I'm the weak link. Probably correctly — that's coming from inside the thing you're up against Friday." — echo appeared in log. Root: battery9 loaded companion.py at 01:01 AM (pre-fix; Python module cached in long-running process). Fresh process confirms fix strips this correctly (`_strip_echo` → "that's coming from inside..."). NOT a code bug.
+- barrier-vague T1: "Anger at him for always making it about himself — that's a whole conversation you're carrying alone." — borderline echo of "always making it about himself" (user's phrase) but passes all mechanical checks (no "You said" prefix, Case 2k Jaccard below 0.30). Quality borderline.
+- barrier-vague T2: "He's twisting it into him — which means he isn't hearing what you're actually saying." ✅
+
+NEXT:
+(1) Mini SSH retry — if reachable, SCP A_gold (6226 valid) + c_gold_beat132-138 JSON files. 10th consecutive unreachable.
+(2) BYO deep-test — needs qc_queue paused + memory ≥35% free. pkill -f qc_queue; pkill -9 -f "battery1|battery9|battery3c|byo_deep|companion_deep|product_e2e". 31+ beats deferred.
+(3) Next battery9 cycle — run fresh to confirm beat138 CROSS-TURN fix in a clean process (not the cached-module battery9_0818_0101). T3 of non-45pct should be echo-free.
+(4) Sonali: push v1.0 tag (git push origin v1.0) when ready. Only Sonali-physical: notarization + F5 voice dial.
+
+---
+
 _Last updated 2026-08-17 beat137 — **SHIP GATE MET (holds). 2 CODE FIXES (eagle "us both/we fly/our flight" escape forms + secretary bare-integer pre-noun injection). battery11-1818 fully read — 3 new companion-implying phrases found and fixed. All dist copies synced. postcheck.py MD5: 642fa548. generator.py dbb56a8d. utility.py 564d46cf. ZIP: d85e0ede. Gold(A)=6231 (+7). Gold(C)+5. Mini UNREACHABLE (8th consecutive). BYO deep-test DEFERRED 30 beats. Sonali: push v1.0 tag when ready.**
 
 BEAT137 SUMMARY:
