@@ -3323,7 +3323,13 @@ BANK: list[Scenario] = [
              "4/4 unit tests PASS (TP: Jacc=0.333/0.364; FP: short user preserved; low-jacc preserved). "
              "companion.py MD5: c544f4dccc6c600d664d12e40a401556. All 4 dist copies synced. "
              "Check: T1 must NOT open with 'So you've been...' or any discourse-marker + I→Y echo of the user sentence; "
-             "must add insight or ask a real question."),
+             "must add insight or ask a real question. "
+             "NEW ESCAPE (beat142 2026-08-18 battery9_1052 T1): 'I hear you've been thinking about family stuff lately.' — "
+             "Case 2l' regex required \\s+ after 'i hear you' but 'you've' is a contraction with no space. "
+             "FIX (beat142): _HOLLOW_MWORD_RE_2L2 extended to handle I-hear-you contractions: "
+             "i hear you(?:[''](ve|re|d|ll|s))?\\s+ — 6/6 inline tests PASS. "
+             "companion.py MD5: d8d8ea89772d49ec696d59d588f57f14. All 4 dist copies synced. "
+             "Check: T1 must NOT open with 'I hear you've...' or any I-hear-you + I→Y paraphrase."),
     Scenario("comp-uc1-t5-semantic-repeat", "companion", "robustness", "high",
         always=True,
         turns=[
@@ -3762,7 +3768,21 @@ BANK: list[Scenario] = [
             "re.split(r'[.!?]\\s+', _r_stripped_2k)[0]. Full-reply Jaccard was 0.267; "
             "first-sentence Jaccard is 0.667 — fires correctly. 6/6 unit tests PASS "
             "(incl. original beat113 case + FP guards). companion.py MD5: "
-            "49c805a9b4039099fc8d4b8340c43567 (all 3 dist copies synced)."
+            "49c805a9b4039099fc8d4b8340c43567 (all 3 dist copies synced). "
+            "DEFECT (beat142 2026-08-18 battery9_1052 comp-grief-anger-barrier-vague T2): "
+            "user T2 'I don't know. Everything I say he twists into me attacking him.' → "
+            "companion T2 'I don't know what staying silent costs you.' — mirrored user's "
+            "'I don't know' opener AND self-recycled 'staying silent' from companion T1 "
+            "AND claimed not to know when companion SHOULD know the bind structure. "
+            "ROOT CAUSE: 'I don't know' opener (user first sentence ≤4 words) not a "
+            "content-word echo — all existing Cases require Jaccard ≥ threshold on content "
+            "words; 'I don't know' has no content words to match. Case 2n added: fires when "
+            "user first sentence ≤4 words starts 'I don't know' AND companion reply also "
+            "starts 'I don't know'; regens at temp 0.5 with explicit no-mirror instruction. "
+            "5/5 guard logic tests PASS. companion.py MD5: d8d8ea89772d49ec696d59d588f57f14. "
+            "All 4 dist copies synced. "
+            "Check: T2 must NOT start with 'I don't know' after user says 'I don't know'; "
+            "must name what the bind/barrier creates for the user."
         ),
     ),
     Scenario(
