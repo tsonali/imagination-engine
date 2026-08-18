@@ -1954,6 +1954,24 @@ class Companion:
                             )
                             reply = "That's going to sit with you today."
 
+            # beat140: short-echo final guard on second-pass output. No echo-strip is
+            # applied to second-pass replies by design, but a ≤4-word reply with ≥80%
+            # word overlap with the user's first sentence is a pure echo — worse than
+            # the "mild echo" that justified skipping strip. Replace with a bridge.
+            # Observed escape: "Angry for days." from "I've been angry for days. Angry."
+            # survives first-regen + second-pass because strip is disabled there.
+            if reply:
+                _sp2_r = re.findall(r"[a-z']+", reply.lower())
+                _sp2_u1 = re.findall(r"[a-z']+", re.split(r'[.!?]', user_message)[0].lower())
+                if (1 < len(_sp2_r) <= 4
+                        and _sp2_u1
+                        and len(set(_sp2_r) & set(_sp2_u1)) / max(len(_sp2_r), 1) >= 0.80):
+                    log.warning(
+                        "companion: second-pass short-echo ('%s') — applying fixed bridge",
+                        reply[:40]
+                    )
+                    reply = "Tell me what it's still costing you."
+
         flagged = _check_forbidden(reply)
         if flagged:
             log.warning("companion: forbidden personhood phrase(s) %s — regenerating once", flagged)

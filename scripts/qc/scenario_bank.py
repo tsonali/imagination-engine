@@ -3392,7 +3392,20 @@ BANK: list[Scenario] = [
              "(?:protecting|guarding|covering|hiding)\\b'. "
              "companion.py MD5: 9b9eec280b21c75f5c36e256a57f9b63. "
              "Check: T1 must NOT contain 'what\\'s it protecting/hiding/guarding' — "
-             "pronoun form is equally forbidden as the noun form."),
+             "pronoun form is equally forbidden as the noun form. "
+             "NEW DEFECT (beat140 2026-08-18 battery9_0557 T1): 'Angry for days.' — "
+             "3-word pure echo surviving second-pass (no echo-strip applied there by design). "
+             "Case 2f fires on initial reply and first regen (both → ''); second-pass uses "
+             "temp=0.7 but produces same 3-word phrase; accepted without strip. ROOT CAUSE: "
+             "second-pass no-echo-strip rule skips Case 2f for ALL short replies, not just "
+             "mild echoes; 'Angry for days.' (100%% word overlap) is worse than mild. "
+             "FIX (beat140): short-echo final guard added AFTER second-pass reply generated "
+             "— if reply is 2-4 words AND ≥80%% overlap with user first sentence → replace "
+             "with fixed bridge 'Tell me what it\\'s still costing you.' "
+             "8/8 logic tests PASS (3 TP fire; 5 FP preserved). "
+             "companion.py MD5: c87baaaa107ea9b3399adb5d7d8e0608. All 4 dist copies synced. "
+             "Check: T1 must NOT be a 2-4-word near-verbatim echo of user's first sentence; "
+             "'Angry for days.' or any ≤4-word ≥80%%-overlap form → FAIL."),
     Scenario("comp-uc1-t5-semantic-repeat-45pct", "companion", "robustness", "high",
         always=True,
         turns=[
