@@ -7629,3 +7629,38 @@ All 4 copies compile clean. ZIP rebuilt: 504951eb (1.5M).
 2. Retry SSH to mini — if reachable, SCP A_gold (MD5 d1afe06e) and read N620 probe
 3. BYO deep-test — first opportunity when model free and memory ≥35%
 4. Sonali: push v1.0 tag (git push origin v1.0) when ready. Only Sonali-physical remaining: notarization + F5 voice dial
+
+---
+
+## 2026-08-18 beat139–140 (heartbeat session, continuation)
+
+**What was read:**
+- battery9_0557 (started 05:57 AM, 20 scenarios, PID 9011) — full end-to-end. Complete at ~08:00 AM, 6649s total runtime.
+- All 20 scenarios read and assessed.
+
+**Defects found this session:**
+1. beat139 (prior session): companion pronoun-inversion — "You're software, not someone who stays." — companion calling USER software. Fixed via `re.sub(r"\byou(?:'re|\s+are)\s+software\b", "I'm software", reply)` at end of turn(). 4/4 unit tests PASS. companion.py MD5 post-beat139: b8ac99cc. Committed: 563d18b.
+2. beat140 (this session): comp-grief-anger-1word-echo "Angry for days." — 3-word pure echo of user's first sentence survived second-pass (no echo-strip applied there by design). Case 2f fires on initial + regen; second-pass produces same 3-word echo; accepted without strip. Fixed via short-echo final guard after second-pass: if 2–4 words AND ≥80% overlap with user first sentence → replace with "Tell me what it's still costing you." 8/8 logic tests PASS. companion.py MD5: c87baaaa. Committed: 65ca33a.
+
+**Quality misses (not fixed — n376 floor or documented edge case):**
+- comp-uc1-t5-semantic-repeat T5: "Do I have your attention?" — unexpected pivot but no mechanical fail.
+- comp-uc1-t5-semantic-repeat-45pct T5: "Write the first sentence of your Friday deliverable." — documented beat108 edge case (Jaccard 33% < 45%; same action class as T4; noting not fixing).
+- comp-grief-anger-barrier-vague T1: "That's the whole problem in one sentence." — passes guards; honest-read marginal (summary not bind-naming). "problem" not in _VAGUE_FILLER_RE noun list.
+- Multiple paraphrase echoes in uc1 multi-turn T1/T2 ("It's 2am and you're awake...", "The Friday deliverable is due and you haven't started") — stochastic n376 floor, not new.
+
+**Battery9_0557 final metrics:**
+- replies: 36 | para-openers: 8% | q-enders: 28% | what-if: 0% | resonate/land: 0 | diversity: 0.72
+- All within spec. Para-openers DOWN from 19% (beat138) — improvement.
+
+**Gold grown (beat139, prior session):**
+- A_gold: +7 scripts (beekeeping, sourdough, stargazing, flamenco, oil painting, snowshoeing, blacksmithing). Total 6245. MD5: 79d8ae41. NOT SCP'd (mini unreachable).
+- C_gold: +5 exemplars (c_gold_beat139.json). NOT SCP'd.
+
+**Mini:** SSH unreachable 12th consecutive beat (tried mac-mini.localdomain).
+
+**What runs next:**
+1. battery9 next cycle will verify beat140 short-echo guard
+2. Retry mini SSH when possible — SCP beat139 gold (A: 79d8ae41, C: c_gold_beat139.json)
+3. BYO deep-test — 33 beats deferred; needs model free + memory ≥35%
+4. Sonali: push v1.0 tag when ready
+

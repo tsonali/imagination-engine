@@ -1,6 +1,20 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-08-18 beat138 (post-battery9 close) — **SHIP GATE MET (holds). 1 CODE FIX: CROSS-TURN regen echo escape. battery9-0818_0101 COMPLETE: 36 replies, 19% q-enders, 3% para-openers, 0.81 diversity — ALL CLEAN ✅. -45pct T3 "You're naming it exactly as you see it." confirms beat138 echo fix works. companion.py MD5: 348aab33. ZIP: 63dd1909. Gold(A)=6226 (+7). Gold(C)+5. Mini UNREACHABLE (10th consecutive). BYO DEFERRED 31 beats. Sonali: push v1.0 tag when ready.**
+_Last updated 2026-08-18 beat140 (post-battery9_0557 close) — **SHIP GATE MET (holds). 2 CODE FIXES this session (beat139 pronoun-inversion + beat140 second-pass short-echo). battery9_0557 COMPLETE: 36 replies, 8% para-openers, 28% q-enders, 0.72 diversity — ALL MECHANICAL CHECKS CLEAN ✅. companion.py MD5: c87baaaa. ZIP: 49939b74. Gold(A)=6245 (+7 from beat139). Gold(C)+5 from beat139. Mini UNREACHABLE (12th consecutive). BYO DEFERRED 33 beats. Sonali: push v1.0 tag when ready.**
+
+BEAT140 SUMMARY:
+- READ: battery9_0557 full end-to-end (20 scenarios, started 05:57 AM, completed ~08:00 AM).
+- DEFECT + FIX (beat140): comp-grief-anger-1word-echo T1 produced "Angry for days." — 3-word pure echo of "I've been angry for days." Survived Case 2f (fires, sets r="") → no-echo regen → Case 2f fires again → second-pass → no echo-strip on second-pass by design → "Angry for days." accepted. FIX: short-echo final guard added AFTER second-pass reply generated: if 2–4 words AND ≥80% overlap with user first sentence → replace with "Tell me what it's still costing you." 8/8 logic tests PASS. companion.py MD5: c87baaaa107ea9b3399adb5d7d8e0608. All 4 dist copies synced. Git: 65ca33a.
+- QUALITY MISSES (not hard failures, no fix this beat):
+  - comp-uc1-t5-semantic-repeat T5 "Do I have your attention?" — odd pivot but no mechanical fail.
+  - comp-uc1-t5-semantic-repeat-45pct T5 "Write the first sentence of your Friday deliverable." — documented beat108 edge case (Jaccard 33% < 45% threshold; same action class as T4; not fixed).
+  - comp-grief-anger-1word-echo T1 "Angry for days." (beat139 run) + "Angry for days." (beat140 run) — pattern confirmed; fix landed this beat.
+  - comp-grief-anger-barrier-vague T1 "That's the whole problem in one sentence." — passes guards (_VAGUE_FILLER_RE doesn't include "problem"); honest-read marginal.
+  - comp-grief-anger-barrier-vague T2 "Your anger at him is the only thing you can't say to him." — STRONG PASS. Names the exact bind.
+- BATCH METRICS: 8% para-openers (prev 19% ✅), 28% q-enders (prev 19%), 0.72 diversity (prev 0.81). Para-openers improved vs beat138.
+- BEAT139 REVIEW: beat139 fixed companion pronoun-inversion ("You're software" → "I'm software"). Confirmed WORKING — no pronoun-inversion seen in battery9_0557.
+- Mini: SSH unreachable 12th consecutive beat. Gold not SCP'd (beat139: A_gold MD5 79d8ae41, C_gold c_gold_beat139.json).
+- BYO deep test: deferred 33 beats.
 
 BEAT138 SUMMARY:
 - READ: battery11-2309 (0817 23:09 run, first with beat137 eagle extension) — ALL 7/7 PASS ✅. eagle-wildlife-plural: 1 anon-companion dropped by "we soar/we fly" new tokens. companion-bird-he: 2 companion-wildlife + 1 he/him/his dropped. Beat137 fixes CONFIRMED working mechanically.
