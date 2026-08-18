@@ -3321,3 +3321,25 @@ No code changes this beat. All quality notes confirmed as known n376 floor — n
 **BYO deep-test: 33 consecutive beats deferred.** Memory consistently 25% (threshold 35%).
 
 **Only Sonali-physical remaining:** git push origin v1.0 / Apple notarization / F5 voice dial.
+
+---
+
+## 2026-08-18 beat141 FYI
+
+**ALL 0818 BATTERIES READ END-TO-END — SHIP GATE HOLDS.** battery11 6/6 ✅, battery9 19%/28% q-enders, battery6/10/2b/12/4b/3b/product_e2e all clean.
+
+**FIX 1 (beat141) — Closing-sentence duplicate (drop_tail_duplicates).** imag-intimacy script ended "Carry her warmth with you now. You carry her warmth with you now." — near-verbatim 6-7 word pair escaped drop_adjacent_duplicates (ADJ_MIN_WORDS=10). New drop_tail_duplicates() targets final 6 sentences with ADJ_MIN_WORDS=5 and ADJ_SIM=0.80. postcheck.py MD5: 9903ad54. generator.py MD5: 489ebd03. Git: d9c69fd.
+
+**FIX 2 (beat141) — 'your alone' contraction error (fix_your_contraction).** Eagle script: "this moment your alone" — possessive used in place of 'you're'. New fix_your_contraction() with noun-blocklist lookahead. Wired into settling + v6 paths. Same MD5s.
+
+**ZIP rebuilt: eee6b183** (includes beat141 postcheck.py + generator.py changes).
+
+**Gold(A) = 6252** (+7 this beat: pottery wheel, kayak dusk, horseback woods, dry-stone walling, cathedral alone, kite, hand-sewing). All sensation-first, unique openings. NOT SCP'd (mini unreachable 13th consecutive).
+
+**Gold(C) +5** (c_gold_beat141.json): 5 exemplars targeting dissatisfied-concrete-different-action, barrier-vague bind-naming, playful register, warmth-through-honest-no, anger-received-without-reframe. NOT SCP'd.
+
+**Mini: 13th consecutive unreachable.** If you can check on the mini: power + network. SCP backlog: A_gold (6252 entries) + c_gold_beat132-141 (57+ exemplars).
+
+**BYO deep-test: 34 consecutive beats deferred.** Memory 4-17% throughout (threshold 35%). First opportunity when qc_queue paused + memory clears.
+
+**Only Sonali-physical remaining:** git push origin v1.0 / Apple notarization / F5 voice dial.

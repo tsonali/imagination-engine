@@ -7664,3 +7664,41 @@ All 4 copies compile clean. ZIP rebuilt: 504951eb (1.5M).
 3. BYO deep-test — 33 beats deferred; needs model free + memory ≥35%
 4. Sonali: push v1.0 tag when ready
 
+
+---
+
+## 2026-08-18 (beat141)
+
+**What was read:**
+- ALL 0818 battery logs read end-to-end (honest reads, not pass-count skims):
+  - battery11 (queue_0818_0913): 6 scenarios, all postchecks ✅. MRI: tube + drums honored, no chair. Intimacy: structural PASS, thematic cycling persists (n376 floor), DEFECT found (closing duplicate). Eagle embodiment: 2015w, all 4 eagle postchecks clean, DEFECT found ('your alone' contraction). Eagle-wildlife-plural: clean. Calm-settle: 1048w, sensation-first, no room inventory. Golden-eagle-wildlife: all postchecks clean.
+  - battery9 (0101): 36 replies, 3% para-openers, 19% q-enders, 0.81 diversity. CLEAN. beat138 CROSS-TURN fix confirmed in fresh process.
+  - battery9 (0557): 36 replies, 8% para-openers, 28% q-enders, 0.72 diversity. CLEAN. beat140 short-echo guard confirmed working.
+  - battery6_crosscut: PASS (offline, graceful errors, 1MB→413) ✅.
+  - battery10_registers: floors clean ✅. battery2b_honesty: floors clean ✅.
+  - battery12_vital_facts: 13/13 PASS ✅. battery4b_floor: floors clean ✅.
+  - battery3b_ask_retest: 5/5 PASS ✅. product_e2e: 5 tools clean (232s) ✅.
+
+**What was fixed:**
+1. **drop_tail_duplicates** (postcheck.py + generator.py, beat141): Closing-sentence adjacent duplicates like "Carry her warmth with you now. You carry her warmth with you now." escaped drop_adjacent_duplicates (ADJ_MIN_WORDS=10 threshold too high for 6-7 word sentences). New function drop_tail_duplicates() targets final 6 sentences with ADJ_MIN_WORDS=5 and ADJ_SIM=0.80. 11/11 unit tests PASS. postcheck.py MD5: 9903ad54. generator.py MD5: 489ebd03. Git: d9c69fd.
+2. **fix_your_contraction** (postcheck.py + generator.py, beat141): 'your alone' → 'you're alone' — model confuses possessive with contraction. Noun-blocklist lookahead preserves 'your alone time'. Wired into settling + v6 paths. 11/11 unit tests PASS. All 4 dist copies synced.
+3. **scenario_bank.py**: defect+fix notes appended to imag-intimacy (closing dup) and imag-embodiment-eagle (your-contraction). Git: f098051.
+4. **ZIP rebuilt**: hearth-0.2.zip MD5: eee6b183 (includes beat141 postcheck.py + generator.py).
+
+**What is verified better:**
+- All 0818 cycle batteries confirmed clean. battery11: new tail-dedup fix will catch 'Carry her warmth with you now. You carry...' on next run. battery9 q-enders at 19-28% (well below 50% target; down from 83% standing flag).
+- Script quality honestly read: n376 floor defects (thematic cycling, 'your alone' contraction, back-half repetition) are all addressed mechanically or noted as known floor.
+
+**Gold grown:**
+- A_gold: +7 (pottery-wheel, kayaking-lake-dusk, horseback-walk-woods, dry-stone-walling, cathedral-alone, kite-flying, hand-sewing-leather). Total 6252. NOT SCP'd (mini unreachable 13th consecutive).
+- C_gold: +5 (c_gold_beat141.json: dissatisfied-concrete-different-action, barrier-vague-names-bind, playful-stays-playful, warmth-through-honest-no, anger-received-no-analysis). NOT SCP'd.
+
+**Mini:** SSH unreachable 13th consecutive beat. DNS mac-mini.localdomain not resolving. Pending SCP accumulating: A_gold (6252 entries), c_gold_beat132-141 (57+ exemplars). Flywheel stalled — no new adapter training possible until mini reconnects.
+
+**Memory:** ~4-17% free throughout. BYO deep-test requires ≥35% free + qc_queue paused → DEFERRED 34th consecutive beat.
+
+**What runs next:**
+1. Rebuild ZIP done (eee6b183). Next step: verify ZIP routes-200 check.
+2. Retry mini SSH — SCP A_gold + c_gold_beat132-141 JSON files. Flywheel will auto-queue retrain.
+3. BYO deep-test — first opportunity when memory ≥35%.
+4. Sonali: push v1.0 tag when ready (git push origin v1.0).

@@ -1,6 +1,39 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-08-18 beat140 (post-battery9_0557 close) — **SHIP GATE MET (holds). 2 CODE FIXES this session (beat139 pronoun-inversion + beat140 second-pass short-echo). battery9_0557 COMPLETE: 36 replies, 8% para-openers, 28% q-enders, 0.72 diversity — ALL MECHANICAL CHECKS CLEAN ✅. companion.py MD5: c87baaaa. ZIP: 49939b74. Gold(A)=6245 (+7 from beat139). Gold(C)+5 from beat139. Mini UNREACHABLE (12th consecutive). BYO DEFERRED 33 beats. Sonali: push v1.0 tag when ready.**
+_Last updated 2026-08-18 beat141 — **SHIP GATE MET (holds). 2 CODE FIXES (drop_tail_duplicates + fix_your_contraction). ALL 0818 BATTERIES READ END-TO-END: battery11 6/6 ✅, battery9 19%/28% q-enders ✅, battery6/10/2b/12/4b/3b/product_e2e all clean. postcheck.py MD5: 9903ad54. generator.py MD5: 489ebd03. Gold(A)=6252 (+7). Gold(C)+5. Mini UNREACHABLE (13th consecutive). BYO DEFERRED 34 beats (memory <5%). Sonali: push v1.0 tag when ready.**
+
+BEAT141 SUMMARY:
+- READ: ALL 0818 battery logs end-to-end (honest reads — see details below).
+  - battery11 (0913 run): 6/6 scenarios ALL PASS postchecks. Scripts read: MRI ✅ (tube, drums, no chair), intimacy ✅ structural (thematic cycling persists — n376 floor), embodiment-eagle ✅ (2015w, no companion wildlife), eagle-wildlife-plural ✅, calm-settle ✅ (1048w, sensation-first, no room inventory), golden-eagle-wildlife ✅.
+  - battery9 (0101): 36 replies, 3% para-openers, 19% q-enders, 0.81 diversity. CLEAN. beat138 CROSS-TURN fix confirmed working (T3 echo-free in fresh process).
+  - battery9 (0557): 36 replies, 8% para-openers, 28% q-enders, 0.72 diversity. CLEAN. beat140 short-echo guard confirmed: "Angry for days." → "Tell me what it's still costing you." working.
+  - battery6_crosscut: PASS (offline, graceful 4xx errors, oversized input 413) ✅.
+  - battery10_registers: floors clean ✅.
+  - battery2b_honesty: floors clean ✅.
+  - battery12_vital_facts: 13/13 PASS ✅.
+  - battery4b_floor: floors clean ✅.
+  - battery3b_ask_retest: 5/5 PASS ✅.
+  - product_e2e: all 5 tools clean (232s) ✅.
+- QUALITY MISSES (read honestly, no mechanical fix):
+  - battery11 intimacy script: "Carry her warmth with you now. You carry her warmth with you now." — closing duplicate NOT caught by drop_adjacent_duplicates (10-word threshold). → FIX below.
+  - battery11 eagle: "this moment your alone" — 'your' for 'you're' contraction error. → FIX below.
+  - battery9 0557 comp-uc1-t5-semantic-repeat T5: "Do I have your attention?" — odd pivot when user demands concrete action; no mechanical fail but quality miss. Gold(C) exemplar added.
+  - battery9 0557 barrier-vague T1: "That's the whole problem in one sentence." — hollow observation; passes guards ('problem' not in _VAGUE_FILLER_RE noun list). Not adding to noun list (too common); Gold(C) exemplar added showing correct bind-naming.
+- DEFECT + FIX 1 (beat141): Closing-sentence adjacent duplicate escaped drop_adjacent_duplicates (ADJ_MIN_WORDS=10 too high for 6-7 word sentences). NEW function drop_tail_duplicates() targets final 6 sentences with ADJ_MIN_WORDS=5, ADJ_SIM=0.80. Wired into settling + v6 paths. 11/11 unit tests PASS. postcheck.py MD5: 9903ad54. generator.py MD5: 489ebd03. Git: d9c69fd.
+- DEFECT + FIX 2 (beat141): 'your STATIVE' → 'you're STATIVE' contraction confusion ('this moment your alone'). NEW function fix_your_contraction(). Noun-blocklist lookahead prevents FP on 'your alone time'. Wired into settling + v6 paths. postcheck.py MD5: 9903ad54. generator.py MD5: 489ebd03.
+- All 4 dist copies synced (src → dist manually; dist excluded from git).
+- scenario_bank.py: defect+fix notes added to imag-intimacy (closing dup) and imag-embodiment-eagle (your-contraction). Git: f098051.
+- Gold(A) +7 (beat141): pottery-wheel-centering, kayaking-lake-dusk, horseback-walk-woods, dry-stone-walling, cathedral-alone, kite-flying-strong-wind, hand-sewing-leather. All sensation-first, unique openings. A_gold total: 6252. NOT SCP'd (mini unreachable 13th consecutive).
+- Gold(C) +5 (c_gold_beat141.json): dissatisfied-concrete-different-action, barrier-vague-names-bind-not-observation, playful-stays-playful-no-deflation, warmth-through-honest-no-not-after-it, anger-received-no-analysis-no-protection. NOT SCP'd.
+- Mini: UNREACHABLE (13th consecutive beat). DNS failure mac-mini.localdomain. Pending SCP: A_gold (6252 entries), c_gold_beat138-141 (57+ exemplars). Flywheel cannot detect gold change — no new adapter training since last mini connection.
+- Memory: ~4% free throughout this beat. BYO deep-test requires ≥35% free + qc_queue paused → DEFERRED 34th beat.
+- ZIP: 49939b74 (unchanged — no companion.py changes this beat; postcheck.py + generator.py changes in dist/ excluded from ZIP until ZIP is rebuilt).
+
+NEXT:
+(1) Rebuild ZIP to include beat141 postcheck.py + generator.py changes: cd ~/Downloads/imagination-engine && bash scripts/package.sh && md5 dist/hearth-0.2.zip.
+(2) Mini SSH retry (14th attempt). If reachable: SCP A_gold + all c_gold_beat132-141 JSON files. Flywheel auto-retrains on hash change.
+(3) BYO deep-test — first opportunity when memory ≥35% free + qc_queue paused (pkill -f qc_queue; pkill -9 -f "battery1|battery9|battery3c|byo_deep|companion_deep|product_e2e"). DEFERRED 34 beats.
+(4) Sonali: push v1.0 tag (git push origin v1.0) when ready. Only Sonali-physical: notarization + F5 voice dial.
 
 BEAT140 SUMMARY:
 - READ: battery9_0557 full end-to-end (20 scenarios, started 05:57 AM, completed ~08:00 AM).
