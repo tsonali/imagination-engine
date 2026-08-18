@@ -320,6 +320,39 @@ def drop_adjacent_duplicates(text: str) -> tuple[str, int]:
     return " ".join(kept), dropped
 
 
+def drop_tail_duplicates(text: str) -> tuple[str, int]:
+    """Remove near-verbatim duplicate sentences in the final 6 sentences of a script.
+
+    Closing degeneration: model restates the same thought with minor word-order
+    variation in the final lines ('Carry her warmth with you now. You carry her
+    warmth with you now.'). drop_adjacent_duplicates misses these because its
+    ADJ_MIN_WORDS=10 guard is too high for short closing sentences. This pass
+    targets only the tail with a lower minimum (5 words) but a stricter similarity
+    floor (0.80) to avoid catching intentional short parallel cadence elsewhere.
+    """
+    _ADJ_SIM_TAIL = 0.80
+    _ADJ_MIN_WORDS_TAIL = 5
+    _TAIL_WINDOW = 6
+    sentences = re.split(r"(?<=[\.\!\?])\s+", text.strip())
+    if len(sentences) <= 2:
+        return text, 0
+    tail_start = max(0, len(sentences) - _TAIL_WINDOW)
+    head = sentences[:tail_start]
+    tail = sentences[tail_start:]
+    kept: list[str] = []
+    dropped = 0
+    prev_ws: set[str] = set()
+    for sent in tail:
+        ws = _words(sent)
+        if (len(ws) >= _ADJ_MIN_WORDS_TAIL and len(prev_ws) >= _ADJ_MIN_WORDS_TAIL
+                and _similarity(ws, prev_ws) >= _ADJ_SIM_TAIL):
+            dropped += 1
+        else:
+            kept.append(sent)
+            prev_ws = ws
+    return " ".join(head + kept), dropped
+
+
 def repair_phrase_repeats(text: str, max_rounds: int = 4) -> tuple[str, int]:
     """Drop the LINES carrying the later occurrence of a repeated shingle.
     For TRAINING-DATA harvesting (a slightly shorter clean script teaches more
@@ -536,6 +569,27 @@ def fix_possessive_pronouns(text: str) -> tuple[str, int]:
     text = re.sub(r"\bhers\s+(\w+)", _replace_hers, text, flags=re.IGNORECASE)
     text = re.sub(r"\byours\s+(\w+)", _replace_yours, text, flags=re.IGNORECASE)
     return text, fixed
+
+
+# "your STATIVE" → "you're STATIVE": model confuses possessive with contraction.
+# Only fires for words that cannot be possessed (cannot say "your alone space" etc.).
+_YOUR_CONTRACTION_RE = re.compile(
+    r"\byour\s+(alone|here|there|gone|done|lost|found|safe|free|ready|okay|ok|fine)\b"
+    r"(?!\s+(?:time|space|room|day|moment|self|work|years|hours|life|world|journey|path))",
+    re.IGNORECASE,
+)
+
+
+def fix_your_contraction(text: str) -> tuple[str, int]:
+    """Replace 'your STATIVE' → 'you\'re STATIVE' where the model uses the
+    possessive in place of the contraction 'you are'.
+
+    Example: 'this moment your alone' → 'this moment you\'re alone'.
+    """
+    result, n = _YOUR_CONTRACTION_RE.subn(
+        lambda m: f"you're {m.group(1)}", text
+    )
+    return result, n
 
 
 _BACK_LEAK_PATTERNS = [

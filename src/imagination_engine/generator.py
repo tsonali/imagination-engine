@@ -62,7 +62,8 @@ from imagination_engine.postcheck import (degeneration_report, drop_collapsed_pa
                                           trim_truncated_tail,
                                           phrase_repeat_count, repair_phrase_repeats,
                                           repair_short_phrase_repeats,
-                                          drop_adjacent_duplicates, fix_possessive_pronouns,
+                                          drop_adjacent_duplicates, drop_tail_duplicates,
+                                          fix_possessive_pronouns, fix_your_contraction,
                                           fix_subject_pronouns, fix_object_pronouns,
                                           strip_back_instruction_leaks,
                                           strip_active_body_chair_refs,
@@ -614,6 +615,9 @@ def _generate_settling(engine: Engine, transcript: list[dict], emit) -> str:
     body, adj_dropped = drop_adjacent_duplicates(body)
     if adj_dropped:
         log.warning('[settling] %d adjacent near-duplicate sentence(s) dropped', adj_dropped)
+    body, tail_dropped = drop_tail_duplicates(body)
+    if tail_dropped:
+        log.warning('[settling] %d closing near-duplicate sentence(s) dropped', tail_dropped)
     body, ellipsis_cleaned = clean_ellipsis_breaks(body)
     if ellipsis_cleaned:
         log.warning('[settling] %d inline ellipsis marker(s) converted to paragraph breaks',
@@ -625,6 +629,9 @@ def _generate_settling(engine: Engine, transcript: list[dict], emit) -> str:
     if pronoun_fixed:
         log.warning('[settling] %d possessive-pronoun adjective error(s) fixed (hers→her/yours→your)',
                     pronoun_fixed)
+    body, contraction_fixed = fix_your_contraction(body)
+    if contraction_fixed:
+        log.warning('[settling] %d your→you\'re contraction error(s) fixed', contraction_fixed)
     body, subj_fixed = fix_subject_pronouns(body)
     if subj_fixed:
         log.warning('[settling] %d subject-pronoun error(s) fixed (her→she before verb)', subj_fixed)
@@ -1158,6 +1165,9 @@ def generate_session(
     full, adj_dropped = drop_adjacent_duplicates(full)
     if adj_dropped:
         log.warning('[v6] %d adjacent near-duplicate sentence(s) dropped', adj_dropped)
+    full, tail_dropped = drop_tail_duplicates(full)
+    if tail_dropped:
+        log.warning('[v6] %d closing near-duplicate sentence(s) dropped', tail_dropped)
     # Narrator-possessive and inline-ellipsis cleaners: catch "my boy", "my dog",
     # "Here we go again", "……" that slip through despite BODY_PROMPT bans.
     full, poss_dropped = clean_narrator_possessives(full)
@@ -1167,6 +1177,9 @@ def generate_session(
     if pronoun_fixed:
         log.warning('[v6] %d possessive-pronoun adjective error(s) fixed (hers→her/yours→your)',
                     pronoun_fixed)
+    full, contraction_fixed = fix_your_contraction(full)
+    if contraction_fixed:
+        log.warning('[v6] %d your→you\'re contraction error(s) fixed', contraction_fixed)
     full, subj_fixed = fix_subject_pronouns(full)
     if subj_fixed:
         log.warning('[v6] %d subject-pronoun error(s) fixed (her→she before verb)', subj_fixed)
