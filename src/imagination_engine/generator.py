@@ -1253,6 +1253,16 @@ def generate_session(
             "fly with someone",
             # beat135: eagle bystanders at same altitude — same-species companions implied
             "a pair of eagles", "pair of eagles",
+            # beat136 (0817): three new escape forms found in battery11 1818 companion-bird-he:
+            # "in this vast sky above us both" / "around us all here where we fly" / "our flight"
+            "us both",              # "above us both"
+            "us all",               # "around us all"
+            "we fly",               # "where we fly" (narrator placed in scene)
+            "we soar",
+            "we glide",
+            "we circle",
+            "we drift",
+            "our flight",           # "shadows of our flight"
         ))
         if anon_companion_dropped:
             log.warning('[v6] %d anonymous-companion sentence(s) dropped (you/we both in solo eagle active-body)',

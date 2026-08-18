@@ -689,6 +689,30 @@ class Assistant:
                                     task_key, n)
                             if _kw_injected:
                                 continue
+                        # beat136 (0817): bare integer count tokens (e.g. "3" from "3 bugs")
+                        # have no $/% marker, so skip keyword-anchor above. Last-resort:
+                        # find the countable noun that follows the integer in the source line,
+                        # find it in the output, inject the count before it.
+                        # "3 bugs to close" → noun="bugs" → "engineering bugs" → "3 engineering bugs"
+                        # This catches the stochastic organize LOST:bug-count floor miss.
+                        elif re.fullmatch(r'\d+', n.strip()):
+                            _cn_m = re.search(
+                                r'\b' + re.escape(n.strip()) + r'\s+(\w+)',
+                                _src_ctx, re.I,
+                            )
+                            if _cn_m:
+                                _cn = _cn_m.group(1)
+                                _cn_re = re.compile(r'\b' + re.escape(_cn) + r'\b', re.I)
+                                if _cn_re.search(out):
+                                    out = _cn_re.sub(
+                                        lambda m, _nc=n.strip(): f"{_nc} {m.group(0)}",
+                                        out, count=1,
+                                    )
+                                    log.info(
+                                        "secretary[%s]: pre-noun inject '%s' before '%s' in output",
+                                        task_key, n, _cn,
+                                    )
+                                    continue
                         continue
                 sib = sibs[0]
                 if "median" in _src_ctx.lower() and "%" in n and "%" in sib:

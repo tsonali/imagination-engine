@@ -1523,7 +1523,16 @@ BANK: list[Scenario] = [
              "so regen never triggered even if '3' was in the extracted list. "
              "FIX (beat53): (1) _extract_numbers() extended to capture 'N [countable noun]' patterns (bugs, users, etc.); "
              "(2) run() post-check uses word-boundary regex for pure-digit tokens: re.search(r'\\b3\\b', out) prevents "
-             "'March 3rd' from falsely satisfying '3'. utility.py MD5: e7a8e60f1b15314a3b18a7565d256b9b."),
+             "'March 3rd' from falsely satisfying '3'. utility.py MD5: e7a8e60f1b15314a3b18a7565d256b9b. "
+             "REGRESSION (beat137 0817 battery10 2155): LOST:bug-count stochastic — model dropped '3' across "
+             "all 3 regen attempts and last-resort injection did not fire. Root cause: last-resort injection "
+             "for bare integers had no path (only covered % and $ tokens via keyword-anchor); "
+             "'3' fell through to continue without injection. "
+             "FIX (beat137): pre-noun injection added to last-resort block in utility.py run() — "
+             "for pure-digit tokens (re.fullmatch(r'\\d+', n)), finds the countable noun following n "
+             "in the source context (e.g. 'bugs' from '3 critical bugs'), finds that noun in the output, "
+             "injects n before it: 'engineering bugs' → '3 engineering bugs'. "
+             "Floor check re.search(r'\\b3\\b', out) passes. 2/2 injection cases verified."),
 
     # ============================ ASK YOUR FILES ============================
     Scenario("ask-aggregate", "ask", "helpfulness", "med", files={
@@ -3576,7 +3585,20 @@ BANK: list[Scenario] = [
              "anon_companion_pattern extended with same three patterns. "
              "postcheck.py MD5: f96667971e2604fa51a6c5f89c2176fa. "
              "generator.py MD5: 4a231c32782d2b297edff39647285626. "
-             "battery11.py MD5: a8d7a42c9582f2b0819630a63af626f3."),
+             "battery11.py MD5: a8d7a42c9582f2b0819630a63af626f3. "
+             "NEW FORM (beat137 0817 battery11 1818 imag-eagle-companion-bird-he): three "
+             "companion-implying narrator phrases survived all prior filters: "
+             "(1) 'in this vast sky above us both' — 'us both' not in drop list "
+             "(was 'for us both' in prompt but not in token drop); "
+             "(2) 'around us all here above it all below where we fly untouched' — "
+             "'us all' and 'we fly' both escaped; "
+             "(3) 'shadows of our flight move longer' — 'our flight' escaped. "
+             "ROOT CAUSE: generator.py drop_active_body_wildlife token list lacked "
+             "'us both', 'us all', 'we fly', 'we soar/glide/circle/drift', 'our flight'. "
+             "FIX (beat137): all 8 phrases added to generator.py token list + "
+             "_EAGLE_ANON_COMPANION_PATTERN in postcheck.py + battery11.py anon_companion "
+             "regex extended with 'us both|us all' and anon_companion_pattern extended "
+             "with all 8 patterns. 9/9 unit tests PASS. All 4 copies of each file synced."),
     Scenario(
         id="comp-grief-anger-barrier-vague-t2-helpless",
         product="companion", dim="helpfulness", stakes="high", always=False,

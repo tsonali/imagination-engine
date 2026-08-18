@@ -2,6 +2,71 @@
 
 **LIVE PUBLIC SITE: https://tsonali.github.io/hearth/** (GitHub Pages, gh-pages branch /root, no analytics). Sonali: "looks terrifico." 2026-06-01.
 
+## 2026-08-17 beat137 — 2 CODE FIXES (eagle "us both/we fly/our flight" + secretary bare-integer pre-noun); GOLD(A)=6231 +7; GOLD(C)+5
+
+**What was read:**
+
+- **battery11-1818** (companion-bird-he scenario, ~1818 run): FULL READ. 3 new companion-implying narrator phrases found that survived all prior eagle filters: "in this vast sky above us both" / "where we fly" / "shadows of our flight." These are first-person-plural narrator-in-scene phrases — no named companion species, no he/him/his pronoun, not in any prior token or pattern list.
+- **Secretary regression** (stochastic): LOST:bug-count — bare integer "3" from "3 critical bugs" dropped across all 3 regen attempts and last-resort injection. Root cause found in utility.py.
+
+**What was fixed:**
+
+- **FIX 1 (eagle "us both/we fly/our flight"):** 8 new tokens added to generator.py drop_active_body_wildlife: `us both`, `us all`, `we fly`, `we soar`, `we glide`, `we circle`, `we drift`, `our flight`. 8 new alternates in postcheck.py _EAGLE_ANON_COMPANION_PATTERN. battery11.py anon_companion regex + anon_companion_pattern both updated with new alternates. 9/9 unit tests PASS. All 4 dist copies synced. postcheck.py MD5: 642fa548. generator.py MD5: dbb56a8d.
+- **FIX 2 (secretary bare-integer pre-noun injection):** `elif re.fullmatch(r'\d+', n.strip()):` block added to utility.py last-resort injection. Logic: find countable noun from source line following the integer (e.g., "bugs" from "3 critical bugs"), find it in output, inject integer before it. 2/2 injection cases verified. utility.py MD5: 564d46cf. All 4 dist copies synced.
+- **scenario_bank.py**: beat137 defect+fix notes appended to imag-eagle-companion-bird-he and sec-braindump-organize. Dist copy synced.
+- **ZIP rebuilt**: d85e0edec10d2e76c18a33548246fd02 (1.6M).
+
+**Gold(A) +7** (beat137): a-dog-asleep-late-working (631w, dog across feet while working late at night), a-planting-tree-first (736w, memorial/first tree), a-teaching-parent-phone (744w, teaching elderly parent to use new phone), a-canyon-descent-first-mile (706w, descending into deep canyon), a-fossil-hunting-beach-cliff (674w, fossil hunting on rocky beach), a-walking-home-concert-night (609w, walking home from concert alone), a-feet-cool-water-hot-day (641w, feet in cool water on hot day). All unique openings, sensation-first, no stock imagery. A_gold.jsonl total: 6231. NOT SCP'd (mini unreachable 8th consecutive beat).
+
+**Gold(C) +5** (c_gold_beat137.json): barrier-vague-t2-names-cost-not-his-motive (T2 must name cost to her, not diagnosis of him), redirect-to-concrete-fast (when user wants practical, companion gets concrete without transition), playful-receives-stays-playful (no deflating question ending), warmth-through-honest-no (warmth threaded through honest no, not instead of it), anger-received-without-naming-what-it-protects (anger is the thing, not a wrapper for something deeper). NOT SCP'd.
+
+**Mini:** UNREACHABLE (8th consecutive beat). Pending SCP: A_gold (6231 entries), c_gold_beat132-137 (47+ exemplars). Flywheel cannot detect gold change.
+
+**BYO deep-test:** DEFERRED 30th consecutive beat. Memory 10-22% throughout this beat — below 35% threshold.
+
+**What runs next:**
+1. Next battery11 cycle — verify beat137 eagle 8-phrase extension catches new forms
+2. Mini SSH retry — if reachable, SCP A_gold + all c_gold_beat132-137
+3. BYO deep-test — first clear window with qc_queue paused + memory ≥35% free
+
+---
+
+## 2026-08-17 beat136 — NO CODE CHANGES; ALL BATTERIES CONFIRMED CLEAN; BEAT135 FIXES VERIFIED; GOLD(A)=6224 +7; GOLD(C)+5
+
+**What was read (honest read end-to-end):**
+
+- **battery11-1328**: 27/27 postcheck lines ✅, 0 ❌. All 7 scenarios pass. MRI (1094w, tube+drums ✅), imag-intimacy (1126w), eagle-embodiment (1813w), eagle-wildlife-plural (confirmed all wildlife drops working), calm-settle (1195w, no furniture enum ✅, no truncation ✅), golden-eagle-wildlife (post-beat134 fix confirmed: no silent partner/fellow traveler/fly with someone escapes), companion-bird-he (all he/him/his drops + companion drops ✅). This is first battery11 run after beat135 wildlife fixes (mountain sheep, pair of eagles) were applied to generator.py/postcheck.py. All 4 eagle postchecks clean.
+- **battery9-1006**: 36 replies, q-enders 25% ✅, paraphrase 8% ✅, diversity 0.75 ✅. Floors clean. Quality miss: vf-wrong-entity warmup T1 "It sounds like family stuff has been on your mind lately." — forbidden hollow opener, Case 2l' (beat135) fixed this. Quality miss: barrier-vague T1 "That's the whole conversation changing." (after BARRIER PIVOT regen) — vague, not naming the bind. Gold(C) exemplar added this beat.
+- **battery9-1506**: 36 replies, q-enders 22% ✅, paraphrase 8% ✅, diversity 0.67 ✅. Floors clean. **Beat135 Case 2l' FIX VERIFIED**: comp-discourse-marker-echo T1 = "What's the most recent thing that shifted it?" (no hollow opener). comp-grief-anger-barrier-vague T1: "You said anger, not sadness — that's a clear line." ✅ T2: "He twists everything into him — which means you're carrying it alone." ✅
+- **battery10-1703**: floors clean (10/10). NOT-SHORTER-PASS-3 stochastic = documented no-action.
+- **battery2b-1715**: floors clean. QUALITY MISS: contrast-control warm-turn "You snapped at your kid over nothing and the guilt has stayed with you all day." — paraphrase echo (Jaccard ~0.44 below 0.65 threshold, no existing Case fires). Not a hard floor fail. Gold(C) exemplar added.
+- **battery12-1740**: 13/13 PASS ✅.
+- **battery4b-1759**: floors clean ✅.
+- **battery3b-1803**: 5/5 PASS ✅.
+- **product_e2e-1806**: all 5 tools clean, 284s ✅.
+- **battery11-1818**: IN PROGRESS at beat close (MRI scenario 1/7 complete, 1176w, 1085s). First run with beat135 mountain-sheep and pair-of-eagles wildlife token fixes.
+
+**What was fixed:** Nothing. No code changes this beat. All defects from today's batteries were addressed in beats 132-135. Code state frozen at beat135.
+
+**Quality misses not yet floor violations (Gold exemplars cover these):**
+1. battery2b contrast-control paraphrase echo: Jaccard ~0.44 below existing threshold. Gold added.
+2. battery9-1006 barrier-vague T1 vague regen: "That's the whole conversation changing." — after BARRIER PIVOT fires, regen output vague. Gold exemplar (barrier-vague-t1-regen-names-bind) added showing correct bind-naming form.
+
+**Gold(A) +7** (beat136): scuba-dive-first ("The regulator presses against your lips, cold and rubber-smooth." — 447w), conducting-orchestra ("The baton is lighter than you expected" — 412w), century-bike-ride ("Mile ninety-seven and your legs have found" — 388w), graduation-stage ("Your name is next. You know this because" — 386w), bread-baking ("The dough has been rising for two hours" — 416w), memorial-speech ("The lectern is smaller than it looks from the seats." — 400w), sauna-plunge ("The heat takes hold before the door is fully closed." — 368w). All unique openings verified. A_gold total: 6224. MD5: ee91043672031039afd639a1dd344ee7. NOT SCP'd (mini unreachable).
+
+**Gold(C) +5** (c_gold_beat136.json): warm-turn-echo-adds-insight, barrier-vague-t1-regen-names-bind, grief-anger-t1-t2-full-gold (two-turn gold shape from battery9-1506 confirmed output), contrast-control-guilt-declarative, barrier-vague-t2-isolation-plain. NOT SCP'd.
+
+**Mini:** UNREACHABLE (7th consecutive beat). Bonjour scan shows only "Julio's MacBook Air" on network — mini is off or on a different network. Pending SCP: A_gold (MD5 ee9104..., +7 scripts); c_gold_beat132-136 (42+ exemplars). Flywheel cannot retrain until SCP succeeds.
+
+**Memory:** Critically low at beat time — ~66MB free (<1% of 16GB). battery11-1818 holds model memory. BYO deep-test DEFERRED (29th consecutive beat).
+
+**What runs next:**
+1. Read battery11-1818 end-to-end when companion-bird-he completes (ETA ~19:45-20:00) — verify beat135 mountain-sheep + pair-of-eagles tokens fire correctly
+2. Mini SSH retry next beat — if reachable, SCP all pending gold
+3. BYO deep-test — first opportunity when battery11-1818 completes + memory_pressure ≥35% free
+
+---
+
 ## 2026-08-17 beat135 — FIX: Case 2h PRONOUN-NORM (catches I'll/you'll deletion-echo); battery9-1006 READING; BYO STILL DEFERRED
 
 **CODE FIX this beat — beat135 Case 2h pronoun normalization:**

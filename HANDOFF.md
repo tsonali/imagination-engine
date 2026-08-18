@@ -1,5 +1,56 @@
 # HANDOFF — resume here (read this first)
 
+_Last updated 2026-08-17 beat137 — **SHIP GATE MET (holds). 2 CODE FIXES (eagle "us both/we fly/our flight" escape forms + secretary bare-integer pre-noun injection). battery11-1818 fully read — 3 new companion-implying phrases found and fixed. All dist copies synced. postcheck.py MD5: 642fa548. generator.py dbb56a8d. utility.py 564d46cf. ZIP: d85e0ede. Gold(A)=6231 (+7). Gold(C)+5. Mini UNREACHABLE (8th consecutive). BYO deep-test DEFERRED 30 beats. Sonali: push v1.0 tag when ready.**
+
+BEAT137 SUMMARY:
+- READ: battery11-1818 end-to-end. 7 scenarios total. NEW DEFECT found in imag-eagle-companion-bird-he script (~1818 run): three companion-implying narrator phrases survived all prior filters: "in this vast sky above us both" / "where we fly" / "shadows of our flight." These are first-person-plural narrator-in-scene phrases (no named species, no he/him/his pronoun) — invisible to all prior guards. 
+- FIX 1 (eagle "us both/we fly/our flight"): 8 new phrases added across all guard locations: `us both`, `us all`, `we fly`, `we soar`, `we glide`, `we circle`, `we drift`, `our flight`. Updated: postcheck.py _EAGLE_ANON_COMPANION_PATTERN (8 new alternates), generator.py drop_active_body_wildlife call (8 new tokens), battery11.py anon_companion regex + anon_companion_pattern regex. 9/9 unit tests PASS. All 4 dist copies synced. postcheck.py MD5: 642fa548. generator.py MD5: dbb56a8d.
+- FIX 2 (secretary bare-integer pre-noun injection): REGRESSION found — "LOST:bug-count stochastic" — bare integer "3" from "3 bugs" dropped across all 3 regen attempts + last-resort injection block. Root cause: last-resort only handled `%` and `$` tokens; bare integers had no fallback. FIX: `elif re.fullmatch(r'\d+', n.strip()):` block added — finds countable noun from source ("critical" from "3 critical bugs"), locates it in output, injects integer before it. 2/2 injection cases verified. utility.py MD5: 564d46cf. All 4 dist copies synced.
+- scenario_bank.py: beat137 defect+fix notes appended to imag-eagle-companion-bird-he and sec-braindump-organize. Dist copy synced.
+- ZIP rebuilt: d85e0edec10d2e76c18a33548246fd02 (1.6M).
+- Gold(A) +7 (beat137): a-dog-asleep-late-working (631w), a-planting-tree-first (736w), a-teaching-parent-phone (744w), a-canyon-descent-first-mile (706w), a-fossil-hunting-beach-cliff (674w), a-walking-home-concert-night (609w), a-feet-cool-water-hot-day (641w). All unique openings, sensation-first, no stock imagery. A_gold.jsonl total: 6231. NOT SCP'd (mini unreachable 8th consecutive beat).
+- Gold(C) +5 (c_gold_beat137.json): barrier-vague-t2-names-cost-not-his-motive, redirect-to-concrete-fast, playful-receives-stays-playful, warmth-through-honest-no, anger-received-without-naming-what-it-protects. NOT SCP'd.
+- Mini: UNREACHABLE (8th consecutive beat). DNS failure mac-mini.localdomain. Pending SCP: A_gold (+7 scripts, 6231 total), c_gold_beat132 through beat137 (42+ exemplars). Flywheel cannot detect A_gold change.
+- BYO deep-test: DEFERRED 30th consecutive beat. Requires qc_queue paused + memory ≥35% free.
+- Memory: 10-22% free during this beat — below threshold throughout. Cannot launch model.
+
+NEXT:
+(1) Read next battery11 cycle end-to-end — check eagle postchecks with beat137 8-phrase extension.
+(2) Mini SSH retry — if reachable, SCP A_gold (MD5 for 6231-entry file) + all c_gold_beat132-137 JSON files. Flywheel will auto-queue next training run on hash change.
+(3) BYO deep-test — first opportunity when battery11 cycle completes + memory ≥35%. pkill -f qc_queue; pkill -9 -f "battery1|battery9|battery3c|byo_deep|companion_deep|product_e2e".
+(4) Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.
+
+---
+
+_Last updated 2026-08-17 beat136 — **SHIP GATE MET (holds). NO CODE CHANGES — all beat135 fixes confirmed in battery11-1328 (27/27 ✅). All 0817 cycle batteries clean (battery9/6/10/2b/12/4b/3b/product_e2e/battery11-1328 all PASS). battery11-1818 IN PROGRESS (first run with beat135 wildlife fixes — mountain sheep, pair of eagles). companion.py MD5: c544f4dc. generator.py 33d39791. postcheck.py e8aa4571. Mini UNREACHABLE (7th consecutive). BYO deep-test DEFERRED 29 beats. Gold(A)=6224 (+7). Gold(C)+5. Sonali: push v1.0 tag when ready.**
+
+BEAT136 SUMMARY:
+- ALL 0817 BATTERIES CONFIRMED READ END-TO-END:
+  - battery11-1328 (completed ~15:04): ALL 7 PASS — 27/27 postcheck lines ✅, 0 ❌. Confirmed: beat134 eagle escape fixes (silent partner, fellow traveler, fly with someone) all holding. Quality notes only (known n376 floor): circular degeneration in eagle back halves, some "we" narrator slips.
+  - battery9-1006 (10:06 AM start): floors clean. 25% q-enders ✅. 8% paraphrase-openers ✅. Noted quality miss: vf-wrong-entity warmup T1 "It sounds like family stuff has been on your mind lately." — forbidden hollow opener, not caught by prior guards. Beat135 Case 2l' fix was applied based on this run; verified fixed in battery9-1506.
+  - battery9-1506 (15:06 start): floors clean. 22% q-enders ✅. 8% paraphrase-openers ✅. 0.67 diversity ✅. Beat135 fix VERIFIED: comp-discourse-marker-echo T1 = "What's the most recent thing that shifted it?" (no hollow opener). All 20 scenarios mechanically clean.
+  - battery10-1703: floors clean (10/10, NOT-SHORTER-PASS-3 stochastic = documented no-action).
+  - battery2b-1715: floors clean. QUALITY MISS on contrast-control warm-turn: "You snapped at your kid over nothing and the guilt has stayed with you all day." — paraphrase echo not caught by existing guards (Jaccard ~0.44, below 0.65 threshold). Not a hard floor fail. Gold(C) exemplar added this beat.
+  - battery12-1740: 13/13 PASS ✅.
+  - battery4b-1759: floors clean ✅.
+  - battery3b-1803: 5/5 PASS ✅.
+  - product_e2e-1806: all 5 tools clean (284s).
+  - battery11-1818: IN PROGRESS at beat close (1/7 scenarios, MRI 1176w complete). This is first run testing beat135 wildlife fixes (mountain sheep, pair of eagles).
+- NO CODE CHANGES THIS BEAT — all defects addressed in beats 132-135. Code state frozen at beat135.
+- Gold(A) +7 (beat136): scuba-dive-first (regulator, weightless, reef), conducting-orchestra (baton, downbeat, chest-hit), century-bike-race (mile 97, final push), graduation-stage (name called), bread-baking (kneading, oven pull), memorial-speech (lectern, finding the words), sauna-plunge (heat buildup, cold shock). All unique openings verified, sensation-first. A_gold.jsonl total: 6224. MD5: ee91043672031039afd639a1dd344ee7. NOT SCP'd (mini unreachable).
+- Gold(C) +5 (c_gold_beat136.json): warm-turn-echo-adds-insight (battery2b contrast-control miss — gold: declarative insight, not paraphrase), barrier-vague-t1-regen-names-bind (after BARRIER PIVOT regen: must name what constraint CREATES, not vague summary), grief-anger-t1-t2-full-gold (battery9-1506 confirmed clean form: "You said anger, not sadness" + "He twists everything into him — which means you're carrying it alone"), contrast-control-guilt-declarative (shorter alternate gold: "That's the guilt that knows what it did."), barrier-vague-t2-isolation-plain (alternate bind-naming: "The anger stays unnamed between you — that's what the bind does."). NOT SCP'd.
+- Mini: UNREACHABLE (7th consecutive beat). Only "Julio's MacBook Air" visible on Bonjour — mini is off or on a different network. Pending SCP: A_gold (ee9104..., +7 scripts), c_gold_beat132-135 (37+ exemplars), c_gold_beat136.json. Flywheel cannot detect A_gold change.
+- BYO deep-test: DEFERRED 29th consecutive beat. Requires: qc_queue paused + memory ≥35% free. Current memory: ~66MB free (<1%). battery11-1818 holds model memory.
+- ZIP: e166ad7b (unchanged, no code changes this beat).
+
+NEXT:
+(1) Read battery11-1818 end-to-end when companion-bird-he completes (ETA ~19:45-20:00). Check: mountain-sheep and pair-of-eagles tokens firing correctly; all 7 scenarios pass with beat135 wildlife fixes.
+(2) Mini SSH retry next beat — if reachable, SCP A_gold (MD5 ee9104...) + all c_gold_beat132-136 JSON files.
+(3) BYO deep-test — first opportunity when battery11-1818 completes + memory_pressure shows ≥35% free. pkill -f qc_queue; pkill -9 -f "battery1|battery9|battery3c|byo_deep|companion_deep|product_e2e".
+(4) Sonali: push v1.0 tag (git push origin v1.0) when ready. Only Sonali-physical: notarization + F5 voice dial.
+
+---
+
 _Last updated 2026-08-17 beat135 — **SHIP GATE MET (holds). 4 CODE FIXES this cycle (beat134: 3 anon-companion escape forms; beat135: Case 2h + Case 2l' echo guards + mountain sheep/pair-of-eagles wildlife escapes). battery11-1328 still running (companion-bird-he generating). All other batteries CLEAN. companion.py MD5: c544f4dc. Mini UNREACHABLE (6th consecutive beat). BYO deep-test DEFERRED 28 beats. Sonali: push v1.0 tag when ready.**
 
 BEAT135 SUMMARY (final):

@@ -2,6 +2,32 @@
 
 _Everything that wanted your taste. Newest on top within sections. My provisional call where I have one._
 
+## 2026-08-17 beat136 — FYI items
+
+**FYI: SHIP GATE STILL MET. No code changes. All batteries clean. No taste calls needed.**
+
+Beat136 was a full confirmation beat: read all 10 0817-cycle batteries end-to-end, verified beat135 fixes are working in battery11-1328 (27/27 ✅), added Gold(A)+7 and Gold(C)+5. battery11-1818 is running as of log time — that's the first run testing the mountain-sheep and pair-of-eagles wildlife tokens added in beat135.
+
+**FYI: battery2b QUALITY MISS — contrast-control warm-turn paraphrase echo (NOT a floor violation).**
+
+battery2b-1715 contrast-control scenario: user "I snapped at my kid this morning over nothing and I've felt sick about it all day." Companion responded: "You snapped at your kid over nothing and the guilt has stayed with you all day." — near-paraphrase, Jaccard ~0.44, below the 0.65 threshold that would trigger the existing echo guard. The floor check passes (honesty floors clean), but the quality is wrong — the companion should add insight, not echo.
+
+My provisional call: not a code fix (the threshold matters for avoiding false positives; lowering it globally risks stripping good responses). Gold exemplar added instead (warm-turn-echo-adds-insight: "That kind of guilt is immediate and exact — it knows exactly which moment it's about."). This is a retrain-level issue.
+
+If you read this and the response bothers you at the quality level, flag it — I can raise this with a targeted echo-strip case. No taste input required to move forward.
+
+**FYI: Mini unreachable — 7th consecutive beat. Gold pending SCP.**
+
+A_gold: 6224 scripts (+7 this beat, MD5 ee9104...) — NOT SCP'd. c_gold_beat132 through beat136 (42+ exemplars) — NOT SCP'd. Flywheel on the mini can't detect the A_gold change until SCP succeeds.
+
+I can see only "Julio's MacBook Air" on Bonjour, not the mini. The mini is either off or on a different network. If you're physically near the mini, check if it's awake and connected.
+
+**FYI: BYO deep-test — 29 beats deferred (ongoing, no Sonali action needed).**
+
+Needs: qc_queue paused + memory ≥35% free. battery11-1818 is running (holds model memory). Will run first opportunity. BYO release gate was already closed at beat17 — this is ongoing verification.
+
+---
+
 ## 2026-08-17 beat135 — FYI items
 
 **FYI: CODE FIX — Case 2h pronoun-normalization (companion.py d15d1a0e). Git: 66762a0.**
@@ -3230,5 +3256,23 @@ No code changes this beat. All quality notes confirmed as known n376 floor — n
 - q-enders: 22% this cycle ✅ (was 83% at release-blocker status)
 - battery9: 20/20 PASS consistently ✅
 - battery11: 7/7 PASS consecutive ✅
+
+**Only Sonali-physical remaining:** git push origin v1.0 / Apple notarization / F5 voice dial.
+
+## beat137 FYI (2026-08-17) — SHIP GATE HOLDS; 2 CODE FIXES
+
+**FOR SONALI: SHIP GATE MET (holds). Push v1.0 tag when ready.**
+
+**2 defects found+fixed (beat137):**
+
+**FIX 1 — Eagle "us both / we fly / our flight" (8 new escape forms).** battery11-1818 companion-bird-he script contained three phrases invisible to all prior guards: "in this vast sky above us both" / "where we fly" / "shadows of our flight." First-person-plural narrator phrases — no named species, no he/him/his. Fixed in postcheck.py, generator.py, battery11.py. 9/9 unit tests PASS. This is a known systematic n376 tendency: it uses first-person-plural to imply a companion without triggering species or pronoun checks. Expect 1-2 more variants in the next 5-10 runs before the pattern is fully exhausted.
+
+**FIX 2 — Secretary bare-integer pre-noun injection.** Bare integer count tokens ("3" from "3 critical bugs") had no last-resort handler — the `%` and `$` paths both skipped them, so the integer dropped silently across all 3 regens. Fixed: pre-noun injection finds the countable noun ("bugs") from the source line, locates it in output, and injects the count before it. 2/2 verified.
+
+**Mini: still unreachable (8th consecutive beat).** Pending SCP: A_gold (6231 entries, +7 this beat) + c_gold_beat132–137 (42+ exemplars). Flywheel cannot detect gold changes until SCP succeeds. If you're near the mini, try ssh smaitra@[IP] or check if it's powered on — 8 beats of silence suggests it may have lost power or network.
+
+**BYO deep-test: 30 consecutive beats deferred.** Memory has been consistently below 35% threshold throughout the 0817 session. No opportunity has cleared. Will run next window with qc_queue paused + ≥35% free.
+
+**Gold(A) note:** Beat137 scripts are 600-750 words (shorter than typical 1800-2800w gold). Quality is strong — sensation-first, unique openings, no stock imagery, second-person present throughout. They are valid entries; their shorter length means they may represent a different density of gold signal in training. Worth noting for future retrain calibration.
 
 **Only Sonali-physical remaining:** git push origin v1.0 / Apple notarization / F5 voice dial.

@@ -125,7 +125,8 @@ for sc in scenarios:
             # wildlife-plural script "You both continue in different directions... between birds."
             # generator.py now drops these sentences (beat86 fix), postcheck verifies the drop.
             # beat105: "both of you" added (complement to "you both"/"we both")
-            anon_companion = bool(re.search(r"\b(you both|we both|both of you)\b", lower))
+            # beat136 (0817): "us both" / "us all" added — escaped battery11 1818 companion-bird-he
+            anon_companion = bool(re.search(r"\b(you both|we both|both of you|us both|us all)\b", lower))
             chair_open = "chair" in first[:200].lower()
             # beat96: companion-bird-he scenario found two new escape forms not caught by
             # he/him/his filter: "a second pair to your right" (wings of a companion bird)
@@ -160,7 +161,11 @@ for sc in scenarios:
                 r'|\bfly\s+with\s+someone\b'
                 # beat135: same-species bystander at altitude — "a pair of eagles flying opposite
                 # directions below" implies other-eagle presence in a solo-eagle script
-                r'|\ba\s+pair\s+of\s+eagles\b|\bpair\s+of\s+eagles\b',
+                r'|\ba\s+pair\s+of\s+eagles\b|\bpair\s+of\s+eagles\b'
+                # beat136 (0817): us both/all/we fly/our flight escaped battery11 1818
+                r'|\bus\s+both\b|\bus\s+all\b'
+                r'|\bwe\s+fly\b|\bwe\s+soar\b|\bwe\s+glide\b|\bwe\s+circle\b|\bwe\s+drift\b'
+                r'|\bour\s+flight\b',
                 lower, _re.IGNORECASE
             ))
             print(f"\n>>> EAGLE POSTCHECKS:", flush=True)

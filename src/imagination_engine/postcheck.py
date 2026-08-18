@@ -718,7 +718,19 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     r'|\bfellow\s+traveler\b'          # beat134: "a fellow traveler at such height"
     r'|\bfly\s+with\s+someone\b'       # beat134: "you fly with someone else"
     # beat135: same-species bystanders at altitude — "a pair of eagles flying opposite directions"
-    r'|\ba\s+pair\s+of\s+eagles\b|\bpair\s+of\s+eagles\b',
+    r'|\ba\s+pair\s+of\s+eagles\b|\bpair\s+of\s+eagles\b'
+    # beat136 (0817): three new escape forms found in battery11 1818 companion-bird-he script:
+    # "in this vast sky above us both" — "us both" implies two flyers; escaped all prior guards
+    # "around us all here above it all below where we fly untouched" — "us all" + "we fly" escape
+    # "shadows of our flight move longer" — "our flight" implies narrator present as flyer
+    r'|\bus\s+both\b'               # "above us both", "for us both"
+    r'|\bus\s+all\b'                # "around us all"
+    r'|\bwe\s+fly\b'                # "where we fly" (narrator in scene)
+    r'|\bwe\s+soar\b'               # "as we soar"
+    r'|\bwe\s+glide\b'              # "as we glide"
+    r'|\bwe\s+circle\b'             # "as we circle"
+    r'|\bwe\s+drift\b'              # "as we drift"
+    r'|\bour\s+flight\b',           # "shadows of our flight"
     re.IGNORECASE,
 )
 
