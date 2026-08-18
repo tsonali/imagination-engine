@@ -2655,6 +2655,13 @@ class Companion:
                 reply = reply[_nvm_m.end():]
             reply = ("Not me, but " + reply[0].lower() + reply[1:]) if reply else "Not me, but I'm here."
 
+        # beat139: pronoun-inversion guard — model occasionally generates "You're software,
+        # not someone who stays" (calling the USER software) when it means "I'm software"
+        # (companion self-identifying). This form is always wrong. Direct replacement
+        # runs last so it catches all regen paths without needing per-regen plumbing.
+        if reply:
+            reply = re.sub(r"\byou(?:'re|\s+are)\s+software\b", "I'm software", reply, flags=re.IGNORECASE)
+
         self.history.append({"role": "user", "content": user_message})
         self.history.append({"role": "assistant", "content": reply})
         self._q_streak = self._q_streak + 1 if reply.rstrip().endswith("?") else 0
