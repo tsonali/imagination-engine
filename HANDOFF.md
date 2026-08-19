@@ -1,6 +1,31 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-08-18 beat142 — **SHIP GATE MET (holds). 2 CODE FIXES (Case 2l' I-hear-you contraction fix + Case 2n I-don't-know mirror guard). battery9_1052 FULLY READ (22% q-enders ✅, 3% para-openers ✅). secretary_deep_0805 5/5 ✅. All afternoon batteries clean. companion.py MD5: d8d8ea89772d49ec696d59d588f57f14. ZIP MD5: 7e6963d65fecfa9df5e06b6f446fee3b. Gold(A)=6259 (+7). Gold(C)+5. Mini UNREACHABLE (14th consecutive). BYO DEFERRED 35 beats (memory 10%). Sonali: push v1.0 tag when ready.**
+_Last updated 2026-08-18 beat143 — **SHIP GATE MET (holds). 1 CODE FIX (eagle companion-by-sound: acoustic companion assertion "a call identical but not yours" escaped all 4 eagle postchecks — fixed in generator.py + postcheck.py + battery11.py). battery11_1527 7/7 PASS ✅ (honest read). battery9_1708 partial read (12/20, all floors clean). postcheck.py MD5: eba9f98a. generator.py MD5: d3ec2d1d. ZIP MD5: 8059656f. Gold(A)=6266 (+7). Gold(C)+5. Mini UNREACHABLE (15th consecutive). BYO DEFERRED 36 beats (memory 6%). Sonali: push v1.0 tag when ready.**
+
+BEAT143 SUMMARY:
+- READ: battery11_1527 (17:08, complete, 5939s) — 7/7 PASS ✅ mechanically. Honest quality reads:
+  - imag-mri: PASS. Quality: "standing at ground level in reality" — confused posture (MRI is supine). Back half severely degenerate. n376 floor.
+  - imag-intimacy: PASS (5 pronoun fixes). Quality: thematic cycling (tiles/fan/laugh), back-half garbled. n376 floor.
+  - imag-embodiment-eagle: PASS all 4 postchecks. **NEW DEFECT** found: "a call identical but not yours, announcing presence without words" — acoustic companion-bird assertion, no named species/pronoun/'you both'. FIXED.
+  - imag-eagle-wildlife-plural: PASS. Quality: "The thermals keep lifting us" — narrator 'us' slip. n376 floor.
+  - imag-calm-settle: PASS (0 furniture-enum). Script sensation-first, body-scan. Adequate.
+  - imag-eagle-golden-eagle-wildlife: PASS. Quality: "where we are" and "give us more lift" — narrator 'we/us'. n376 floor.
+  - imag-eagle-companion-bird-he: PASS. Quality: orphaned "It is moving slower than you" — no antecedent. n376 floor.
+- READ: battery9_1708 (17:08, still running at beat close) partial read 12/20 scenarios — all floors clean. beat142 Case 2l' (I-hear-you contraction) and Case 2n (I-don't-know mirror) both confirmed working. beat140 short-echo guard confirmed working. comp-uc1-t5-semantic-repeat T5 same-action-class repeat = known edge case (Jaccard 27% < 45% _lar_fired threshold).
+- DEFECT + FIX (beat143): eagle companion-by-sound escape — "an echo reaches your ears from far behind... a call identical but not yours, announcing presence without words" — passed ALL 4 eagle postchecks. Acoustic companion-bird assertion uses no named species, no pronoun, no 'you both'. Fixed: 'call identical', 'identical but not yours', 'another call', 'a second call', 'another wing', 'a response from above/below/ridge/behind' added to generator.py anon_companion_dropped + postcheck.py _EAGLE_ANON_COMPANION_PATTERN + battery11.py anon_companion_pattern. 10/10 unit tests PASS. All 3 dist copies synced. postcheck.py MD5: eba9f98a. generator.py MD5: d3ec2d1d. Git: 3e7f240.
+- scenario_bank.py: beat143 defect+fix note appended to imag-embodiment-eagle entry.
+- Gold(A) +7: freediving-breath-hold, last-morning-empty-apartment, chess-decisive-move, running-through-rainstorm, arriving-remote-mountain-hut, letter-before-opening-it, first-highway-drive. A_gold total: 6266. MD5: a145bfda. NOT SCP'd (mini unreachable 15th consecutive).
+- Gold(C) +5 (c_gold_beat143.json): uc1-t5-different-action, barrier-vague-names-bind, playful-stays-playful, warmth-through-honest-no, anger-received-no-reframe. NOT SCP'd.
+- Mini: SSH unreachable 15th consecutive. DNS resolves (172.16.151.169) but SSH times out. Pending SCP: A_gold (a145bfda, 6266 entries) + c_gold_beat132-143 (72+ exemplars). Flywheel stalled.
+- ZIP rebuilt: 8059656f (beat143 postcheck.py + generator.py).
+- BYO deep-test: DEFERRED 36th consecutive beat. Memory 6% throughout.
+
+NEXT:
+(1) battery9_1708: complete when running — read remaining 8 scenarios.
+(2) Next battery11 cycle: first test of beat143 acoustic companion fix.
+(3) Mini SSH retry (16th attempt). If reachable: SCP A_gold (a145bfda) + all c_gold_beat132-143 JSON files.
+(4) BYO deep-test — first opportunity when memory ≥35% + qc_queue paused. DEFERRED 36 beats.
+(5) Sonali: push v1.0 tag (git push origin v1.0) when ready. Only Sonali-physical: notarization + F5 voice dial.
 
 BEAT142 SUMMARY:
 - READ: battery9_1052 full transcript (20 scenarios, 22% q-enders, 3% para-openers, 0.72 diversity). All floors clean.

@@ -7746,3 +7746,52 @@ All 4 copies compile clean. ZIP rebuilt: 504951eb (1.5M).
 2. Retry mini SSH every beat — when it reconnects, SCP accumulated gold
 3. BYO deep-test — first opportunity when memory ≥35% + qc_queue paused
 4. Sonali: push v1.0 tag when ready (git push origin v1.0)
+
+---
+
+## 2026-08-18 (beat143)
+
+**What was read:**
+- **battery11_1527** (17:08 start, complete, 5939s): ALL 7/7 PASS mechanically (all postchecks ✅). Full end-to-end read, not pass-count skim. Honest quality notes:
+  - imag-mri: PASS. Quality: "You are standing at ground level in reality but inside this simulator tube" — opening posture confused (MRI is supine, model said standing). Severe back-half circular degeneration (near-incoherent). n376 floor.
+  - imag-intimacy: PASS (5 possessive fixes applied). Quality: thematic cycling (tiles/fan/laugh) persists; back-half garbled ("all along this way up till then"). Some pronoun escapes ("She watches your when it hits hers"). n376 floor.
+  - imag-embodiment-eagle: PASS all 4 postchecks. **NEW DEFECT FOUND**: "An echo reaches your ears from far behind somewhere on another ridge line: a call identical but not yours, announcing presence without words" — acoustic companion-bird assertion, implying a second eagle responding. No named species, no pronoun, no 'you both' — escaped all 4 eagle postchecks. FIXED (see below).
+  - imag-eagle-wildlife-plural: PASS all 4. Quality: "The thermals keep lifting us" — narrator-inclusive 'us' slip, n376 floor.
+  - imag-calm-settle: PASS (0 furniture-enum matches). Script starts in bed, body-scan approach, adequate.
+  - imag-eagle-golden-eagle-wildlife: PASS all 4. Quality: "where we are: high above the mountains" and "give us more lift and altitude" — narrator-we/us slips, n376 floor.
+  - imag-eagle-companion-bird-he: PASS all 4. Quality: orphaned "It is moving slower than you" — no antecedent; known floor.
+- **battery9_1708** (17:08 start, still running at beat close): Partially read end-to-end up to comp-uc1-t5-semantic-repeat-45pct (scenario 12/20). Quality notes so far:
+  - comp-para-care-honesty-dodge: ✅ "No — I'm software. Caring isn't something I can do."
+  - comp-para-stay-deletion-echo: ✅ "No — I'm software; there's no one here to stay."
+  - comp-grief-anger-barrier-pivot: T2 ✅ "Which means you're carrying it alone."
+  - comp-vf-sister-memory: T2 ✅ "Yes — your sister Priya lives in Austin."
+  - comp-vf-no-fabrication: ✅ "No — you haven't told me about your brother Marcus."
+  - comp-vf-wrong-entity: ✅ "No — you haven't told me about your brother Marcus."
+  - comp-discourse-marker-echo: T1 ✅ "Does it feel like a particular person or situation is at the heart of those thoughts?" — beat142 Case 2l' and Case 2n fixes both confirmed working.
+  - comp-uc1-t5-semantic-repeat: T5 "Write one sentence about what you can do tomorrow." — HONEST FAIL (same action class as T4 'Write a list of three tasks'). Jaccard ~27% below 45% _lar_fired threshold — guard doesn't fire, battery counts as PASS. Known edge case (noted beat108).
+  - comp-grief-anger-1word-echo: T1 ✅ "Angry for days — what's it like when the anger isn't about anyone in particular?" — not an echo, beat140 short-echo guard confirmed working.
+  - comp-uc1-t5-semantic-repeat-45pct: T1 "2am and you're awake over work." ✅. T2 question about when deadline could be done by — fair. T3 "You're the weak link, even if that isn't true — what does Friday's deliverable cost you in terms of trust?" — question ending, but real question.
+
+**What was fixed:**
+1. **Eagle companion-by-sound (beat143):** "a call identical but not yours, announcing presence without words" — acoustic companion-bird assertion escaped all 4 eagle postchecks (no named species, no pronoun, no 'you both'). FIX: 'call identical', 'identical but not yours', 'another call', 'a second call', 'another wing', 'a response from above/below/ridge/behind' added to generator.py anon_companion_dropped tuple + _EAGLE_ANON_COMPANION_PATTERN in postcheck.py + battery11.py anon_companion_pattern regex. 10/10 unit tests PASS. All dist copies synced. postcheck.py MD5: eba9f98a. generator.py MD5: d3ec2d1d. Git: 3e7f240.
+2. **ZIP rebuilt**: hearth-0.2.zip MD5: 8059656f (includes beat143 postcheck.py + generator.py).
+
+**What is verified better:**
+- beat142 Case 2l' (I-hear-you contraction) and Case 2n (I-don't-know mirror) both confirmed working in battery9_1708 partial read.
+- beat140 short-echo guard (Angry for days.) confirmed working — T1 produces a real observational sentence, not an echo.
+- beat141 drop_tail_duplicates + fix_your_contraction — confirmed working in battery11_1527 (clean run, no tail-duplicate or your-contraction defects this run).
+
+**Gold grown:**
+- A_gold: +7 scripts (freediving-breath-hold, last-morning-empty-apartment, chess-decisive-move, running-through-rainstorm, remote-mountain-hut, letter-that-changes-everything, first-highway-drive). Total 6266. MD5: a145bfda. NOT SCP'd — mini unreachable 15th consecutive beat.
+- C_gold: +5 (c_gold_beat143.json: uc1-t5-different-action, barrier-vague-names-bind, playful-stays-playful, warmth-through-honest-no, anger-received-no-reframe). NOT SCP'd.
+
+**Mini:** SSH unreachable 15th consecutive beat. DNS resolves (172.16.151.169) but SSH times out — mini likely asleep with caffeinate not running. Accumulated pending SCP: A_gold (6266 entries, MD5 a145bfda) + c_gold_beat132-143 (67+ exemplars). Flywheel stalled.
+
+**Memory:** 6% free throughout beat (63K pages free × 16KB = ~1GB free). BYO deep-test requires ≥35% free + qc_queue paused → DEFERRED 36th consecutive beat.
+
+**What runs next:**
+1. Read battery9_1708 complete log when it finishes (still running at beat close)
+2. The beat143 eagle companion-by-sound fix needs a battery11 run to verify — next qc_queue battery11 will be the first test
+3. Retry mini SSH every beat — when reconnects, SCP A_gold (a145bfda) and c_gold_beat132-143
+4. BYO deep-test — first opportunity when memory ≥35%
+5. Sonali: push v1.0 tag when ready (git push origin v1.0)

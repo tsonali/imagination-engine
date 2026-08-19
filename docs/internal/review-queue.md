@@ -3371,3 +3371,29 @@ No code changes this beat. All quality notes confirmed as known n376 floor — n
 **BYO deep-test: 35 consecutive beats deferred.** Memory 10% throughout (threshold 35%).
 
 **Only Sonali-physical remaining:** git push origin v1.0 / Apple notarization / F5 voice dial.
+
+---
+## beat143 (2026-08-18) — FYI log
+
+**NEW DEFECT FOUND + FIXED: eagle companion-by-sound.** battery11_1527 imag-embodiment-eagle script (v6 clean, all 4 postchecks PASS) contained: "An echo reaches your ears from far behind somewhere on another ridge line: a call identical but not yours, announcing presence without words that are anything less than full-throated declaration in this open air where sound travels so well across the distances." This is a companion-bird assertion via implied acoustic response — a second eagle answering the user's call. No named species, no pronoun, no 'you both'. Slipped all 4 postchecks. Fixed: 'call identical', 'identical but not yours', 'another call', 'a second call', 'another wing', 'a response from above/below/ridge/behind' added to generator.py + postcheck.py + battery11.py. 10/10 unit tests PASS. Git: 3e7f240. postcheck.py MD5: eba9f98a. generator.py MD5: d3ec2d1d.
+
+**battery11_1527 quality misses (n376 floor — not mechanical failures):**
+- imag-mri: "standing at ground level in reality but inside this simulator tube" — opening posture confused (MRI should be supine). Back half severely degenerate (incoherent circular text in final 600w). PASS mechanically.
+- imag-intimacy: "She watches your when it hits hers" — pronoun escape. Back half garbled. Thematic cycling (tiles/fan/laugh) persists.
+- imag-eagle-wildlife-plural: "The thermals keep lifting us" — narrator-inclusive 'us' in body (not a companion-bird assertion; narrator placing itself in scene).
+- imag-eagle-golden-eagle-wildlife: "where we are: high above the mountains" and "give us more lift and altitude" — narrator 'we' and 'us' slips in body.
+None require code fixes this beat — all confirmed n376 floor patterns.
+
+**battery9_1708 partial read (12/20, still running):** beat142 Case 2l' (I-hear-you contraction) and Case 2n (I-don't-know mirror) both confirmed working. beat140 short-echo guard confirmed working. comp-uc1-t5-semantic-repeat T5 still produces same-action-class reply (Jaccard 27% below 45% _lar_fired threshold) — known edge case, not a new regression.
+
+**Mini: 15th consecutive unreachable.** DNS resolves to 172.16.151.169 but SSH times out — almost certainly asleep (caffeinate not running). SCP backlog: A_gold (a145bfda, 6266 entries) + c_gold_beat132-143 (72+ exemplars). **Flywheel stalled.** If you can check: power + network on mac-mini.localdomain.
+
+**Gold(A) = 6266** (+7: freediving, last-apartment-morning, chess-decisive-move, running-rainstorm, remote-mountain-hut, letter-before-reading, first-highway-drive). NOT SCP'd.
+
+**Gold(C) +5** (c_gold_beat143.json: uc1-t5-different-action, barrier-vague-names-bind, playful-stays-playful, warmth-through-honest-no, anger-received-no-reframe). NOT SCP'd.
+
+**ZIP rebuilt: 8059656f91bee45eb7deb722150f9c41** (beat143 postcheck.py + generator.py).
+
+**BYO deep-test: 36 consecutive beats deferred.** Memory 6% throughout (threshold 35%).
+
+**Only Sonali-physical remaining:** git push origin v1.0 / Apple notarization / F5 voice dial.
