@@ -64,6 +64,7 @@ from imagination_engine.postcheck import (degeneration_report, drop_collapsed_pa
                                           repair_short_phrase_repeats,
                                           drop_adjacent_duplicates, drop_tail_duplicates,
                                           fix_possessive_pronouns, fix_your_contraction,
+                                          fix_copula_youre_alone,
                                           fix_subject_pronouns, fix_object_pronouns,
                                           strip_back_instruction_leaks,
                                           strip_active_body_chair_refs,
@@ -632,6 +633,9 @@ def _generate_settling(engine: Engine, transcript: list[dict], emit) -> str:
     body, contraction_fixed = fix_your_contraction(body)
     if contraction_fixed:
         log.warning('[settling] %d your→you\'re contraction error(s) fixed', contraction_fixed)
+    body, copula_fixed = fix_copula_youre_alone(body)
+    if copula_fixed:
+        log.warning('[settling] %d copula+you\'re alone → yours alone fixed', copula_fixed)
     body, subj_fixed = fix_subject_pronouns(body)
     if subj_fixed:
         log.warning('[settling] %d subject-pronoun error(s) fixed (her→she before verb)', subj_fixed)
@@ -1180,6 +1184,9 @@ def generate_session(
     full, contraction_fixed = fix_your_contraction(full)
     if contraction_fixed:
         log.warning('[v6] %d your→you\'re contraction error(s) fixed', contraction_fixed)
+    full, copula_fixed = fix_copula_youre_alone(full)
+    if copula_fixed:
+        log.warning('[v6] %d copula+you\'re alone → yours alone fixed', copula_fixed)
     full, subj_fixed = fix_subject_pronouns(full)
     if subj_fixed:
         log.warning('[v6] %d subject-pronoun error(s) fixed (her→she before verb)', subj_fixed)

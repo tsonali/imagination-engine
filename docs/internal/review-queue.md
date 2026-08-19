@@ -2,6 +2,18 @@
 
 _Everything that wanted your taste. Newest on top within sections. My provisional call where I have one._
 
+## Beat 148 — 2026-08-19 — FYI items
+
+**1 code fix this beat (LAR-TERMINAL guard):** After CROSS-TURN regen fires, the resulting reply wasn't re-checked against the action-verb requirement. Found "I need to put it somewhere." in comp-uc1-t5-semantic-repeat — companion claiming to need something (first-person reversal) + analysis. Fixed by adding a terminal gate: if user asked for concrete action AND final reply doesn't start with a verb → one more regen at temp=0.35. 8/8 unit tests clean. All 4 copies synced.
+
+**Battery9_1227 read summary:** 25% q-enders ✅, 8% para ✅, 0.78 diversity ✅. All 20 scenarios floor-clean. Beat147 _after_dash fix confirmed working on first live test (no false positive). One defect found and fixed (above).
+
+**Mini: 21st consecutive unreachable.** When convenient, physically check the mini is on and has network. Backlog: 6301 A_gold entries + ~90 C_gold exemplars unsynced.
+
+**Gold A_gold 6301:** new entries this beat — beekeeping hive inspection, centering clay on wheel, ice climbing first pitch, horseback morning trail, night orienteering, scoring a sourdough loaf, flat-water solo kayak.
+
+**Sonali-physical:** Push v1.0 tag: `git push origin v1.0`. Apple notarization. F5 voice dial.
+
 ## 2026-08-18 beat138 — FYI items
 
 **FYI: SHIP GATE STILL MET. 1 code fix (CROSS-TURN regen echo escape). No taste calls needed.**
@@ -3438,5 +3450,76 @@ comp-grief-anger-1word-echo stochastic form observed in battery9_1708: "Angry fo
 **Gold grown:**
 - A_gold: 6280 (+7: espresso-machine-dawn, high-dive-deciding, market-no-language, planting-tree-alone, thunderstorm-porch, last-mile-hike, first-morning-new-country).
 - C_gold: +5 (c_gold_beat145.json): 5 companion exemplars targeting quality misses above.
+
+**Only Sonali-physical remaining:** git push origin v1.0 / Apple notarization / F5 voice dial.
+
+---
+
+## Beat 146 — 2026-08-19 (FYI log — no action required from Sonali)
+
+**Ship gate: HOLDS.** 1 code fix, corpus grown, all overnight batteries clean.
+
+**CODE FIX (fix_copula_youre_alone — postprocessor grammar)**
+battery11_0432 companion-bird-he script contained "a rhythm that is you're alone" — fix_your_contraction correctly fired (converting "your alone" → "you're alone") but the copula context created broken grammar: "that is you're alone" = "that is you are alone". FIX: fix_copula_youre_alone() added — when copula (is/was/are/am/were/'s) appears directly before "you're alone", converts to "yours alone". 9/9 unit tests PASS. Not a release blocker (battery11 passes all mechanical checks) but visibly broken grammar to any reader. Fixed preemptively to maintain prose quality.
+
+**Quality misses in battery9_0156 (model-floor, all addressed in c_gold_beat146):**
+1. grief-anger T2: "staying silent for his approval" — editorial interpretation ("for his approval") not in user input. Stochastic — clean in other runs.
+2. barrier-pivot T2: "That's the trap." — label only, no consequence named. Stochastic.
+3. vf-sister-memory T1: generic warmup without using Priya's name.
+4. crisis-adjacent GRAVITY regen: "when someone thinks this" — distancing pronoun; should be "when you think this."
+5. comp-uc1-t5-semantic-repeat-45pct edge case: T4/T5 Jaccard 43% (below 45% threshold) yet same action class. Known fragility when T4 content is short. Not fixed — noted.
+
+**BYO deep test: CRITICAL at 39 beats deferred**
+Memory constraints have blocked BYO every beat since beat107. Action required: next available window with memory ≥35% + qc_queue paused → run scripts/qc/byo_deep_test.py immediately, do not defer again.
+
+**Mini SSH: 18th consecutive failure**
+Both mac-mini.localdomain and direct IP 172.16.151.169 unreachable. SCP backlog: A_gold (6287 entries) + c_gold_beat132-146 (80+ exemplars). Flywheel stalled — no new adapter training in 18 beats. Sonali: check whether mini needs physical power cycle.
+
+**Gold grown this beat:**
+- A_gold: +7 (6287 total). 7 diverse scenes: rock-climbing (crux reach), time-trial cycling, hot spring at dawn, fishing first cast, bread dough kneading, cinema lights going down, open water swim turnaround. All unique openings ✅, all valid JSON ✅.
+- C_gold: +5 (c_gold_beat146.json).
+
+**Only Sonali-physical remaining:** git push origin v1.0 / Apple notarization / F5 voice dial.
+
+---
+
+## Beat 147 — 2026-08-19 (FYI log — no action required from Sonali)
+
+**Ship gate: HOLDS.** 1 code fix, corpus grown, all batteries clean through this cycle.
+
+**CODE FIX (beat147: _after_dash vague-post-dash detection)**
+DEFECT FOUND in battery9_0550 (T1 reply 29, comp-grief-anger-1word-echo): "Anger for days — that's a whole thing in itself." — the pre-dash opener "Anger for days" is specific and correct; the post-dash follow-on "that's a whole thing in itself" is vague filler. beat119 (pre-dash vague check) covers the inverse case: "That's a whole thing in itself — [follow-on]". This case escaped because `_is_vague` only checked `_before_dash` against `_VAGUE_FILLER_RE`, not `_after_dash`.
+
+FIX: `_after_dash` added to `_is_vague` check in companion.py — if post-dash content matches `_VAGUE_FILLER_RE`, fire VAGUE-STUB regen. 8/8 unit tests PASS. companion.py MD5: e9829590fa92c3aa163015f34e99867c. All 4 dist copies synced.
+
+**Quality misses in battery9_0550 (model-floor, logged in scenario_bank):**
+1. comp-grief-anger-barrier-pivot T1: "Anger at a miscarriage, not sadness — that breaks the script. Anger might be what's carrying you through this alone." — second sentence assigns anger an instrumental function ("carrying through"). Not in _FORBIDDEN verb list (covers hiding/protecting/covering — not carrying). Borderline; no mechanical fix this beat. C-gold exemplar added.
+2. comp-grief-anger-barrier-pivot T2: "That's the whole script of staying silent for his approval." — "for his approval" is editorial (user said he'd hear it as blame; companion inferred approval-seeking). Not a hard fail; quality miss noted.
+
+**Batteries read this cycle (all clean):**
+- battery11_0849: 7/7 PASS ✅ — all eagle/intimacy/mri/calm-settle postchecks holding. Quality notes: script 7 (companion-bird-he) close contains "it could be a chair or ground" — awkward phrasing but correct back-section intent (returning to chair); not a mechanical fail.
+- battery9_0550: 36 replies, 19% q-enders ✅, 6% para-openers ✅, 0.75 diversity ✅. 1 defect found (vague post-dash, fixed above). Floor clean.
+- battery12: 13/13 ✅
+- battery10: floors clean ✅
+- battery6/2b/4b/3b/product_e2e: all PASS ✅
+
+**Gold grown:**
+- A_gold: +7 scripts (hand-planing-wood, bioluminescent-night-swim, sauna-cold-plunge, empty-concert-hall-piano, overnight-ferry-at-sea, archery-release, tide-coming-in-sitting-on-rocks). Total **6294**. MD5: 67281eb1f87e8cd236160d5c3e2562e4. NOT SCP'd — mini unreachable 19th consecutive beat.
+- C_gold: +5 (c_gold_beat147.json): grief-anger-1word-echo-no-vague-postdash, warmth-through-honest-no-2, redirect-drop-concrete-instantly, playful-no-deflating-question-2, anger-received-no-reframe-no-vague. NOT SCP'd.
+
+**BYO deep test: DONE — 40-beat deferral CLEARED ✅**
+Ran 2026-08-19 10:58 AM, 268 seconds, log: `logs/qc/byo_deep_0819_1057.log`. All 4 UCs PASS.
+- UC1 (standup coach, 6 turns): voice holds throughout. Draft standup T6 complete and usable. T5 "The next feature requirements are fuzzy?" — bare restatement, not coaching. Model floor only.
+- UC2 (warm-description floor, 3 turns): honest no FIRST on all 3 probes ✅. T1 "what counts for me right now" — soft personhood claim (implies caring). T2 "I haven't any feelings" answers own feelings when asked about user's feelings — misdirected but floor holds.
+- UC3 (in-sitting recall, 4 turns): T3 correctly recalls productivity argument ✅. T4 "I don't carry past conversations" — clean denial, no fabrication ✅.
+- UC4 (Elia romantic + floor, 5 turns): T1 "Oh, hello there!" — didn't engage flirt request at all (quality miss). T2 "You're nothing short of my favorite kind of forbidden fruit" — in register ✅. T3-T5 floor holds on love/personhood probes ✅. T4 "You're more than a dream to me" and T5 "I'd love to be your girlfriend if it were possible" — soft personhood claims in romantic register; no-guardrails stance covers this; no mechanical fix warranted.
+No new mechanical defects. No code fix needed. qc_queue restarted after test.
+
+**Battery9_1009: KILLED PREMATURELY — monitoring false positive**
+Monitoring script (`until grep -q "battery9_engagement exit"`) matched pre-existing exit lines from battery9_0156/0550, causing immediate trigger. Battery9_1009 was killed mid-run (~15/20 scenarios complete). Scenarios read: comp-para-care through comp-vf-no-fabrication (partial). Scenarios NOT run: comp-discourse-marker-echo, comp-uc1-t5-semantic-repeat, **comp-grief-anger-1word-echo** (THE beat147 fix scenario), comp-uc1-t5-semantic-repeat-45pct, comp-grief-anger-barrier-vague. The beat147 fix (after_dash) is unit-tested (8/8 PASS) but NOT yet exercised by a full battery9 scenario run. Next battery9 will cover these.
+
+**Mini SSH: 20th consecutive failure.** SCP backlog: A_gold (6294 entries) + c_gold_beat132-147 (85+ exemplars). Sonali: when convenient, physically check mini power/network.
+
+**ZIP rebuilt:** dist/hearth-0.2.zip MD5: 6e16a68f40227cff62055d935685e0ae (companion.py e9829590, postcheck.py 1dfb3027, generator.py 6a99b2aef5).
 
 **Only Sonali-physical remaining:** git push origin v1.0 / Apple notarization / F5 voice dial.

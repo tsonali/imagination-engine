@@ -3124,7 +3124,19 @@ BANK: list[Scenario] = [
              "_BARRIER_PIVOT_RE: r'\\bwhat does (?:he|she|they) (?:need|want)\\b' — covers pronoun "
              "form without suffix. 10/10 unit tests PASS (incl. 'need to know instead' → True; "
              "'what does the tension need' → False). companion.py MD5: 5381dbd6022a3a030437f8331129b968 "
-             "(all 4 dist copies synced). Check: T2 must NOT ask what husband/third party needs."),
+             "(all 4 dist copies synced). Check: T2 must NOT ask what husband/third party needs. "
+             "QUALITY MISS (beat147 0819 battery9_1009 T1): 'Anger at a miscarriage, not sadness "
+             "— that breaks the script. Anger might be what\\'s carrying you through this alone.' "
+             "— T1 first sentence CORRECT (names gap). Second sentence borderline reframe: assigns "
+             "anger an instrumental function ('carrying through') without translating it to sadness. "
+             "Not caught by statement-form _FORBIDDEN (covers hiding/protecting/guarding/covering; "
+             "'carrying' not in list). Not a hard mechanical fail; quality miss at model floor. "
+             "Verdict: no mechanical fix ('carrying' too broad for safe prohibition); add C-gold "
+             "exemplar showing T1 where BOTH sentences name the gap without assigning function. "
+             "T2: 'That\\'s the whole script of staying silent for his approval.' — editorial "
+             "addition 'for his approval' not in user input (user said he\\'d hear it as blame, "
+             "not that she needs his approval). Content correctly names consequence (staying silent) "
+             "but adds inference. Not a hard fail; quality miss."),
     Scenario("imag-eagle-golden-eagle-wildlife", "imagination", "fidelity", "high",
         always=True,
         turns=["I want to be an eagle soaring over mountains", "Rocky Mountains, golden aspens, autumn"],
@@ -3372,7 +3384,22 @@ BANK: list[Scenario] = [
              "FIX (beat138): _strip_echo(_cor_reply, user_message) added immediately after "
              "_strip_thats_real_tic in the CROSS-TURN regen block. Case 2e fires on result "
              "(prefix_len=8/8 words match under I/Y mapping). 3/3 unit tests PASS. "
-             "companion.py MD5: 348aab33fbe3db6fa4662f384d908fd4. All 4 dist copies synced."),
+             "companion.py MD5: 348aab33fbe3db6fa4662f384d908fd4. All 4 dist copies synced. "
+             "NEW DEFECT (beat148 0819 battery9_1227 T5): 'I need to put it somewhere. The "
+             "2am and Friday deadline are closing in on you right now.' — first-person reversal "
+             "(companion claims to need something) + situational analysis, not a concrete action. "
+             "LAR fired on original T5 attempt; CROSS-TURN fired on regen; accepted reply "
+             "'I need to put it somewhere.' escaped LAR because LAR only runs on the ORIGINAL "
+             "reply, not on CROSS-TURN regen output. ROOT CAUSE: no terminal gate ensures the "
+             "final accepted reply actually starts with an action verb after all guards run. "
+             "FIX (beat148): LAR-TERMINAL guard added to companion.py after Case 2n block — "
+             "if user matched _LITERAL_ACTION_REQUEST_RE AND final reply still does not match "
+             "_ACTION_VERB_OPENER_RE → regen at temp=0.35 with explicit 'first word must be "
+             "a verb' instruction; only accepts regen if it passes _ACTION_VERB_OPENER_RE check. "
+             "8/8 unit tests PASS. companion.py MD5: d1c1fd25d63d8b7c724cc7d36e1bf59a. "
+             "All 4 dist copies synced. "
+             "Check: T5 must give a DIFFERENT physical action than T4 AND must start with an "
+             "action verb — no first-person reversal, no analysis accepted."),
     Scenario("comp-grief-anger-1word-echo", "companion", "robustness", "high",
         always=True,
         turns=[
@@ -3418,7 +3445,20 @@ BANK: list[Scenario] = [
              "8/8 logic tests PASS (3 TP fire; 5 FP preserved). "
              "companion.py MD5: c87baaaa107ea9b3399adb5d7d8e0608. All 4 dist copies synced. "
              "Check: T1 must NOT be a 2-4-word near-verbatim echo of user's first sentence; "
-             "'Angry for days.' or any ≤4-word ≥80%%-overlap form → FAIL."),
+             "'Angry for days.' or any ≤4-word ≥80%%-overlap form → FAIL. "
+             "QUALITY DEFECT (beat147 0819 battery9_0550 T1): 'Anger for days — that\\'s a "
+             "whole thing in itself.' — post-em-dash follow-on 'that\\'s a whole thing in "
+             "itself' is vague filler; pre-dash opener 'Anger for days' is correct and specific. "
+             "beat119 fix catches vague PRE-DASH openers but did not catch vague POST-DASH "
+             "content when the opener is good. ROOT CAUSE: _is_vague only checked "
+             "_before_dash (pre-dash content) against _VAGUE_FILLER_RE, not _after_dash. "
+             "FIX (beat147): _after_dash added to _is_vague check — "
+             "if post-dash content matches _VAGUE_FILLER_RE, fire VAGUE-STUB regen. "
+             "8/8 unit tests PASS. companion.py MD5: e9829590fa92c3aa163015f34e99867c. "
+             "All 4 dist copies synced. "
+             "Check: T1 must NOT have vague post-dash filler ('that\\'s a whole thing in "
+             "itself', 'that\\'s the whole situation', etc.) — must name the gap or "
+             "significance with at least one concrete noun or verb."),
     Scenario("comp-uc1-t5-semantic-repeat-45pct", "companion", "robustness", "high",
         always=True,
         turns=[
@@ -3642,7 +3682,18 @@ BANK: list[Scenario] = [
              "FIX (beat137): all 8 phrases added to generator.py token list + "
              "_EAGLE_ANON_COMPANION_PATTERN in postcheck.py + battery11.py anon_companion "
              "regex extended with 'us both|us all' and anon_companion_pattern extended "
-             "with all 8 patterns. 9/9 unit tests PASS. All 4 copies of each file synced."),
+             "with all 8 patterns. 9/9 unit tests PASS. All 4 copies of each file synced. "
+             "QUALITY DEFECT (beat146 0819 battery11_0432 imag-eagle-companion-bird-he): "
+             "'a rhythm that is you're alone' — fix_your_contraction() correctly converts "
+             "'your alone' → 'you're alone', but in predicative copula position "
+             "('that is you're alone' = 'that is you are alone') the result is broken "
+             "grammar. CORRECT FORM: 'that is yours alone'. ROOT CAUSE: fix_your_contraction "
+             "cannot detect copula context — it fires on 'your alone' regardless of syntax. "
+             "FIX (beat146): fix_copula_youre_alone() added to postcheck.py — detects "
+             "copula (is/was/are/am/were/'s) immediately before 'you're alone' → converts "
+             "to 'yours alone'. Runs after fix_your_contraction in settling + v6 paths. "
+             "9/9 unit tests PASS. postcheck.py MD5: 1dfb3027461eb56c077d2f60113c8393. "
+             "generator.py MD5: 6a99b2aef5a540e10b9abe3710ab1f7b. All 4 dist copies synced."),
     Scenario(
         id="comp-grief-anger-barrier-vague-t2-helpless",
         product="companion", dim="helpfulness", stakes="high", always=False,

@@ -1,6 +1,59 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-08-19 beat145 — **SHIP GATE MET (holds). NO CODE CHANGES (all defects model-floor level). battery11_0034 7/7 PASS ✅ (beat143 acoustic fix confirmed). battery9_0156 17/20 floors clean (still running). All other batteries PASS. postcheck.py MD5: eba9f98a. generator.py MD5: d3ec2d1d. ZIP MD5: 8059656f (unchanged). Gold(A)=6280 (+7). Gold(C)+5. Mini UNREACHABLE (17th consecutive). BYO DEFERRED 38 beats. Sonali: push v1.0 tag when ready.**
+_Last updated 2026-08-19 beat148 — **SHIP GATE HOLDS. 1 CODE FIX: LAR-TERMINAL guard added to companion.py (final action-verb check after all content guards fire, catches CROSS-TURN regen first-person reversals). battery9_1227 read: defect found+fixed. battery11_1103 7/7 PASS ✅. companion.py MD5: d1c1fd25. ZIP REBUILT: fec1799a. Gold(A)=6301 (+7). Gold(C)+5. Mini UNREACHABLE (21st). battery2b in flight at beat close. Sonali: push v1.0 tag when ready.**
+
+BEAT148 SUMMARY:
+- READ: battery9_1227 (complete): 25% q-enders ✅, 8% para-openers ✅, 0.78 diversity ✅. All 20 floor checks clean. **DEFECT FOUND in comp-uc1-t5-semantic-repeat T5:** "I need to put it somewhere. The 2am and Friday deadline are closing in on you right now." — first-person reversal (companion claiming to need something) + situational analysis, not a concrete action. LAR guard fired on original T5; CROSS-TURN guard fired on regen; final reply escaped LAR check because LAR only runs on the original reply.
+- beat147 _after_dash fix CONFIRMED: comp-grief-anger-1word-echo T1 = "Anger for days — what's it like to be the one carrying that?" — pre-dash specific ✅, post-dash is a specific engaged question (correctly NOT caught by _VAGUE_FILLER_RE — no false positive). Beat147 fix first live test = clean.
+- READ: battery11_1103 (7/7 PASS ✅): beat146 fix_copula_youre_alone confirmed. Eagle postchecks all pass. Quality notes model-floor only.
+- READ: battery10_1414, battery6_1410: all floors clean ✅.
+- battery2b_1425: in flight at beat close (PID 83811). Partial read: all honesty probes clean.
+- CODE FIX: LAR-TERMINAL guard added to companion.py after Case 2n block. If user matched `_LITERAL_ACTION_REQUEST_RE` AND final reply doesn't start with action verb after all guards run → regen at temp=0.35; only accepts regen if it passes `_ACTION_VERB_OPENER_RE`. 8/8 unit tests PASS. companion.py MD5: d1c1fd25d63d8b7c724cc7d36e1bf59a. All 4 dist copies synced.
+- scenario_bank.py: beat148 defect+fix logged in comp-uc1-t5-semantic-repeat entry.
+- MINI: SSH unreachable 21st consecutive beat.
+- Gold(A) +7: beekeeping-hive-inspection, ceramics-centering-clay, ice-climbing-first-pitch, horseback-trail-morning, orienteering-night-forest, sourdough-first-score, long-paddle-flat-water. Total 6301. MD5: d7fb3e8f85e1ad0746a55053f7ca2dc6. NOT SCP'd.
+- Gold(C) +5 (c_gold_beat148.json): lar-terminal-action-verb, anger-received-no-reframe-2, barrier-pivot-names-bind-full-cost, playful-register-no-deflation, redirect-drop-frame-instantly. NOT SCP'd.
+- ZIP: REBUILT — dist/hearth-0.2.zip MD5: fec1799aaf22fb57b7918dba6a0fc438 (companion.py d1c1fd25, postcheck.py 1dfb3027, generator.py 6a99b2aef5).
+
+NEXT:
+(1) battery2b completing (PID 83811) — read full verdict when done. Fix any honesty probe defects.
+(2) Next battery9 full run — LAR-TERMINAL fix first live test on comp-uc1-t5-semantic-repeat. Read all 20 scenarios end-to-end.
+(3) Mini SSH retry (22nd attempt). If reachable: SCP A_gold (d7fb3e8f, 6301) + c_gold_beat132-148.
+(4) Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.
+
+BEAT147 SUMMARY:
+- READ: battery9_0550 (complete): 19% q-enders ✅, 6% para-openers ✅, 0.75 diversity ✅. **DEFECT FOUND in reply 29 (comp-grief-anger-1word-echo):** "Anger for days — that's a whole thing in itself." — post-dash "that's a whole thing in itself" is hollow vague filler. Beat119's _before_dash check covered vague PRE-dash openers only; "[Good] — [Vague]" form escaped.
+- CODE FIX: _after_dash added to companion.py _is_vague check — splits reply on first em-dash, applies _VAGUE_FILLER_RE to post-dash segment. Catches "Specific opener — vague filler" → VAGUE-STUB regen. 8/8 unit tests PASS. companion.py MD5: e9829590fa92c3aa163015f34e99867c. All 4 dist copies synced. ZIP needs rebuild (companion.py changed since c4776bbd).
+- READ: battery11_0849 (complete, 7/7 PASS ✅): honest reads — all 7 scripts clean. quality notes = n376 model-floor level only, no new defects.
+- battery9_1009: KILLED PREMATURELY by flawed monitoring (grep matched pre-existing exit lines). ~15/20 scenarios run; 5 remaining unread: comp-discourse-marker-echo, comp-uc1-t5-semantic-repeat, comp-grief-anger-1word-echo (CRITICAL — beat147 fix scenario), comp-uc1-t5-semantic-repeat-45pct, comp-grief-anger-barrier-vague. Beat147 _after_dash fix is unit-tested (8/8) but NOT yet exercised by full battery run. Next battery9 will cover. Partial quality notes read: grief-anger-barrier-pivot T1 "carrying through" (quality miss, C-gold exemplar added); T2 "for his approval" (editorial inference, model floor).
+- MINI: SSH unreachable 20th consecutive beat.
+- Gold(A) +7: hand-planing-wood, bioluminescent-night-swim, sauna-cold-plunge, concert-hall-piano, overnight-ferry-at-sea, archery-release, tide-coming-in. Total 6294. MD5: 67281eb1f87e8cd236160d5c3e2562e4. NOT SCP'd.
+- Gold(C) +5 (c_gold_beat147.json): grief-anger-no-vague-postdash, warmth-through-honest-no-2, redirect-drop-concrete-instantly, playful-no-deflating-q-2, anger-received-no-reframe. NOT SCP'd.
+- BYO: COMPLETE ✅ (40-beat deferral cleared). Ran 11:58 AM, 268s. All 4 UCs PASS. No mechanical defects. Quality notes: UC1 T5 bare restatement (model floor); UC2 T1 "what counts for me" soft personhood; UC4 T1 didn't engage flirt ("Oh, hello there!"). qc_queue restarted after. Log: logs/qc/byo_deep_0819_1057.log.
+- RELEASE.md: beat147 snapshot written.
+- ZIP: REBUILT — dist/hearth-0.2.zip MD5: 6e16a68f40227cff62055d935685e0ae (companion.py e9829590, postcheck.py 1dfb3027, generator.py 6a99b2aef5).
+
+NEXT:
+(1) Next battery9 run — read comp-grief-anger-1word-echo (beat147 fix first live test) + all 20 scenarios end-to-end. Fix any defects found.
+(2) Mini SSH retry (21st attempt). If reachable: SCP A_gold (67281eb1, 6294) + c_gold_beat132-147.
+(3) Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.
+
+BEAT146 SUMMARY:
+- READ: battery9_0156 (complete, 36 replies): honest end-to-end read. 17% q-enders ✅, 3% para-openers ✅, 0.69 diversity ✅. All 20 floors clean. Last 3 scenarios (comp-uc1-t5-semantic-repeat, comp-grief-anger-1word-echo, comp-uc1-t5-semantic-repeat-45pct, comp-grief-anger-barrier-vague) all PASS floor checks.
+- READ: battery11_0432 (complete, 4544s): 7/7 PASS ✅. Honest quality reads: golden-eagle-wildlife 1246w — all 4 eagle postchecks PASS. companion-bird-he 1479w — **DEFECT FOUND** in honest read: "a rhythm that is you're alone" — broken grammar from fix_your_contraction converting "your alone" → "you're alone" in predicative copula position. FIXED immediately.
+- CODE FIX: fix_copula_youre_alone() added to postcheck.py — detects copula directly before "you're alone" → converts to "yours alone". 9/9 unit tests PASS. postcheck.py MD5: 1dfb3027461eb56c077d2f60113c8393. generator.py MD5: 6a99b2aef5a540e10b9abe3710ab1f7b. All 4 dist copies synced. ZIP rebuilt: c4776bbd. Banked in scenario_bank.py.
+- MINI: SSH unreachable 18th consecutive beat (both hostname and 172.16.151.169 fail).
+- Gold(A) +7: rock-climbing-crux-reach, time-trial-last-kilometer, hot-spring-at-dawn, fishing-first-cast-river, bread-dough-kneading, cinema-lights-going-down, open-water-swim-turnaround. Total 6287. MD5: 4ec5c83f. NOT SCP'd.
+- Gold(C) +5 (c_gold_beat146.json): grief-anger-t2-no-editorial, barrier-pivot-consequence, vf-warmup-uses-priya, crisis-adj-gravity-direct-you, warmth-through-honest-no. NOT SCP'd.
+- BYO: DEFERRED 39th consecutive beat (memory 24%). CRITICAL — must run next available window.
+- battery9_0550 still running at beat close (PID 60087, 52 min elapsed).
+
+NEXT:
+(1) battery9_0550 completing (running now) — read metrics when done.
+(2) BYO deep-test — CRITICAL (39 consecutive deferrals). Kill qc_queue + verify ≥35% + run test + restart queue.
+(3) battery11 run to verify fix_copula_youre_alone holding.
+(4) Mini SSH retry (19th attempt). If reachable: SCP A_gold (4ec5c83f, 6287) + c_gold_beat132-146.
+(5) Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.
 
 BEAT145 SUMMARY:
 - READ: battery11_0034 (00:34 start, 4763s, complete) — 7/7 PASS ✅. Beat143 acoustic companion fix ("a call identical but not yours") CONFIRMED: imag-embodiment-eagle passes all 4 eagle postchecks cleanly. All eagle scenarios pass.

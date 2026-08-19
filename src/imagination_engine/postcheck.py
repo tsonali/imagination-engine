@@ -592,6 +592,28 @@ def fix_your_contraction(text: str) -> tuple[str, int]:
     return result, n
 
 
+# After fix_your_contraction converts 'your alone' → 'you're alone', a copula
+# immediately before creates broken grammar: 'a rhythm that is you're alone'
+# (= 'a rhythm that is you are alone').  The correct form is 'yours alone'.
+# Pattern: copula/contraction directly before 'you're alone' (no intervening word).
+_COPULA_YOURE_ALONE_RE = re.compile(
+    r"\b(is|was|are|am|were|'s)\s+you're\s+(alone)\b",
+    re.IGNORECASE,
+)
+
+
+def fix_copula_youre_alone(text: str) -> tuple[str, int]:
+    """'that is you\'re alone' / 'that\'s you\'re alone' → 'that is yours alone'.
+
+    Runs after fix_your_contraction to catch broken copula + you're constructions
+    that read as 'X is you are alone' — grammatically invalid.
+    """
+    result, n = _COPULA_YOURE_ALONE_RE.subn(
+        lambda m: f"{m.group(1)} yours {m.group(2)}", text
+    )
+    return result, n
+
+
 _BACK_LEAK_PATTERNS = [
     re.compile(r"\bTwo sentences max\b", re.IGNORECASE),
     re.compile(r"^Open (?:your eyes )?when ready\b", re.IGNORECASE),

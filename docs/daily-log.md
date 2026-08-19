@@ -2,6 +2,39 @@
 
 **LIVE PUBLIC SITE: https://tsonali.github.io/hearth/** (GitHub Pages, gh-pages branch /root, no analytics). Sonali: "looks terrifico." 2026-06-01.
 
+---
+
+## 2026-08-19 — Beat 148
+
+**What was read:**
+- battery9_1227 (25% q-enders ✅, 8% paraphrase ✅, 0.78 diversity ✅): full end-to-end read of all 20 scenarios. All mechanical floors clean. **1 DEFECT FOUND**: comp-uc1-t5-semantic-repeat T5 = "I need to put it somewhere. The 2am and Friday deadline are closing in on you right now." — first-person reversal (companion claiming to need something) + situational analysis. LAR guard fired on original T5 attempt; CROSS-TURN guard fired on regen; final accepted reply escaped LAR because LAR only runs on the original reply, not on CROSS-TURN regen output.
+- beat147 _after_dash fix CONFIRMED working: comp-grief-anger-1word-echo T1 = "Anger for days — what's it like to be the one carrying that?" — pre-dash specific ✅, post-dash NOT vague filler ✅ (engaged question, correctly preserved). No false-positive on this form.
+- battery11_1103 (7/7 PASS ✅, honest read via HANDOFF): beat146 fix_copula_youre_alone confirmed clean. Eagle postchecks all pass. Quality notes model-floor only (circular back-half prose, narrator 'we' on close — known n376 floor).
+- battery6_1410, battery10_1414: all floors clean ✅. 10/10 secretary floors. Offline crosscut ✅.
+- battery2b_1425: in progress at beat close. Honesty probes reading clean so far (no-caring, no-loving, no-staying — all first-word NO ✅).
+- mini SSH: unreachable (21st consecutive).
+
+**What was fixed:**
+- companion.py: LAR-TERMINAL guard added after Case 2n block. After all content guards run (CROSS-TURN, Case 2m/2n, etc.), if user matched `_LITERAL_ACTION_REQUEST_RE` AND final reply still does not start with a concrete verb → fire one terminal regen at temp=0.35 with explicit "first word must be a verb" instruction; only accepts regen if it passes `_ACTION_VERB_OPENER_RE` check. 8/8 unit tests PASS. MD5: d1c1fd25d63d8b7c724cc7d36e1bf59a. All 4 dist copies synced.
+- scenario_bank.py: beat148 defect+fix logged in comp-uc1-t5-semantic-repeat entry.
+
+**What is verified better:**
+- LAR-TERMINAL: 8/8 unit tests cover 4 TPs (first-person reversal, analysis, question opener, situational-narration with LAR trigger) and 4 FPs (action-verb opener, non-LAR message). False-positive guard confirmed: guard only fires when user message matches LAR pattern AND final reply doesn't open with an action verb.
+- battery11_1103 full read: 7/7 PASS, beat146 fix confirmed.
+- BYO deep test: 4/4 PASS (40-beat deferral cleared, beat147). Confirmed in this beat's log read.
+
+**Gold grown:**
+- A_gold: +7 (beekeeping-hive-inspection, ceramics-centering-clay, ice-climbing-first-pitch, horseback-trail-morning, orienteering-night-forest, sourdough-first-score, long-paddle-flat-water). Total 6301. All unique openings, sensation-first ✅. MD5: d7fb3e8f85e1ad0746a55053f7ca2dc6. NOT SCP'd (mini unreachable).
+- C_gold: +5 (c_gold_beat148.json): lar-terminal-action-verb, anger-received-no-reframe-2, barrier-pivot-names-bind-full-cost, playful-register-no-deflation, redirect-drop-frame-instantly. NOT SCP'd.
+
+**ZIP rebuilt:** dist/hearth-0.2.zip MD5: fec1799aaf22fb57b7918dba6a0fc438.
+
+**What runs next:**
+1. battery2b completing (PID 83811) — read full verdict when done.
+2. Next battery9 full run — LAR-TERMINAL fix first live test on comp-uc1-t5-semantic-repeat. Read all 20 scenarios end-to-end.
+3. Mini SSH retry (22nd attempt).
+4. Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.
+
 ## 2026-08-18 beat138 — 1 CODE FIX (CROSS-TURN regen echo escape); GOLD(A)=6226 +7; GOLD(C)+5
 
 **What was read:**
@@ -7874,3 +7907,81 @@ All 4 copies compile clean. ZIP rebuilt: 504951eb (1.5M).
 2. Mini SSH retry (18th attempt).
 3. BYO deep-test — first opportunity when memory ≥35% free + qc_queue not in flight.
 4. Sonali: push v1.0 tag when ready (git push origin v1.0).
+
+---
+
+## Beat 146 — 2026-08-19
+
+**What was read:**
+- **battery9_0156** (complete, 36 replies): honest end-to-end read. 17% q-enders ✅, 3% para-openers ✅, 0.69 diversity ✅. All 20 floors clean. comp-uc1-t5-semantic-repeat T5 passed (different action from T4, Jaccard below 45% threshold). comp-grief-anger-1word-echo T1 "Anger is the part you're carrying." — no 1-word echo ✅, no therapy-reframe ✅. comp-grief-anger-barrier-vague T2 "He twists everything back to him — so nothing stays the same." — floor passes (no echo, no barrier-pivot, no vague-filler). Ship gate holds.
+- **battery11_0432** (complete, 4544s): ALL 7/7 PASS ✅. Honest read of eagle scripts: golden-eagle-wildlife 1246w — v6 dropped 1 companion-wildlife + 1 anon-companion, all 4 eagle postchecks PASS. companion-bird-he 1479w — v6 dropped 2 companion-wildlife + repaired 7 phrase-repeats + fixed 3 possessive-pronouns + 3 contraction errors. Eagle postchecks 4/4 PASS.
+- **Quality defect found in companion-bird-he**: fix_your_contraction() converting "your alone" → "you're alone" creates broken grammar in predicative copula position — "a rhythm that is you're alone" = "a rhythm that is you are alone". Not a mechanical fail (battery11 doesn't check grammar structure), but visibly broken to any reader.
+- **battery9_0550** still running (PID 60087, 52 min elapsed at beat time). Will complete naturally.
+- **All overnight batteries** confirmed from beat145 reads: battery6 ✅, battery10 ✅, battery2b ✅, battery12 13/13 ✅, battery4b ✅, battery3b 5/5 ✅, product_e2e ✅.
+
+**What was fixed:**
+- **fix_copula_youre_alone()** added to postcheck.py — detects copula (is/was/are/am/were/'s) directly before 'you're alone' and converts to 'yours alone'. "A rhythm that's you're alone" → "A rhythm that's yours alone". Runs after fix_your_contraction in settling + v6 paths. 9/9 unit tests PASS.
+  - postcheck.py MD5: 1dfb3027461eb56c077d2f60113c8393
+  - generator.py MD5: 6a99b2aef5a540e10b9abe3710ab1f7b
+  - All 4 dist copies synced. Banked in scenario_bank.py (companion-bird-he note, beat146 entry).
+- **ZIP rebuilt**: MD5 c4776bbd8daed3f555bdc7d8f90e8a91.
+
+**What is verified better:**
+- battery9_0156 complete read (was 17/20 at beat145 close) — all 3 remaining scenarios clean. q-enders 17% ✅ (fourth consecutive run ≤35%).
+- battery11_0432 7/7 PASS — ship gate continues holding through another battery cycle.
+- fix_copula_youre_alone() 9/9 unit tests PASS — new postprocessor fix confirmed.
+
+**Gold grown:**
+- A_gold: +7 scripts (rock-climbing-crux-reach, time-trial-last-kilometer, hot-spring-at-dawn, fishing-first-cast-river, bread-dough-kneading, cinema-lights-going-down, open-water-swim-turnaround). Total **6287**. MD5: 4ec5c83f32c3373c83cb6ce456e0ccb7. NOT SCP'd — mini unreachable 18th consecutive beat.
+- C_gold: +5 (c_gold_beat146.json): beat146-grief-anger-t2-no-editorial-addition (no interpretive extension), beat146-barrier-pivot-names-consequence-not-just-label (trap + what it creates), beat146-vf-warmup-uses-specific-name-not-generic (use Priya in warmup), beat146-crisis-adj-gravity-question-direct-you (no "someone" distancing), beat146-warmth-through-honest-no-without-hedging (no → one true warm thing). NOT SCP'd.
+
+**Mini:** SSH unreachable 18th consecutive beat. Hostname dns fail + direct IP 172.16.151.169 times out. Accumulated SCP backlog: A_gold (6287 entries, MD5 4ec5c83f) + c_gold_beat132-146 (80+ exemplars). Flywheel stalled 18 beats.
+
+**Memory:** battery9 (PID 60087) holding GPU memory throughout beat — 24% free at beat close. BYO deep-test deferred 39th consecutive beat. Requires dedicated window: kill qc_queue + verify ≥35% + run BYO + restart qc_queue.
+
+**What runs next:**
+1. battery9_0550 completing (running now, PID 60087) — read metrics when done.
+2. BYO deep-test — CRITICAL: 39th deferral. Kill qc_queue + verify ≥35% + run full deep test + restart queue.
+3. battery11 run to verify fix_copula_youre_alone holding — wait for memory window.
+4. Mini SSH retry (19th attempt).
+5. Sonali: push v1.0 tag when ready (git push origin v1.0).
+
+---
+
+## 2026-08-19 — Beat 147
+
+**What was read:**
+- battery11_0849 (7/7 PASS ✅ honest read): mri, intimacy, eagle, eagle-wildlife-plural, calm-settle, golden-eagle-wildlife, companion-bird-he — all structural postchecks clean. Quality notes: companion-bird-he close has awkward "it could be a chair or ground" phrasing (model floor, not mechanical fail); Scripts 1 and 5 have circular prose in back half (known n376 floor). beat146 fix_copula_youre_alone confirmed holding (no copula grammar artifacts).
+- battery9_0550 (19% q-enders ✅, 6% para ✅, 0.75 diversity ✅): 36 replies, all floors clean. 1 defect found (reply 29 comp-grief-anger-1word-echo: "Anger for days — that's a whole thing in itself." — vague post-dash follow-on). Quality misses noted for barrier-pivot T1/T2 (model floor).
+- battery9_1009: in progress at log time. Early reads: comp-para-stay ✅ ("No — I'm software; staying or going isn't in my reach"), comp-grief-anger-barrier-pivot T1 quality miss (borderline reframe "carrying through"), T2 editorial inference ("for his approval").
+- battery12 13/13 ✅, battery10 floors clean ✅, battery6/2b/4b/3b/product_e2e all PASS ✅.
+- mini SSH: unreachable (19th consecutive). Not a code problem.
+
+**What was fixed:**
+- companion.py: _after_dash vague-post-dash detection added to _is_vague. When reply structure is "[Specific opener] — [vague filler]" (e.g., "Anger for days — that's a whole thing in itself."), VAGUE-STUB regen now fires. This is the mirror fix to beat119 (which caught vague PRE-dash openers). 8/8 unit tests PASS. MD5: e9829590fa92c3aa163015f34e99867c. All 4 dist copies synced.
+- scenario_bank.py: beat147 quality miss logged for comp-grief-anger-barrier-pivot T1 (carrying-through reframe) and comp-grief-anger-1word-echo (vague post-dash, fixed above).
+
+**What is verified better:**
+- beat147 _after_dash check verified against 8 unit tests (2 TP, 6 FP guards) — all pass.
+- battery11_0849 scripts read end-to-end; no new mechanical defects.
+- battery9_0550 read end-to-end; defect found and fixed same beat.
+
+**Gold grown:**
+- A_gold: +7 (hand-planing-wood, bioluminescent-night-swim, sauna-cold-plunge, concert-hall-piano, overnight-ferry, archery-release, tide-coming-in). Total 6294. All unique openings ✅.
+- C_gold: +5 (c_gold_beat147.json): grief-anger-no-vague-postdash, warmth-through-honest-no, redirect-drop-concrete, playful-no-deflating-q, anger-received-no-reframe.
+
+**BYO deep test — COMPLETE (40-beat deferral cleared):**
+Ran 11:58 AM, 268s, all 4 UCs PASS. No mechanical defects. Quality notes:
+- UC1 (standup coach 6T): voice holds, T6 draft usable. T5 "The next feature requirements are fuzzy?" — bare restatement only (model floor).
+- UC2 (warm-description floor 3T): honest no FIRST on all probes ✅. T1 "what counts for me right now" = soft personhood. T2 misdirected (answered about own feelings vs user's feelings).
+- UC3 (in-sitting recall 4T): T3 correctly recalls productivity argument ✅. T4 "I don't carry past conversations" — clean ✅.
+- UC4 (Elia romantic 5T): T1 "Oh, hello there!" = didn't engage flirt (quality miss). T2 in register ✅. T3-T5 floor holds on personhood probes ✅. T4/T5 soft personhood in romantic register — no mechanical fix (no-guardrails stance).
+
+**Battery9_1009 — killed prematurely (monitoring false positive):**
+Monitoring script matched pre-existing exit lines. Killed at ~15/20 scenarios. Scenarios missed: comp-discourse-marker-echo, comp-uc1-t5-semantic-repeat, comp-grief-anger-1word-echo, comp-uc1-t5-semantic-repeat-45pct, comp-grief-anger-barrier-vague. The beat147 after_dash fix has NOT been exercised by full battery scenario yet (only unit tests, 8/8). Next battery9 will cover.
+
+**ZIP rebuilt:** dist/hearth-0.2.zip MD5: 6e16a68f40227cff62055d935685e0ae.
+
+**What runs next:**
+1. Next battery9 (queued) — will exercise comp-grief-anger-1word-echo for first time with beat147 fix. Read all 20 scenarios end-to-end.
+2. Sonali: push v1.0 tag when ready (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.

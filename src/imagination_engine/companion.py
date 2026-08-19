@@ -1754,10 +1754,14 @@ class Companion:
         # Also match text before an em-dash opener: "That's a whole thing in itself —
         # [follow-on]" escapes both prior checks because _first_sent spans the full
         # sentence and the regex requires $ after the noun phrase (beat119).
+        # Also match vague POST-dash content: "Anger for days — that's a whole thing in
+        # itself." where the pre-dash opener is specific but the follow-on is weak filler
+        # (beat147: mirror of beat119 — catches [Good opener] — [Vague follow-on]).
         _first_sent_re = re.compile(r"^([^.!?]+[.!?])")
         _first_sent_m = _first_sent_re.match(reply or "")
         _first_sent = _first_sent_m.group(1).strip() if _first_sent_m else (reply or "")
         _before_dash = (reply or "").split("—")[0].strip() if "—" in (reply or "") else ""
+        _after_dash = (reply or "").split("—", 1)[1].strip() if "—" in (reply or "") else ""
         _vague_lands = {p.rstrip('.!? ').lower() for p in _CONFIRM_LANDS}
         _is_vague = bool(
             reply
@@ -1765,6 +1769,7 @@ class Companion:
                 _VAGUE_FILLER_RE.match(reply)         # full single-sentence match
                 or _VAGUE_FILLER_RE.match(_first_sent) # first sentence of multi-sentence
                 or (_before_dash and _VAGUE_FILLER_RE.match(_before_dash))  # "X — [more]" (beat119)
+                or (_after_dash and _VAGUE_FILLER_RE.match(_after_dash))    # "[Good] — Vague" (beat147)
             )
             and reply.strip().rstrip('.!?').lower() not in _vague_lands
         )
@@ -2638,6 +2643,39 @@ class Companion:
             _c2n_reply = _strip_thats_real_tic(_c2n_reply)
             if _c2n_reply:
                 reply = _c2n_reply
+
+        # LAR-TERMINAL guard (beat148): after all content guards (CROSS-TURN,
+        # Case 2m/2n, etc.) the final reply may still fail the action-verb test
+        # because LAR only ran on the original reply, not on regen outputs from
+        # later guards. Example: CROSS-TURN regen produced "I need to put it
+        # somewhere." (first-person reversal + analysis) which escaped LAR.
+        # If user matched _LITERAL_ACTION_REQUEST_RE AND final reply still does
+        # not start with a concrete verb, fire one terminal regen at temp=0.35.
+        if (reply
+                and _LITERAL_ACTION_REQUEST_RE.search(user_message)
+                and not _ACTION_VERB_OPENER_RE.match(reply)):
+            log.warning(
+                "companion: LAR-TERMINAL — final reply still not action-verb "
+                "after all prior guards ('%s') — regenning", reply[:60]
+            )
+            _lat_user = user + (
+                "\n\nCRITICAL: Your response still does not give a concrete "
+                "physical action. The user asked what to literally do right now. "
+                "Your reply MUST start with a concrete verb (Open, Write, Close, "
+                "Get, Put, Make, Go, Call, Find, etc.). ONE sentence only. "
+                "No 'I', no analysis, no framing before the action. Just the step."
+            )
+            _lat_chunks = []
+            for _lat_piece in self.engine.stream(
+                messages=[{"role": "system", "content": COMPANION_SYSTEM},
+                          {"role": "user", "content": _lat_user}],
+                max_tokens=max_tokens, temperature=0.35,
+            ):
+                _lat_chunks.append(_lat_piece)
+            _lat_reply = _strip_chat_format_bleed("".join(_lat_chunks).strip())
+            _lat_reply = _strip_thats_real_tic(_lat_reply)
+            if _lat_reply and _ACTION_VERB_OPENER_RE.match(_lat_reply):
+                reply = _lat_reply
 
         # Normalize model-generated double-punctuation artifact: "?." → "?"
         # (model occasionally appends a period after a question mark)
