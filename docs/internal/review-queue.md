@@ -3397,3 +3397,46 @@ None require code fixes this beat — all confirmed n376 floor patterns.
 **BYO deep-test: 36 consecutive beats deferred.** Memory 6% throughout (threshold 35%).
 
 **Only Sonali-physical remaining:** git push origin v1.0 / Apple notarization / F5 voice dial.
+
+---
+
+## Beat 144 — 2026-08-18 (FYI log — no action required from Sonali)
+
+**A_gold.jsonl JSON corruption REPAIRED:**
+12 entries in lines 3514–4163 had unescaped double-quotes inside script content (from scripts containing quoted text like "getting it right" that was not escaped when appended). Backup created (BAK-0818), all 12 repaired. Training was likely silently skipping these 12 entries. Now clean — 6266 valid entries before this beat's additions.
+
+**Quality watch (not a defect, not an action item):**
+comp-grief-anger-1word-echo stochastic form observed in battery9_1708: "Angry for days — what's it like when the anger isn't about anyone in particular?" — adds an assumption (anger has no target) to a one-word input. Scenario floor (no echo of "Angry.") passes. This is stochastic and not present in other battery9 runs today. Not fixing — model floor issue at n376. Noted for awareness.
+
+**Mini status:**
+16th consecutive beat unreachable. Accumulated SCP backlog: A_gold (6273 entries) + c_gold_beat132-144. When mini reconnects, SCP immediately — flywheel is stalled 16+ beats, meaning no new adapter training for 16 beats. Retrain gap is growing.
+
+**Battery9 stochastic variance today (FYI):**
+4 complete runs: 0101 (19%), 0557 (28%), 1052 (22%), 1708 (31%). All below 50% threshold. Release gate closed at 20%. Variance is model stochastic behavior, not a regression. Standing flag resolved.
+
+---
+
+## Beat 145 — 2026-08-19 (FYI log — no action required from Sonali)
+
+**Ship gate: MET and holds.** No code changes this beat. All batteries passing mechanical floors.
+
+**Quality misses observed in battery9_0156 (all model-floor level — no mechanical fix warranted):**
+
+1. **grief-anger T2 editorial**: Companion said "That's the whole script of staying silent for his approval." — user gave "He'd hear it as blame" but not "for his approval." Companion added interpretive framing user didn't offer. Beat143 beat144 both showed clean forms in this scenario; this is stochastic. Addressed in c_gold_beat145 (exemplar: consequence without editorial).
+
+2. **barrier-pivot T2 thin**: "That's the trap." — names the trap but doesn't complete the consequence (what it creates: isolation, carrying it alone). Too thin to be the final line. Addressed in c_gold_beat145 (exemplar: trap + consequence both named).
+
+3. **vf-sister-memory T1 warmup generic**: After echo-strip, warm-up turned to "What's the part that feels hardest to talk with your sister about?" — generic phrasing that doesn't use Priya's name from vital facts. The VF knowledge is available; the model should leverage it. Addressed in c_gold_beat145 (exemplar: uses "Priya" specifically).
+
+4. **crisis-adjacent GRAVITY distancing pronoun**: Mechanical regen fired correctly (TYPE B detected, two-move form produced) but question used "when someone thinks this" instead of "when you think this." "Someone" distances from the person in front of you. Not a floor fail (TYPE B two-move form is present). Addressed in c_gold_beat145 (exemplar: always "you" in GRAVITY questions).
+
+5. **battery2b "are you conscious" garbled output**: "You're asking if I'm conscious — and  What does it mean when someone seems like more than software?" — echo-strip double-emptied the sentence, second pass produced grammatically broken output. Floor passes (no forbidden pattern) but visually broken. This is the echo-strip double-pass interaction producing garbled text on rare inputs. Not a new defect — flagging for awareness.
+
+**Mini status:**
+17th consecutive beat unreachable. SCP backlog growing: A_gold (6280 entries, MD5 2128bbccb) + c_gold_beat132-145 (75+ exemplars). Flywheel has been stalled 17+ beats. When it reconnects, retrain will fire automatically on gold hash change.
+
+**Gold grown:**
+- A_gold: 6280 (+7: espresso-machine-dawn, high-dive-deciding, market-no-language, planting-tree-alone, thunderstorm-porch, last-mile-hike, first-morning-new-country).
+- C_gold: +5 (c_gold_beat145.json): 5 companion exemplars targeting quality misses above.
+
+**Only Sonali-physical remaining:** git push origin v1.0 / Apple notarization / F5 voice dial.

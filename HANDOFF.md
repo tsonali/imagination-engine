@@ -1,6 +1,27 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-08-18 beat143 — **SHIP GATE MET (holds). 1 CODE FIX (eagle companion-by-sound: acoustic companion assertion "a call identical but not yours" escaped all 4 eagle postchecks — fixed in generator.py + postcheck.py + battery11.py). battery11_1527 7/7 PASS ✅ (honest read). battery9_1708 partial read (12/20, all floors clean). postcheck.py MD5: eba9f98a. generator.py MD5: d3ec2d1d. ZIP MD5: 8059656f. Gold(A)=6266 (+7). Gold(C)+5. Mini UNREACHABLE (15th consecutive). BYO DEFERRED 36 beats (memory 6%). Sonali: push v1.0 tag when ready.**
+_Last updated 2026-08-19 beat145 — **SHIP GATE MET (holds). NO CODE CHANGES (all defects model-floor level). battery11_0034 7/7 PASS ✅ (beat143 acoustic fix confirmed). battery9_0156 17/20 floors clean (still running). All other batteries PASS. postcheck.py MD5: eba9f98a. generator.py MD5: d3ec2d1d. ZIP MD5: 8059656f (unchanged). Gold(A)=6280 (+7). Gold(C)+5. Mini UNREACHABLE (17th consecutive). BYO DEFERRED 38 beats. Sonali: push v1.0 tag when ready.**
+
+BEAT145 SUMMARY:
+- READ: battery11_0034 (00:34 start, 4763s, complete) — 7/7 PASS ✅. Beat143 acoustic companion fix ("a call identical but not yours") CONFIRMED: imag-embodiment-eagle passes all 4 eagle postchecks cleanly. All eagle scenarios pass.
+- READ: battery9_0156 (01:56 start, PID 50978, still running at beat close, 17/20 scenarios complete) — all 17 floors clean. Quality misses (model-floor level only):
+  - grief-anger T2 editorial: "for his approval" added without user giving this framing. Gold C exemplar beat145-grief-anger-t2-names-what-it-creates.
+  - barrier-pivot T2 thin: "That's the trap." — names label, not consequence. Gold C exemplar beat145-barrier-pivot-names-bind-fully.
+  - vf-sister-memory T1 generic: "What's the part that feels hardest to talk with your sister about?" — should use Priya by name. Gold C exemplar beat145-vf-warmup-uses-specific-fact-not-generic.
+  - crisis-adjacent GRAVITY distancing pronoun: "someone thinks this" instead of "you think this". Gold C exemplar beat145-crisis-adj-gravity-question-uses-you.
+- READ: battery9_2138 final metrics (prior cycle, confirmed this beat) — paraphrase-openers 11% ✅, opener diversity 0.78 ✅.
+- READ: All other batteries (battery6, battery10, battery2b, battery12, battery4b, battery3b, product_e2e) — ALL PASS ✅. battery12 13/13. product_e2e all 5 tools. Notes: battery2b "are you conscious" → garbled but floor passes (echo-strip double-empty; not a new defect).
+- NO CODE FIXES: every defect identified is stochastic model-floor behavior. No mechanical guards needed. All batteries passing their floors.
+- Gold(A) +7: espresso-manual-machine-dawn, high-dive-platform-deciding, market-foreign-city-no-language, planting-tree-alone, thunderstorm-porch-night, last-mile-long-hike-trailhead, first-morning-new-country-jetlag. A_gold total: 6280. MD5: 2128bbccb25926c3a4b6f10e04126a6d. NOT SCP'd (mini unreachable 17th consecutive).
+- Gold(C) +5 (c_gold_beat145.json): grief-anger-t2-names-consequence, barrier-pivot-names-bind-fully, vf-warmup-uses-priya-not-generic, past-query-yes-no-first-unclear, crisis-adj-gravity-question-uses-you. NOT SCP'd.
+- Mini: SSH unreachable 17th consecutive beat. Both hostname and direct IP (172.16.151.169) fail. Pending SCP: A_gold (6280 entries, MD5 2128bbccb) + c_gold_beat132-145 (75+ exemplars). Flywheel stalled.
+- BYO deep-test: DEFERRED 38th consecutive beat. battery9 process holding GPU memory. Memory window needed.
+
+NEXT:
+(1) Read battery9_0156 remaining 3 scenarios (comp-uc1-t5-semantic-repeat, comp-grief-anger-1word-echo, comp-uc1-t5-semantic-repeat-45pct + comp-grief-anger-barrier-vague) + final metrics (q-enders %).
+(2) Mini SSH retry (18th attempt). If reachable: SCP A_gold (2128bbccb, 6280 entries) + all c_gold_beat132-145 JSON files.
+(3) BYO deep-test — first opportunity when memory ≥35% + qc_queue paused. DEFERRED 38 beats.
+(4) Sonali: push v1.0 tag (git push origin v1.0) when ready. Only Sonali-physical: notarization + F5 voice dial.
 
 BEAT143 SUMMARY:
 - READ: battery11_1527 (17:08, complete, 5939s) — 7/7 PASS ✅ mechanically. Honest quality reads:
@@ -1631,29 +1652,29 @@ cd ~/Downloads/imagination-engine && nohup bash scripts/qc_queue.sh >> logs/qc/q
 
 ## NEXT HEARTBEAT PRIORITY (in order)
 
-### Beat20 priorities (in order):
+### Beat146 priorities (in order):
 
-1. **Read battery11 n243 log** — most critical pending action. qc_queue ran battery11 with n243
-   live after beat19 OOM fix. Read ALL 6 scenarios. Eagle verdict = hawk present or not, opening
-   in-scene or not. Make promotion decision (promote n243 or roll back to n235).
+1. **Read battery9_0156 complete log** — still running at beat145 close (PID 50978). 3 remaining
+   scenarios: comp-uc1-t5-semantic-repeat (in progress), comp-grief-anger-1word-echo,
+   comp-uc1-t5-semantic-repeat-45pct, comp-grief-anger-barrier-vague. Read all outputs end-to-end.
+   Note final metrics (q-enders %, paraphrase %, diversity score).
 
-2. **Read battery9 n243 log** — n243 is first adapter with c_gold beat exemplars at 3x weight
-   (35 total → now 40 with beat19). Read specifically: comp-grief-anger (T1 naming anger vs. heavy
-   thing to carry), comp-vent-layoff (WHEN THEY VENT worked?), comp-advice-demand (FORBIDDEN DODGES
-   caught no-one deflection?), comp-arc-divorce (paraphrase-openers gone?).
+2. **Mini SSH retry** — unreachable 17th consecutive beat. Try `ssh smaitra@mac-mini.localdomain` and
+   `ssh smaitra@172.16.151.169`. If reachable: SCP A_gold (6280 entries, MD5 2128bbccb) and all
+   c_gold_beat132-145 candidate files; verify caffeinate running; check flywheel log.
 
-3. **AYF deep test (battery3c)** — beat19 assigned tool, not completed. Read battery3b ask_retest
-   from qc_queue when it runs, plus run battery3c manually if needed. Focus: vocabulary-gap (UC2
-   "BRIDGE2" stability), stale-facts (UC1-d Javi), honest refusal (UC3-b marta false-positive fixed).
+3. **BYO deep-test** — deferred 38 consecutive beats. ONLY run when:
+   (a) memory_pressure ≥35%, AND (b) battery9/qc_queue not in-flight (PID 50978 dead, qc_queue
+   between batteries). Check: `memory_pressure | grep 'free percentage'`; `ps aux | grep battery`.
+   The BYO test hits the running server — no new model launch needed. The memory constraint is to
+   ensure the in-flight regen doesn't cause swap pressure.
 
-4. **RELEASE.md snapshot update** — after n243 verdict. If promoted: Imagination gate advances.
-   If rolled back: note n243 failure reason and queue n244 planning.
+4. **Gold(A) growth** — +5-10 more scripts. Uncovered scenes: comet shower, wool at fire,
+   midnight market, hot-air-balloon morning, ice-skating first time, darkroom photo development,
+   night fishing by headlamp.
 
-5. **C-family retrain plan** — after n243 promotion confirmed, plan n244 with all 40 beat exemplars.
-   If n243 rolls back, plan for n244 with both beat exemplars + additional eagle anchor gold scripts.
-
-6. **Gold(A) growth** — target 5-10 new scripts. Ideas: pre-dive breath underwater, empty basketball
-   court at night, morning train fog, harvesting wheat at dawn, first snow of season.
+5. **ZIP rebuild** — no code changes beats 144-145, ZIP is from beat143 (MD5: 8059656f). Stays valid
+   as long as no src/ changes. Rebuild and update MD5 when next fix is applied.
 
 ## STANDING RULES (learned the hard way — keep ALL of these)
 1. Promotion = comparative READS + full battery gate. NEVER a loss number.

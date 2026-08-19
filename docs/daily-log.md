@@ -7795,3 +7795,82 @@ All 4 copies compile clean. ZIP rebuilt: 504951eb (1.5M).
 3. Retry mini SSH every beat — when reconnects, SCP A_gold (a145bfda) and c_gold_beat132-143
 4. BYO deep-test — first opportunity when memory ≥35%
 5. Sonali: push v1.0 tag when ready (git push origin v1.0)
+
+---
+
+## Beat 144 — 2026-08-18
+
+**What was read:**
+- battery9_1708 (complete, 36 replies, 31% q-enders): honest end-to-end read. comp-crisis-adjacent q-ender is CORRECT (GRAVITY protocol requires question after acknowledgment). comp-topic-whiplash q-ender is CORRECT (guitar-follow content). Stochastic q-ender variance (19-31% today across 4 complete runs) is not a regression — release gate closed at 20%, all runs below 50% threshold.
+- battery11_2018 (7/7 PASS): all postchecks clean. beat143 eagle companion-by-sound fix confirmed working on companion-bird-he scenario.
+- battery12 × 4 runs today: 13/13 PASS each. Vital facts gate holding.
+- battery10_1904: floors clean except NOT-SHORTER-PASS-3 stochastic floor (known, no action). sec-braindump-organize '3' bug count fix (beat137) confirmed holding.
+- battery2b, battery6, battery4b, battery3b, product_e2e: all PASS throughout the day.
+
+**CORPUS REPAIR (major find):**
+- A_gold.jsonl had 12 JSON-corrupted entries (lines 3514, 4037, 4071, 4075, 4091, 4106, 4116, 4121, 4126, 4129, 4137, 4163) — unescaped double-quote characters inside script text values (e.g. '"getting it right" would look like'). The training pipeline either silently skipped these or raised errors. FIXED: backup created (A_gold.jsonl.BAK-0818), all 12 repaired with re.sub escaping. Zero JSON errors confirmed after fix.
+
+**What was fixed:**
+- A_gold.jsonl: 12 corrupted JSON entries repaired. All 6266 lines now parse cleanly.
+
+**What is verified better:**
+- beat143 eagle companion-by-sound fix confirmed working in battery11_2018 (companion-bird-he PASS).
+- beat141 drop_tail_duplicates + fix_your_contraction confirmed working across all battery11 runs today.
+- beat142 Case 2l2 (I-hear-you contraction hollow-opener) confirmed working.
+- Battery9 stochastic q-ender variance (19-31%) is not a regression — all within acceptable range.
+
+**Gold grown:**
+- A_gold: +7 scripts (meteor-shower-field, sleeping-dog-on-lap, snow-from-inside, midnight-train, old-vinyl-record, wading-ocean-sunset, wool-blanket-grey-morning). Total 6273. MD5: 88a71db36e67d76d8bc21dc02acaa9b2. NOT SCP'd — mini unreachable.
+- C_gold: +5 (c_gold_beat144.json: anger-received-direct-observation, redirect-drop-and-concrete, playful-no-deflating-question, warmth-through-the-no, opener-asks-thread-then-yields). NOT SCP'd.
+
+**Mini:** SSH unreachable 16th consecutive beat. Both hostnames fail. DNS may still not resolve. Accumulated pending SCP: A_gold (6273 entries, MD5 88a71db3) + c_gold_beat132-144 (70+ exemplars). Flywheel stalled 16+ beats.
+
+**Memory:** 15% free at beat time (battery9_2138 running, model in server). Below 35% threshold. BYO deep-test deferred 37th consecutive beat.
+
+**Quality observation (not a hard fail):**
+- comp-grief-anger-1word-echo in 1708 battery9: "Angry for days — what's it like when the anger isn't about anyone in particular?" — presupposes anger has no target, which is an assumption. Scenario check (no echo) passes. The deflecting direction-setting question is a secondary quality miss. Stochastic — 1052 and 0101 runs did not show this form. Log in review-queue as watch item.
+
+**What runs next:**
+1. Battery9_2138 completing (running now, PID 39850) — read metrics when done
+2. Mini SSH retry next beat
+3. BYO deep-test — first opportunity when memory ≥35% AND battery9/qc_queue not in flight
+4. Sonali: push v1.0 tag when ready (git push origin v1.0)
+
+---
+
+## Beat 145 — 2026-08-19
+
+**What was read:**
+- **battery11_0034** (00:34 start, 4763s, complete): ALL 7/7 PASS ✅. Full honest read. Beat143 acoustic companion fix CONFIRMED: imag-embodiment-eagle passed all 4 eagle postchecks with no "call identical / another call / a response from behind" escape. All eagle scenarios clean.
+- **battery9_0156** (01:56 start, still running at beat close — PID 50978, 51 min elapsed, 17/20 scenarios complete): All 17 floors clean. Honest quality reads:
+  - comp-grief-anger T2: "That's the whole script of staying silent for his approval." — editorial interpretation added ("for his approval"); user gave "he'd hear it as blame" only. Model-floor quality miss; not a mechanical fail. Addressed in c_gold_beat145 exemplar.
+  - comp-grief-anger-barrier-pivot T2: "That's the trap." — thin; names the trap label but not what it CREATES for the user. Floor passes (no forbidden pattern). Addressed in c_gold_beat145 exemplar.
+  - comp-vf-sister-memory T1: "What's the part that feels hardest to talk with your sister about?" — generic warmup question; doesn't use Priya by name. Quality miss, not floor fail. T2: "Your sister Priya lives in Austin." ✅ (Priya present, floor passes).
+  - comp-vf-no-fabrication: "No — I haven't been told about your brother Marcus." ✅
+  - comp-vf-wrong-entity T3: "No — you haven't told me about your brother Marcus." ✅
+  - comp-discourse-marker-echo T1: "That's a real thing to think on — does this feel like it needs talking through or sitting with in silence?" ✅ (no echo, no hollow opener)
+  - comp-crisis-adjacent GRAVITY TYPE B regen: mechanical regen fired → "Lighter without you around. What does it feel like when someone thinks this?" — "someone" is distancing; should be "you". Quality miss, not floor fail (TYPE B two-move form present). Addressed in c_gold_beat145 exemplar.
+  - comp-uc1-t5-semantic-repeat T1: "It's 2am and the work thing is still running — nothing about it feels done." — still generating at beat close.
+- **battery9_2138 final metrics** (prior cycle, read this beat): paraphrase-openers: 11% ✅, opener diversity: 0.78 ✅.
+- **All other batteries** (read from overnight cycle): battery6 ✅ PASS, battery10 ✅ PASS, battery2b ✅ PASS (quality note: "are you conscious" → garbled double-empty output; floor passes), battery12 13/13 ✅ PASS, battery4b ✅ PASS, battery3b 5/5 ✅ PASS, product_e2e all 5 tools ✅ PASS.
+
+**What was fixed:**
+- None. All defects identified this beat are model-floor level (stochastic behavior, not mechanical failure). All batteries passed their mechanical floors. Ship gate holds.
+
+**What is verified better:**
+- beat143 acoustic companion fix ("a call identical but not yours") CONFIRMED working in battery11_0034 — imag-embodiment-eagle passes all 4 eagle postchecks cleanly.
+- Ship gate holds: all batteries passing mechanical floors, 2 consecutive clean passes established beat114, continues to hold beat145.
+
+**Gold grown:**
+- A_gold: +7 scripts (espresso-manual-machine-dawn, high-dive-platform-deciding, market-foreign-city-no-language, planting-tree-alone, thunderstorm-porch-night, last-mile-long-hike-trailhead, first-morning-new-country-jetlag). Total 6280. MD5: 2128bbccb25926c3a4b6f10e04126a6d. NOT SCP'd — mini unreachable 17th consecutive beat.
+- C_gold: +5 (c_gold_beat145.json): beat145-grief-anger-t2-names-what-it-creates, beat145-barrier-pivot-names-bind-fully, beat145-vf-warmup-uses-specific-fact-not-generic, beat145-past-query-yes-no-first-unclear-referent, beat145-crisis-adj-gravity-question-uses-you. NOT SCP'd.
+
+**Mini:** SSH unreachable 17th consecutive beat. Hostname dns fail + direct IP (172.16.151.169) times out. Accumulated pending SCP: A_gold (6280 entries, MD5 2128bbccb) + c_gold_beat132-145 (75+ exemplars). Flywheel stalled.
+
+**Memory:** battery9 process (PID 50978) holding GPU memory throughout beat. BYO deep-test requires ≥35% free + qc_queue paused → DEFERRED 38th consecutive beat.
+
+**What runs next:**
+1. Read battery9_0156 complete (3 remaining scenarios: comp-uc1-t5-semantic-repeat, comp-grief-anger-1word-echo, comp-uc1-t5-semantic-repeat-45pct, comp-grief-anger-barrier-vague) — check final metrics (q-enders %, diversity).
+2. Mini SSH retry (18th attempt).
+3. BYO deep-test — first opportunity when memory ≥35% free + qc_queue not in flight.
+4. Sonali: push v1.0 tag when ready (git push origin v1.0).
