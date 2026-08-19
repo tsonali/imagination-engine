@@ -1276,6 +1276,14 @@ def generate_session(
             "we circle",
             "we drift",
             "our flight",           # "shadows of our flight"
+            # beat143: companion-by-sound escape vectors found in imag-embodiment-eagle battery11
+            # 1527 (2026-08-18): "a call identical but not yours, announcing presence without words"
+            # — acoustic companion assertion, no species name or pronoun, slipped all prior guards.
+            "call identical",       # "a call identical but not yours"
+            "identical but not yours",  # core signal
+            "another call",         # "another call echoes back" — second entity
+            "a second call",        # "a second call came from below"
+            "another wing",         # "another wing beats nearby"
         ))
         if anon_companion_dropped:
             log.warning('[v6] %d anonymous-companion sentence(s) dropped (you/we both in solo eagle active-body)',

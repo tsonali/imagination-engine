@@ -784,7 +784,17 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     r'|\bwe\s+glide\b'              # "as we glide"
     r'|\bwe\s+circle\b'             # "as we circle"
     r'|\bwe\s+drift\b'              # "as we drift"
-    r'|\bour\s+flight\b',           # "shadows of our flight"
+    r'|\bour\s+flight\b'            # "shadows of our flight"
+    # beat143: companion-by-sound escape — "a call identical but not yours, announcing presence"
+    # found in imag-embodiment-eagle battery11 1527 (2026-08-18); model implies a second eagle
+    # via an answering call. Token filters only cover named species and visual companion signals;
+    # acoustic companion assertions slipped through entirely.
+    r'|\bcall\s+identical\b'       # "a call identical but not yours"
+    r'|\bidentical\s+but\s+not\s+yours\b'  # "a call identical but not yours"
+    r'|\banother\s+call\b'         # "another call echoes back" — second entity calling
+    r'|\ba\s+second\s+call\b'      # "a second call came from below"
+    r'|\banother\s+wing\b'         # "another wing beats nearby" — non-flapping variant
+    r'|\ba\s+response\s+from\s+(?:above|below|the\s+ridge|behind)\b',  # implied reply from companion
     re.IGNORECASE,
 )
 

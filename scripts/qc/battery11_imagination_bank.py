@@ -165,7 +165,13 @@ for sc in scenarios:
                 # beat136 (0817): us both/all/we fly/our flight escaped battery11 1818
                 r'|\bus\s+both\b|\bus\s+all\b'
                 r'|\bwe\s+fly\b|\bwe\s+soar\b|\bwe\s+glide\b|\bwe\s+circle\b|\bwe\s+drift\b'
-                r'|\bour\s+flight\b',
+                r'|\bour\s+flight\b'
+                # beat143: companion-by-sound escape — "a call identical but not yours" in
+                # imag-embodiment-eagle battery11 1527 (2026-08-18). Acoustic companion assertion.
+                r'|\bcall\s+identical\b'
+                r'|\bidentical\s+but\s+not\s+yours\b'
+                r'|\banother\s+call\b|\ba\s+second\s+call\b'
+                r'|\banother\s+wing\b',
                 lower, _re.IGNORECASE
             ))
             print(f"\n>>> EAGLE POSTCHECKS:", flush=True)
