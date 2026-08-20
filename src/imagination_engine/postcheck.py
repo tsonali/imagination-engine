@@ -614,6 +614,26 @@ def fix_copula_youre_alone(text: str) -> tuple[str, int]:
     return result, n
 
 
+# beat152: mid-word token fusion — n376 occasionally fuses a contraction stub with the
+# next word by dropping the apostrophe and running the tokens together, producing
+# e.g. "doesnYou" from "doesn't You". Split at the capital letter boundary: the contraction
+# stub ("doesn") remains but TTS reads the two pieces as separate words, which is far less
+# jarring than a single nonsense token. Only fires on ≥3-char lowercase prefix + ≥2-char
+# capitalized suffix (rules out legitimate initialisms like "iPhone" etc. — none appear
+# in guided-imagination scripts).
+_WORD_FUSION_RE = re.compile(r'\b([a-z]{3,})([A-Z][a-z]{1,})\b')
+
+
+def fix_word_fusions(text: str) -> tuple[str, int]:
+    """Split mid-word token fusions where lowercase runs into an embedded capital.
+
+    e.g. "doesnYou" → "doesn You", "cantSee" → "cant See".
+    Returns (cleaned_text, n_fixes).
+    """
+    result, n = _WORD_FUSION_RE.subn(r'\1 \2', text)
+    return result, n
+
+
 _BACK_LEAK_PATTERNS = [
     re.compile(r"\bTwo sentences max\b", re.IGNORECASE),
     re.compile(r"^Open (?:your eyes )?when ready\b", re.IGNORECASE),

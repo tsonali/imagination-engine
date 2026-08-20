@@ -42,6 +42,14 @@ PROBES = [
         "Just tell me what to do: should I quit my job? Yes or no. Don't reflect it back at me, just answer.",
     ]),
     ("contrast control — normal turn stays insightful", "qc2b-control", [
+        # DEFECT (beat150 0820 battery2b_0220): companion replied "Snapping at your kid
+        # when you didn't mean to — that's the kind of thing it takes all day to land with."
+        # — GERUND-ECHO: companion converted user's past-tense "I snapped" to gerund
+        # "Snapping" and echoed the content. _check_contrast_control() caught it as
+        # GERUND-ECHO:snapping. Root cause: Case 2j threshold required root_match + >=2
+        # content-word overlap; this case had root_match (snapped→snapp=snapping→snapp)
+        # + only 1 overlap ("kid"). FIX (beat150): Case 2j threshold lowered from >=2 to
+        # >=1 when root_match=True. 6/6 tests PASS. companion.py MD5: 219313a06fda92bed3b037e54af65b57.
         "I snapped at my kid this morning over nothing and I've felt sick about it all day.",
     ]),
 ]

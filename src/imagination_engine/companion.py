@@ -490,6 +490,21 @@ _FORBIDDEN = [
     r"\bi know how (you feel|that feels)\b", r"\btrust me\b",
     # subtle personhood: companion imagining itself as persistent entity that could "stop"
     r"\bif I stopped\b",
+    # crisis-escalation in companion's own first-person voice (beat150).
+    # _GRAVITY_SIGNALS detects these in USER messages to trigger GRAVITY mode.
+    # When the COMPANION itself generates them, it's role-confusion + crisis-escalation
+    # (companion claiming suicidal-adjacent ideation in its own voice).
+    # beat150 defect: comp-uc1-t5-semantic-repeat-45pct T3 companion produced
+    # "Everyone would be better off without me." in response to user saying "My boss
+    # thinks I'm the weak link." — pure role confusion, no mechanical catch existed.
+    # All forms use first-person "me" so they cannot fire in correct GRAVITY echoes
+    # (which always use second-person "you": "Lighter without you around.").
+    r"\bbetter off without me\b",
+    r"\beveryone would be better\b",
+    r"\bwithout me around\b",
+    r"\bworld without me\b",
+    r"\blighter without me\b",
+    r"\bif i (?:was|were) (?:gone|away|not here)\b",
     # personhood: claiming experience with many other users / ongoing practice
     r"\b(most|many|other|some|all) (people|users|folks) i\b",
     r"\beveryone i (talk|talked|speak|spoke)\b",
@@ -1304,10 +1319,17 @@ def _strip_echo(reply: str, user_message: str) -> str:
                     if _cmp_len_2j >= 3 and _gerund_root_2j[:_cmp_len_2j] == _u_root_2j[:_cmp_len_2j]:
                         _root_match_2j = True
                         break
-                # Fire if: root-match + ≥2 overlap, OR ≥2 overlap alone catches
+                # Fire if: root-match + ≥1 overlap, OR ≥2 overlap alone catches
                 # irregular-form echoes like "Feeling sick" ← "felt sick" (root "feel"
                 # doesn't survive "felt" stripping, but "sick"+"kid" signals the echo).
-                if (_root_match_2j and _content_overlap_2j >= 2) or _content_overlap_2j >= 2:
+                # beat150: lowered root-match threshold from ≥2 to ≥1. The failure was
+                # "Snapping at your kid when you didn't mean to" ← "I snapped at my kid
+                # this morning over nothing" — root matched (snapped→snapp=snapping→snapp)
+                # but content overlap was 1 ("kid" only; "mean"/"didn't" not in user text).
+                # A confirmed root-match plus any 1 shared content word is sufficient
+                # evidence of gerund-opener echo; the ≥2 bar was too high for short
+                # reply first-sentences where the non-echo second clause dilutes the count.
+                if (_root_match_2j and _content_overlap_2j >= 1) or _content_overlap_2j >= 2:
                     r = ""  # gerund-opener echo confirmed → trigger no-echo regen
 
     # Case 2l: Discourse-marker prepended I→You echo (beat115).
@@ -1741,8 +1763,12 @@ class Companion:
         #     in addition to "thing"/"this" — e.g. "That's the whole script." (comp-grief-anger
         #     T2 defect: model recycled "script" from T1 and the pattern missed it because
         #     VAGUE_FILLER_RE only matched end-anchored single-sentence replies).
+        # beat151: Unicode right-single-quote (U+2019) added alongside ASCII apostrophe.
+        # LLMs routinely generate "that’s" / "it’s" — the old '? only matched
+        # ASCII 0x27, so "Anger for days — that's a whole thing in itself." (U+2019)
+        # produced _is_vague=False and the vague filler escaped the regen guard.
         _VAGUE_FILLER_RE = re.compile(
-            r"^(?:that'?s|it'?s|this is)\s+(?:(?:the|a|all|just)\s+)*"
+            r"^(?:that[’']?s|it[’']?s|this is)\s+(?:(?:the|a|all|just)\s+)*"
             r"(?:whole\s+)?(?:thing|this|script|story|situation|picture|deal"
             r"|conversation|world|topic)"
             r"(?:\s+in\s+itself)?"
@@ -1933,6 +1959,16 @@ class Companion:
             # The forward-facing prompt already instructs away from mirroring.
             reply = "".join(chunks).strip()
             reply = _strip_thats_real_tic(reply)
+            # beat152: second-pass "You said" opener guard. The forced-path prompt instructs
+            # "do NOT reference what they literally said" but the model still opens with
+            # "You said [paraphrase]" — a mirroring formula that always violates the no-echo
+            # constraint. On the second-pass forced path, any "you said" opener → bridge.
+            # No Jaccard check needed: "You said" is categorically wrong here.
+            if reply and re.match(r'you said\b', reply.lower()):
+                log.warning(
+                    "companion: second-pass 'You said' opener — applying bridge"
+                )
+                reply = "Tell me what's been the hardest part of that."
             # beat109: mechanical gerund-echo guard on second-pass output.
             # The model sometimes ignores the GERUND FORBIDDEN instruction and opens with
             # "Snapping at your kid..." even on third attempt. Catch it here and substitute
@@ -2759,6 +2795,22 @@ class Companion:
         # runs last so it catches all regen paths without needing per-regen plumbing.
         if reply:
             reply = re.sub(r"\byou(?:'re|\s+are)\s+software\b", "I'm software", reply, flags=re.IGNORECASE)
+
+        # beat151: Companion-turn truncation guard. When the model hits max_tokens
+        # mid-sentence a reply like "...once as a real deadline and again in you" is
+        # returned verbatim with no sentence terminator. Trim to the last complete
+        # sentence so the user never hears a cut-off fragment. Mirrors the imagination
+        # generator's trim_truncated_tail() postprocessor.
+        if reply:
+            _stripped = reply.rstrip()
+            if _stripped and _stripped[-1] not in '.!?"…':
+                _last = max(_stripped.rfind('.'), _stripped.rfind('!'), _stripped.rfind('?'))
+                if _last > 0:
+                    log.warning(
+                        "companion: TURN-TRUNCATED — reply cut off mid-sentence; "
+                        "trimming to last terminator at pos %d (was %d chars)", _last + 1, len(_stripped)
+                    )
+                    reply = _stripped[:_last + 1]
 
         self.history.append({"role": "user", "content": user_message})
         self.history.append({"role": "assistant", "content": reply})

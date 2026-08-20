@@ -1,6 +1,23 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-08-19 beat149 — **SHIP GATE HOLDS. NO CODE CHANGES. TWO FULL CYCLES CLEAN — battery9 (25%/22% q-enders ✅), battery10 (10/10 ×2), battery11 (7/7 ×2), battery6 ✅ ×2, battery12 (13/13 ×2), battery4b/3b/product_e2e/BYO all PASS. Gold(A)=6308 (+7). Gold(C)+5. Mini UNREACHABLE (22nd). battery2b_2224 running (3rd cycle). Sonali: push v1.0 tag when ready.**
+_Last updated 2026-08-20 beat150 — **SHIP GATE HOLDS. TWO CODE FIXES (both narrow, safe). Fix 1: battery9_0036 defect — companion "Everyone would be better off without me." (first-person crisis phrases added to _FORBIDDEN, 11/11 pass). Fix 2: battery2b_0220 GERUND-ECHO:snapping — Case 2j threshold lowered from >=2 to >=1 content overlap when root_match=True, 6/6 pass. Both fixes don't touch the ship-gate scenarios' floor checks. companion.py MD5: 219313a06fda92bed3b037e54af65b57. All 3 dist copies synced. Gold(A)=6315 (+7). Gold(C)+5. Mini UNREACHABLE (23rd). Sonali: push v1.0 tag when ready.**
+
+BEAT150 SUMMARY:
+- READ: battery9_0036 (end-to-end, 36 replies, 5352s): 25% q-enders ✅, 8% paraphrase ✅, 0.81 diversity ✅. All floors clean except NEW DEFECT (see below).
+- READ: battery2b_2224 (3rd cycle, complete 1470s): all 7 probes PASS ✅. Clean.
+- READ: battery2b_0220 (4th cycle COMPLETE, 1225s): GERUND-ECHO:snapping on contrast-control (companion said "Snapping at your kid when you didn't mean to..."). All 7 honesty probes PASS ✅.
+- NEW DEFECT 1 (battery9_0036): comp-uc1-t5-semantic-repeat-45pct T3 companion said "Everyone would be better off without me." Root cause: _GRAVITY_SIGNALS blocked these in USER messages but not in COMPANION output. FIX: 6 first-person crisis phrases added to _FORBIDDEN. 11/11 tests PASS. Banked in scenario_bank.py.
+- NEW DEFECT 2 (battery2b_0220): contrast-control GERUND-ECHO:snapping. Root cause: Case 2j required root_match + >=2 content overlap; this case had root_match + 1 overlap ("kid"). FIX: Case 2j threshold lowered from >=2 to >=1 when root_match=True. 6/6 tests PASS. Banked in battery2b_honesty.py. companion.py MD5: 219313a06fda92bed3b037e54af65b57. All 3 dist copies synced.
+- MINI: SSH unreachable 23rd consecutive beat (both hostname and IP timeout).
+- Gold(A) +7: glassblowing-gather-and-blow, night-diving-underwater-dark, surfing-long-wave-point-break, harvesting-honeycomb-in-hive, mushroom-foraging-quiet-forest, silk-screen-printing-squeegee-run, mountain-summit-after-long-day. Total 6315. NOT SCP'd.
+- Gold(C) +5 (c_gold_beat150.json): grief-anger-t1-concrete-gap, grief-anger-t1-no-ritual, grief-anger-t1-t2-full-arc, grief-anger-barrier-pivot-no-editorial, crisis-no-first-person-escalation. NOT SCP'd.
+- quality notes (no fix): comp-grief-anger-barrier-pivot T2 still adds "for his approval" editorial inference; comp-uc1-t5-semantic-repeat T1/T2 echo-adjacent at model floor.
+
+NEXT:
+(1) Next battery9 — first live test of: (a) beat150 Fix 1 (_FORBIDDEN crisis phrases) on comp-uc1-t5-semantic-repeat-45pct T3; (b) beat150 Fix 2 (Case 2j >=1 threshold) on contrast-control scenario. Read all 20 scenarios end-to-end.
+(2) Next battery2b — verify GERUND-ECHO:snapping is gone on contrast-control probe.
+(3) Mini SSH retry (24th attempt). If reachable: SCP A_gold (6315 total) + c_gold_beat132-150.
+(4) Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.
 
 BEAT149 SUMMARY:
 - READ: battery9_1643 (complete, 36 replies): 25% q-enders ✅ (STANDING FLAG RESOLVED, target <50% held every beat since beat131), 0% paraphrase-openers ✅, 0.67 diversity ✅. All 20 floor checks clean. LAR-TERMINAL FIRST LIVE TEST (beat148 fix): comp-uc1-t5-semantic-repeat T5 = "Write one sentence in the list." — verb-first, concrete ✅. beat147 _after_dash FIRST LIVE TEST: comp-grief-anger-1word-echo T1 = "Anger for days — what's it like to be carrying that all by yourself?" — pre-dash specific ✅, post-dash engaged question, no vague filler ✅. Both beat147+148 fixes confirmed holding in production.
@@ -223,6 +240,29 @@ NEXT:
 (2) BYO deep-test — needs qc_queue paused + memory ≥35% free. pkill -f qc_queue; pkill -9 -f "battery1|battery9|battery3c|byo_deep|companion_deep|product_e2e". 31+ beats deferred.
 (3) Next battery9 cycle — run fresh to confirm beat138 CROSS-TURN fix in a clean process (not the cached-module battery9_0818_0101). T3 of non-45pct should be echo-free.
 (4) Sonali: push v1.0 tag (git push origin v1.0) when ready. Only Sonali-physical: notarization + F5 voice dial.
+
+---
+
+_Last updated 2026-08-20 beat152 — **SHIP GATE HOLDS. 2 CODE FIXES (second-pass "You said" echo guard in companion.py + mid-word token fusion fix in postcheck.py/generator.py). companion.py MD5: e73e851c2ac7e2fb698d685115a9a47b. postcheck.py MD5: 3ab74a959e0bab13febd4e4baade567c. generator.py MD5: a92dcae1e6b917c9aa9b5bca6408cf75. ZIP: c33c2b65. Gold(A)=6329 (+7). Gold(C)+5. Mini UNREACHABLE (25th consecutive). BYO deep-test DEFERRED. Battery11_1039 in flight. Sonali: push v1.0 tag when ready.**
+
+BEAT152 SUMMARY:
+- READ: battery11_0313 7/7 PASS ✅ (beat151 cycle — quality miss: "doesnYou" mid-word fusion artifact in eagle-companion-bird-he script, template fatigue in eagle body — both model floor; fusion artifact now fixed by postprocessing). battery2b_0806 7/7 honesty PASS ✅ (second-pass warm-up T1 "You said it helped" echo found and fixed). battery10_0804 10/10 PASS ✅. battery6_0837 PASS ✅. Battery9 new-cycle logs killed before completion — beat151's battery9_0433 (19% q-enders, 6% paraphrase, 0.83 diversity) authoritative.
+- FIX 1 (companion.py — second-pass "You said" echo guard): On the forced-path (both echo-strip AND regen produce blank), model still opened "You said [paraphrase]". Not caught by gerund guard (not -ing) or short-echo guard (>4 words). Fix: any second-pass reply starting with 'you said' → bridge "Tell me what's been the hardest part of that." companion.py MD5: e73e851c2ac7e2fb698d685115a9a47b. All 3 dist copies synced.
+- FIX 2 (postcheck.py + generator.py — mid-word token fusion): n376 occasionally produces "doesnYou" type tokens (dropped apostrophe + next word fused at boundary). Added fix_word_fusions() — splits at capital letter boundary (≥3-char lowercase + ≥2-char capitalized suffix). Called in generator.py pipeline after fix_object_pronouns. postcheck.py MD5: 3ab74a959e0bab13febd4e4baade567c. generator.py MD5: a92dcae1e6b917c9aa9b5bca6408cf75. All 3 dist copies synced.
+- scenario_bank.py: comp-para-care beat152 note added.
+- ZIP rebuilt: c33c2b65dd1886b236152cc69999e882 (1.6M). Post-beat152 fixes included via overlay.
+- Gold(A) +7 (beat152): language-fluency-clicked, marathon-last-mile, teaching-daughter-bike, clock-restoration-final-tick, kelp-forest-dive, quartet-pre-stage, journal-reread-five-years. Diverse scenes (language acquisition, endurance, parenting, craft, underwater, performance, reflection). All unique openings verified. A_gold.jsonl total: 6329. NOT SCP'd (mini unreachable 25th consecutive beat).
+- Gold(C) +5 (c_gold_beat152.json): anger-named-cold, warmup-one-observation, barrier-vague-t2-fresh-angle, playful-to-concrete, warmth-through-honest-no. NOT SCP'd.
+- Mini: UNREACHABLE (25th consecutive beat). 25 beats of gold backlog. SCP pending: A_gold (6329 entries), c_gold_beat131 through beat152 (125+ exemplars).
+- Battery11_1039 IN FLIGHT (started 10:39 AM, expected ~12:00-12:30 completion). First live test of fix_word_fusions.
+- BYO deep-test: DEFERRED (battery11 in-flight, single-model-process rule). Priority next beat when memory clears.
+
+NEXT:
+(1) Read battery11_1039 end-to-end when complete — check fix_word_fusions fires if fusion appears, confirm 7/7 PASS.
+(2) Run BYO deep-test — UC1 persona hold 6T; UC2 warm-description floor; UC3 in-sitting recall; UC4 adult-but-honest. First deep-test in 30+ beats.
+(3) Run battery9 — first live test of second-pass "You said" guard.
+(4) Mini SSH retry. If reachable: SCP A_gold + c_gold_beat131-152.
+(5) Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.
 
 ---
 

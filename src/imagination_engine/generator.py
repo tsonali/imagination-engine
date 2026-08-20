@@ -69,7 +69,8 @@ from imagination_engine.postcheck import (degeneration_report, drop_collapsed_pa
                                           strip_back_instruction_leaks,
                                           strip_active_body_chair_refs,
                                           strip_alert_calm_violations,
-                                          strip_bullet_lines)
+                                          strip_bullet_lines,
+                                          fix_word_fusions)
 from imagination_engine.scene_bibles import get_bible
 from imagination_engine.structured import extract_array
 
@@ -1193,6 +1194,12 @@ def generate_session(
     full, obj_fixed = fix_object_pronouns(full)
     if obj_fixed:
         log.warning('[v6] %d object-pronoun error(s) fixed (she→her after preposition)', obj_fixed)
+    # beat152: fix mid-word token fusions (e.g. doesnYou → doesn You) — n376 occasionally
+    # drops an apostrophe and runs the stub directly into the next capitalized word.
+    full, fusion_fixed = fix_word_fusions(full)
+    if fusion_fixed:
+        log.warning('[v6] %d mid-word token fusion(s) split (e.g. doesnYou → doesn You)',
+                    fusion_fixed)
     # Strip BACK_PROMPT instruction leaks: model occasionally echoes sub-instructions
     # ('Two sentences max.', 'Open your eyes when ready.') verbatim. Strip them.
     full, leak_removed = strip_back_instruction_leaks(full)

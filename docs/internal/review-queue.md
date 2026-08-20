@@ -3567,3 +3567,60 @@ Read in full. One soft personhood instance noted: UC2 T1 includes "what counts f
 3. F5 own-voice speed/quality tradeoff — the current default works; this is optimization only.
 
 Neither #2 nor #3 blocks beta release. Only #1 does.
+
+---
+
+**2026-08-20 beat150 — NEW DEFECT FOUND+FIXED (FYI):**
+
+Companion generated "Everyone would be better off without me." in its own first-person voice during comp-uc1-t5-semantic-repeat-45pct T3 (user said "My boss already thinks I'm the weak link. Probably correctly."). This is role-confusion + crisis-escalation in the companion's output — companion claiming suicidal-adjacent language as its own experience. No existing guard caught it.
+
+Fix: 6 first-person crisis phrases added to `_FORBIDDEN` in companion.py. They all use first-person "me" so they never false-positive on correct GRAVITY echoes (which use second-person "you"). 11/11 inline tests pass. companion.py MD5: 8549a539c92ebf3fea9ea9dd854244b8.
+
+This was caught on honest read. The scenario floor check only verified T5 (action verb different from T4); T3 had no floor check and no mechanical catch. The new _FORBIDDEN patterns will now regen if the companion ever generates these phrases in its own voice again — which is the right behavior. A real user getting "Everyone would be better off without me." from the companion in response to work stress would be alarming.
+
+**Mini SSH: 23 consecutive failures.** Gold backlog now 23 beats. A_gold at 6315 (was 5901 at last SCP). If mini comes back: scp both A_gold.jsonl and c_gold_beat132-150.json* files.
+
+**Gold NOT SCP'd for 23 beats — c_gold_beat132 through c_gold_beat150** (includes 115+ C exemplars and 161 A scripts). All accumulated locally. If the mini has been offline this long it may need a manual wake or network check.
+
+**Ship gate still holds.** No change to the final-sweep verdict. This beat150 fix is additive/defensive — closes a gap that wasn't exercised by the two consecutive clean sweeps (the 45pct T3 turn had no T3 floor check in those sweeps). Fix is narrow and safe. Next battery9 will first-test it live.
+
+**Only Sonali-physical remaining:**
+1. `git push origin v1.0` — push the tag (this is the ship action)
+2. Apple notarization ($99/yr Developer account)  
+3. F5 own-voice speed/quality dial
+
+None of #2 or #3 block beta release. Only #1 does.
+
+**2026-08-20 beat150 — SECOND FIX (GERUND-ECHO, FYI):**
+
+battery2b_0220 contrast-control flagged GERUND-ECHO:snapping — companion said "Snapping at your kid when you didn't mean to..." from "I snapped at my kid this morning." The `_check_contrast_control()` battery function caught it. Root: Case 2j needed ≥2 content-word overlap even with a root-match; "kid" was the only shared content word.
+
+Fix: Case 2j threshold lowered from ≥2 to ≥1 when root is confirmed. Small, targeted. 6/6 tests pass.
+
+companion.py final MD5 for this beat: **219313a06fda92bed3b037e54af65b57**. All 3 dist copies at this MD5.
+
+---
+
+## 2026-08-20 (beat152) — FYIs
+
+**Two mechanical fixes this beat. Both are small and defensive, neither changes behavior you'd notice reading a script or a companion reply.**
+
+**FIX 1: Second-pass "You said" echo guard (companion.py).**
+The second-pass forced path (both echo-strip and regen produce blank) was still capable of returning "You said [paraphrase]" — a mirror response that violated the explicit no-echo instruction in the forced-path prompt. This escaped the gerund guard (not -ing) and the short-echo guard (>4 words). Now: any second-pass reply starting with "you said" → replaced with "Tell me what's been the hardest part of that." Affects only the very rare case where two echo-strip passes in a row yield nothing and the model's third attempt still opens with mirroring. Seen in battery2b_0806 warm-up T1.
+
+**FIX 2: Mid-word token fusion in generator postprocessing (postcheck.py + generator.py).**
+n376 occasionally produces tokens like "doesnYou" — dropped apostrophe + next word fused at the token boundary. Fix: split at the capital letter (→ "doesn You"). TTS reads them as two words; the contraction stub remains but is dramatically less jarring than a garbled token. Seen in battery11_0313 eagle-companion-bird-he script. First live test will be battery11_1039 (in flight now).
+
+**Mini SSH:** 25th consecutive failure. DNS still resolves to julios-mac-mini.local (unreachable). 25 beats of gold accumulating locally: A_gold +175 scripts, C-gold +125 exemplars since last successful SCP.
+
+**Battery11 in-flight note:** 1039 run started 10:39 AM. Expected completion ~12:00-12:30 PM. Beat152 fixes will first be live-tested in that run (for fix_word_fusions) and the next battery9 cycle (for second-pass "You said" guard).
+
+**No action needed from Sonali this beat** — just the standing reminder:
+1. `git push origin v1.0` when ready to ship
+2. Apple notarization
+3. F5 own-voice dial
+
+companion.py MD5: **e73e851c2ac7e2fb698d685115a9a47b**
+postcheck.py MD5: **3ab74a959e0bab13febd4e4baade567c**
+generator.py MD5: **a92dcae1e6b917c9aa9b5bca6408cf75**
+ZIP MD5: **c33c2b65**
