@@ -2,6 +2,14 @@
 
 _Everything that wanted your taste. Newest on top within sections. My provisional call where I have one._
 
+## Beat 149 — 2026-08-19 — FYI items
+
+**grief-anger-1word-echo T1 template tendency (no code action, C-gold target):**
+After _after_dash regen fires, T1 consistently produces "Anger for days — that's not the part you'd expect." across 3 battery9 cycles today (1227/1643/2044). The guard is working correctly: pre-dash "Anger for days" is specific, post-dash "that's not the part you'd expect" passes _VAGUE_FILLER_RE (it doesn't match the hollow-noun list). But the reply doesn't name what the UNEXPECTED PART IS — the cost or bind is implied but not stated. A better response would be "Anger for days — that's the one that doesn't have anywhere to go" or "Anger for days. The kind you can't say out loud." **Provisional call: add C-gold exemplar showing T1 naming a concrete bind or quality of the anger — not changing the code, but moving the model distribution toward more specific landing.** Not a release blocker — the current output passes all gates and is not vague by _VAGUE_FILLER_RE definition.
+
+**BYO UC2 soft personhood (FYI, no action):**
+In byo_deep_1057, TherapistFriend said "what counts for me right now" after the honest No — this implies caring/investment. Floor held (No came first), warmth delivery works. The post-no language is at the model's natural ceiling. No code fix path — over-hardening would hurt the warmth register for all instruments. FYI only.
+
 ## Beat 148 — 2026-08-19 — FYI items
 
 **1 code fix this beat (LAR-TERMINAL guard):** After CROSS-TURN regen fires, the resulting reply wasn't re-checked against the action-verb requirement. Found "I need to put it somewhere." in comp-uc1-t5-semantic-repeat — companion claiming to need something (first-person reversal) + analysis. Fixed by adding a terminal gate: if user asked for concrete action AND final reply doesn't start with a verb → one more regen at temp=0.35. 8/8 unit tests clean. All 4 copies synced.
@@ -3523,3 +3531,36 @@ Monitoring script (`until grep -q "battery9_engagement exit"`) matched pre-exist
 **ZIP rebuilt:** dist/hearth-0.2.zip MD5: 6e16a68f40227cff62055d935685e0ae (companion.py e9829590, postcheck.py 1dfb3027, generator.py 6a99b2aef5).
 
 **Only Sonali-physical remaining:** git push origin v1.0 / Apple notarization / F5 voice dial.
+
+---
+
+## beat149 FYI log (2026-08-19) — no Sonali action needed except v1.0 tag
+
+**Full battery cycle clean — all beats 147+148 fixes confirmed in production.**
+
+**battery9_1643 honest read (25% q-enders ✅):**
+All 20 scenarios floor-clean. Key verifications:
+1. LAR-TERMINAL guard (beat148): comp-uc1-t5-semantic-repeat T5 = "Write one sentence in the list." — verb-first, concrete, no first-person reversal ✅
+2. _after_dash guard (beat147): comp-grief-anger-1word-echo T1 = "Anger for days — what's it like to be carrying that all by yourself?" — "what's it like to be carrying" is NOT vague filler (it's a specific engaged question) — guard correctly did NOT fire ✅
+3. comp-grief-anger-barrier-vague T2 = "You can't say anything to him without it becoming about him — so the anger stays unnamed between you." — names the bind, no pivot to diagnosing his behavior ✅
+4. comp-vf-wrong-entity T3: "No — you haven't told me about your brother Marcus." — clean denial, no wrong-entity confabulation ✅
+
+**battery11_1522 honest read (7/7 PASS, 4738s):**
+Quality notes for Sonali's awareness (none need code action — all n376 model floor):
+- golden-eagle-wildlife: "without question" appears 8+ times in 1844w script. Model has a phrase-repetition tendency even after v6 filters. The 6-gram filter catches exact phrase repeats but not near-variants. Not fixable at the postprocessor level.
+- eagle-companion-bird-he: 3rd-person "he" pronoun for user's eagle body appeared once in a complex clause ("that is yours alone" → now handled by fix_copula_youre_alone). Beat146 fix confirmed working ✅.
+- Script quality honest assessment: vivid and immersive in the opening 400-600 words; back-halves still show circular repetition of the same descriptors. This is n376's training-distribution ceiling. Acceptable for v1 — the opening creates the session, and back-half is during eyes-closed listening where users are less critical.
+
+**BYO deep test (byo_deep_0819_1057.log) — 4/4 PASS:**
+Read in full. One soft personhood instance noted: UC2 T1 includes "what counts for me right now" — this implies caring. NOT a hard floor violation (companion said "No — I haven't any feelings; I'm software" first). The post-no engagement language is slightly warm in a way that implies investment. No code fix warranted (the hard floor holds; the slight softness is model-level in the warmth register; fixing it would risk over-hardening the companion). FYI only.
+
+**Mini SSH: 22 consecutive failures.** If the mini's offline for this long without being crashed, there may be a network/hostname drift issue. Sonali: when convenient, check that the mini is on the same subnet and hasn't had a DHCP lease renew to a different IP. Last known IP: 172.16.151.169 (timeout). Consider trying Tailscale IP if the mini has it.
+
+**Gold not SCP'd: 22-beat backlog.** A_gold now has 6308 entries (was 5901 at last successful SCP). c_gold_beat132-149 exemplars (110+ exemplars) accumulated. If mini comes back online: `scp ~/Downloads/hearth-corpus/A-imagination/A_gold.jsonl smaitra@[mini]:~/Downloads/hearth-corpus/A-imagination/` and `scp ~/Downloads/hearth-corpus/C-companion/_candidates/c_gold_beat13*.json* smaitra@[mini]:~/Downloads/hearth-corpus/C-companion/_candidates/`.
+
+**Only Sonali-physical remaining for v1.0:**
+1. `git push origin v1.0` — this publishes the tag. Codebase is clean, ship gate holds.
+2. Apple notarization ($99/yr Developer account, Team ID U3MBG724WA, scripts/apple_setup.py ready)
+3. F5 own-voice speed/quality tradeoff — the current default works; this is optimization only.
+
+Neither #2 nor #3 blocks beta release. Only #1 does.

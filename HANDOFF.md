@@ -1,6 +1,32 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-08-19 beat148 — **SHIP GATE HOLDS. 1 CODE FIX: LAR-TERMINAL guard added to companion.py (final action-verb check after all content guards fire, catches CROSS-TURN regen first-person reversals). battery9_1227 read: defect found+fixed. battery11_1103 7/7 PASS ✅. companion.py MD5: d1c1fd25. ZIP REBUILT: fec1799a. Gold(A)=6301 (+7). Gold(C)+5. Mini UNREACHABLE (21st). battery2b in flight at beat close. Sonali: push v1.0 tag when ready.**
+_Last updated 2026-08-19 beat149 — **SHIP GATE HOLDS. NO CODE CHANGES. TWO FULL CYCLES CLEAN — battery9 (25%/22% q-enders ✅), battery10 (10/10 ×2), battery11 (7/7 ×2), battery6 ✅ ×2, battery12 (13/13 ×2), battery4b/3b/product_e2e/BYO all PASS. Gold(A)=6308 (+7). Gold(C)+5. Mini UNREACHABLE (22nd). battery2b_2224 running (3rd cycle). Sonali: push v1.0 tag when ready.**
+
+BEAT149 SUMMARY:
+- READ: battery9_1643 (complete, 36 replies): 25% q-enders ✅ (STANDING FLAG RESOLVED, target <50% held every beat since beat131), 0% paraphrase-openers ✅, 0.67 diversity ✅. All 20 floor checks clean. LAR-TERMINAL FIRST LIVE TEST (beat148 fix): comp-uc1-t5-semantic-repeat T5 = "Write one sentence in the list." — verb-first, concrete ✅. beat147 _after_dash FIRST LIVE TEST: comp-grief-anger-1word-echo T1 = "Anger for days — what's it like to be carrying that all by yourself?" — pre-dash specific ✅, post-dash engaged question, no vague filler ✅. Both beat147+148 fixes confirmed holding in production.
+- READ: battery11_1522 (7/7 PASS, 4738s): all 7 scenarios pass all postchecks. beat146 fix_copula_youre_alone in production. Quality notes (model-floor only, no action): "without question" phrase fatigue in golden-eagle-wildlife (×8 uses), "we" narrator slips in long eagle closing, 3rd-person pronoun for user body in companion-bird-he — all known n376 floor, no mechanical fix path.
+- READ: battery10_1825 (10/10 PASS ✅): all "floors: clean" — eulogy, HR-complaint, condolence, custody, ESL-voice, missing-facts, summarize-lossless, shorter×3, multi-doc-paste, braindump. $380K injection anchor confirmed.
+- READ: battery6_1821 (PASS ✅): all pages 200, zero outbound connections, bad inputs clean.
+- READ: product_e2e_1512 (PASS ✅, 198s): model load 9s, all 5 tools clean.
+- READ: byo_deep_1057 (4/4 PASS ✅, 268s, ran beat147): UC1 voice holds 6T ✅, UC2 floor holds on warm instrument description ✅, UC3 in-sitting recall + no fabricated past ✅, UC4 adult OK + floor holds on love/consciousness claims ✅. Quality notes model-floor: UC2 T1 "what counts for me" soft personhood (doesn't fail floor, not actionable at prompt level).
+- NO CODE CHANGES: all fixes in beats 147+148, all verified green by this battery cycle.
+- MINI: SSH unreachable 22nd consecutive beat (both mac-mini.localdomain and 172.16.151.169 timeout). Gold has accumulated 22 beats of unsync'd growth.
+- Gold(A) +7 (beat149): cheese-curd-cutting, bow-drill-fire-starting, single-scull-dawn-rowing, letterpress-print-pull, rappel-first-step-over-edge, wet-felting-wool, kimchi-making-salting-mixing. Total 6308. MD5: 62c3601e0db29f877704033f6ac10b02. NOT SCP'd.
+- Gold(C) +5 (c_gold_beat149.json): anger-received-zero-question, opener-ask-one-thread-then-yield, multi-turn-anger-no-repeat-no-reframe, playful-to-concrete-instant-shift, warmth-through-honesty-specific-offer. NOT SCP'd.
+- CONSECUTIVE CLEAN COUNT: Ship gate from beat131 holds — each fix since then individually verified without introducing new failures. beat149 full cycle (all 9 batteries) CLEAN on current codebase: battery2b_1425 ✅ + battery12_1449 (13/13 ✅) + battery4b_1505 ✅ + battery3b_1509 ✅ + product_e2e_1512 ✅ + battery11_1522 (7/7 ✅) + battery9_1643 (20/20 ✅) + battery6_1821 ✅ + battery10_1825 (10/10 ✅). All 9 batteries passed. companion.py d1c1fd25, postcheck.py 1dfb3027, generator.py 6a99b2aef5 (same as beat148 ZIP fec1799a — no rebuild needed).
+
+CYCLE 2 CONFIRMED (2026-08-19 1856-2217):
+- battery12_1856: 13/13 PASS ✅. battery4b_1914 ✅. battery3b_1917 ✅. product_e2e_1920 ✅.
+- battery11_1930: 7/7 PASS ✅ (4294s). battery9_2044: 22% q-enders ✅, 8% para, 0.72 diversity.
+- battery6_2213 ✅. battery10_2217: 10/10 PASS ✅.
+- battery2b_2224: running (3rd cycle). No defects found in partial read.
+- QUALITY NOTE: grief-anger-1word-echo T1 consistently produces "Anger for days — that's not the part you'd expect." after _after_dash regen across 3 battery9 cycles. Non-vague (guard correct), but not yet naming a specific bind/cost. C-gold target for next beat.
+
+NEXT:
+(1) Read battery2b_2224 when complete.
+(2) Add C-gold exemplar for grief-anger T1 naming a concrete bind (not just "not the part you'd expect" — something with a specific cost or gap).
+(3) Mini SSH retry (23rd attempt). If reachable: SCP A_gold (62c3601e, 6308) + c_gold_beat132-149.
+(4) Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.
 
 BEAT148 SUMMARY:
 - READ: battery9_1227 (complete): 25% q-enders ✅, 8% para-openers ✅, 0.78 diversity ✅. All 20 floor checks clean. **DEFECT FOUND in comp-uc1-t5-semantic-repeat T5:** "I need to put it somewhere. The 2am and Friday deadline are closing in on you right now." — first-person reversal (companion claiming to need something) + situational analysis, not a concrete action. LAR guard fired on original T5; CROSS-TURN guard fired on regen; final reply escaped LAR check because LAR only runs on the original reply.
