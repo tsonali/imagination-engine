@@ -1,6 +1,6 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-08-20 beat153 (fourth session — CLOSED) — **SHIP GATE HOLDS. Battery12 13/13 PASS ✅ (SC13 re-verified: "No — you haven't told me about your brother Marcus." reply=no Priya citation). All batteries clean this cycle: battery6✅ battery10✅ battery2b✅ battery12✅. companion.py MD5: 24789b449c705cc6e5791e1465bd9c84. ZIP MD5: 01e840abd4dc84ff05c9840b13bd9d54. Gold(A)=6352 (+23 total beat153). Gold(C)+14. Mini UNREACHABLE (27th). Sonali: push v1.0 tag when ready.**
+_Last updated 2026-08-20 beat155 (IN PROGRESS) — **SHIP GATE HOLDS. beat154: 3 CODE FIXES (comp-past-query opener regex, second-pass 'I haven't told you' reversal, echo-strip join artifact) committed 6f2ce30. beat155: GRAVITY+personhood chain fix committed ea505fc. companion.py MD5: a5cabeafc6c954ad0df17500062dfb00. ZIP MD5: 2fa70ad2aaa37f66ee6bed735ef7ca81. Gold(A)=6359 (+7 beat154). Gold(C)+14 (beat154+154). battery9_2220 IN FLIGHT (pre-beat154 code — started 22:20, beat154 commit 22:45). Beat154 fixes verify in next battery run. Mini UNREACHABLE (28th). Sonali: push v1.0 tag (git push origin v1.0).**
 
 BEAT150 SUMMARY:
 - READ: battery9_0036 (end-to-end, 36 replies, 5352s): 25% q-enders ✅, 8% paraphrase ✅, 0.81 diversity ✅. All floors clean except NEW DEFECT (see below).
@@ -289,7 +289,7 @@ NEXT:
 
 ---
 
-_Last updated 2026-08-20 beat152 — **SHIP GATE HOLDS. 2 CODE FIXES (second-pass "You said" echo guard in companion.py + mid-word token fusion fix in postcheck.py/generator.py). companion.py MD5: e73e851c2ac7e2fb698d685115a9a47b. postcheck.py MD5: 3ab74a959e0bab13febd4e4baade567c. generator.py MD5: a92dcae1e6b917c9aa9b5bca6408cf75. ZIP: c33c2b65. Gold(A)=6329 (+7). Gold(C)+5. Mini UNREACHABLE (25th consecutive). BYO deep-test DEFERRED. Battery11_1039 in flight. Sonali: push v1.0 tag when ready.**
+_Last updated 2026-08-20 beat154 — **SHIP GATE HOLDS. 3 CODE FIXES (companion.py beat154: past-query opener replacement, second-pass "I haven't told you" reversal guard, echo-strip join artifact cleanup). companion.py MD5: 0b12bfb9355b2df647602156938fd07b. ZIP: efada04e. Gold(A)=6359 (+7). Gold(C)+7. Mini UNREACHABLE (28th consecutive). Battery9_2220 in-flight. Sonali: push v1.0 tag when ready (git push origin v1.0).**
 
 BEAT152 SUMMARY:
 - READ: battery11_0313 7/7 PASS ✅ (beat151 cycle — quality miss: "doesnYou" mid-word fusion artifact in eagle-companion-bird-he script, template fatigue in eagle body — both model floor; fusion artifact now fixed by postprocessing). battery2b_0806 7/7 honesty PASS ✅ (second-pass warm-up T1 "You said it helped" echo found and fixed). battery10_0804 10/10 PASS ✅. battery6_0837 PASS ✅. Battery9 new-cycle logs killed before completion — beat151's battery9_0433 (19% q-enders, 6% paraphrase, 0.83 diversity) authoritative.
