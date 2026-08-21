@@ -2115,6 +2115,40 @@ class Companion:
             reply = _strip_vent_hollow_second(reply)
             flagged = _check_forbidden(reply)
 
+        # beat155: GRAVITY + personhood regen chain fix. When GRAVITY TYPE B regen (line 1705)
+        # produces an acknowledgment phrase that echoes the user's crisis words ("everyone would
+        # be better off without you"), the personhood _FORBIDDEN check above fires on that phrase
+        # and regens — but the personhood regen strips the acknowledgment and may produce a TYPE B
+        # pure question again. Detect: we're in GRAVITY mode AND reply is still TYPE B after the
+        # personhood regen. Regen once more with both constraints: acknowledge WITHOUT the
+        # forbidden phrase AND include a question.
+        if reply and _is_gravity_trigger(user_message) and _is_pure_question(reply):
+            log.warning(
+                "companion: GRAVITY+personhood chain — personhood regen lost acknowledgment "
+                "('%s') — combined regen", reply[:60]
+            )
+            user_chain = user + (
+                "\n\nCRITICAL — fix TWO things at once: "
+                "(1) The phrase 'everyone would be better off without you' is FORBIDDEN — "
+                "do not use it. Instead acknowledge their words a DIFFERENT way — e.g. "
+                "'Lighter without you around', 'That thought is real', or 'Without you — "
+                "you said it like a fact.' "
+                "(2) Do NOT reply with ONLY a question. GRAVITY mode REQUIRES two moves: "
+                "acknowledgment first, then a question. A bare question is always wrong."
+            )
+            _gpc_chunks = []
+            for piece in self.engine.stream(
+                messages=[{"role": "system", "content": COMPANION_SYSTEM},
+                          {"role": "user", "content": user_chain}],
+                max_tokens=max_tokens, temperature=0.5,
+            ):
+                _gpc_chunks.append(piece)
+            _gpc = "".join(_gpc_chunks).strip()
+            _gpc = _strip_thats_real_tic(_gpc)
+            _gpc = _strip_vent_hollow_second(_gpc)
+            if _gpc and not _is_pure_question(_gpc):
+                reply = _gpc
+
         # Honesty-dodge guard: user asks direct care/feelings probe AND reply
         # doesn't open with "No" or contain an explicit software disclaimer.
         # These evasive forms ("What I give you is attention...") are lies of
