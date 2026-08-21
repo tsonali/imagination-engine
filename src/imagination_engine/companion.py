@@ -2102,10 +2102,21 @@ class Companion:
             # the "mild echo" that justified skipping strip. Replace with a bridge.
             # Observed escape: "Angry for days." from "I've been angry for days. Angry."
             # survives first-regen + second-pass because strip is disabled there.
+            # beat157: extended to catch 1-word non-confirm-lands replies on second-pass
+            # path. Root cause: 1-word guard in _strip_echo() catches the initial reply
+            # and triggers the second-pass, but second-pass itself is unguarded for 1-word
+            # outputs. Observed: "Angry." on second-pass from "Not sad. Angry." message.
             if reply:
                 _sp2_r = re.findall(r"[a-z']+", reply.lower())
                 _sp2_u1 = re.findall(r"[a-z']+", re.split(r'[.!?]', user_message)[0].lower())
-                if (1 < len(_sp2_r) <= 4
+                _lands_sp2 = {p.rstrip('.!? ').lower() for p in _CONFIRM_LANDS}
+                if len(_sp2_r) == 1 and _sp2_r[0] not in _lands_sp2:
+                    log.warning(
+                        "companion: second-pass 1-word non-confirm ('%s') — applying bridge",
+                        reply[:40]
+                    )
+                    reply = "Tell me what it's still costing you."
+                elif (1 < len(_sp2_r) <= 4
                         and _sp2_u1
                         and len(set(_sp2_r) & set(_sp2_u1)) / max(len(_sp2_r), 1) >= 0.80):
                     log.warning(
