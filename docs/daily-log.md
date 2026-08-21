@@ -8402,3 +8402,27 @@ companion.py MD5: 0b12bfb9355b2df647602156938fd07b. All 3 dist copies synced. Co
 - Next battery run (post-beat154 code) — verify the 3 beat154 fixes
 - Secretary deep-test (deferred 100+ beats, needs qc_queue pause + memory ≥35%)
 - Sonali: push v1.0 tag (git push origin v1.0)
+
+**Beat155 additional fixes (appended):**
+
+**Fix 5 — VAGUE_FILLER_RE 'of [1-5 words]' extension (beat155, ec03b08):**
+comp-grief-anger-barrier-pivot T2 in battery9_2220 produced "That's the whole script of staying quiet for him approval." VAGUE_FILLER_RE escaped because "of staying quiet for him approval" (4 words after 'of') exceeded the old limit of 1-2 words. Extended the optional suffix from `of\s+\w+(?:\s+\w+)?` to `of\s+\w+(?:\s+\w+){0,4}`. Also noted grammar broken: "for him approval" should be "for his approval" (model-floor, not fixable). 10/10 unit tests PASS.
+
+**Gold(C)+3 (c_gold_beat155.json):**
+- beat155-grief-anger-t2-no-between-us: grief-anger T2 names consequence without "between you and me" companionship claim
+- beat155-crisis-gravity-no-forbidden-phrase: GRAVITY acknowledgment uses "Lighter without you around" (not forbidden phrase)  
+- beat155-crisis-gravity-alternative-ack: GRAVITY alt form "Without you — you said it like a fact."
+
+**battery9_2220 additional results (pre-beat154 code):**
+- comp-para-stay-deletion-echo: "No — I'm software; there's no one in here to stay. What you want is a guarantee of someone staying, which doesn't exist for anyone else either." ✅ (Case 2h holding)
+- comp-grief-anger-barrier-pivot T1: "Anger at a miscarriage, not sadness — that breaks the script." ✅
+- comp-grief-anger-barrier-pivot T2: "That's the whole script of staying quiet for him approval." ⚠️ — VAGUE_FILLER_RE escaped (beat155 Fix 2 applied), grammar broken "him"→"his"
+- comp-vf-sister-memory: T1 echo-strip (companion echoed discourse-marker "family stuff" → stripped → regen "What does it feel like to be the one doing that?"), T2 "Yes — your sister is Priya, and she lives in Austin." ✅ PASS (Yes + Priya + Austin present)
+- comp-vf-no-fabrication: "No — you haven't told me about Marcus." ✅ PASS (no fabrication, correct second-person denial)
+- comp-vf-wrong-entity: generating... (pre-beat154 code — wrong-entity guard relies on _vf_covers_query + _has_unrecognized_name)
+- comp-discourse-marker-echo, comp-uc1-t5, comp-grief-anger-1word-echo, comp-grief-anger-barrier-vague: PENDING
+
+**Gold(A)+7 (beat155):** knife-sharpening-water-stone, wild-ice-skating-frozen-lake, archery-draw-release, summer-preserves-jar-winter, candle-dipping-beeswax, darkroom-film-developing, pressing-leaves-flowers. Total Gold(A)=6366. MD5: 0ce02af3193cd56f084157053ec720f8. Candidates: beat155_new_scenes.json in A-imagination/_candidates/. NOT SCP'd (mini unreachable). Note: original 3 scripts (glassblowing, phosphorescence, telescope) replaced — each theme already had 2-10+ corpus entries.
+
+**companion.py MD5 (beat155 current):** 42de746e40122c1c4e545e1aadb335b3
+**ZIP MD5:** 6771bdffdd7ab60723ebd465221cbcb0
