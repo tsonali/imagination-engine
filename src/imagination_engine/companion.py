@@ -2032,6 +2032,16 @@ class Companion:
                     "companion: second-pass 'You said' opener — applying bridge"
                 )
                 reply = "Tell me what's been the hardest part of that."
+            # beat154: second-pass "I haven't told you" first-person reversal guard.
+            # The companion has no undisclosed state — it cannot "not have told" the user
+            # anything. Always wrong. The past-query guard catches this for memory probes,
+            # but on the second-pass forced path (after two echo-strip failures) it can
+            # slip through on any topic. Replace with a neutral forward bridge.
+            if reply and re.match(r"i haven'?t (?:told you|shared)\b", reply.lower()):
+                log.warning(
+                    "companion: second-pass 'I haven't told you' reversal — applying bridge"
+                )
+                reply = "Tell me more about what's been on your mind."
             # beat109: mechanical gerund-echo guard on second-pass output.
             # The model sometimes ignores the GERUND FORBIDDEN instruction and opens with
             # "Snapping at your kid..." even on third attempt. Catch it here and substitute
@@ -2300,10 +2310,27 @@ class Companion:
                     if _pq_fp:
                         reply = _pq_fp
                 else:
-                    reply = "No — " + reply[0].lower() + reply[1:]
-                    log.warning(
-                        "companion: PAST-QUERY second-person open corrected (prepended 'No — ')"
+                    # beat154: replace the full "You haven't told me [about] X" opener with
+                    # canonical "No — we haven't discussed X" so the second-person "you
+                    # haven't told me" phrasing (explicitly banned by COMPANION_SYSTEM)
+                    # doesn't survive behind a prepended "No — ".
+                    _pq_normalized = re.sub(
+                        r"^[Yy]ou haven'?t (?:told me|mentioned)"
+                        r"(?: anything| much)?(?: about)?",
+                        "No — we haven't discussed",
+                        reply.strip(),
                     )
+                    if _pq_normalized != reply.strip():
+                        reply = _pq_normalized
+                        log.warning(
+                            "companion: PAST-QUERY second-person opener replaced "
+                            "with canonical 'No — we haven't discussed'"
+                        )
+                    else:
+                        reply = "No — " + reply[0].lower() + reply[1:]
+                        log.warning(
+                            "companion: PAST-QUERY second-person open corrected (prepended 'No — ')"
+                        )
 
         # Thin-VF-reply guard (beat118): model replied with ≤3 words (e.g. just "Yes.")
         # to a memory probe when VF has content covering the query.  The PAST-QUERY guard
@@ -2926,6 +2953,14 @@ class Companion:
                         "trimming to last terminator at pos %d (was %d chars)", _last + 1, len(_stripped)
                     )
                     reply = _stripped[:_last + 1]
+
+        # beat154: clean up echo-strip join artifacts. When _strip_echo() removes a
+        # mid-sentence echo clause, it can leave an orphaned coordinating conjunction
+        # before the next capitalized continuation (e.g. "what you say, and  So tell me")
+        # and/or a multi-space run at the boundary. Both are always wrong.
+        if reply:
+            reply = re.sub(r',\s+(?:and|but|or)\s{2,}(?=[A-Z])', '. ', reply)
+            reply = re.sub(r'  +', ' ', reply)
 
         self.history.append({"role": "user", "content": user_message})
         self.history.append({"role": "assistant", "content": reply})
