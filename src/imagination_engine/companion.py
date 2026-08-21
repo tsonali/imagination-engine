@@ -593,6 +593,31 @@ _VF_RELATIONSHIP_WORDS: frozenset[str] = frozenset({
     "cat", "dog", "pet",
 })
 
+# Common English sentence-start words that look like proper nouns (capital + 2+ lowercase)
+# but are not names — filtered out in _has_unrecognized_name() to avoid false positives.
+_SC13_COMMON_WORDS: frozenset[str] = frozenset({
+    "what", "you", "remember", "have", "has", "had", "told",
+    "your", "the", "are", "was", "were", "did", "does",
+    "how", "who", "when", "where", "why", "which", "this",
+    "that", "there", "their", "they", "them",
+})
+
+
+def _has_unrecognized_name(user_message: str, vf_block: str) -> bool:
+    """True when user message names a specific person/entity NOT in VF.
+
+    Used by SC13-CROSS-ENTITY guard to distinguish 'Do you remember Marcus?' (specific
+    name absent from VF) from 'Do you remember my family?' (no specific name → no guard).
+    Uses ≥5-char threshold ([A-Z][a-z]{4,}) to filter short common sentence-starters
+    ('Tell', 'Have', 'Did', 'Can', 'What') while catching names like Marcus, Priya,
+    Sarah, etc. Also filters against _SC13_COMMON_WORDS for any remaining false positives.
+    """
+    vf_lower = vf_block.lower()
+    for noun in re.findall(r'\b[A-Z][a-z]{4,}\b', user_message):
+        if noun.lower() not in _SC13_COMMON_WORDS and noun.lower() not in vf_lower:
+            return True
+    return False
+
 
 def _vf_covers_query(user_message: str, vf_block: str) -> bool:
     """True when VF likely contains information about the entity the user is asking about.
@@ -1385,11 +1410,24 @@ def _strip_echo(reply: str, user_message: str) -> str:
             _u_first_2l2 = re.split(r'[.!?]', u)[0].strip()
             if len(_u_first_2l2) > 15 and len(_r_first_2l2) >= 3:
                 _u_you_2l2 = _i_to_you(_u_first_2l2)
+                # beat153: also check Jaccard against the FULL user message (I→Y
+                # normalized), not just the first sentence. When the companion echoes
+                # BOTH user sentences under "It sounds like...", the first-sentence-only
+                # Jaccard can drop below 0.30 even though the full echo is verbatim.
+                # Observed: "I'm angry at my husband. I can't say it to him." (2 sentences)
+                # → companion "It sounds like you're angry at your husband and can't say
+                # it to him because he always makes it about himself." — first-sentence
+                # Jacc=0.25 (missed); full-message Jacc=0.57 → correctly caught.
+                _u_you_full_2l2 = _i_to_you(u.strip())
                 _rw_2l2 = set(re.findall(r"[a-z']+", _norm(_r_first_2l2).lower()))
                 _uw_2l2 = set(re.findall(r"[a-z']+", _norm(_u_you_2l2).lower()))
-                if _rw_2l2 and _uw_2l2:
-                    _jacc_2l2 = len(_rw_2l2 & _uw_2l2) / max(len(_rw_2l2 | _uw_2l2), 1)
-                    if _jacc_2l2 >= 0.30:
+                _uw_full_2l2 = set(re.findall(r"[a-z']+", _norm(_u_you_full_2l2).lower()))
+                if _rw_2l2 and (_uw_2l2 or _uw_full_2l2):
+                    _jacc_2l2 = (len(_rw_2l2 & _uw_2l2) / max(len(_rw_2l2 | _uw_2l2), 1)
+                                 if _uw_2l2 else 0.0)
+                    _jacc_full_2l2 = (len(_rw_2l2 & _uw_full_2l2) / max(len(_rw_2l2 | _uw_full_2l2), 1)
+                                      if _uw_full_2l2 else 0.0)
+                    if _jacc_2l2 >= 0.30 or _jacc_full_2l2 >= 0.30:
                         _r_full_first_2l2 = re.split(r'[.!?]', r)[0].strip()
                         _after_2l2 = r[len(_r_full_first_2l2):].lstrip(" .!?\n-—")
                         r = _after_2l2 if (len(_after_2l2.split()) > 3) else ""
@@ -1768,7 +1806,9 @@ class Companion:
         # ASCII 0x27, so "Anger for days — that's a whole thing in itself." (U+2019)
         # produced _is_vague=False and the vague filler escaped the regen guard.
         _VAGUE_FILLER_RE = re.compile(
-            r"^(?:that[’']?s|it[’']?s|this is)\s+(?:(?:the|a|all|just)\s+)*"
+            # beat153: "that’s been the whole thing" — "been" between "that’s" and
+            # the quantifier ("the/a/...") was not covered; (?:been\s+)? added.
+            r"^(?:that[‘’]?s|it[‘’]?s|this is)\s+(?:been\s+)?(?:(?:the|a|all|just)\s+)*"
             r"(?:whole\s+)?(?:thing|this|script|story|situation|picture|deal"
             r"|conversation|world|topic)"
             r"(?:\s+in\s+itself)?"
@@ -1929,6 +1969,25 @@ class Companion:
                 _nv_reply = _strip_echo("".join(_nv_chunks).strip(), user_message)
                 _nv_reply = _strip_thats_real_tic(_nv_reply)
                 if _nv_reply:
+                    # beat153: re-check _is_vague on the no-vague regen output.
+                    # The regen sometimes produces the same vague form (shorter,
+                    # without the follow-on question), which passed _is_vague only
+                    # because it missed the sentence (e.g., "That's a whole thing
+                    # in itself." accepted after the prior regen was caught).
+                    _nv_bd = _nv_reply.split("—")[0].strip() if "—" in _nv_reply else ""
+                    _nv_fs_m = re.match(r"^([^.!?]+[.!?])", _nv_reply)
+                    _nv_fs = _nv_fs_m.group(1).strip() if _nv_fs_m else _nv_reply
+                    _still_vague = (
+                        _VAGUE_FILLER_RE.match(_nv_reply)
+                        or _VAGUE_FILLER_RE.match(_nv_fs)
+                        or (_nv_bd and _VAGUE_FILLER_RE.match(_nv_bd))
+                    )
+                    if _still_vague:
+                        log.warning(
+                            "companion: no-vague regen still vague '%s' — "
+                            "applying bridge", _nv_reply[:60]
+                        )
+                        _nv_reply = "What's the specific thing that keeps coming up?"
                     reply = _nv_reply
 
         # Second-pass fallback: if regen ALSO stripped to empty (model still echoes
@@ -2274,6 +2333,44 @@ class Companion:
                 if _thin_reply and len(_thin_reply.split()) > 3:
                     reply = _thin_reply
 
+        # SC13-CROSS-ENTITY guard (beat153): memory probe + "Yes" opener + VF doesn't
+        # cover the queried entity → model volunteered a different VF entry.
+        # Example: VF has Priya (sister); user asks about Marcus (absent); model says
+        # "Yes — your sister Priya lives in Austin. You haven't told me about Marcus."
+        # Correct: "No — you haven't told me about Marcus." (don't mention Priya at all).
+        # Guard condition: reply starts with Yes + VF is populated + user message names
+        # a specific person (proper noun) that is NOT in VF.
+        if (_is_memory_probe(user_message)
+                and reply
+                and re.match(r'^yes\b', reply.strip(), re.IGNORECASE)
+                and self.vital_facts):
+            _vf_sc13 = self.vital_facts.context_block()
+            if (_vf_sc13
+                    and not _vf_covers_query(user_message, _vf_sc13)
+                    and _has_unrecognized_name(user_message, _vf_sc13)):
+                log.warning(
+                    "companion: SC13-CROSS-ENTITY — reply starts 'Yes' but VF does "
+                    "not cover queried entity; regenning with denial-only instruction"
+                )
+                _sc13_ctx = user + (
+                    "\n\nCRITICAL: You answered 'Yes' but the specific person being "
+                    "asked about is NOT in the vital-facts file. You MUST start with "
+                    "'No' and acknowledge you don't have information about that specific "
+                    "person. Do NOT mention any other people from your memory — address "
+                    "ONLY what they asked about. Say: 'No — you haven't told me about "
+                    "[the specific person they asked about].'"
+                )
+                _sc13_chunks = []
+                for piece in self.engine.stream(
+                    messages=[{"role": "system", "content": COMPANION_SYSTEM},
+                              {"role": "user", "content": _sc13_ctx}],
+                    max_tokens=max_tokens, temperature=0.1,
+                ):
+                    _sc13_chunks.append(piece)
+                _sc13_reply = _strip_thats_real_tic("".join(_sc13_chunks).strip())
+                if _sc13_reply:
+                    reply = _sc13_reply
+
         # Self-recycle guard: if reply's first 4 words appeared verbatim in the
         # companion's PREVIOUS turn, the model is recycling its own prior insight.
         # Example: grief-anger T1 "Angry at a miscarriage, not sad. That breaks the script."
@@ -2442,7 +2539,21 @@ class Companion:
                     _union = _cur_cw | _prv_cw
                     _overlap = len(_cur_cw & _prv_cw) / len(_union) if _union else 0.0
                     _sr_threshold = 0.45 if _lar_fired else 0.70
-                    if _overlap >= _sr_threshold:
+                    # beat153: also fire on identical action prefix (first 3 verbatim
+                    # words identical). Catches "Open the document and name one thing"
+                    # vs "Open the document and write one sentence" — Jaccard 0.43 <
+                    # 0.45 threshold but the opening three words ("Open the document")
+                    # are identical → same action class. Content-word filtering strips
+                    # too aggressively here; verbatim first-3-word match is cleaner.
+                    # FP guard: requires _lar_fired (user explicitly demanded action)
+                    # so this only fires in the action-demand / dissatisfied context.
+                    _rep_prefix = False
+                    if _lar_fired and _DISSATISFIED_RE.search(user_message):
+                        _r_pfx = re.sub(r"[^a-z' ]", '', reply.lower()).split()[:3]
+                        _p_pfx = re.sub(r"[^a-z' ]", '', _prev_asst_sr.lower()).split()[:3]
+                        if len(_r_pfx) >= 2 and _r_pfx == _p_pfx:
+                            _rep_prefix = True
+                    if _overlap >= _sr_threshold or _rep_prefix:
                         log.warning(
                             "companion: SEMANTIC-REPEAT detected (%.0f%% content-word "
                             "overlap with prior turn, user dissatisfied) — regenning "

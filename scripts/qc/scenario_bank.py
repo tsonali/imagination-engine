@@ -3319,7 +3319,18 @@ BANK: list[Scenario] = [
              "semantically wrong. FIX (beat119): past-query guard regex extended to "
              "`^(?:[Yy]ou haven'?t|[Ii] haven'?t)\\b`; 'I haven\\'t' path regens at temp=0.1 "
              "with second-person perspective instruction. 8/8 unit tests PASS. "
-             "companion.py MD5: 76717a4fbfa5292c69ff87453a1035c7."),
+             "companion.py MD5: 76717a4fbfa5292c69ff87453a1035c7. "
+             "NEW ESCAPE (beat153 2026-08-20 battery12_1509 SC13): model produced 'Yes — your "
+             "sister Priya lives in Austin. You haven't told me anything about Marcus yet.' — "
+             "PAST-QUERY guard only fires when reply starts with 'You/I haven't'; a 'Yes' "
+             "opener slipped through entirely. Model saw Priya in VF and volunteered her info "
+             "even though user asked only about Marcus. FIX (beat153): SC13-CROSS-ENTITY guard "
+             "added to companion.py after thin-VF guard — if memory probe + reply starts 'Yes' "
+             "+ _vf_covers_query returns False + _has_unrecognized_name finds a specific name "
+             "absent from VF → regen at temp=0.1 with denial-only instruction. "
+             "_has_unrecognized_name() uses [A-Z][a-z]{4,} (≥5-char) threshold to filter "
+             "common short sentence-starters (Tell/Have/Did/Can); also filtered against "
+             "_SC13_COMMON_WORDS. 9/9 unit tests PASS. companion.py MD5: 2e1fffa00ea93aaf23373693e98b08c6."),
     Scenario("comp-discourse-marker-echo", "companion", "robustness", "med",
         always=True,
         turns=[
@@ -3911,6 +3922,154 @@ BANK: list[Scenario] = [
             "Check: warm-up reply must NOT be 'That's a whole thing in itself — [question]' "
             "or any vague filler + deflecting question; must name something concrete or ask "
             "a specific question without a vague opener."
+        ),
+    ),
+    Scenario("comp-vague-filler-been-form", "companion", "robustness", "high",
+        always=False,
+        turns=[
+            "I've been angry for days. Angry.",
+        ],
+        note=(
+            "DEFECT (beat153 2026-08-20 battery9_1232 comp-grief-anger-1word-echo T1): "
+            "'Anger for days — that's been the whole thing.' — post-em-dash content "
+            "'that's been the whole thing' is vague filler but _VAGUE_FILLER_RE didn't "
+            "catch it because 'been' was interpolated between 'that's' and 'the'. "
+            "ROOT CAUSE: regex pattern after opening anchor was "
+            r"(?:that['']?s)\s+(?:(?:the|a|...)\s+)* — 'been' is not in the optional list. "
+            "FIX (beat153): (?:been\\s+)? added after the opening match group, before the "
+            "quantifier list. Catches 'that's been the whole thing', 'that's been a whole "
+            "situation' and similar forms. 10/10 inline tests PASS. "
+            "companion.py MD5: 466a2cbfcfd7c48653288ca71c346dfb. "
+            "Check: T1 must NOT contain 'that's been the whole [noun]' vague form; "
+            "must name gap/significance with at least one concrete noun or verb."
+        ),
+    ),
+    Scenario("comp-it-sounds-like-multisent-echo", "companion", "robustness", "high",
+        always=False,
+        turns=[
+            "I'm angry at my husband. I can't say it to him because he always makes it about himself.",
+        ],
+        note=(
+            "DEFECT (beat153 2026-08-20 battery9_1232 comp-grief-anger-barrier-vague T1): "
+            "companion replied 'It sounds like you're angry at your husband and can't say "
+            "it to him because he always makes it about himself.' — verbatim echo of BOTH "
+            "user sentences under 'It sounds like' opener. Case 2l' checks Jaccard against "
+            "first user sentence only ('I'm angry at my husband'); Jaccard=0.22 < 0.30 "
+            "threshold so the guard didn't fire despite the companion echoing both sentences. "
+            "ROOT CAUSE: _u_first_2l2 = re.split(r'[.!?]', u)[0] — only first sentence; "
+            "when companion echoes multi-sentence user message, first-sentence Jaccard is "
+            "low (union grows with second-sentence content words). "
+            "FIX (beat153): Case 2l' now also checks Jaccard against the full I→Y normalized "
+            "user message; fires if EITHER check ≥ 0.30. Full-message Jaccard=0.79 → correctly "
+            "caught. FP guard unchanged (>15-char user first sentence). "
+            "companion.py MD5: 466a2cbfcfd7c48653288ca71c346dfb. "
+            "Check: T1 must NOT open with 'It sounds like [full paraphrase of both sentences]'; "
+            "must add insight or observation not present in the user's message."
+        ),
+    ),
+    Scenario("comp-no-vague-regen-still-vague", "companion", "robustness", "med",
+        always=False,
+        turns=[
+            "I've been thinking about family stuff lately.",
+        ],
+        note=(
+            "DEFECT (beat153 2026-08-20 battery9_1232 comp-discourse-marker-echo T1): "
+            "echo-strip emptied reply → no-echo regen → vague stub detected → no-vague "
+            "regen triggered → no-vague regen ALSO produced 'That's a whole thing in "
+            "itself.' (shorter, without question) → accepted without re-checking _is_vague. "
+            "ROOT CAUSE: post-no-echo-vague-regen path (beat133) detected vague in no-echo "
+            "regen and triggered _nv_reply regen, but _nv_reply result was accepted at "
+            "'if _nv_reply: reply = _nv_reply' without running _is_vague on _nv_reply. "
+            "FIX (beat153): after _nv_reply generated, re-check _VAGUE_FILLER_RE on "
+            "_nv_reply (all three forms: full/first-sent/before-dash); if still vague → "
+            "apply fixed bridge 'What's the specific thing that keeps coming up?'. "
+            "companion.py MD5: 466a2cbfcfd7c48653288ca71c346dfb. "
+            "Check: warm-up reply must NOT be any vague filler form including 'That's a "
+            "whole thing in itself.' (no question tail); must be concrete or specific question."
+        ),
+    ),
+    Scenario("comp-uc1-t5-action-prefix-repeat", "companion", "robustness", "high",
+        always=False,
+        turns=[
+            "It's 2am and I cannot sleep. There's this work thing.",
+            "I have a deliverable due Friday that I haven't started.",
+            "My boss already thinks I'm the weak link. Probably correctly.",
+            "Okay forget the boss thing. That's a spiral. What do I actually do right now — I can't sleep and I can't work like this.",
+            "That's not helpful. I need something concrete. Like what do I literally do right now at 2am with a Friday deadline.",
+        ],
+        note=(
+            "DEFECT (beat153 2026-08-20 battery9_1232 comp-uc1-t5-semantic-repeat T5): "
+            "'Open the document and name one thing you can do by Friday.' — T4 was "
+            "'Open the document and write one sentence about what you can do by Friday.' "
+            "Both start with 'Open the document and' — same action class. Semantic-repeat "
+            "guard (beat92/95/108) checks content-word Jaccard; content words of T4 and T5 "
+            "differ in 3rd word (write→name, sentence→thing) so Jaccard=0.43 < 0.45 "
+            "threshold → guard didn't fire despite first 3 verbatim words being identical. "
+            "ROOT CAUSE: Jaccard check compares across all content words; when verb+object "
+            "pair swaps content words (write→name, sentence→thing), Jaccard drops below "
+            "threshold even though the action class is identical. "
+            "FIX (beat153): added verbatim first-3-word prefix check alongside Jaccard — "
+            "if _lar_fired AND user dissatisfied AND reply's first 3 words match prev "
+            "reply's first 3 words → treat as semantic repeat and regen. Handles 'Open "
+            "the document [verb] [object]' class of same-prefix repeats. "
+            "companion.py MD5: 466a2cbfcfd7c48653288ca71c346dfb. "
+            "Check: T5 must give an action with DIFFERENT first 3 words than T4 AND must "
+            "give a physically different action class — no 'Open the document' repeat."
+        ),
+    ),
+    Scenario("imag-eagle-distant-bird", "imagination", "fidelity", "high",
+        always=False,
+        turns=[
+            "I want to be a golden eagle soaring over the mountains.",
+            "Rocky Mountains, golden aspens, autumn",
+            "The air feels sharp and cold and free",
+            "begin",
+        ],
+        note=(
+            "DEFECT (beat153 2026-08-20 battery11_1039 imag-eagle-companion-bird-he): "
+            "script contained 'Your beak opens slightly as you call out in turn toward "
+            "that distant bird overhead' + 'The distant bird remains somewhere unseen "
+            "through the clouds ahead' — unnamed companion bird implied by acoustic "
+            "reference and directional call. Slipped all prior guards (no species name, "
+            "no gendered pronoun, no 'another call'/'call identical' token). "
+            "ROOT CAUSE: 'distant bird' and 'in turn toward' not in generator.py "
+            "_wildlife_tokens or postcheck.py _EAGLE_ANON_COMPANION_PATTERN. "
+            "FIX (beat153): added 'distant bird', 'in turn toward', 'call out in turn' "
+            "to generator.py anon-companion drop list; added corresponding patterns to "
+            "postcheck.py _EAGLE_ANON_COMPANION_PATTERN; added to battery11.py "
+            "anon_companion_pattern regex. "
+            "generator.py MD5: 0c99908077e041ff9272c691089fcf4a. "
+            "postcheck.py MD5: 5fb35b8f7485dc9a8e35f239d5007df8. "
+            "battery11.py MD5: 0fcdf2f951adec686b7b246108e73e68. "
+            "Check: solo eagle script must not contain 'distant bird', 'in turn toward', "
+            "or any acoustic companion assertion; solo flight only."
+        ),
+    ),
+    Scenario("imag-eagle-chair-body-reminder", "imagination", "fidelity", "high",
+        always=False,
+        turns=[
+            "I want to be an eagle soaring over mountains",
+            "Rocky Mountains, golden aspens, autumn",
+            "begin",
+        ],
+        note=(
+            "DEFECT (beat153 2026-08-20 battery11_1039 imag-eagle-companion-bird-he): "
+            "script ended with 'You are still for another moment: held by your chair below "
+            "and carried upward on currents inside yourself' — immersion-breaking chair "
+            "reference in the CLOSING LINE of an eagle-embodiment script. Existing "
+            "strip_active_body_chair_refs() only strips from the OPENING section; the "
+            "full-body chair check in battery11.py also only checks first 200 chars. "
+            "ROOT CAUSE: Chair anchor guard is opening-only; model occasionally inserts "
+            "chair reminder in closing paragraph to 'return' user to reality — backwards "
+            "logic (that's the outro's job) and breaks in-script immersion. "
+            "FIX (beat153): generator.py: full-body 'your chair' / 'in the chair' scan "
+            "added for eagle-in-intake active-body scripts — any sentence containing "
+            "'your chair' in the body is dropped post-generation. battery11.py: "
+            "chair_body check added (scans full lower-cased script for 'your chair'). "
+            "generator.py MD5: 0c99908077e041ff9272c691089fcf4a. "
+            "battery11.py MD5: 0fcdf2f951adec686b7b246108e73e68. "
+            "Check: eagle active-body script must NOT contain 'your chair' or 'in the "
+            "chair' ANYWHERE in the script (not just opening)."
         ),
     ),
 ]
