@@ -4014,7 +4014,16 @@ BANK: list[Scenario] = [
             "the document [verb] [object]' class of same-prefix repeats. "
             "companion.py MD5: 466a2cbfcfd7c48653288ca71c346dfb. "
             "Check: T5 must give an action with DIFFERENT first 3 words than T4 AND must "
-            "give a physically different action class — no 'Open the document' repeat."
+            "give a physically different action class — no 'Open the document' repeat. "
+            "QUALITY MISS (beat153b 2026-08-20 battery9_1726 comp-uc1-t5-semantic-repeat): "
+            "T4='Write a to-do list for Friday and set an alarm for 6am.' T5='Write a list "
+            "of three things you can do tomorrow to start on Friday\'s deliverable.' — "
+            "Same 'Write a [list]' category, different 3rd word ('to-do' vs 'list') so "
+            "first-3-word prefix check doesn\'t fire; 27% Jaccard so semantic-repeat guard "
+            "doesn\'t fire either. Quality floor miss: T5 should pivot to a different ACTION "
+            "CLASS entirely (e.g. physical reset, open document + single sentence, alarm only). "
+            "No mechanical fix available without semantic action-class detection. Fix path: "
+            "family-C retrain with c_gold_beat153c exemplar showing T4=physical, T5=document+sentence."
         ),
     ),
     Scenario("imag-eagle-distant-bird", "imagination", "fidelity", "high",

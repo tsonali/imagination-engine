@@ -1298,10 +1298,36 @@ def generate_session(
             "another call",         # "another call echoes back" — second entity
             "a second call",        # "a second call came from below"
             "another wing",         # "another wing beats nearby"
+            # beat153: "distant bird" acoustic companion escape — 0820_1039 battery11:
+            # "you call out in turn toward that distant bird overhead" — unnamed companion
+            # implied by the eagle calling OUT at something. "in turn toward" implies
+            # a partner that initiated; "distant bird" names the implied companion.
+            "distant bird",         # "that distant bird overhead" / "the distant bird"
+            "in turn toward",       # "call out in turn toward" — implies response partner
+            "call out in turn",     # "you call out in turn toward"
         ))
         if anon_companion_dropped:
             log.warning('[v6] %d anonymous-companion sentence(s) dropped (you/we both in solo eagle active-body)',
                         anon_companion_dropped)
+    # beat153: Chair-body reminder in eagle script body (not opening). The opening
+    # chair-anchor check (strip_active_body_chair_refs) only covers the first few
+    # sentences; the model occasionally closes the script with a chair-reminder
+    # e.g. "held by your chair below" that breaks immersion at the end. Drop any
+    # sentence in the full body that contains "your chair" when the user is in an
+    # eagle active-body script.
+    if _is_active_body and _eagle_in_intake:
+        _chair_body_sents = re.split(r"(?<=[\.\!\?])\s+", full.strip())
+        _chair_body_kept = []
+        _chair_body_dropped = 0
+        for _s in _chair_body_sents:
+            if re.search(r'\byour\s+chair\b|\bin\s+(?:the\s+)?chair\b|\bfrom\s+(?:your\s+)?chair\b', _s, re.IGNORECASE):
+                _chair_body_dropped += 1
+            else:
+                _chair_body_kept.append(_s)
+        if _chair_body_dropped:
+            full = " ".join(_chair_body_kept)
+            log.warning('[v6] %d chair-body-reminder sentence(s) dropped (eagle script)',
+                        _chair_body_dropped)
     # Hallucinated 3rd-person female filter: model stochastically invents a female
     # character ("a voice, hers... when she would call out encouraging words") in solo
     # active-body scripts (user running alone, no female named in intake). Drop sentences

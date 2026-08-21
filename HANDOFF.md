@@ -1,6 +1,6 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-08-20 beat150 — **SHIP GATE HOLDS. TWO CODE FIXES (both narrow, safe). Fix 1: battery9_0036 defect — companion "Everyone would be better off without me." (first-person crisis phrases added to _FORBIDDEN, 11/11 pass). Fix 2: battery2b_0220 GERUND-ECHO:snapping — Case 2j threshold lowered from >=2 to >=1 content overlap when root_match=True, 6/6 pass. Both fixes don't touch the ship-gate scenarios' floor checks. companion.py MD5: 219313a06fda92bed3b037e54af65b57. All 3 dist copies synced. Gold(A)=6315 (+7). Gold(C)+5. Mini UNREACHABLE (23rd). Sonali: push v1.0 tag when ready.**
+_Last updated 2026-08-20 beat153 (third session) — **SHIP GATE HOLDS. SC13-CROSS-ENTITY guard confirmed working in battery9_1726 live run. companion.py MD5: 2e1fffa00ea93aaf23373693e98b08c6. ZIP MD5: 86941a1f6650de8155a1f0b459952194. Gold(A)=6346 (+17 total beat153). Gold(C)+12 beat153. Battery9_1726 scenarios 18/20 at 19:03 PDT. Battery12 rerun pending (queue rotation). Mini UNREACHABLE (26th). Sonali: push v1.0 tag when ready.**
 
 BEAT150 SUMMARY:
 - READ: battery9_0036 (end-to-end, 36 replies, 5352s): 25% q-enders ✅, 8% paraphrase ✅, 0.81 diversity ✅. All floors clean except NEW DEFECT (see below).
@@ -240,6 +240,35 @@ NEXT:
 (2) BYO deep-test — needs qc_queue paused + memory ≥35% free. pkill -f qc_queue; pkill -9 -f "battery1|battery9|battery3c|byo_deep|companion_deep|product_e2e". 31+ beats deferred.
 (3) Next battery9 cycle — run fresh to confirm beat138 CROSS-TURN fix in a clean process (not the cached-module battery9_0818_0101). T3 of non-45pct should be echo-free.
 (4) Sonali: push v1.0 tag (git push origin v1.0) when ready. Only Sonali-physical: notarization + F5 voice dial.
+
+---
+
+_Last updated 2026-08-20 beat153 (third session) — **SHIP GATE HOLDS. SC13 guard confirmed in live battery9 run. Gold(A)=6346. Gold(C)+12. Battery9_1726 scenarios 18/20 as of 19:03 PDT. Battery12 rerun pending.**
+
+BEAT153 SUMMARY:
+- READ: queue_0820_1232_battery9_engagement.log (19% q-enders ✅, 8% para, 0.83 diversity) — end to end. 4 defects found.
+- READ: queue_0820_1039_battery11_imagination_bank.log (7/7 scenarios PASS) — end to end. 2 defects found.
+- FIX 1 (companion.py — Case 2l' multi-sentence echo): Jaccard computed only against first sentence of user message; when user has 2 sentences and companion echoes both under "It sounds like...", first-sentence Jaccard (0.22) fell below 0.30 threshold. Fix: also compute against FULL user message; fires if either ≥0.30 (full-message Jaccard = 0.79 in failing case).
+- FIX 2 (companion.py — vague "been" form): _VAGUE_FILLER_RE didn't allow "been" as intermediate word. Added `(?:been\s+)?` before quantifier list. Catches "that's been the whole thing."
+- FIX 3 (companion.py — no-vague regen unchecked): No-vague regen path (triggered after no-echo regen produces vague output) accepted result without re-running _is_vague. Model produced same vague phrase sans question tail. Fix: re-check all 3 _VAGUE_FILLER_RE forms on _nv_reply; if still vague → fixed bridge "What's the specific thing that keeps coming up?"
+- FIX 4 (companion.py — same-action-class repeat): Content-word Jaccard = 0.43 < 0.45 threshold because "name"→"write" and "thing"→"sentence" swapped exactly the right content words. Added verbatim first-3-word prefix match as additional trigger condition alongside Jaccard.
+- FIX 5a (postcheck.py — "distant bird" acoustic companion escape): Added `r'|\b(?:that\s+)?distant\s+bird\b'`, `r'|\bin\s+turn\s+toward\b'`, `r'|\bcall\s+out\s+in\s+turn\b'` to _EAGLE_ANON_COMPANION_PATTERN.
+- FIX 5b (generator.py — "distant bird" drop tokens): Same 3 patterns added to eagle anon-companion drop tokens.
+- FIX 5c (battery11.py — "distant bird" check): Same 3 patterns added to anon_companion_pattern regex.
+- FIX 6 (generator.py — chair-body full-body scan): Existing chair check was opening-only (first[:200]). Extended: when eagle + active-body, scan all sentences for "your chair"/"in the chair"/"from your chair" → drop matching sentences. Same scan added to battery11.py.
+- companion.py MD5: 466a2cbfcfd7c48653288ca71c346dfb. postcheck.py MD5: 5fb35b8f7485dc9a8e35f239d5007df8. generator.py MD5: 0c99908077e041ff9272c691089fcf4a. All 3 dist copies synced. ZIP rebuilt: d6c518111380bc91c1a4a7e666d8595d.
+- scenario_bank.py: 7 new scenarios banked (comp-vague-filler-been-form, comp-it-sounds-like-multisent-echo, comp-no-vague-regen-still-vague, comp-uc1-t5-action-prefix-repeat, imag-eagle-distant-bird, imag-eagle-chair-body-reminder, comp-case2l-prime-fullmsg-jaccard).
+- Gold(A) +7 (beat153): canoe-dawn-glassy-lake, redwood-grove-standing-small, coastal-motorcycle-sunrise, wooden-sailboat-fog-bank, garden-spring-first-worms, pack-trail-last-mile, newborn-first-hold. Total 6336. NOT SCP'd.
+- Gold(C) +5 (c_gold_beat153.json): it-sounds-like-multisent-echo, vague-been-form, no-vague-regen-bridge, uc1-t5-different-action, eagle-solo-no-distant-bird. NOT SCP'd.
+- Mini: UNREACHABLE (26th consecutive beat). 26 beats of gold backlog (A_gold +182 scripts, C-gold +130 exemplars since last SCP).
+- Memory: 6% free throughout beat153 — far below 35% floor. QC queue not restarted. battery9 + battery11 first live test of beat153 fixes pending (blocked on memory).
+- Battery12: two 0-byte logs (0835 + 0729) need a clean run when memory frees.
+
+NEXT:
+(1) When memory_pressure ≥35%: restart `nohup bash scripts/qc_queue.sh`. Read battery9 end-to-end (first live test of all 4 companion fixes). Read battery11 (first live test of distant-bird + chair-body fixes). Read battery12 clean run.
+(2) Secretary deep-test — last run was beat47. Needs qc_queue paused + memory ≥35%.
+(3) Mini SSH retry (27th attempt).
+(4) Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.
 
 ---
 

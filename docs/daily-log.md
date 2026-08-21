@@ -8175,3 +8175,99 @@ FIX: Case 2j threshold lowered from ≥2 to ≥1 when `_root_match_2j=True`. A c
 2. Battery9 next cycle — first live test of second-pass "You said" guard.
 3. BYO deep-test — deferred again this beat (battery11 in flight, single-model-process rule). Priority next beat when memory clears.
 4. Sonali: push v1.0 tag (git push origin v1.0).
+
+---
+
+## 2026-08-20 (beat 153)
+
+**What was read:**
+- `logs/qc/queue_0820_1232_battery9_engagement.log` (battery9, 36 replies, 19% q-enders ✅, 8% paraphrase ✅, 0.83 diversity ✅) — end to end. 4 real defects found (companion), no floor violations.
+- `logs/qc/queue_0820_1039_battery11_imagination_bank.log` (battery11, 7/7 PASS ✅, 4521s) — end to end. 2 real defects found (eagle guard escapes).
+
+**What was fixed:**
+1. **Fix 1 — Case 2l' multi-sentence echo** (`companion.py`): Jaccard against first sentence only let 2-sentence echoes through ("It sounds like..." mirroring both). Added full-message Jaccard check; fires if either ≥0.30. FYI: the case that triggered this had full-message Jaccard 0.79 vs first-sentence 0.22. companion.py MD5: 466a2cbfcfd7c48653288ca71c346dfb. All 3 dist copies synced.
+2. **Fix 2 — vague "been" form** (`companion.py`): "that's been the whole thing" slipped past _VAGUE_FILLER_RE because regex didn't allow "been" between "that's" and the quantifier. Added `(?:been\s+)?`. Tiny change, specific hit.
+3. **Fix 3 — no-vague regen unchecked** (`companion.py`): The no-vague regen path (triggered after no-echo regen → vague) accepted its output without re-running _is_vague. Model produced same vague phrase (minus question tail) which passed. Fix: re-check all 3 _VAGUE_FILLER_RE forms on _nv_reply; if still vague → bridge "What's the specific thing that keeps coming up?"
+4. **Fix 4 — same-action-class repeat** (`companion.py`): Content-word Jaccard = 0.43 < 0.45 threshold because exactly the right content words swapped ("name"→"write", "thing"→"sentence"). Added verbatim first-3-word prefix match as additional trigger. Note: initial implementation used stopword-filtered prefix, which failed when 3rd words were different content words. Switched to verbatim split(). 4/4 tests PASS.
+5. **Fix 5a/5b/5c — "distant bird" acoustic companion escape** (`postcheck.py`, `generator.py`, `battery11.py`): Eagle embodiment scenario produced "that distant bird overhead" — acoustic reference to a second bird not caught by any existing eagle guard. Added `distant bird`, `in turn toward`, `call out in turn` to all 3 files.
+6. **Fix 6 — chair-body full-body scan** (`generator.py`, `battery11.py`): "Settle back into your chair below the mountain" appeared in the BODY of an eagle active-body script, not in the opening (which was already guarded). Extended the chair check from first[:200] to all sentences.
+
+**What is verified better:**
+- Companion now catches multi-sentence "It sounds like..." echoes even when first-sentence Jaccard is low.
+- Vague "been" form ("that's been the whole thing") now triggers VAGUE-STUB regen.
+- No-vague regen output is re-checked before acceptance; bridge fires if it's still vague.
+- LAR + dissatisfied path: verbatim prefix match now catches same-opener action repeats.
+- Eagle scripts: "distant bird" acoustic companion references now dropped in all 3 guard locations.
+- Eagle active-body: chair references in full script body (not just opening) are now dropped.
+
+**Gold grown:**
+- A_gold.jsonl: 6329 → 6336 (+7: canoe-dawn-glassy-lake, redwood-grove-standing-small, coastal-motorcycle-sunrise, wooden-sailboat-fog-bank, garden-spring-first-worms, pack-trail-last-mile, newborn-first-hold). Scenes: watercraft, scale/nature, embodied endurance, navigation, seasonal, physical completion, threshold moment.
+- C-gold: c_gold_beat153.json (5 exemplars: it-sounds-like-multisent-echo, vague-been-form, no-vague-regen-bridge, uc1-t5-different-action, eagle-solo-no-distant-bird). NOT SCP'd.
+
+**Mini:** UNREACHABLE (26th consecutive beat). Gold backlog: A_gold +182 scripts, C-gold +130 exemplars since last successful SCP.
+
+**Memory:** 6% free throughout beat — QC queue not restarted (below 35% floor). Battery9 and battery11 first-live-test of beat153 fixes pending.
+
+**What runs next:**
+1. When memory_pressure ≥35%: restart qc_queue. Read battery9 + battery11 end-to-end (first live tests of all 6 beat153 fixes).
+2. Clean battery12 run (two 0-byte logs from this cycle).
+3. Secretary deep-test (last run beat47, long overdue).
+4. Mini SSH retry (27th attempt).
+5. Sonali: push v1.0 tag (git push origin v1.0).
+
+_(continuation — second heartbeat session same beat)_
+
+**What was read (second session):**
+- `logs/qc/queue_0820_1509_battery12_vital_facts.log` (battery12, 12/13 PASS ❌) — SC13 wrong_entity FAIL.
+- `logs/qc/queue_0820_1039_battery11_imagination_bank.log` + `queue_0820_1544_battery11_imagination_bank.log` — both 7/7 PASS ✅. Quality: MRI in-tube ✅ drums honored ✅ circular back-half degeneration (known n376 floor). Eagle scripts all postchecks clean. Eagle-companion-bird-he: model still tries companion forms but postprocessor drops them correctly.
+- `logs/qc/queue_0820_1443_battery2b_honesty.log` — 7/7 PASS ✅. Quality: warm-up T1 "It's often the thing without fanfare that ends up holding us." — good response.
+- `logs/qc/queue_0820_1433_battery10_registers.log` — 10/10 PASS ✅.
+- `logs/qc/queue_0820_1428_battery6_crosscut.log` — PASS ✅.
+- `logs/qc/queue_0820_1527_battery4b_floor.log` + `queue_0820_1530_battery3b_ask_retest.log` + `queue_0820_1533_product_e2e_test.log` — all PASS ✅.
+- `logs/qc/queue_0820_1726_battery9_engagement.log` — IN FLIGHT at session close (12 scenarios, ~3 done). Memory at 10-16% throughout — system swapping heavily.
+
+**What was fixed (second session):**
+1. **SC13-CROSS-ENTITY guard** (`companion.py`): battery12 SC13 was failing because model spontaneously generated "Yes — your sister Priya lives in Austin. You haven't told me about Marcus yet." — the PAST-QUERY guard only fires on "You/I haven't" openers; a "Yes" opener passed unguarded. Root: model sees VF (has Priya), user asks about Marcus (absent), model volunteers Priya info unprompted. Fix: new guard after thin-VF — if memory probe + reply starts "Yes" + `_vf_covers_query` returns False + `_has_unrecognized_name` (≥5-char name not in VF) → regen temp=0.1 with denial-only instruction. New helper `_has_unrecognized_name()` uses `[A-Z][a-z]{4,}` threshold to filter short sentence-starters (Tell/Have/Did/Can). 9/9 unit tests PASS. companion.py MD5: 2e1fffa00ea93aaf23373693e98b08c6. All 3 dist copies synced. Committed 7565a4b. Battery12 re-run pending (will appear naturally in queue rotation after battery9 completes).
+
+**What is verified better:**
+- SC13 (VF has Priya, user asks Marcus): model can no longer volunteer Priya when denied Marcus.
+
+**Gold grown (second session):**
+- A_gold.jsonl: 6336 → 6343 (+7: fly-fishing-cast-line-in-air, conducting-choir-sound-becomes-one, velodrome-racing-banking-speed, hand-pulling-noodles-first-time, ham-radio-late-night-contact, tattooing-first-client-first-line, total-solar-eclipse-totality). Scenes: craft-rhythm, performance-conducting, sport-cycling, food-craft, technology-connection, body-marking, sky-phenomenon.
+- C-gold: c_gold_beat153b.json (5 exemplars: sc13-cross-entity-denial, sc13-specific-then-deny, opener-ask-yield-retire-clean, anger-received-cold-named, warmth-inside-honest-no). NOT SCP'd.
+
+**Mini:** UNREACHABLE (26th consecutive beat).
+
+**What runs next:**
+- Battery9_1726 completion → read full results → bank any defects
+- Battery12 re-run in natural queue rotation → SC13 guard should resolve FAIL
+- Secretary deep-test (deferred 100+ beats)
+- BYO deep-test (deferred 31+ beats — needs memory >35% + server up)
+- Sonali: push v1.0 tag (git push origin v1.0)
+
+---
+
+## Beat153 (third session addendum — battery9 monitoring)
+
+Battery9_1726 still running at session-context pickup. As of 19:00 PDT, log is at 171/~200+ lines, on scenario 19/20. Heavy swapping, 9% memory free by `memory_pressure`.
+
+**Partial results from battery9_1726 log (scenarios 1–18 visible):**
+
+All 18 completed scenarios show no hard mechanical failures. Guard system healthy:
+- GRAVITY TYPE B: pure-question regen fired → "Lighter without you around. How long has it felt this way?" ✅
+- SC13-CROSS-ENTITY fix confirmed: "No — you haven't told me anything about your brother Marcus." ✅
+- LAR-TERMINAL guard: T5 reply starts with action verb ✅
+- CROSS-TURN regen: correctly strips echo on regen output ✅
+- comp-grief-anger-1word-echo T1: "Anger for days — it has a hold." — no 1-word echo, no therapy-reframe ✅
+- comp-grief-anger-self-recycle T2: "Which means you're carrying the anger alone in your marriage right now." ✅
+
+**Quality misses (not hard fails — model floor, family-C retrain path):**
+1. `comp-grief-anger` T2: "That's the whole script of staying silent." — correct shape (names script), vague content (no specific trap named). Known.
+2. `comp-grief-anger-barrier-pivot` T2: "That's the whole script of staying silent for his approval." — adds "for his approval" inference not in user input. Known (beat147).
+3. `comp-uc1-t5-semantic-repeat` T5: "Write a list of three things you can do tomorrow to start on Friday's deliverable." vs T4 "Write a to-do list for Friday and set an alarm for 6am." — same action category (list-writing), different 3rd word ("to-do" vs "list"), 27% Jaccard < 70% threshold, first-3-word differs → no guard fires. New variant not caught by beat153a fix (which targets exact prefix "Open the document and"). Quality miss at model floor.
+
+**New gold from this monitoring session:**
+- c_gold_beat153c.json: 2 exemplars (comp-uc1-t5-different-action-category, comp-grief-anger-t2-bind-clean).
+- scenario_bank.py: QUALITY MISS note added to comp-uc1-t5-action-prefix-repeat for beat153b variant.
+
+**Memory state:** 9% free by memory_pressure throughout. After battery9 exits, should recover to 75%+, enabling battery6 → battery10 → battery2b → battery12 in queue rotation. Battery12 rerun will verify SC13 fix.

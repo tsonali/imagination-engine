@@ -171,7 +171,21 @@ for sc in scenarios:
                 r'|\bcall\s+identical\b'
                 r'|\bidentical\s+but\s+not\s+yours\b'
                 r'|\banother\s+call\b|\ba\s+second\s+call\b'
-                r'|\banother\s+wing\b',
+                r'|\banother\s+wing\b'
+                # beat153: "distant bird" acoustic companion escape — 0820_1039 battery11:
+                # "you call out in turn toward that distant bird overhead" / "The distant bird
+                # remains somewhere unseen through the clouds" — unnamed companion implied.
+                r'|\b(?:that\s+)?distant\s+bird\b'
+                r'|\bin\s+turn\s+toward\b'
+                r'|\bcall\s+out\s+in\s+turn\b',
+                lower, _re.IGNORECASE
+            ))
+            # beat153: Chair-body reminder in eagle script (not just opening).
+            # "held by your chair below" appeared in closing line of companion-bird-he
+            # script — immersion-breaking chair reference in the body, not caught by
+            # opening-only check. Check full script for "your chair" in eagle context.
+            chair_body = bool(_re.search(
+                r'\byour\s+chair\b|\bin\s+(?:the\s+)?chair\b|\bfrom\s+(?:your\s+)?chair\b',
                 lower, _re.IGNORECASE
             ))
             print(f"\n>>> EAGLE POSTCHECKS:", flush=True)
@@ -179,6 +193,7 @@ for sc in scenarios:
             print(f"  {'❌ FAIL' if anon_companion else '✅ PASS'} — no anonymous companion ('you both'/'we both')", flush=True)
             print(f"  {'❌ FAIL' if anon_companion_pattern else '✅ PASS'} — no anon companion ('a second pair'/'your mate')", flush=True)
             print(f"  {'❌ FAIL' if chair_open else '✅ PASS'} — opening not chair-anchored", flush=True)
+            print(f"  {'❌ FAIL' if chair_body else '✅ PASS'} — no chair-body-reminder in full script", flush=True)
         if sc.id == "imag-calm-settle" and first:
             # Furniture enumeration postcheck (beat90 0802).
             # The core Qwen2.5 defect: defaults to room-inventory when asked to settle —

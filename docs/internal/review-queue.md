@@ -3624,3 +3624,64 @@ companion.py MD5: **e73e851c2ac7e2fb698d685115a9a47b**
 postcheck.py MD5: **3ab74a959e0bab13febd4e4baade567c**
 generator.py MD5: **a92dcae1e6b917c9aa9b5bca6408cf75**
 ZIP MD5: **c33c2b65**
+
+---
+
+## 2026-08-20 beat153 — FYIs
+
+**6 code fixes this beat. None touch the ship-gate scenarios' floor checks. Ship gate holds.**
+
+**FIX 1: Case 2l' full-message Jaccard (companion.py).**
+When a user writes two sentences and the companion echoes both under "It sounds like...", the first-sentence Jaccard was 0.22 (below the 0.30 threshold) even though the full-message Jaccard was 0.79. Root: Jaccard was computed only against the first sentence. Fix: compute against both first sentence AND full message; fires if either ≥0.30. Only affects 2l' (the "It sounds like / I hear" path). No change to 2l, 2k, 2m, 2n, 2h.
+
+**FIX 2: Vague "been" form (companion.py).**
+"That's been the whole thing." evaded _VAGUE_FILLER_RE because the regex didn't allow "been" between "that's" and the quantifier chain. Added `(?:been\s+)?`. Single-line change. Tested on: "that's been the whole thing", "it's been all of this", "this has been the situation" — all now caught.
+
+**FIX 3: No-vague regen unchecked (companion.py).**
+The no-vague regen path was a blind acceptance: if no-echo regen produced vague output, the secondary regen would run but its output was never re-checked against _VAGUE_FILLER_RE. The model (being the same model) sometimes produced the same vague phrase again (stripped of the question tail that previously triggered detection). Fix: re-check all 3 forms of _VAGUE_FILLER_RE on the regen output; if still vague → bridge. Bridge is "What's the specific thing that keeps coming up?" — forward-facing, specific-asking.
+
+**FIX 4: Same-action-class prefix repeat (companion.py).**
+When LAR fires and user is dissatisfied, the semantic-repeat guard fires at Jaccard ≥0.45. But content-word substitutions can keep Jaccard at 0.43 while the companion literally opens the same way ("Open the document / Write in the document" → same opener class, 0.43 Jaccard). Added verbatim first-3-word prefix match as additional trigger. Note: stopword filtering was tried first but broke when 3rd words were different content words. Verbatim match on full surface form (lowercased, punct-stripped) is cleaner. Implementation note for future: `_r_pfx[:3] == _p_pfx[:3]` only fires when `_lar_fired AND _DISSATISFIED_RE.search(user_message)` — tight precondition prevents false fires on normal turns.
+
+**FIX 5: "Distant bird" acoustic companion escape (postcheck.py, generator.py, battery11.py).**
+Eagle embodiment (imag-eagle-distant-bird scenario): model generated "that distant bird overhead" as an acoustic companion reference without using a bird name, pronoun, or "another." The existing eagle anon-companion guard looked for named species, pronouns, "another call/wing", etc. — not unnamed acoustic references. Added "distant bird", "in turn toward", "call out in turn" to all 3 guard locations. 7/7 battery11 tests PASS.
+
+**FIX 6: Chair-body full scan (generator.py, battery11.py).**
+Eagle active-body check was opening-only (first[:200]). Model put "settle back into your chair below the mountain" in the BODY of the script, not the opening. Extended: scan all sentences; drop any sentence containing "your chair" / "in the chair" / "from your chair" when eagle + active-body. Battery11 check updated identically.
+
+**Gold: 7 new A scripts (6329→6336). Scenes: canoe at dawn, redwood grove, coastal motorcycle, sailboat in fog, spring garden, trail-out final mile, first hold of newborn.**
+
+**Mini: 26 consecutive unreachable. 26 beats of gold accumulated locally. When mini returns: `scp A_gold.jsonl + c_gold_beat131-153*.json`.**
+
+**QC queue: blocked at 6% RAM (below 35% floor). No restart this beat. Battery9 + battery11 first live test of beat153 fixes is the top item when memory frees.**
+
+**No action needed from Sonali this beat** — only the standing item:
+1. `git push origin v1.0` when ready to ship
+2. Apple notarization + F5 voice dial (Sonali-physical only)
+
+companion.py MD5: **466a2cbfcfd7c48653288ca71c346dfb**
+postcheck.py MD5: **5fb35b8f7485dc9a8e35f239d5007df8**
+generator.py MD5: **0c99908077e041ff9272c691089fcf4a**
+ZIP MD5: **d6c518111380bc91c1a4a7e666d8595d**
+
+---
+
+## Beat153 (second session) — 2026-08-20
+
+**FIX: SC13-CROSS-ENTITY guard (companion.py).**
+battery12 SC13 was failing: model generated "Yes — your sister Priya lives in Austin. You haven't told me about Marcus yet." when user asked ONLY about Marcus (absent from VF). PAST-QUERY guard only catches "You/I haven't" openers. A "Yes" opener with a volunteered unasked-about VF entry was unguarded. New guard: if memory probe + "Yes" opener + VF doesn't cover queried entity + `_has_unrecognized_name` (≥5-char name not in VF) → regen temp=0.1 with denial-only instruction. 9/9 unit tests PASS. Battery12 rerun pending in queue rotation (should pick up fix automatically).
+
+**Gold: +7 A scripts (6336→6343). Scenes: fly-fishing cast, conducting choir, velodrome racing, hand-pulling noodles, ham radio at night, tattooing first client, total solar eclipse.**
+
+**Gold: +5 C exemplars (c_gold_beat153b.json): sc13-cross-entity-denial, sc13-specific-then-deny, opener-ask-yield-retire-clean, anger-received-cold-named, warmth-inside-honest-no.**
+
+**Battery11: two runs today (1039 + 1544) both 7/7 PASS ✅. Quality notes: MRI in-tube ✅ drums honored ✅ circular back-half degeneration (known n376 floor). Eagle postchecks all clean.**
+
+**Battery9_1726: IN FLIGHT at session close. Memory 10-16% throughout (heavy swapping). 3 of 12 scenarios done when session ended.**
+
+**No action needed from Sonali this beat** — only the standing item:
+1. `git push origin v1.0` when ready to ship
+2. Apple notarization + F5 voice dial (Sonali-physical only)
+
+companion.py MD5: **2e1fffa00ea93aaf23373693e98b08c6**
+ZIP MD5: **949f9abdb2324017a89efbf357c3a357**

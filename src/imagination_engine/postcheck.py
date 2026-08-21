@@ -836,7 +836,15 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     r'|\banother\s+call\b'         # "another call echoes back" — second entity calling
     r'|\ba\s+second\s+call\b'      # "a second call came from below"
     r'|\banother\s+wing\b'         # "another wing beats nearby" — non-flapping variant
-    r'|\ba\s+response\s+from\s+(?:above|below|the\s+ridge|behind)\b',  # implied reply from companion
+    r'|\ba\s+response\s+from\s+(?:above|below|the\s+ridge|behind)\b'  # implied reply from companion
+    # beat153: "distant bird" acoustic companion escape — 0820_1039 battery11 run:
+    # "you call out in turn toward that distant bird overhead" + "The distant bird
+    # remains somewhere unseen through the clouds" — implies a responding companion
+    # bird without naming a species; slipped all prior guards (no pronoun, no species
+    # name, no acoustic-response token).
+    r'|\b(?:that\s+)?distant\s+bird\b'   # "that distant bird overhead" / "the distant bird"
+    r'|\bin\s+turn\s+toward\b'           # "call out in turn toward" — implies response partner
+    r'|\bcall\s+out\s+in\s+turn\b',      # "you call out in turn toward"
     re.IGNORECASE,
 )
 
