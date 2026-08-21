@@ -8599,3 +8599,36 @@ FIX (beat157): second-pass 1-word non-confirm-lands guard added to companion.py 
 **Battery11_0821_0529 IN FLIGHT (PID 9115, started 05:29).** Memory at 22-23% free (below 35% floor — no model launches until battery11 done). Battery9 post-fix will auto-run after.
 
 **What runs next:** battery11_0529 completes → read end-to-end → battery9 (post-fix _norm_apos + beat157 1-word guard) → read end-to-end → ZIP rebuild (if clean) → HANDOFF/RELEASE update.
+
+---
+
+## 2026-08-21 beat158 — 4 CODE FIXES, battery11_0529 COMPLETE (7/7), post-fix battery9 IN FLIGHT
+
+**Commit:** 62a4dd5
+
+**Battery11_0529 FULL READ (7/7 PASS ✅, total 5191s):**
+- imag-mri: ✅ 1715w/726s. In-tube throughout, drums honored, no first-person. Back half: one-two-one breathing rhythm repetitive but structural floor.
+- imag-intimacy: ✅ 1126w/659s. Lisbon tiles/fan/laugh scene. 8 possessive-pronoun fixes, 11 phrase-repeat pairs, 7 short-phrase repeats. Quality: "with your in your mind" (garbled closing — model floor).
+- imag-embodiment-eagle: ✅ (mechanical) but honest read found defects — see FIX 1+2 below.
+- imag-eagle-wildlife-plural: ✅ (mechanical) but honest read found defect — see FIX 1 below.
+- imag-calm-settle: ✅ 1284w/334s. 1 furniture-enum match in first 250 words (threshold=3). Back half: whichever/whatever fatigue — model floor.
+- imag-eagle-golden-eagle-wildlife: ✅ 1672w/749s. 4 companion-wildlife sentences dropped. All postchecks clean.
+- imag-eagle-companion-bird-he: ✅ (mechanical) but honest read found defect — see FIX 4 below.
+
+**4 DEFECTS FOUND + FIXED (beat158):**
+
+**FIX 1 (generator.py + postcheck.py + battery11.py): "another pair of wings" — imag-eagle-wildlife-plural.** Script: "Your eyes catch sight of another pair of wings ahead — flying toward you on an intersecting path but not coming any closer because it's your journey up here..." — companion bird implied by visible wings. "A second pair" (beat96) blocked but "another pair of wings" was different phrasing. Fix: added to all three files.
+
+**FIX 2 (same files): "two separate birds" — imag-eagle-wildlife-plural.** Same script sentence: "...as two separate birds moving through a shared sky." — "two birds"+"two separate eagles" (beat106/109) blocked but "two separate BIRDS" slipped exact-match filter. Fix: added to all three files.
+
+**FIX 3 (same files): "both birds" — imag-eagle-golden-eagle-wildlife.** Script: "It sounds almost like an argument — both birds carrying their own particular meanings across this distance..." — "both of you"/"you both" (beat105) blocked but "both birds" not covered. Fix: added to all three files.
+
+**FIX 4 (generator.py + battery11.py): "in a chair" — imag-eagle-companion-bird-he.** Script: "You are not in a chair." — constraint-bleed from FORBIDDEN note. Eagle chair-body drop regex was `in\s+(?:the\s+)?chair` which matched "in the chair"/"in chair" but NOT "in a chair" (article "a" not covered). Fix: extended to `(?:a\s+|the\s+)?chair` in both the generator drop block and the battery11 postcheck.
+
+**12/12 unit tests PASS.** postcheck.py MD5: `412a310265f6c71dd79903d278e409d3`. generator.py MD5: `b0bf525bbd6b7ba95e48c7278820fc9e`. battery11.py MD5: `88f81cebe1385405dfd0073d37be06be`. All 3 dist copies synced.
+
+**Post-fix battery9 IN FLIGHT** (PID 15683, started 06:57 AM, log: queue_0821_0657_battery9_engagement.log). Will verify: (a) _norm_apos() catches S06/S09/S18 VAGUE misses; (b) beat157 1-word guard catches "Angry."; (c) beat158 changes don't affect companion flow (no eagle scenarios in battery9).
+
+**RELEASE.md + HANDOFF.md:** Need updating with beat158 entry after battery9 completes and ZIP is rebuilt.
+
+**Mini SSH:** UNREACHABLE (still 33rd consecutive). Gold backlog not SCP'd.
