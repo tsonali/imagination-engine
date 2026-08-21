@@ -844,7 +844,17 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     # name, no acoustic-response token).
     r'|\b(?:that\s+)?distant\s+bird\b'   # "that distant bird overhead" / "the distant bird"
     r'|\bin\s+turn\s+toward\b'           # "call out in turn toward" — implies response partner
-    r'|\bcall\s+out\s+in\s+turn\b',      # "you call out in turn toward"
+    r'|\bcall\s+out\s+in\s+turn\b'       # "you call out in turn toward"
+    # beat158 (2026-08-21): three new escape forms found in battery11_0529:
+    # (1) imag-eagle-wildlife-plural: "another pair of wings ahead — flying toward you on an
+    # intersecting path" — companion bird implied by wings; "a second pair" (beat96) was blocked
+    # but "another pair of wings" is different. (2) imag-eagle-wildlife-plural: "two separate birds
+    # moving through a shared sky" — "two birds"+"two separate eagles" (beat106/109) blocked but
+    # "two separate BIRDS" slipped. (3) imag-eagle-golden-eagle-wildlife: "both birds carrying their
+    # own particular meanings" — "both of you"/"you both" (beat105) blocked but "both birds" not.
+    r'|\banother\s+pair\s+of\s+wings\b'  # "another pair of wings ahead"
+    r'|\btwo\s+separate\s+birds\b'       # "two separate birds moving through a shared sky"
+    r'|\bboth\s+birds\b',                # "both birds carrying their own particular meanings"
     re.IGNORECASE,
 )
 

@@ -177,15 +177,25 @@ for sc in scenarios:
                 # remains somewhere unseen through the clouds" — unnamed companion implied.
                 r'|\b(?:that\s+)?distant\s+bird\b'
                 r'|\bin\s+turn\s+toward\b'
-                r'|\bcall\s+out\s+in\s+turn\b',
+                r'|\bcall\s+out\s+in\s+turn\b'
+                # beat158 (2026-08-21): three new escape forms found in battery11_0529:
+                # "another pair of wings" (eagle-wildlife-plural) — "a second pair" (beat96) blocked;
+                # "two separate birds" (eagle-wildlife-plural) — "two birds"/"two separate eagles" blocked;
+                # "both birds" (golden-eagle-wildlife) — "both of you"/"you both" blocked but not this.
+                r'|\banother\s+pair\s+of\s+wings\b'
+                r'|\btwo\s+separate\s+birds\b'
+                r'|\bboth\s+birds\b',
                 lower, _re.IGNORECASE
             ))
             # beat153: Chair-body reminder in eagle script (not just opening).
             # "held by your chair below" appeared in closing line of companion-bird-he
             # script — immersion-breaking chair reference in the body, not caught by
             # opening-only check. Check full script for "your chair" in eagle context.
+            # beat158: extended "in a chair" — battery11_0529 companion-bird-he generated
+            # "You are not in a chair." (constraint-bleed from FORBIDDEN note). The prior
+            # regex had (?:the\s+)? which matched "in the chair" / "in chair" but not "in a chair".
             chair_body = bool(_re.search(
-                r'\byour\s+chair\b|\bin\s+(?:the\s+)?chair\b|\bfrom\s+(?:your\s+)?chair\b',
+                r'\byour\s+chair\b|\bin\s+(?:a\s+|the\s+)?chair\b|\bfrom\s+(?:your\s+)?chair\b',
                 lower, _re.IGNORECASE
             ))
             print(f"\n>>> EAGLE POSTCHECKS:", flush=True)

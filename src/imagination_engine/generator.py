@@ -1305,6 +1305,15 @@ def generate_session(
             "distant bird",         # "that distant bird overhead" / "the distant bird"
             "in turn toward",       # "call out in turn toward" — implies response partner
             "call out in turn",     # "you call out in turn toward"
+            # beat158 (2026-08-21): three new escape forms found in battery11_0529:
+            # "another pair of wings" (wildlife-plural) — "a second pair" (beat96) blocked but this
+            # is different phrasing. "two separate birds" (wildlife-plural) — "two birds"+"two
+            # separate eagles" (beat106/109) blocked but "two separate BIRDS" slipped exact-match.
+            # "both birds" (golden-eagle-wildlife) — "both of you"/"you both" (beat105) blocked but
+            # "both birds" not covered.
+            "another pair of wings",   # "another pair of wings ahead"
+            "two separate birds",      # "two separate birds moving through a shared sky"
+            "both birds",              # "both birds carrying their own particular meanings"
         ))
         if anon_companion_dropped:
             log.warning('[v6] %d anonymous-companion sentence(s) dropped (you/we both in solo eagle active-body)',
@@ -1320,7 +1329,7 @@ def generate_session(
         _chair_body_kept = []
         _chair_body_dropped = 0
         for _s in _chair_body_sents:
-            if re.search(r'\byour\s+chair\b|\bin\s+(?:the\s+)?chair\b|\bfrom\s+(?:your\s+)?chair\b', _s, re.IGNORECASE):
+            if re.search(r'\byour\s+chair\b|\bin\s+(?:a\s+|the\s+)?chair\b|\bfrom\s+(?:your\s+)?chair\b', _s, re.IGNORECASE):
                 _chair_body_dropped += 1
             else:
                 _chair_body_kept.append(_s)
