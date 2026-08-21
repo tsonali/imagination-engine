@@ -8540,3 +8540,18 @@ NOT SCP'd.
 
 **USE-CASES deep testing:** DEFERRED — model now free but qc_queue restarted (battery2b next). Secretary (100+ beats) + BYO test deferred to next open window.
 
+
+**battery10_0821_0510 10/10 PASS ✅ (550s):** All floors clean. Runs: eulogy, HR-complaint, condolence, custody, ESL-voice, missing-facts, summarize-lossless, shorter×3 (1 stochastic floor hit, known — no code action), multi-doc-paste, braindump-organize. No new defects.
+
+**qc_queue restarted (PID 9083) — battery11_0821_0529 NOW RUNNING (PID 9115).**
+Post-fix battery9 will auto-run after: battery11 → battery9 → battery6 → battery10 → battery2b → battery12 → battery4b → battery3b → product_e2e.
+
+**Mini SSH:** UNREACHABLE (33rd consecutive — both mac-mini.localdomain and 172.16.151.169 timeout). Gold(A) and Gold(C) backlog NOT SCP'd.
+
+**Beat156c mandate complete:**
+- READ ✅: battery9_0309 fully read (20/20 scenarios), template-fatigue logged
+- MINI ✅: UNREACHABLE (33rd consecutive), noted
+- GOLD ✅: Gold(A)+7 (6380→6387), Gold(C)+4 (c_gold_beat156c.json)
+- USE-CASES: DEFERRED — battery11 now running (model busy); Secretary 100+ beats deferred
+- VITAL FACTS ✅: battery10_0510 10/10 PASS
+- LOG ✅: daily-log.md, HANDOFF.md, RELEASE.md, review-queue.md all updated; 3 commits (4bd4da4, c30e4be, 47de2c8)
