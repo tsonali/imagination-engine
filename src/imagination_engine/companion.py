@@ -1477,6 +1477,17 @@ def _strip_echo(reply: str, user_message: str) -> str:
     # Observed: beat46 battery9 2042 arc-divorce T3 "\u2014 that's a line between..."
     if r and r[0] in "'\u2018\u2019\u201c\u201d\"\u2014\u2013" and len(r) > 1 and r[1] == ' ':
         r = r[1:].lstrip()
+    # Strip unmatched trailing close-quote artifact (beat156).
+    # Model sometimes appends " after ? or ! when it has no matching open quote.
+    # Observed: battery9_2220 comp-discourse-marker-echo T1:
+    # "What's one thing that needs attention?" (last char curly/straight ").
+    # Parity guard: only strip when that quote char appears an ODD number of times
+    # (meaning no matching opener) \u2014 prevents stripping legitimate closing quotes
+    # in sentences like 'She said "hello."' (count=2, even, safe).
+    if len(r) >= 2 and r[-1] in ('"', '\u201d') and r[-2] in '.!?':
+        _tq = r[-1]
+        if r.count(_tq) % 2 == 1 and not r.startswith(('"', '\u201c')):
+            r = r[:-1]
 
     return r
 
