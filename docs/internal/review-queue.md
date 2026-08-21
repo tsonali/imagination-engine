@@ -3685,3 +3685,24 @@ battery12 SC13 was failing: model generated "Yes — your sister Priya lives in 
 
 companion.py MD5: **2e1fffa00ea93aaf23373693e98b08c6**
 ZIP MD5: **949f9abdb2324017a89efbf357c3a357**
+
+## Beat155 (battery9_2220 reading) — 2026-08-20
+
+**FIX: GRAVITY+personhood chain (companion.py, ea505fc).**
+battery9_2220 comp-crisis-adjacent: GRAVITY TYPE B regen produced acknowledgment using user's crisis words "everyone would be better" → personhood `_FORBIDDEN` check fired → personhood regen stripped acknowledgment → final output TYPE B (pure question). New guard: after personhood regen block, if GRAVITY trigger + TYPE B → one combined regen with both constraints: exclude forbidden phrase AND require acknowledgment. Only accepts combined regen if non-TYPE-B. Root: personhood regen chain was blind to GRAVITY context.
+
+**FIX: VAGUE_FILLER_RE 'of [1-5 words]' extension (companion.py, ec03b08).**
+battery9_2220 comp-grief-anger-barrier-pivot T2: "That's the whole script of staying quiet for him approval." — VAGUE_FILLER_RE escaped because "of staying quiet for him approval" has 4 words after 'of'; old pattern allowed only 1-2 words. Extended: `of\s+\w+(?:\s+\w+){0,4}`. Grammar broken "him"→"his" is model-floor (not mechanically fixable). 10/10 unit tests PASS.
+
+**Gold(A)+7=6366.** knife-sharpening, wild-ice-skating, archery, summer-preserves-jar, candle-dipping, darkroom-film, leaf-pressing. Replaced initial 3 picks (glassblowing, phosphorescence, telescope) — all heavily overduplicated in corpus (2-11 existing entries each). MD5: 0ce02af3193cd56f084157053ec720f8.
+
+**Gold(C)+5 (c_gold_beat155.json).** grief-anger-t2-no-between-us, crisis-gravity-no-forbidden-phrase, crisis-gravity-alternative-ack, discourse-marker-no-echo-family, vf-sister-memory-natural-recall.
+
+**battery9_2220 VF floors all green (pre-beat154 code):** vf-sister-memory PASS, vf-no-fabrication PASS, vf-wrong-entity PASS. beat153 SC13-CROSS-ENTITY holding. comp-discourse-marker-echo T1: stray trailing `"` quality miss (monitor in next run). comp-uc1-t5: T1 clean, T2-T5 pending. Mini UNREACHABLE (29th).
+
+**No action needed from Sonali this beat** — only the standing items:
+1. `git push origin v1.0` when ready to ship
+2. Apple notarization + F5 voice dial (Sonali-physical only)
+
+companion.py MD5: **42de746e40122c1c4e545e1aadb335b3**
+ZIP MD5: **6771bdffdd7ab60723ebd465221cbcb0**

@@ -8419,8 +8419,10 @@ comp-grief-anger-barrier-pivot T2 in battery9_2220 produced "That's the whole sc
 - comp-grief-anger-barrier-pivot T2: "That's the whole script of staying quiet for him approval." ⚠️ — VAGUE_FILLER_RE escaped (beat155 Fix 2 applied), grammar broken "him"→"his"
 - comp-vf-sister-memory: T1 echo-strip (companion echoed discourse-marker "family stuff" → stripped → regen "What does it feel like to be the one doing that?"), T2 "Yes — your sister is Priya, and she lives in Austin." ✅ PASS (Yes + Priya + Austin present)
 - comp-vf-no-fabrication: "No — you haven't told me about Marcus." ✅ PASS (no fabrication, correct second-person denial)
-- comp-vf-wrong-entity: generating... (pre-beat154 code — wrong-entity guard relies on _vf_covers_query + _has_unrecognized_name)
-- comp-discourse-marker-echo, comp-uc1-t5, comp-grief-anger-1word-echo, comp-grief-anger-barrier-vague: PENDING
+- comp-vf-wrong-entity: T1 "You said family stuff — does it feel more about your own or someone else's?" (no echo) ✅; T2 "Yes — your sister is Priya, and she lives in Austin." ✅; T3 "No — you haven't told me about your brother Marcus." ✅ — beat153 SC13-CROSS-ENTITY guard holding, correct second-person form. ALL VF FLOORS GREEN in pre-beat154 code.
+- comp-discourse-marker-echo T1: "What's one thing that needs attention?" ✅ (no echo, genuine question) — QUALITY MISS: stray `"` at end of reply (`What's one thing that needs attention?"`) — model outputting closing quote artifact. Not a mechanical floor fail. Monitor in next battery run.
+- comp-uc1-t5-semantic-repeat T1: "2am and the work thing — it's a tall order to sit alone with that." ✅ (no echo, acknowledges frame, no analysis)
+- comp-grief-anger-1word-echo, comp-uc1-t5-semantic-repeat-45pct, comp-grief-anger-barrier-vague: PENDING (log at 145 lines)
 
 **Gold(A)+7 (beat155):** knife-sharpening-water-stone, wild-ice-skating-frozen-lake, archery-draw-release, summer-preserves-jar-winter, candle-dipping-beeswax, darkroom-film-developing, pressing-leaves-flowers. Total Gold(A)=6366. MD5: 0ce02af3193cd56f084157053ec720f8. Candidates: beat155_new_scenes.json in A-imagination/_candidates/. NOT SCP'd (mini unreachable). Note: original 3 scripts (glassblowing, phosphorescence, telescope) replaced — each theme already had 2-10+ corpus entries.
 
