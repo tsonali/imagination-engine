@@ -1,6 +1,6 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-08-20 beat155 (IN PROGRESS) — **SHIP GATE HOLDS. beat154: 3 CODE FIXES (comp-past-query opener regex, second-pass 'I haven't told you' reversal, echo-strip join artifact) committed 6f2ce30. beat155: GRAVITY+personhood chain fix committed ea505fc. companion.py MD5: a5cabeafc6c954ad0df17500062dfb00. ZIP MD5: 2fa70ad2aaa37f66ee6bed735ef7ca81. Gold(A)=6359 (+7 beat154). Gold(C)+14 (beat154+154). battery9_2220 IN FLIGHT (pre-beat154 code — started 22:20, beat154 commit 22:45). Beat154 fixes verify in next battery run. Mini UNREACHABLE (28th). Sonali: push v1.0 tag (git push origin v1.0).**
+_Last updated 2026-08-20 beat155 (IN PROGRESS) — **SHIP GATE HOLDS. beat154: 3 CODE FIXES (comp-past-query opener regex, second-pass 'I haven't told you' reversal, echo-strip join artifact) committed 6f2ce30. beat155: 2 MORE CODE FIXES — GRAVITY+personhood chain (ea505fc) + VAGUE_FILLER_RE 'of [1-5 words]' extension (ec03b08). companion.py MD5: 42de746e40122c1c4e545e1aadb335b3. ZIP MD5: 6771bdffdd7ab60723ebd465221cbcb0. Gold(A)=6359 (+7 beat154). Gold(C)+3 beat155. battery9_2220 IN FLIGHT (pre-beat154 code — started 22:20, beat154 commit 22:45). Beat154+155 fixes verify in next battery run. Mini UNREACHABLE (28th). Sonali: push v1.0 tag (git push origin v1.0).**
 
 BEAT150 SUMMARY:
 - READ: battery9_0036 (end-to-end, 36 replies, 5352s): 25% q-enders ✅, 8% paraphrase ✅, 0.81 diversity ✅. All floors clean except NEW DEFECT (see below).
