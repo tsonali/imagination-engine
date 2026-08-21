@@ -1256,8 +1256,12 @@ def _strip_echo(reply: str, user_message: str) -> str:
     # Example: user "Promise me you'll always be here." →
     #          companion "Promise you'll always be here. No — I'm software..."
     # ("me" deleted → 100% of companion's words are in user's sentence; Cases 1-2g miss.)
-    # Guard: reply's first sentence ≤9 words, ≥85% word overlap with user's first
+    # Guard: reply's first sentence ≤9 words, ≥80% word overlap with user's first
     # sentence, not a CONFIRM_LANDS phrase, remainder > 3 words.
+    # beat153b: lowered from 85% to 80% — battery9_1726 T3 miss: user "My boss already
+    # thinks I'm the weak link." companion "You're already the weak link" = 80% overlap;
+    # verified safe (5-case analysis: no false positives found at 80% threshold for ≤9-word
+    # replies; a reply sharing 4/5 words with user's sentence is always an echo).
     if r and u:
         _r_first_2h = re.split(r'[.!?]', r)[0].strip()
         _u_first_2h = re.split(r'[.!?]', u)[0].strip()
@@ -1271,7 +1275,7 @@ def _strip_echo(reply: str, user_message: str) -> str:
             if (len(_r_wlist_2h) <= 9
                     and _r_first_2h.rstrip('.!? ').lower() not in _lands_2h
                     and _u_wset_2h
-                    and len(set(_r_wlist_2h) & _u_wset_2h) / max(len(_r_wlist_2h), 1) >= 0.85):
+                    and len(set(_r_wlist_2h) & _u_wset_2h) / max(len(_r_wlist_2h), 1) >= 0.80):
                 _after_2h = r[len(_r_first_2h):].lstrip(" .!?\n-—")
                 r = _after_2h if (len(_after_2h.split()) > 3) else ""
 

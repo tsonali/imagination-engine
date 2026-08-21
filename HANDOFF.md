@@ -1,6 +1,6 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-08-20 beat153 (third session) — **SHIP GATE HOLDS. SC13-CROSS-ENTITY guard confirmed working in battery9_1726 live run. companion.py MD5: 2e1fffa00ea93aaf23373693e98b08c6. ZIP MD5: 86941a1f6650de8155a1f0b459952194. Gold(A)=6346 (+17 total beat153). Gold(C)+12 beat153. Battery9_1726 scenarios 18/20 at 19:03 PDT. Battery12 rerun pending (queue rotation). Mini UNREACHABLE (26th). Sonali: push v1.0 tag when ready.**
+_Last updated 2026-08-20 beat153 (third session) — **SHIP GATE HOLDS. SC13-CROSS-ENTITY guard + Case 2h threshold 85%→80% fix. companion.py MD5: 24789b449c705cc6e5791e1465bd9c84. ZIP MD5: 01e840abd4dc84ff05c9840b13bd9d54. Gold(A)=6346 (+17 total beat153). Gold(C)+12. Battery9_1726 scenarios 19/20 at 19:12 PDT. Battery12 rerun pending. Mini UNREACHABLE (26th). Sonali: push v1.0 tag when ready.**
 
 BEAT150 SUMMARY:
 - READ: battery9_0036 (end-to-end, 36 replies, 5352s): 25% q-enders ✅, 8% paraphrase ✅, 0.81 diversity ✅. All floors clean except NEW DEFECT (see below).
@@ -243,7 +243,7 @@ NEXT:
 
 ---
 
-_Last updated 2026-08-20 beat153 (third session) — **SHIP GATE HOLDS. SC13 guard confirmed in live battery9 run. Gold(A)=6346. Gold(C)+12. Battery9_1726 scenarios 18/20 as of 19:03 PDT. Battery12 rerun pending.**
+_Last updated 2026-08-20 beat153 (third session) — **SHIP GATE HOLDS. Case 2h threshold 85%→80% (T3 echo miss fixed). companion.py MD5: 24789b449c705cc6e5791e1465bd9c84. ZIP: 01e840abd4dc84ff05c9840b13bd9d54. Battery9_1726 19/20 at 19:12 PDT. Battery12 pending.**
 
 BEAT153 SUMMARY:
 - READ: queue_0820_1232_battery9_engagement.log (19% q-enders ✅, 8% para, 0.83 diversity) — end to end. 4 defects found.
