@@ -2,6 +2,23 @@
 
 _Everything that wanted your taste. Newest on top within sections. My provisional call where I have one._
 
+## Beat 156 — 2026-08-21 — FYI items
+
+**Battery9 post-fix verification still pending (FYI, no action):**
+Neither battery9_1726 nor battery9_2220 ran with beat154+155+156 code. battery9_1726 was pre-beat154; battery9_2220 crashed OOM pre-beat154. The first battery9 run with all 6 fixes (6f2ce30 / ea505fc / ec03b08 / aadf5cf) will be the next cycle queued after battery11 completes. Specific things to verify in that run: (1) comp-past-query no longer produces "you haven't told me" form; (2) forced second-pass no longer produces "I haven't told you"; (3) join artifact "and  So" cleaned; (4) GRAVITY+personhood chain produces TWO MOVES; (5) VAGUE_FILLER_RE with extended 'of [1-5 words]' suffix; (6) trailing close-quote absent from discourse-marker-echo T1; (7) topic-paraphrase-echo monitor — watch for "Family stuff is on your mind." reappearing (stochastic; if fires again, add Case).
+
+**calm-settle quality note (FYI, no code action):**
+battery11_0821_0144 calm-settle script (1213w) passes the enum check (0 'The [noun] is' matches in first 250w) but the second half degenerates into circular "what was required before right now" repetition — n376 model floor on internal settling. No mechanical detection path exists (not a phrase-pair repeat, content varies slightly each iteration). The script settles the user and passes all checks; the language is somewhat repetitive but not harmful. No fix path this beat; noted as ongoing n376 quality ceiling for non-outdoor non-active-body scripts.
+
+**eagle-wildlife-plural ambient pronoun (FYI, no code action):**
+battery11_0821_0144 eagle-wildlife-plural script (2172w) contains near end: "You are aware of its presence without needing any particular focus away from your own flight — which means its call becomes a specific thing separate but still present within earshot." The pronoun "its" is ambiguous — no wildlife named before or after. Passed all 4 eagle postchecks (no named species, no 'you both'/'we both', no anon companion phrases). The "its" likely refers to the altitude/environment/wind (model floor ambiguity), not a companion animal. Provisional call: not a defect — if a specific animal were named, the postcheck would catch it; the ambiguous "its" is at the edge of the filter's design scope. Monitor in future eagle-wildlife-plural reads.
+
+**topic-paraphrase-echo (MONITOR, no code action yet):**
+"Family stuff is on your mind." appeared in battery9_2220 pre-fix run. This is a short topic-paraphrase (≤7 words, content words from user's first sentence, no new information, no question). Confirmed stochastic — battery9_2220 same scenario gave clean reply "What's one thing that needs attention?" (with trailing quote artifact, now fixed). No Case in `_strip_echo()` catches this pattern (no discourse marker, no hollow opener, no pronoun flip). Decision: bank as monitor item in scenario_bank; add mechanical fix only if it fires again in the next post-fix battery9. The banked scenario is `comp-discourse-marker-echo` (scenario_bank line added beat156).
+
+**Mini unreachable (30th consecutive day):**
+Gold backlog: 6373 A_gold entries (MD5: 77ce82a8971019cb05d32d4c6e3565f7) and ~105 C_gold exemplars (beats 144-156) unsynced. Flywheel is idle. When mini reconnects: SCP A_gold + all c_gold_beat*.json files from _candidates/ → flywheel will auto-detect hash change and queue next training run. No adapter has been trained since n376 (permanent). Mini has been unreachable since approximately 2026-07-23 (day 29 per beat155 count).
+
 ## Beat 149 — 2026-08-19 — FYI items
 
 **grief-anger-1word-echo T1 template tendency (no code action, C-gold target):**
