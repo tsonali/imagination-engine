@@ -8271,3 +8271,6 @@ All 18 completed scenarios show no hard mechanical failures. Guard system health
 - scenario_bank.py: QUALITY MISS note added to comp-uc1-t5-action-prefix-repeat for beat153b variant.
 
 **Memory state:** 9% free by memory_pressure throughout. After battery9 exits, should recover to 75%+, enabling battery6 → battery10 → battery2b → battery12 in queue rotation. Battery12 rerun will verify SC13 fix.
+
+**Additional fix found during battery9 monitoring:**
+- **Case 2h threshold 85%→80%** (companion.py beat153b): battery9_1726 T3 for comp-uc1-t5-semantic-repeat-45pct produced "You're already the weak link — what does it feel like to be sure of that?" — echoes user "My boss already thinks I'm the weak link. Probably correctly." at 80% word overlap, just below 85% Case 2h threshold. Fix: lowered threshold from 85% to 80%. 7-case analysis: no false positives at 80% for ≤9-word replies. companion.py MD5: **24789b449c705cc6e5791e1465bd9c84**. ZIP MD5: **01e840abd4dc84ff05c9840b13bd9d54**. Committed 3e83c0f.
