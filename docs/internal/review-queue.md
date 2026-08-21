@@ -4,6 +4,9 @@ _Everything that wanted your taste. Newest on top within sections. My provisiona
 
 ## Beat 156b — 2026-08-21 — FYI items
 
+**VAGUE_FILLER_RE ASCII apostrophe blind spot fixed (code fix, commit 99da9da):**
+`_VAGUE_FILLER_RE` character class `[''']` contained only U+2018/U+2019 (curly apostrophes), not ASCII U+0027. Battery9_0309 revealed: comp-grief-anger T2 + comp-grief-anger-self-recycle T2 both produced "That's the whole script of staying silent for his approval." (ASCII apostrophe) without VAGUE-STUB regen firing. Fix: `_norm_apos()` helper converts ASCII→U+2019 before all `_VAGUE_FILLER_RE.match()` calls — primary + 2 secondary regen paths. companion.py MD5: a3bbefd00867abeb2094360e771626d4. scenario_bank MD5: 12591d3a5a625d9bacda9df18f338697. All 4 dist copies synced. Battery9_0309 is a pre-fix run (process loaded old code); post-fix battery9 needed to verify the fix fires correctly.
+
 **scenario_bank duplicate comp-discourse-marker-echo removed (code fix, commit 856e722):**
 beat156 had appended a new `Scenario("comp-discourse-marker-echo", ...)` entry (always=True, severity high) as a second entry rather than appending to the existing beat115 entry. The duplicate had `turns=["...", ""]` — empty second turn would have sent a blank message to companion on every battery9 run. Fix: merged monitor note into existing entry (line 3382), removed duplicate. scenario_bank: 113 scenarios (was 114), always: 50, companion: 49, no duplicates. MD5: ab8b288750d08065ba47a6ebcf5e19a8. All 4 dist copies synced.
 
