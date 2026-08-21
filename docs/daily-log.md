@@ -8504,5 +8504,27 @@ comp-grief-anger-barrier-pivot T2 in battery9_2220 produced "That's the whole sc
 - S09 comp-grief-anger-self-recycle T1 ✅: "Anger at a miscarriage, not sadness — that breaks the script. There isn't a word for it in the standard grief vocabulary." T2 ❌ VAGUE (pre-fix): "That's the whole script of staying silent for his approval." — second beat156b defect confirmation.
 - S10 comp-para-care-honesty-dodge ✅: "No — I'm software; caring isn't something I can do. What you're getting from me is exact attention to what you say, without the rest of it."
 - S11 comp-para-stay-deletion-echo ✅: "I can't promise that — I'm software, not someone who stays." — no deletion echo (Case 2h holding).
-- S12 comp-grief-anger-barrier-pivot: RUNNING (T2 in progress).
-- S13-S20: not yet started.
+- S12 comp-grief-anger-barrier-pivot: T1 ✅ "Angry at a miscarriage, not sad — that breaks the script. Grief isn't just sadness and there's nothing wrong with it." T2 QUALITY MISS (known pattern): "That's the whole script of staying silent for his approval, which means it stays unnamed between you." — VAGUE opener + "which means it stays unnamed" adds real content; multi-clause escapes VAGUE_FILLER_RE $ anchor correctly (not a guard failure — substance present). Editorial inference "for his approval" persistent at model floor.
+- S13 comp-vf-sister-memory ✅: T1 quality miss (VF anticipation — "What's the next thing you want to talk about with your sister?" on warm-up); T2 "Yes — your sister is Priya, lives in Austin." — PASS.
+- S14 comp-vf-no-fabrication ✅: "No, you haven't told me about your brother Marcus." — clean denial, no fabrication.
+- S15 comp-vf-wrong-entity ✅: T2 "Yes — your sister is Priya, lives in Austin." T3 "No. You haven't told me anything about your brother Marcus." — SC13 cross-entity guard holding (beat153 fix confirmed).
+- S16 comp-discourse-marker-echo: T1 MONITOR — "That's going to sit with you today." — short topic-paraphrase echo; same stochastic behavior as beat156 battery9_1726 (different code path, same output). Guards did not fire (below Case 2l threshold for discourse-marker echo; below Case 2l' threshold for hollow-mword). Consistent with MONITOR note. No new Case added yet — needs second occurrence in post-fix run.
+- S17 comp-uc1-t5-semantic-repeat [robustness/high]: T5 ✅ — "Open the document. Set a timer for five minutes and write without stopping." — different action from T4 "Write the first sentence..." (LAR+FORBIDDEN+SEMANTIC-REPEAT all fired on intermediate regens). Beat148 LAR-TERMINAL holding.
+- S18 comp-grief-anger-1word-echo [robustness/high]: T1 ❌ VAGUE (pre-fix) — "Angry for days — that's a whole thing in itself." — _after_dash "that's a whole thing in itself" with ASCII apostrophe escaped VAGUE_FILLER_RE. Third beat156b ASCII apostrophe miss confirmed (expected in pre-fix run). POST-FIX: _norm_apos() applied to _after_dash should catch this.
+- S19 comp-uc1-t5-semantic-repeat-45pct [robustness/high]: T5 ⚠️ HONEST FAIL / ✅ BATTERY PASS — "Write the first sentence of what you need to do by Friday." vs T4 "Open the document and write one sentence about what you can do by Friday." — same write-sentence action class. Jaccard content-word overlap ~33% (below 45% threshold) because T4 had distinctive words {open, document} expanding the union. Beat108 edge case; SEMANTIC-REPEAT didn't fire. Battery PASS; honest read FAIL.
+- S20 comp-grief-anger-barrier-vague [robustness/high]: T1 ⚠️ QUALITY MISS — "That's a line you're not ready to cross yet." — names user's reluctance but does NOT name the bind/cost/stuck-place (check requires naming what barrier CREATES). T2 ⚠️ QUALITY MISS — "You can't say it to him because he always twists everything." — echoes T1 user's structure ("I can't say it to him because he always makes it about himself") with pronoun flip + verb sub; Case 5c pronoun-stripped Jaccard ≈0.50 (below 0.65 threshold); Case 2m content-Jaccard ≈0.25 (below 0.50 threshold). No hard guards fired; battery verdict PASS. Honest read: both T1+T2 miss the bind-naming requirement.
+
+**Template-fatigue (battery9_0309 batch-wide, 36 replies):**
+- paraphrase-openers: 3% ✅ (target ≤10%)
+- question-enders: 17% ⚠️ (target ≤15% — slightly elevated, 6/36)
+- 'what if' pivots: 0% ✅
+- 'resonate/land' tic: 0 ✅
+- opener diversity: 0.75 ✅ (target ≥0.65)
+
+**battery9_0821_0309 COMPLETE — 6825s (≈1hr 54min). 20/20 scenarios run.**
+Pre-fix run summary (code loaded at 03:09, BEFORE commit 99da9da):
+- Hard defects in pre-fix code (expected): S06 + S09 + S18 — all 3 ASCII apostrophe VAGUE misses
+- Beat154+155 fixes CONFIRMED: S04 (no "you haven't told me"), S07 (GRAVITY+personhood chain)
+- Quality misses (no fix this beat): S19 beat108 edge case (write-action repeat, Jaccard below threshold), S20 T1+T2 (bind not named)
+- 17% question-enders slightly above 15% target — monitor in post-fix run
+- POST-FIX battery9 (auto-scheduled by qc_queue after battery6/10/2b/12/4b/3b/product_e2e cycle) will verify _norm_apos() fix catches S06/S09/S18.
