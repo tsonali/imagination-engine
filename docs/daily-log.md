@@ -8528,3 +8528,13 @@ Pre-fix run summary (code loaded at 03:09, BEFORE commit 99da9da):
 - Quality misses (no fix this beat): S19 beat108 edge case (write-action repeat, Jaccard below threshold), S20 T1+T2 (bind not named)
 - 17% question-enders slightly above 15% target — monitor in post-fix run
 - POST-FIX battery9 (auto-scheduled by qc_queue after battery6/10/2b/12/4b/3b/product_e2e cycle) will verify _norm_apos() fix catches S06/S09/S18.
+
+**Gold(C)+4 (beat156c):** c_gold_beat156c.json — 4 exemplars targeting battery9_0309 quality misses:
+- barrier-vague-t1-bind-named: "You have the anger and nowhere to put it." — correct T1 naming the bind (no release valve) after S20 T1 quality miss ("That's a line you're not ready to cross yet." named reluctance, not cost).
+- barrier-vague-t2-cost-named: "So you stay silent and carry it alone." — correct T2 naming what barrier CREATES after S20 T2 quality miss ("You can't say it to him because he always twists everything." echoed T1 user structure + named his behavior, not her bind).
+- uc1-t5-physical-pivot-non-writing: "Get up. Get a glass of water. Come back in two minutes." — correct T5 breaking write/document action class after S19 beat108 edge case.
+- family-stuff-no-topic-paraphrase: "What kind of family stuff?" — correct T1 that doesn't paraphrase user's topic label, targeting S16 MONITOR.
+NOT SCP'd.
+
+**Gold(A) and USE-CASES deep testing:** DEFERRED — battery10 (PID 7257) running, model busy. Next window after battery10+battery2b+12+4b+3b+product_e2e cycle completes.
+

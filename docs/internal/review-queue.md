@@ -2,6 +2,12 @@
 
 _Everything that wanted your taste. Newest on top within sections. My provisional call where I have one._
 
+## Beat 156b/c — 2026-08-21 — FYI items
+
+**battery9_0309 complete + Gold(C)+4 written (FYI, no action):**
+battery9_0821_0309 COMPLETE (6825s, 20/20). Pre-fix run: S06+S09+S18 VAGUE misses expected (confirmed ASCII apostrophe defect). S16 MONITOR (topic-paraphrase-echo — stochastic, no new Case yet). S19 beat108 edge case (write-action repeat, Jaccard below 45% threshold — known limitation). S20 T1+T2 quality miss (bind not named; no hard guards fired). Template-fatigue: 3% para-openers ✅, 17% Q-enders ⚠️ (slightly above 15% target), 0.75 diversity ✅. Post-fix battery9 auto-scheduled by qc_queue.
+Gold(C)+4 written (c_gold_beat156c.json): barrier-vague-t1-bind-named, barrier-vague-t2-cost-named, uc1-t5-physical-pivot-non-writing, family-stuff-no-topic-paraphrase. NOT SCP'd.
+
 ## Beat 156b — 2026-08-21 — FYI items
 
 **VAGUE_FILLER_RE ASCII apostrophe blind spot fixed (code fix, commit 99da9da):**
