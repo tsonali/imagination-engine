@@ -8536,5 +8536,7 @@ Pre-fix run summary (code loaded at 03:09, BEFORE commit 99da9da):
 - family-stuff-no-topic-paraphrase: "What kind of family stuff?" — correct T1 that doesn't paraphrase user's topic label, targeting S16 MONITOR.
 NOT SCP'd.
 
-**Gold(A) and USE-CASES deep testing:** DEFERRED — battery10 (PID 7257) running, model busy. Next window after battery10+battery2b+12+4b+3b+product_e2e cycle completes.
+**Gold(A)+7 (beat156c):** falconry-first-flight (505w), darkroom-film-developing (553w), forge-knife-first-heat (600w), shibori-indigo-dyeing (535w), ice-sculpting-clear-block (566w), traditional-archery-draw (567w), cave-diving-first-passage (593w). Total Gold(A)=6387. MD5: 1502f7c12bddbc94548a7ba829c35c4f. NOT SCP'd. Gen script: scripts/gen_beat156c_gold.py.
+
+**USE-CASES deep testing:** DEFERRED — model now free but qc_queue restarted (battery2b next). Secretary (100+ beats) + BYO test deferred to next open window.
 
