@@ -8461,11 +8461,11 @@ comp-grief-anger-barrier-pivot T2 in battery9_2220 produced "That's the whole sc
 
 **Scenario_bank:** comp-discourse-marker-echo entry added with topic-paraphrase-echo monitor note.
 
-**Battery status at session end:**
-- battery11_0821 PID 89007 STILL RUNNING (started 01:44, ~50 min elapsed). 3/7 scenarios complete (MRI ✅, intimacy ✅, eagle ✅). Memory at 17% free — below 35% threshold for new launches.
+**Battery status at beat156 close (updated):**
+- battery11_0821 PID 89007 STILL RUNNING (started 01:44). 5/7 scenarios complete: MRI ✅, intimacy ✅, eagle (embodiment) ✅, eagle-wildlife-plural ✅ (2172w/862s, 4 eagle postchecks PASS — quality note: ambiguous "its call" pronoun near end, no named species, mechanical PASS), calm-settle ✅ (1213w/265s, 0 'The [noun] is' matches in 250w — quality note: second half circular "what was required before right now" repetition, n376 floor). imag-eagle-golden-eagle-wildlife GENERATING at beat close. imag-eagle-companion-bird-he not yet run. Memory <10% free (model running).
 - qc_queue PID 10078 ALIVE. Will launch battery9 after battery11 completes.
 - battery9 WITH BEAT154+155+156 FIXES: not yet run. This will be the verification run for all recent companion changes.
 
-**What runs next:** battery11 to complete (eagle-wildlife-plural, calm-settle, golden-eagle-wildlife, companion-bird-he), then battery9 (first post-fix verification). Rebuild ZIP after battery9 confirms clean. Secretary deep-test (deferred 100+ beats) + BYO deep-test (deferred 40+ beats) need to rotate into next beats.
+**What runs next:** battery11 to complete (golden-eagle-wildlife, companion-bird-he), then battery9 (first post-fix verification). Rebuild ZIP after battery9 confirms clean. Secretary deep-test (deferred 100+ beats) + BYO deep-test (deferred 40+ beats) need to rotate into next beats.
 
 **companion.py MD5:** abbf6acdb5b5d1eb07a44d8c37f7e2fc
