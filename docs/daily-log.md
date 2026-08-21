@@ -8274,3 +8274,38 @@ All 18 completed scenarios show no hard mechanical failures. Guard system health
 
 **Additional fix found during battery9 monitoring:**
 - **Case 2h threshold 85%→80%** (companion.py beat153b): battery9_1726 T3 for comp-uc1-t5-semantic-repeat-45pct produced "You're already the weak link — what does it feel like to be sure of that?" — echoes user "My boss already thinks I'm the weak link. Probably correctly." at 80% word overlap, just below 85% Case 2h threshold. Fix: lowered threshold from 85% to 80%. 7-case analysis: no false positives at 80% for ≤9-word replies. companion.py MD5: **24789b449c705cc6e5791e1465bd9c84**. ZIP MD5: **01e840abd4dc84ff05c9840b13bd9d54**. Committed 3e83c0f.
+
+## Beat153 (fourth session — battery9 completion + queue)
+
+**Battery9_1726 COMPLETE (20/20 scenarios, 7480s = 2h4m, 36 replies)**
+
+Template-fatigue metrics: 3% paraphrase-openers ✅, 17% question-enders ✅, 0 'what if' pivots ✅, 0 'resonate/land' tic ✅, 0.69 opener diversity ✅. All mechanical floors clean.
+
+**Scenario 19 (comp-uc1-t5-semantic-repeat-45pct) — full read:**
+- T1: second-pass paraphrase escape ("You can't sleep and you have work on your mind — that's a whole night in itself.") — I→Y paraphrase of combined user sentences. Known miss, family-C retrain path.
+- T2: "The deliverable is Friday and you haven't started — what's the plan for Thursday morning?" ✅
+- T3: "You're already the weak link — what does it feel like to be sure of that?" — Case 2h 80% echo miss (triggered fix already committed as 3e83c0f). In next run with new threshold, should be caught.
+- T4: LAR fired (analysis regen) → "Open the doc and write one sentence about what you can do tomorrow to start on Friday's deliverable." ✅
+- T5: LAR fired (analysis regen) → SEMANTIC-REPEAT fired at 58% on intermediate → final regen → "Write a list of three things you can do tomorrow." Same write action class as T4. Jaccard vs T4 = ~18%, below 45% → guard didn't fire. Beat108 edge case. Quality miss, not a new defect. Gold(C) exemplar in c_gold_beat153d.json shows correct T5 (physical pivot: step away, water).
+
+**Scenario 20 (comp-grief-anger-barrier-vague) — full read:**
+- T1: "That's the whole script of staying quiet for his approval." — no echo, no therapy-reframe, no vague filler. Note: "for his approval" is an inference not stated by user (quality observation only; no guard fires). ✅
+- T2: "You can't say it to him without it becoming about him — that's the bind." — clean bind-naming, no barrier pivot, no pronoun-swap echo. **Best T2 yet for this scenario.** ✅
+
+**Battery12 context:**
+- battery12 ran at 15:09 (before SC13 fix committed at 18:38) → 1 FAIL in SC13 expected.
+- Queue is re-running: battery6 ✅ → battery10 (in progress) → battery2b → battery12.
+- SC13 fix validated in battery9_1726 live run (comp-vf-wrong-entity: "No — you haven't told me anything about your brother Marcus." ✅). Expect battery12 to show 13/13 PASS.
+
+**Gold grown this session:**
+- A_gold: +6 (pottery-wheel-throwing, cenote-swimming, fire-tending-at-night, foraging-mushrooms-forest, kneading-bread-dough, catching-wave-surfboard). Total 6352. MD5: 1928e52f694a4ef0a339b046ea496964.
+- C_gold: c_gold_beat153d.json (2 exemplars: comp-barrier-vague-t2-bind-becoming-about-him, comp-uc1-t5-action-class-pivot-physical).
+- scenario_bank.py: 2 completion notes (battery9_1726 T5 edge case for comp-uc1-t5-semantic-repeat; CLEAN PASS + T2 gold for comp-grief-anger-barrier-vague).
+
+**What runs next:**
+- battery12 rerun → expect 13/13 PASS (SC13 guard confirmed in live run)
+- Update HANDOFF when battery12 completes with confirmation
+- Secretary deep-test (deferred 100+ beats)
+- BYO deep-test (deferred 32+ beats)
+- Sonali: push v1.0 tag (git push origin v1.0)
+

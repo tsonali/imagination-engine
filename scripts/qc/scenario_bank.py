@@ -3538,7 +3538,15 @@ BANK: list[Scenario] = [
              "replies; a reply sharing 4/5 words with user's sentence is always an echo. "
              "companion.py MD5: 24789b449c705cc6e5791e1465bd9c84. All 3 dist copies synced. "
              "Check: T3 must NOT echo user's self-label back as opener; Case 2h should fire "
-             "and strip 'You're already the weak link' → regen."),
+             "and strip 'You're already the weak link' → regen. "
+             "QUALITY OBS (beat153 2026-08-20 battery9_1726 T5): T4 companion 'Open the doc "
+             "and write one sentence about what you can do tomorrow.' T5 user 'That's not "
+             "helpful. I need something concrete.' SEMANTIC-REPEAT fired (58%%) on intermediate "
+             "LAR regen → regen produced 'Write a list of three things you can do tomorrow.' "
+             "Jaccard vs T4 = ~18%%, below 45%% → guard didn't fire → T5 = same action class "
+             "(writing) as T4. Same beat108 edge case; battery verdict = PASS (Jaccard below "
+             "threshold); honest read = action-class repeat. Gold(C) exemplar in "
+             "c_gold_beat153d.json shows correct T5 pivot to physical action (step away, water)."),
     Scenario("comp-grief-anger-barrier-vague", "companion", "robustness", "high",
         always=True,
         turns=[
@@ -3974,7 +3982,14 @@ BANK: list[Scenario] = [
             "caught. FP guard unchanged (>15-char user first sentence). "
             "companion.py MD5: 466a2cbfcfd7c48653288ca71c346dfb. "
             "Check: T1 must NOT open with 'It sounds like [full paraphrase of both sentences]'; "
-            "must add insight or observation not present in the user's message."
+            "must add insight or observation not present in the user's message. "
+            "CLEAN PASS (beat153 2026-08-20 battery9_1726): T1 'That's the whole script of "
+            "staying quiet for his approval.' — no echo, no therapy-reframe, no vague filler. "
+            "Note: 'for his approval' is an inference not in user's words (quality observation "
+            "only; no guard fires). T2 'You can't say it to him without it becoming about him "
+            "— that's the bind.' — clean bind-naming without barrier pivot, prior-turn echo, "
+            "or pronoun-swap. companion.py MD5: 24789b449c705cc6e5791e1465bd9c84. "
+            "Gold(C) exemplar in c_gold_beat153d.json."
         ),
     ),
     Scenario("comp-no-vague-regen-still-vague", "companion", "robustness", "med",

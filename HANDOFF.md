@@ -1,6 +1,6 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-08-20 beat153 (third session) — **SHIP GATE HOLDS. SC13-CROSS-ENTITY guard + Case 2h threshold 85%→80% fix. companion.py MD5: 24789b449c705cc6e5791e1465bd9c84. ZIP MD5: 01e840abd4dc84ff05c9840b13bd9d54. Gold(A)=6346 (+17 total beat153). Gold(C)+12. Battery9_1726 scenarios 19/20 at 19:12 PDT. Battery12 rerun pending. Mini UNREACHABLE (26th). Sonali: push v1.0 tag when ready.**
+_Last updated 2026-08-20 beat153 (fourth session) — **SHIP GATE HOLDS. Battery9_1726 COMPLETE (20/20, 7480s). SC13 CLEAN in battery9 live run (comp-vf-wrong-entity: "No — you haven't told me anything about your brother Marcus." ✅). Battery12 rerun running now (cycle: battery6✅ → battery10 running → battery2b → battery12). companion.py MD5: 24789b449c705cc6e5791e1465bd9c84. ZIP MD5: 01e840abd4dc84ff05c9840b13bd9d54. Gold(A)=6352 (+23 total beat153). Gold(C)+14. Mini UNREACHABLE (26th). Sonali: push v1.0 tag when ready.**
 
 BEAT150 SUMMARY:
 - READ: battery9_0036 (end-to-end, 36 replies, 5352s): 25% q-enders ✅, 8% paraphrase ✅, 0.81 diversity ✅. All floors clean except NEW DEFECT (see below).
@@ -243,7 +243,7 @@ NEXT:
 
 ---
 
-_Last updated 2026-08-20 beat153 (third session) — **SHIP GATE HOLDS. Case 2h threshold 85%→80% (T3 echo miss fixed). companion.py MD5: 24789b449c705cc6e5791e1465bd9c84. ZIP: 01e840abd4dc84ff05c9840b13bd9d54. Battery9_1726 19/20 at 19:12 PDT. Battery12 pending.**
+_Last updated 2026-08-20 beat153 (fourth session) — **SHIP GATE HOLDS. Battery9_1726 COMPLETE (20/20, 7480s). SC13 CLEAN in battery9 live run. Battery12 rerun in queue. companion.py MD5: 24789b449c705cc6e5791e1465bd9c84. ZIP: 01e840abd4dc84ff05c9840b13bd9d54. Gold(A)=6352 (+23 total beat153). Gold(C)+14. Mini UNREACHABLE (26th).**
 
 BEAT153 SUMMARY:
 - READ: queue_0820_1232_battery9_engagement.log (19% q-enders ✅, 8% para, 0.83 diversity) — end to end. 4 defects found.
@@ -264,8 +264,24 @@ BEAT153 SUMMARY:
 - Memory: 6% free throughout beat153 — far below 35% floor. QC queue not restarted. battery9 + battery11 first live test of beat153 fixes pending (blocked on memory).
 - Battery12: two 0-byte logs (0835 + 0729) need a clean run when memory frees.
 
+BEAT153 CONTINUATION (second + third sessions — same beat):
+- FIX 7 (companion.py — SC13-CROSS-ENTITY guard): memory probe + "Yes" opener + VF doesn't cover queried entity + _has_unrecognized_name() detects ≥5-char proper noun not in VF → regen temp=0.1 with denial instruction. Live-validated in battery9_1726 comp-vf-wrong-entity: "No — you haven't told me anything about your brother Marcus." ✅ companion.py MD5 after SC13: 2e1fffa00ea93aaf23373693e98b08c6.
+- FIX 8 (companion.py — Case 2h threshold 85%→80%): battery9_1726 T3 "You're already the weak link" echoed at 80% word overlap; old 85% threshold missed it. Lowered from 0.85 to 0.80. 7-case FP analysis: no FPs at 80% for ≤9-word replies. companion.py MD5: 24789b449c705cc6e5791e1465bd9c84. All 3 dist copies synced. ZIP rebuilt: 01e840abd4dc84ff05c9840b13bd9d54.
+- Gold(A) +10 (beat153 sessions 2+3): ice-climbing-frozen-waterfall, soap-carving-fish, motorcycle-mountain-curves (session 3) + 7 earlier (session 2). Total: 6343→6346.
+- Gold(C) +7 (sessions 2+3): c_gold_beat153b.json (5 exemplars: sc13-cross-entity-denial, sc13-specific-then-deny, opener-ask-yield-retire-clean, anger-received-cold-named, warmth-inside-honest-no). c_gold_beat153c.json (2 exemplars: comp-uc1-t5-different-action-category, comp-grief-anger-t2-bind-clean).
+- Battery9_1726: 19/20 complete at context cutoff; T3 echo miss (Case 2h 80%) confirmed + fix committed.
+
+BEAT153 FOURTH SESSION:
+- Battery9_1726 COMPLETE: 20/20 scenarios, 7480s (2h4m), 36 replies. Template-fatigue: 3% para, 17% q-enders, 0 'what if' pivots, 0 'resonate/land' tics, 0.69 opener diversity. All floors clean.
+- Scenario 19 (comp-uc1-t5-semantic-repeat-45pct): T1 second-pass paraphrase escape (known miss); T3 Case 2h 80% echo (triggered fix already committed); T4 LAR → action ✅; T5 LAR + SEMANTIC-REPEAT (58%) both fired → regen → "Write a list of three things" (same action class as T4, Jaccard 18%). Same beat108 edge case. Quality miss, no fix this beat.
+- Scenario 20 (comp-grief-anger-barrier-vague): T1 "That's the whole script of staying quiet for his approval." ✅ (note: "for his approval" is an inference not stated by user). T2 "You can't say it to him without it becoming about him — that's the bind." ✅ Clean bind-naming, no barrier pivot, no echo.
+- Battery12 FAIL explained: SC13 fix was committed 18:38; battery12 ran 15:09 on old code. Queue currently re-running battery12 (battery6✅ → battery10 running → battery2b → battery12). Expect 13/13 PASS.
+- Gold(A) +6 (beat153 fourth session): pottery-wheel-throwing, cenote-swimming, fire-tending-at-night, foraging-mushrooms-forest, kneading-bread-dough, catching-wave-surfboard. Total 6352. MD5: 1928e52f694a4ef0a339b046ea496964. NOT SCP'd.
+- Gold(C) +2 (c_gold_beat153d.json): comp-barrier-vague-t2-bind-becoming-about-him, comp-uc1-t5-action-class-pivot-physical.
+- scenario_bank.py: two completion notes added (battery9_1726 T5 edge case for comp-uc1-t5-semantic-repeat; clean pass for comp-grief-anger-barrier-vague).
+
 NEXT:
-(1) When memory_pressure ≥35%: restart `nohup bash scripts/qc_queue.sh`. Read battery9 end-to-end (first live test of all 4 companion fixes). Read battery11 (first live test of distant-bird + chair-body fixes). Read battery12 clean run.
+(1) Wait for battery12 rerun in queue — expect SC13 13/13 PASS. Update HANDOFF when confirmed.
 (2) Secretary deep-test — last run was beat47. Needs qc_queue paused + memory ≥35%.
 (3) Mini SSH retry (27th attempt).
 (4) Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.
