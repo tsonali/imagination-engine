@@ -3182,7 +3182,19 @@ BANK: list[Scenario] = [
              "T2: 'That\\'s the whole script of staying silent for his approval.' — editorial "
              "addition 'for his approval' not in user input (user said he\\'d hear it as blame, "
              "not that she needs his approval). Content correctly names consequence (staying silent) "
-             "but adds inference. Not a hard fail; quality miss."),
+             "but adds inference. Not a hard fail; quality miss. "
+             "QUALITY MISS (beat155 2026-08-20 battery9_2220 pre-beat154-code T2): "
+             "'That\\'s the whole script of staying quiet for him approval.' — TWO DEFECTS: "
+             "(1) VAGUE_FILLER_RE escape: 'That\\'s the whole script of staying quiet' — 'of "
+             "staying quiet' follows 'script' but regex only allows '(?:\\s+in\\s+itself)?' "
+             "after the noun word; 'of staying quiet' is not matched, so VAGUE_FILLER_RE does "
+             "not fire. Root cause: VAGUE_FILLER_RE matches 'That\\'s the whole [thing/script/...]' "
+             "but not 'That\\'s the whole script of [verb-phrase]'. Fix path: extend VAGUE_FILLER_RE "
+             "to also catch 'That\\'s the whole [noun] of [verb-phrase]' pattern, or add "
+             "'of \\w+ing' to the optional suffix. "
+             "(2) Grammar broken: 'for him approval' should be 'for his approval'. Model-floor "
+             "error; not mechanically fixable. Same editorial inference pattern as beat147. "
+             "NOTE: battery9_2220 runs pre-beat154 code."),
     Scenario("imag-eagle-golden-eagle-wildlife", "imagination", "fidelity", "high",
         always=True,
         turns=["I want to be an eagle soaring over mountains", "Rocky Mountains, golden aspens, autumn"],

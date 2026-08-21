@@ -1812,10 +1812,16 @@ class Companion:
         _VAGUE_FILLER_RE = re.compile(
             # beat153: "that’s been the whole thing" — "been" between "that’s" and
             # the quantifier ("the/a/...") was not covered; (?:been\s+)? added.
+            # beat155: "That’s the whole script of staying quiet [for him approval]" —
+            # "of [verb-phrase]" suffix with 3-5 words escapes the prior pattern (only
+            # allowed "in itself"). Extended to: (a) match "of [1-5 words]" prepositional
+            # phrases (covers "of staying quiet for him approval"); (b) include Unicode
+            # curly apostrophe ’ alongside ASCII ‘ so model typographic output
+            # ("That’s") is matched correctly.
             r"^(?:that[‘’]?s|it[‘’]?s|this is)\s+(?:been\s+)?(?:(?:the|a|all|just)\s+)*"
             r"(?:whole\s+)?(?:thing|this|script|story|situation|picture|deal"
             r"|conversation|world|topic)"
-            r"(?:\s+in\s+itself)?"
+            r"(?:\s+(?:in\s+itself|of\s+\w+(?:\s+\w+){0,4}))?"
             r"\s*[.!?]?\s*$",
             re.IGNORECASE,
         )
