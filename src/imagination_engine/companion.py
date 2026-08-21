@@ -1850,13 +1850,19 @@ class Companion:
         _before_dash = (reply or "").split("—")[0].strip() if "—" in (reply or "") else ""
         _after_dash = (reply or "").split("—", 1)[1].strip() if "—" in (reply or "") else ""
         _vague_lands = {p.rstrip('.!? ').lower() for p in _CONFIRM_LANDS}
+        # beat156b: VAGUE_FILLER_RE character class has U+2018/U+2019 (curly apostrophes)
+        # but NOT ASCII U+0027. Model stochastically uses ASCII apostrophes ("That's") —
+        # normalize ASCII apostrophe to U+2019 before matching so the guard fires
+        # regardless of which apostrophe encoding the model happens to use.
+        def _norm_apos(s: str) -> str:
+            return s.replace("'", '’')
         _is_vague = bool(
             reply
             and (
-                _VAGUE_FILLER_RE.match(reply)         # full single-sentence match
-                or _VAGUE_FILLER_RE.match(_first_sent) # first sentence of multi-sentence
-                or (_before_dash and _VAGUE_FILLER_RE.match(_before_dash))  # "X — [more]" (beat119)
-                or (_after_dash and _VAGUE_FILLER_RE.match(_after_dash))    # "[Good] — Vague" (beat147)
+                _VAGUE_FILLER_RE.match(_norm_apos(reply))           # full single-sentence match
+                or _VAGUE_FILLER_RE.match(_norm_apos(_first_sent))  # first sentence of multi-sentence
+                or (_before_dash and _VAGUE_FILLER_RE.match(_norm_apos(_before_dash)))  # "X — [more]"
+                or (_after_dash and _VAGUE_FILLER_RE.match(_norm_apos(_after_dash)))    # "[Good] — Vague"
             )
             and reply.strip().rstrip('.!?').lower() not in _vague_lands
         )
@@ -1965,9 +1971,9 @@ class Companion:
             _ne_fs_m = re.match(r"^([^.!?]+[.!?])", reply)
             _ne_fs = _ne_fs_m.group(1).strip() if _ne_fs_m else reply
             if (
-                _VAGUE_FILLER_RE.match(reply)
-                or _VAGUE_FILLER_RE.match(_ne_fs)
-                or (_ne_bd and _VAGUE_FILLER_RE.match(_ne_bd))
+                _VAGUE_FILLER_RE.match(_norm_apos(reply))
+                or _VAGUE_FILLER_RE.match(_norm_apos(_ne_fs))
+                or (_ne_bd and _VAGUE_FILLER_RE.match(_norm_apos(_ne_bd)))
             ):
                 log.warning(
                     "companion: no-echo regen produced vague-stub '%s' — regenning "
@@ -1999,9 +2005,9 @@ class Companion:
                     _nv_fs_m = re.match(r"^([^.!?]+[.!?])", _nv_reply)
                     _nv_fs = _nv_fs_m.group(1).strip() if _nv_fs_m else _nv_reply
                     _still_vague = (
-                        _VAGUE_FILLER_RE.match(_nv_reply)
-                        or _VAGUE_FILLER_RE.match(_nv_fs)
-                        or (_nv_bd and _VAGUE_FILLER_RE.match(_nv_bd))
+                        _VAGUE_FILLER_RE.match(_norm_apos(_nv_reply))
+                        or _VAGUE_FILLER_RE.match(_norm_apos(_nv_fs))
+                        or (_nv_bd and _VAGUE_FILLER_RE.match(_norm_apos(_nv_bd)))
                     )
                     if _still_vague:
                         log.warning(
