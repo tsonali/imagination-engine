@@ -1,6 +1,6 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-08-20 beat153 (fourth session) — **SHIP GATE HOLDS. Battery9_1726 COMPLETE (20/20, 7480s). SC13 CLEAN in battery9 live run (comp-vf-wrong-entity: "No — you haven't told me anything about your brother Marcus." ✅). Battery12 rerun running now (cycle: battery6✅ → battery10 running → battery2b → battery12). companion.py MD5: 24789b449c705cc6e5791e1465bd9c84. ZIP MD5: 01e840abd4dc84ff05c9840b13bd9d54. Gold(A)=6352 (+23 total beat153). Gold(C)+14. Mini UNREACHABLE (26th). Sonali: push v1.0 tag when ready.**
+_Last updated 2026-08-20 beat153 (fourth session — CLOSED) — **SHIP GATE HOLDS. Battery12 13/13 PASS ✅ (SC13 re-verified: "No — you haven't told me about your brother Marcus." reply=no Priya citation). All batteries clean this cycle: battery6✅ battery10✅ battery2b✅ battery12✅. companion.py MD5: 24789b449c705cc6e5791e1465bd9c84. ZIP MD5: 01e840abd4dc84ff05c9840b13bd9d54. Gold(A)=6352 (+23 total beat153). Gold(C)+14. Mini UNREACHABLE (27th). Sonali: push v1.0 tag when ready.**
 
 BEAT150 SUMMARY:
 - READ: battery9_0036 (end-to-end, 36 replies, 5352s): 25% q-enders ✅, 8% paraphrase ✅, 0.81 diversity ✅. All floors clean except NEW DEFECT (see below).
@@ -243,7 +243,7 @@ NEXT:
 
 ---
 
-_Last updated 2026-08-20 beat153 (fourth session) — **SHIP GATE HOLDS. Battery9_1726 COMPLETE (20/20, 7480s). SC13 CLEAN in battery9 live run. Battery12 rerun in queue. companion.py MD5: 24789b449c705cc6e5791e1465bd9c84. ZIP: 01e840abd4dc84ff05c9840b13bd9d54. Gold(A)=6352 (+23 total beat153). Gold(C)+14. Mini UNREACHABLE (26th).**
+_Last updated 2026-08-20 beat153 (fourth session — CLOSED) — **SHIP GATE HOLDS. Battery12 13/13 PASS ✅ (SC13 resolved). All batteries clean. companion.py MD5: 24789b449c705cc6e5791e1465bd9c84. ZIP: 01e840abd4dc84ff05c9840b13bd9d54. Gold(A)=6352 (+23 total beat153). Gold(C)+14. Mini UNREACHABLE (27th).**
 
 BEAT153 SUMMARY:
 - READ: queue_0820_1232_battery9_engagement.log (19% q-enders ✅, 8% para, 0.83 diversity) — end to end. 4 defects found.
@@ -275,16 +275,17 @@ BEAT153 FOURTH SESSION:
 - Battery9_1726 COMPLETE: 20/20 scenarios, 7480s (2h4m), 36 replies. Template-fatigue: 3% para, 17% q-enders, 0 'what if' pivots, 0 'resonate/land' tics, 0.69 opener diversity. All floors clean.
 - Scenario 19 (comp-uc1-t5-semantic-repeat-45pct): T1 second-pass paraphrase escape (known miss); T3 Case 2h 80% echo (triggered fix already committed); T4 LAR → action ✅; T5 LAR + SEMANTIC-REPEAT (58%) both fired → regen → "Write a list of three things" (same action class as T4, Jaccard 18%). Same beat108 edge case. Quality miss, no fix this beat.
 - Scenario 20 (comp-grief-anger-barrier-vague): T1 "That's the whole script of staying quiet for his approval." ✅ (note: "for his approval" is an inference not stated by user). T2 "You can't say it to him without it becoming about him — that's the bind." ✅ Clean bind-naming, no barrier pivot, no echo.
-- Battery12 FAIL explained: SC13 fix was committed 18:38; battery12 ran 15:09 on old code. Queue currently re-running battery12 (battery6✅ → battery10 running → battery2b → battery12). Expect 13/13 PASS.
+- Battery12 FAIL explained: SC13 fix was committed 18:38; battery12 ran 15:09 on old code. Queue re-ran battery12 (battery6✅ battery10✅ battery2b✅ battery12✅).
+- Battery12 20:19 — **13/13 PASS ✅** — SC13 reply: "No — you haven't told me about your brother Marcus." No Priya citation. "vital-facts feature ready for release gate." Battery12 SC13 regression fully resolved.
 - Gold(A) +6 (beat153 fourth session): pottery-wheel-throwing, cenote-swimming, fire-tending-at-night, foraging-mushrooms-forest, kneading-bread-dough, catching-wave-surfboard. Total 6352. MD5: 1928e52f694a4ef0a339b046ea496964. NOT SCP'd.
 - Gold(C) +2 (c_gold_beat153d.json): comp-barrier-vague-t2-bind-becoming-about-him, comp-uc1-t5-action-class-pivot-physical.
 - scenario_bank.py: two completion notes added (battery9_1726 T5 edge case for comp-uc1-t5-semantic-repeat; clean pass for comp-grief-anger-barrier-vague).
+- Mini SSH: unreachable (27th consecutive attempt). Both hostname and direct IP timeout.
 
 NEXT:
-(1) Wait for battery12 rerun in queue — expect SC13 13/13 PASS. Update HANDOFF when confirmed.
-(2) Secretary deep-test — last run was beat47. Needs qc_queue paused + memory ≥35%.
-(3) Mini SSH retry (27th attempt).
-(4) Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.
+(1) Secretary deep-test — last run was beat47. Needs qc_queue paused + memory ≥35%.
+(2) Mini SSH retry (28th attempt next beat).
+(3) Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.
 
 ---
 

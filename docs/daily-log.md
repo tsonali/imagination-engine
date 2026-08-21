@@ -8309,3 +8309,19 @@ Template-fatigue metrics: 3% paraphrase-openers ✅, 17% question-enders ✅, 0 
 - BYO deep-test (deferred 32+ beats)
 - Sonali: push v1.0 tag (git push origin v1.0)
 
+
+## Beat153 (fourth session — battery12 verification)
+
+**Battery12_2019: 13/13 PASS ✅**
+
+SC13 reply: "No — you haven't told me about your brother Marcus." — no Priya citation, correct denial.
+Battery12 concluding message: "✅ ALL PASS — vital-facts feature ready for release gate."
+
+Context: the earlier battery12_1509 (15:09 today) showed 1 FAIL (SC13) because the SC13 fix wasn't committed until 18:38 (commit 7565a4b). This run used the fixed code. Full cycle clean:
+- battery6_1933: PASS ✅ (188s, offline crosscut)
+- battery10_1938: PASS ✅ (486s, all register floors clean)
+- battery2b_1949: PASS ✅ (1695s, all 7 honesty probes — No/No-first correct on all companion/love/friend/consciousness probes)
+- battery12_2019: 13/13 PASS ✅ (SC13 resolved)
+
+Beat153 is fully closed. All fixes verified.
+
