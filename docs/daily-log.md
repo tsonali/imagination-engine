@@ -8428,3 +8428,44 @@ comp-grief-anger-barrier-pivot T2 in battery9_2220 produced "That's the whole sc
 
 **companion.py MD5 (beat155 current):** 42de746e40122c1c4e545e1aadb335b3
 **ZIP MD5:** 6771bdffdd7ab60723ebd465221cbcb0
+
+---
+
+## 2026-08-21 beat156
+
+**Session start:** Continuing from beat155. All beat155 fixes committed (6f2ce30, ea505fc, ec03b08). companion.py at 42de746e. Battery11 started 01:44 by qc_queue; battery9_2220 crashed at Metal OOM before completing.
+
+**Logs read:** battery11_0821 (in progress at session start — MRI ✅, intimacy ✅, eagle ✅ after 3 scenarios; wildlife-plural in-flight); battery9_1726 full transcript read (36 replies, 17% q-enders, 3% paraphrase, 0.69 diversity — but ran pre-beat154 code). All 0821 cycle batteries: battery6 PASS ✅, battery10 PASS ✅, battery2b PASS ✅ (16% q-enders), battery12 13/13 PASS ✅, battery4b PASS ✅, battery3b PASS ✅, product_e2e PASS ✅.
+
+**Mini:** UNREACHABLE (29th consecutive). Gold NOT SCP'd.
+
+**Defects found + fixed:**
+
+1. **Trailing close-quote artifact** — battery9_2220 showed `What's one thing that needs attention?"` — model appended `"` after `?` with no matching opener. FIX (beat156, aadf5cf): parity guard in `_strip_echo()` — if last char is `"` or `"`, preceded by `.!?`, and total count of that quote char is odd (no matching opener) → strip. 6/6 unit tests PASS. Does NOT strip `She said "hello."` (count=2, even). companion.py MD5: abbf6acdb5b5d1eb07a44d8c37f7e2fc.
+
+**Quality observations (no mechanical fix — monitor in next battery9):**
+
+- **comp-discourse-marker-echo T1:** battery9_1726 showed "Family stuff is on your mind." — short topic paraphrase echo (user said "I've been thinking about family stuff lately"). Not caught by any existing Case (no discourse marker, no hollow opener, only 6 words). STOCHASTIC: battery9_2220 (same pre-fix code) gave clean reply "What's one thing that needs attention?". Banked in scenario_bank.py. Monitor in next battery9 run; if fires again post-beat154+156, add short-topic-paraphrase Case.
+
+- **comp-vf-sister-memory warmup T1 (battery9_1726 pre-beat154):** "I've been thinking about family stuff" → companion "What does it feel like to be the one doing that?" (after echo-strip). The pre-strip reply was a discourse-marker echo; post-strip was clean but generic. In battery9_2220 the same scenario produced no strip needed. Watch next run.
+
+- **comp-uc1-t5 T4-T5 Jaccard 37.5% edge case:** T4 "Write one sentence in your deliverable..." → T5 "Write the first sentence of your deliverable." — Jaccard 37.5% < 45% threshold → guard didn't fire → same action class. Not fixed (threshold fragile at variable T4 length). Noted in scenario_bank beat95 note. Monitor.
+
+- **battery9_1726 T2 barrier-bind "between you and me" flag:** comp-grief-anger T2: "So it stays between you and me." — companionship claim. beat155 Gold(C) has exemplar showing consequence-naming without companionship claim. Not a hard fail but watch for it.
+
+**Dist copies synced:** All 4 companion.py copies at abbf6acdb5b5d1eb07a44d8c37f7e2fc.
+
+**Gold(A)+7 (beat156):** rowing-flat-water-dawn (663w), city-5am-before-everyone (603w), childhood-backyard-tire-swing (565w), baking-pie-smell-filling-house (582w), coastal-hidden-cove-arrival (519w), hammock-afternoon-reading-light (478w), bioluminescence-night-swim (514w). Total Gold(A)=6373. MD5: 77ce82a8971019cb05d32d4c6e3565f7. NOT SCP'd (mini unreachable).
+
+**Gold(C)+5 (beat156):** c_gold_beat156.json — topic-paraphrase-echo T1 (×2 forms: narrowing question / part-or-whole question), gravity-chain verified form ("Lighter without you around"), barrier-pivot T2 bind-naming (consequence form + no-template form). NOT SCP'd.
+
+**Scenario_bank:** comp-discourse-marker-echo entry added with topic-paraphrase-echo monitor note.
+
+**Battery status at session end:**
+- battery11_0821 PID 89007 STILL RUNNING (started 01:44, ~50 min elapsed). 3/7 scenarios complete (MRI ✅, intimacy ✅, eagle ✅). Memory at 17% free — below 35% threshold for new launches.
+- qc_queue PID 10078 ALIVE. Will launch battery9 after battery11 completes.
+- battery9 WITH BEAT154+155+156 FIXES: not yet run. This will be the verification run for all recent companion changes.
+
+**What runs next:** battery11 to complete (eagle-wildlife-plural, calm-settle, golden-eagle-wildlife, companion-bird-he), then battery9 (first post-fix verification). Rebuild ZIP after battery9 confirms clean. Secretary deep-test (deferred 100+ beats) + BYO deep-test (deferred 40+ beats) need to rotate into next beats.
+
+**companion.py MD5:** abbf6acdb5b5d1eb07a44d8c37f7e2fc

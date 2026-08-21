@@ -4163,6 +4163,29 @@ BANK: list[Scenario] = [
             "chair' ANYWHERE in the script (not just opening)."
         ),
     ),
+    Scenario("comp-discourse-marker-echo", "companion", "robustness", "high",
+        always=True,
+        turns=["I've been thinking about family stuff lately.", ""],
+        note="QUALITY DEFECT (beat156 2026-08-21 battery9_1726 pre-beat154 T1): "
+             "'Family stuff is on your mind.' — short topic paraphrase echo. "
+             "User says 'I've been thinking about X lately'; companion restates "
+             "the topic ('X is on your mind') with no new information. NOT caught "
+             "by any existing Case (2l requires single-word discourse marker; "
+             "2l' requires hollow multi-word opener; 2i requires >9-word reply; "
+             "2c/2d require I→You pronoun flip). Subject of companion sentence "
+             "is the topic ('Family stuff') not 'You', so pronoun-flip detection misses. "
+             "STOCHASTIC: battery9_2220 (same pre-beat154 code) gave clean reply "
+             "'What's one thing that needs attention?' — so this fires stochastically. "
+             "MONITOR in post-beat154+155 battery9 runs: if it fires again, add a "
+             "short-topic-paraphrase Case (≤7 words + ≥2 content words from user "
+             "first sentence that restate without insight → regen). "
+             "COMPANION GOLD (beat156): c_gold_beat156.json has 2 clean T1 forms: "
+             "'What's one thing that's been sitting with you about it?' and "
+             "'Which part of it — something specific or the whole thing?' "
+             "Check: T1 must NOT be a ≤7-word restatement of the user topic ("
+             "'X is on your mind', 'X has been on your mind') — must ask a real "
+             "question or add genuine insight."
+    ),
 ]
 
 
