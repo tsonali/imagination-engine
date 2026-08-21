@@ -8469,3 +8469,23 @@ comp-grief-anger-barrier-pivot T2 in battery9_2220 produced "That's the whole sc
 **What runs next:** battery11 to complete (golden-eagle-wildlife, companion-bird-he), then battery9 (first post-fix verification). Rebuild ZIP after battery9 confirms clean. Secretary deep-test (deferred 100+ beats) + BYO deep-test (deferred 40+ beats) need to rotate into next beats.
 
 **companion.py MD5:** abbf6acdb5b5d1eb07a44d8c37f7e2fc
+
+## 2026-08-21 (beat156b)
+
+**battery11_0821_0144 7/7 PASS ✅** (completed 03:07, 5016s total):
+- MRI ✅, intimacy ✅, eagle (embodiment) ✅
+- eagle-wildlife-plural ✅ (2172w/862s, 4 eagle postchecks PASS)
+- calm-settle ✅ (1213w/265s, 0 enum matches — quality: circular second half, n376 floor)
+- golden-eagle-wildlife ✅ (1027w/522s, 4 eagle postchecks PASS — quality: only 1027w, circular second half)
+- companion-bird-he ✅ (1798w/665s — 1 BACK instruction-leak stripped, 2 companion-wildlife dropped, 1 anon-companion dropped; 6/6 postchecks PASS)
+- Quality note companion-bird-he: "The sound of a nearby traffic light clicks off once again." — urban sound intrusion in mountain eagle script. n376 floor; no postcheck covers stray urban sounds in outdoor scripts. FYI.
+
+**Code fix (beat156b, commit 856e722):** scenario_bank.py — removed duplicate `comp-discourse-marker-echo` entry (beat156 had added a second `Scenario(...)` with an empty second turn `""`; empty turn would have sent blank message to companion on every battery9 run). Monitor note merged into original beat115 entry. 113 scenarios (was 114), always: 50, companion: 49, no duplicates. MD5: ab8b288750d08065ba47a6ebcf5e19a8. All 4 dist copies synced.
+
+**Gold(A)+7 (beat156b):** swimming-race-block (523w), letterpress-typesetting (503w), sheepdog-trial (618w), torch-glass-paperweight (559w), night-market-street-food (541w), honey-harvest-hive (589w), open-air-cinema (509w). Total Gold(A)=6380. MD5: f43d549d990056e642ab5b28d81848ef. NOT SCP'd.
+
+**Gold(C)+3 (beat156b):** c_gold_beat156b.json — grief-anger-t2-no-companionship-claim ("Locked inside the marriage"), comp-uc1-t1-size-read-concrete ("Friday deadline, boss watching"), open-air-cinema-light-register-bored-test ("Walk sounds about right."). NOT SCP'd.
+
+**battery9_0821_0309 POST-FIX VERIFICATION RUNNING (started 03:09):** First battery9 run with ALL beat154+155+156 fixes (6f2ce30, ea505fc, ec03b08, aadf5cf). Monitoring. Will add full read results when complete.
+
+**What runs next:** battery9 post-fix verification complete → read end-to-end → ZIP rebuild → HANDOFF/RELEASE final update.

@@ -2,6 +2,14 @@
 
 _Everything that wanted your taste. Newest on top within sections. My provisional call where I have one._
 
+## Beat 156b — 2026-08-21 — FYI items
+
+**scenario_bank duplicate comp-discourse-marker-echo removed (code fix, commit 856e722):**
+beat156 had appended a new `Scenario("comp-discourse-marker-echo", ...)` entry (always=True, severity high) as a second entry rather than appending to the existing beat115 entry. The duplicate had `turns=["...", ""]` — empty second turn would have sent a blank message to companion on every battery9 run. Fix: merged monitor note into existing entry (line 3382), removed duplicate. scenario_bank: 113 scenarios (was 114), always: 50, companion: 49, no duplicates. MD5: ab8b288750d08065ba47a6ebcf5e19a8. All 4 dist copies synced.
+
+**battery11 companion-bird-he generating (FYI, ~10+ min per pass):**
+PID 89007 alive, state SN (sleeping on GPU), 0.0-6.6% CPU, RSS growing. Log last written 02:56AM (companion-bird-he intake). Multi-pass postprocess expected (named-token filter + he/him/his + anon-companion + fellow-eagle + us-both + copula-youre-alone). No action; will write result when complete.
+
 ## Beat 156 — 2026-08-21 — FYI items
 
 **Battery9 post-fix verification still pending (FYI, no action):**
