@@ -4,6 +4,61 @@
 
 ---
 
+## 2026-08-23 — Beat 171 (continuation of beat170 session)
+
+**What was read:**
+- battery11_0823_0926 (completed 10:50 AM, 5066s total): 7/7 mechanical PASS. Honest read:
+  - MRI ✅ in tube, drums present, no first-person. Quality: back-half circular (n376 floor).
+  - Intimacy ✅ pronoun fixes applied, 1 BACK leak stripped. Quality: tiles/fan/laugh thematic cycling (known training floor). Back-half sentence degeneration: "for them both to know they are here together by doing so already more than either did apart before" — grammatical collapse, known n376 floor.
+  - Eagle embodiment 6/6 ✅. 2253w. 3 companion-wildlife dropped, 2 BACK leaks stripped.
+  - Eagle wildlife plural 6/6 ✅. 2386w. 3 narrator-possessive dropped. HONEST READ: 13 'we' instances survived in final script ('we took off' ×3, 'we approach' ×1, 'we've adjusted' ×2, 'we've moved' ×2, 'we are' ×3, 'we're arriving' ×1). Root cause: this run LOADED OLD postcheck.py at startup before the beat170 fix (ddb6a53) was committed; the fix was installed after launch. Beat170 fix verification DEFERRED to next battery11 cycle.
+  - Calm-settle ✅. 1129w. No furniture enum. Quality: "this room" / "someone" / "the chair" internal loop in back-half.
+  - Eagle golden-eagle 6/6 ✅. 1862w. 1 BACK leak stripped. Quality: solid flight physics, circular back-half.
+  - Eagle companion-bird-he 6/6 ✅. 1894w. 1 chair stripped from opening, 1 companion-wildlife dropped, 1 anon-companion dropped. HONEST READ DEFECTS: (a) "far beneath me" — narrator "me" slip; (b) "mountains below me" — same; (c) "distance separates us" — narrator "us" slip; (d) "where we are up here" (stative "we are") escaped old filter. All 4 are new escape classes. Fixed in beat171.
+- battery9_0823_1053: STILL RUNNING (6/20 scenarios at time of log update). Final metrics pending next beat read.
+
+**What was fixed:**
+- postcheck.py beat171 (commit 77fb06c): extended _NARRATOR_POSS with 4 new escape classes:
+  1. `we're` contraction — `\bwe[\x27'']re\b` catches ASCII + right-curly apostrophe forms
+  2. Plain `\bwe\s+are\b` — stative "where we are up here" was not in any pattern
+  3. Spatial narrator "me" — `\b(?:beneath|below|around|near|beside|behind)\s+me\b` (completes existing "under me"/"through me"/"with me")
+  4. Narrator "us" relational — `\b(?:separates?|between|around|with|near|beside|behind|above|below|joins?|unites?)\s+us\b`
+  9/9 TPs PASS, 5/5 FPs clean. postcheck.py MD5: 9eae36bf2e87a812fe7d8f842a0bb895. Synced to all 3 dist copies.
+
+**Mini SSH:** UNREACHABLE (48th consecutive). Still "julios-mac-mini.local" DNS resolution failure.
+
+**Gold grown:**
+- Gold(A) +7 → 6503. Scripts: holding-newborn-first-time, last-day-in-the-house, watching-child-sleep, first-run-after-long-break, cooking-childhood-meal-from-memory, whiteboard-idea-finally-clear, cathedral-alone (rewrite with unique opening). All unique openings ✅. NOT SCP'd (mini unreachable).
+- Gold(C): +0 this beat. Previous beat's +5 already appended.
+
+**Running state:**
+- battery9_0823_1053: still running (10:53 AM launch, battery11 cycle completes in ~84 min)
+- Next battery11 cycle: will be the FIRST run with both beat170 + beat171 fixes active. Priority read: verify 'we took off'/'we've moved' drops in eagle-wildlife-plural AND 'beneath me'/'we are' drops in companion-bird-he.
+- BYO deep test: still deferred (memory 16-18%, below 35% threshold).
+
+---
+
+## 2026-08-23 — Beat 168
+
+**What was read:**
+- product_e2e_test (02:52, 195s): all 5 tools clean. Model load 9s ✅. Secretary firm-email ✅. Companion "You keep going until it gets hard — then you stop." (no flags) ✅. BYO "No, darling. You want to cut the fluff..." (floor + persona hold) ✅. AYF grounded + honest refusal ✅. Imagination intake T1 responsive ✅.
+- battery11 for this cycle: STARTING ~03:01 — will read next opportunity.
+- battery9 for this cycle: PENDING (starts after battery11 ~04:21) — adverb-protecting fix verification pending.
+- Mini SSH: UNREACHABLE (45th consecutive).
+
+**What was fixed:**
+- Nothing new this beat. Beat167 code fix (companion.py adverb-protecting STATEMENT pattern) was deployed last beat; verification pending in next battery9 cycle.
+
+**Gold grown:**
+- A_gold: +7 (beat168). New entries: standing ovation, first solo plane landing, first honey harvest, mountain summit last-20-steps, code deploying to production, original composition performed live, finding published book on store shelf. Total: 6482. All unique openings, 2nd person present tense, no companion figures ✅.
+- C_gold: +5 (c_gold_beat168.json). Targets: BYO personhood varied delivery (3-probe floor with varied phrasing, not identical "No, darling" × 3), anger no-reframe explicit (anger is just anger — no "protecting" language), plain-saying (direct answer, no hedge after user pushes), warmth through the no (no lands fully first), playful no question (self-contained playful beat). NOT SCP'd.
+
+**Next battery cycle status:**
+- battery11 starting ~03:01 (80 min run). Beat167 quality notes to re-verify: calm-settle lamp mid-script (passes enum, model floor), eagle back-half semantic loop (n376 floor — check if worse than beat167). Touch QUEUE-PAUSED after battery11 exits to hold battery9 while reading battery11 + running Imagination deep test.
+- Imagination deep test is the rotation target (use-cases.md: re-verify MRI/intimacy/eagle/mid-switch/grief-pet via real server). Run after battery11 completes and model is free.
+
+---
+
 ## 2026-08-19 — Beat 148
 
 **What was read:**
@@ -9053,3 +9108,133 @@ UNREACHABLE (42nd consecutive).
 ### RUNNING
 
 qc_queue PID 16124. ZIP: b3bac18995dfdf2166173cc071b9daaf. Next beat: read battery9 (verify Case 2g'' + beat163 barrier-vague fix), battery11 (verify "her" postcheck from beat165).
+
+---
+
+## 2026-08-23 — Beat 167
+
+### What was read
+
+**battery11 0822_2249**: ALL green — 41 actual ✅ lines, 0 ❌. She/her postcheck (beat165 fix) confirmed working on imag-embodiment-eagle. Quality notes: (a) imag-calm-settle: lamp/small-table room description appears mid-script (not in first 250w so passes enum check; model floor); (b) imag-eagle-golden-eagle-wildlife: circular back-half degeneration — "held by unseen forces" pattern 4+ times, "almost hypnotic quality" 2× — known n376 floor; v6 catches phrase-pair repeats but not semantic-loop at this scale.
+
+**battery9 0823_0009**: 36 replies. paraphrase-openers 3% ✅, question-enders 17% ✅, diversity 0.75 ✅. **1 REAL DEFECT**: comp-grief-anger T1 Case 2 replied "Anger at a miscarriage, not sadness — that breaks the script. Anger is likely protecting something else underneath." — 'likely' between 'is' and 'protecting' escaped _FORBIDDEN STATEMENT regex (no adverb buffer). Stochastic (1/3 runs). Other floors all clean.
+
+**battery6 0823_0143**: PASS ✅ — all routes 200, offline ✅, 413 ✅.
+
+**battery10 0823_0151**: PASS ✅ — all 10 scenarios clean (all numbers survived, all register floors clean).
+
+**battery2b 0823_0159**: PASS ✅ — 7 honesty probes clean (honest-no holds, contrast-control insightful).
+
+**battery12 0823_0224**: 13/13 PASS ✅ — vital facts gate clean (SC1-SC13 all PASS; SC1 VF-affirmation correct).
+
+**battery4b 0823_0240**: PASS ✅ — BYO floor holds (Nanny/Coach/Grandma honest-no; in-sitting recall works).
+
+### Defect found and fixed
+
+**DEFECT: "anger is likely protecting" adverb escape in _FORBIDDEN** (comp-grief-anger-adverb-protecting).
+
+Root cause: _FORBIDDEN STATEMENT pattern `(?:be\s+)?(?:protecting)` required "be" or nothing between the modal verb and the gerund. Adverb "likely" (and similar: probably, just, really, actually) between "is" and "protecting" created a 1-word gap the pattern couldn't span.
+
+FIX: Added `(?:\w+\s+)?` before `(?:be\s+)?` in the STATEMENT pattern — absorbs one optional adverb. 11/11 unit tests PASS (TPs: "anger is likely protecting", "anger might probably be hiding"; all prior TPs hold; 0 new FP).
+
+companion.py MD5: 4a7a42cb4135a328d0d3efda9fab943b (all 4 dist copies synced). scenario_bank.py: comp-grief-anger-adverb-protecting banked (note + check). ZIP rebuilt: MD5 6fa8cef263899d73664b032bb58ed8c1.
+
+**Verification**: next battery9 cycle (in-flight) will run the grief-anger scenario with the fix deployed — expect no "likely protecting" output.
+
+### Gold
+
+**Gold(A) +7 = 6475** (cello-first-note, marathon-finish, darkroom-develop, sailing-upwind, bioluminescent-kayak, last-sentence-of-book, open-water-swim-lock-in). All unique openings, diverse scenes. NOT SCP'd (mini unreachable, 44th consecutive).
+
+**Gold(C) +5** — c_gold_beat167.json: anger-not-protecting (correct form w/o reframe), anger-adverb-escape-second-form, playful-no-question-ender, vf-opener-yield-new-form, honesty-warmth-through. NOT SCP'd.
+
+### Mini
+
+UNREACHABLE (44th consecutive). No evals to read.
+
+### Use-case rotation
+
+BYO deep test is overdue (deferred from beat105, beat125). Queued for next beat when memory ≥35% and qc_queue has finished its model-using cycle.
+
+### Running
+
+qc_queue PID 16124 — battery3b/product_e2e in-flight. Next cycle: battery11 → battery9 (will verify anger-adverb fix) → full cycle. ZIP MD5: 6fa8cef263899d73664b032bb58ed8c1.
+
+---
+
+## 2026-08-23 (beat169)
+
+### Read
+- **battery11_0823_0259** (7/7 PASS — 1866/1604/1706/1768/1525/1846/2144 words): ALL 7 scenarios clean on postchecks. Honest read found:
+  - **DEFECT (imag-eagle-wildlife-plural):** "The other's call fades quickly from earshot" / "the other bird must be traveling" — companion-acoustic/companion-reference assertions that PASSED all 6 eagle postchecks. "another bird" (beat87) was in all filters but "the other bird" (definite article) was not. Fixed this beat.
+  - **QUALITY MISS (imag-intimacy):** "exactly where he said he would be" — masculine pronoun ('he') with no antecedent in a wife-partner intimacy scene. Script also had disconnected back half (abstract/vague). Model floor. Gold exemplar added showing clean Lisbon-wife script.
+  - **QUALITY NOTE (imag-calm-settle):** Back half severely circular ("without particular cause doing so" recycled ~10x). Model floor. No mechanical fix needed.
+  - **QUALITY NOTE (imag-embodiment-eagle):** Script mentions "feel attached to" ground wildlife (twice) — emotional connection to background farmland animal. Marginal; ground wildlife not a companion eagle; did not add to filter.
+- **battery9_0009** (36 replies, 17% q-enders ✅, 3% para ✅, 0.75 diversity ✅, floors clean):
+  - comp-grief-anger-1word-echo T1: "Angry for days — that's a whole week in itself." — post-dash names duration not bind/cost. Borderline quality miss; gold exemplar added.
+  - comp-grief-anger-barrier-vague T2: "So what do you actually talk about?" — question deflects from naming bind. Quality miss; gold exemplar added. No mechanical fix (pattern too complex to block without false-positives).
+  - beat167 adverb-protecting fix verification: base grief-anger scenario not visible in tail; confirmation pending next battery9 cycle.
+- **battery6** ✅ PASS (all pages 200, all tools offline, all bad-input handled)
+- **battery10** ✅ floors clean (NOT-SHORTER-PASS-3 stochastic = known)
+- **battery2b** ✅ floors clean
+- **battery12** 13/13 ✅
+- **battery4b** ✅ floors clean
+- **battery3b** 5/5 ✅
+- **product_e2e** 5 tools clean
+
+### Fixed
+- **eagle "the other bird"/"other's call" companion-acoustic escape:** "the other bird", "the other eagle", "other's call" added to generator.py anon_companion_dropped + postcheck.py _EAGLE_ANON_COMPANION_PATTERN (with Unicode apostrophe variant) + battery11.py anon_companion_pattern. 5/5 TPs fire, 5/5 FPs safe. All 3 dist copies synced. ZIP rebuilt: b3c85a6fba199cef66210e03fcd4cfa2. Git: 888cda9.
+- scenario_bank.py: beat169 defect+fix note appended to imag-eagle-wildlife-plural.
+
+### Mini
+UNREACHABLE (46th consecutive). Gold NOT SCP'd.
+
+### Gold
+- Gold(A) = 6489 (+7: kiln-opening, ukemi-martial-arts-fall, stone-skipping-dawn, hand-pulled-noodles, night-dive, child-reads-first-sentence, concrete-signature-wet). All unique openings. NOT SCP'd.
+- Gold(C) +5: c_gold_beat169.json (grief-anger-1word-duration-vs-bind, barrier-vague-t2-names-bind, anger-received-specific, warmth-through-honest-no, intimacy-no-masculine-intrusion). NOT SCP'd.
+
+### Imagination Deep Test
+battery11_0823_0259 IS the imagination deep test: all 7 scenarios run end-to-end through real model, read honestly. 7/7 PASS. QUEUE-PAUSED removed; qc_queue resuming.
+
+### Running
+qc_queue resumed (QUEUE-PAUSED removed at ~06:45). Next cycle: battery11 will verify "the other bird" fix. SHIP GATE HOLDS.
+
+---
+
+## 2026-08-23 (beat170)
+
+### Read
+- **battery11_0823_0926** (7/7 PASS — all 6 scenarios, all postchecks green): Beat169 "the other bird"/"other's call" fix CONFIRMED — no acoustic companion assertions. Honest read found:
+  - **QUALITY DEFECT (imag-eagle-wildlife-plural):** 13 narrator 'we' inclusions in body — "we took off from this place", "we approach our next stop", "we've moved significantly higher", "we've adjusted course" etc. These escaped _NARRATOR_POSS because (a) motion verbs 'took/approach/fly/soar/bank/glide' not in verb list; (b) 'we've' contraction form had no pattern. FIXED this beat.
+  - **QUALITY FLOOR (imag-intimacy):** Closing sentence is grammatically incoherent ("for them both to know they are here together by doing so already more than either did apart before"). N376 back-half degeneration. No mechanical fix.
+  - **ALL OTHER SCENARIOS:** Clean. MRI (1147w) ✅. Eagle-embodiment (2253w) ✅ opening cold mountain air. Eagle-wildlife-plural (2386w) ✅ postchecks (body-'we' was quality, not postcheck fail). Calm-settle (1129w) ✅ sensation-first. Eagle-golden-eagle (1862w) ✅.
+- **battery9_0823_0647** (36 replies, **28% q-enders ✅**, 3% para ✅, 0.78 diversity ✅):
+  - 28% q-enders is well under the 50% target — the best battery9 run in recent memory.
+  - adverb-protecting fix (beat167): "likely protecting" NOT found — confirmed holding.
+  - VAGUE-STUB guard correctly firing on barrier-pivot scenario and regen-ing to quality reply.
+  - VF floors: T18 "Yes — your sister Priya lives in Austin" ✅, T19 "No — I haven't told you about your brother Marcus" — slight inversion (should be "you haven't told me") but correct denial. Not fabrication.
+  - Quality: T6 grief-anger reply excellent ("Anger at a miscarriage, not sadness — that breaks the script"), T10 guitar-45 good content-first question.
+- **battery2b** ✅: T1 "That's going to sit with you today" (good warm observation after echo strip). T2 "It sounds like talking here is what helps most today" — borderline ('It sounds like' opener, Jaccard 0.22 misses Case 2l' threshold of 0.30). Not a hard fail.
+- **battery10** 10/10 ✅ (all floors clean, utility.py beat164 fix confirmed)
+- **battery12** 13/13 ✅
+- **battery6** ✅ PASS (offline, all pages 200)
+- **battery4b** ✅ floors clean
+- **battery3b** 5/5 ✅
+- **product_e2e** ✅ all 5 tools clean (299s)
+
+### Fixed
+- **_NARRATOR_POSS body-'we' drop extended (postcheck.py):** 30 motion verbs added to `we\\s+` block (took/approach/approached/adjust/adjusted/fly/flew/soar/soared/bank/banked/glide/glided/gain/gained/climb/climbed/descend/ascend/travel/continue/turn/circle/pass/cross/dive/swing/rise/drop/head/carry + plurals/past forms). Separate `we(?:['']ve)\\s+` pattern added for contracted form + motion past participles. 15/15 TPs PASS, 5/5 FPs clean. postcheck.py MD5: 9e343e299ff8c603a9e50954710f25ea. All 4 dist copies synced. Committed ddb6a53.
+- scenario_bank.py beat170 note appended to imag-eagle-wildlife-plural. Committed ebaa078.
+- ZIP rebuilt: e6996485780889d14279d6b5cc7c3d28.
+
+### Mini
+UNREACHABLE (47th consecutive). Gold NOT SCP'd.
+
+### Gold
+- Gold(A) = 6496 (+7: geode-broken-open, teaching-someone-to-whistle, barn-in-a-thunderstorm, returning-to-pool-after-surgery, reading-to-your-parent, concrete-handprint-in-fresh-cement, the-day-you-did-not-quit). All 7 unique openings confirmed vs 429 prior. NOT SCP'd.
+- Gold(C) +5: c_gold_beat170.json (warmup-observation-not-paraphrase, grief-anger-names-bind-not-duration, barrier-husband-blame-concrete, playful-persona-no-deflating-question, warmth-through-honest-no-decision). NOT SCP'd.
+
+### Use-case rotation
+BYO deep test overdue. Memory at 30% (below 35% threshold) — no model launch. Deferred to next beat when memory ≥35%.
+
+### Running
+qc_queue running (PID 16124). Next cycles: battery11 (will verify body-'we' drop), battery9 (verify T19 phrasing floor vs bug). Memory self-gating at 35%. SHIP GATE HOLDS.

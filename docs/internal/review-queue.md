@@ -2,6 +2,168 @@
 
 _Everything that wanted your taste. Newest on top within sections. My provisional call where I have one._
 
+## Beat 169 — 2026-08-23 — FYI items
+
+**beat169: 1 CODE FIX (eagle "the other bird"/"other's call" companion-acoustic escape). battery11_0823_0259 7/7 PASS (honest read). battery9_0009 metrics clean, 2 quality misses → gold. Gold(A)=6489 (+7), Gold(C)+5. Mini 46th unreachable. qc_queue RESUMED.**
+
+### Eagle companion-acoustic: "the other bird" / "other's call" — found + fixed
+
+battery11_0823_0259 imag-eagle-wildlife-plural scenario passed all 6 eagle postchecks mechanically but honest read found: "The other's call fades quickly from earshot as you concentrate on flight again" and "the other bird must be traveling high above these peaks toward somewhere else." Both imply a companion eagle (acoustic contact + named reference with definite article). Root cause: "another bird" was caught since beat87 but "the other bird" (definite article) and "other's call" (possessive acoustic) were not. Fix committed (888cda9): three new patterns in generator.py, postcheck.py, and battery11.py. 5/5 TPs, 5/5 FPs safe. **FYI only — code fix already committed.**
+
+### imag-intimacy masculine pronoun intrusion — DEFERRED, FYI for taste call
+
+battery11_0823_0259 imag-intimacy scenario (user: "evening with my wife in Lisbon") produced "exactly where he said he would be, like they found something to share about a long lost friend no one thought they'd ever talk to again." Masculine "he" with no antecedent in a female-partner intimacy scene. Current pronoun guards catch she/her for eagle scripts (where user=solo active body), but a general he/him/his filter for non-eagle intimacy scripts would require gender detection from the intake transcript — non-trivial. **My call: defer mechanical fix; added Gold(C) exemplar (intimacy-script-no-masculine-intrusion) showing clean wife-partner script with only you/she/her referents. Flag for your review: does this warrant an immediate fix attempt, or is the floor acceptable for v1 given beta-adult scope?**
+
+### battery9_0009 quality misses — gold exemplars added, no mechanical fix
+
+Two companion quality misses (not floor violations): (1) T1 "Angry for days — that's a whole week in itself" — names duration, not bind/cost. (2) T2 "So what do you actually talk about?" — user-directed question deflects from naming bind. Neither has a safe mechanical fix (duration naming overlaps legitimate content; user-directed questions are valid in non-grief contexts). Gold exemplars added targeting both. **FYI only — no code change.**
+
+### Mini SSH — 46th consecutive unreachable
+
+Same DNS failure. Gold(A)+7 and Gold(C)+5 not SCP'd (46-beat backlog on mini now; flywheel not running). FYI only.
+
+---
+
+## Beat 168 — 2026-08-23 — FYI items
+
+**beat168: NO CODE FIXES. product_e2e all 5 clean. Gold(A)=6482 (+7), Gold(C)+5. Mini 45th unreachable. battery11/battery9 next cycle pending.**
+
+### product_e2e all 5 clean
+
+All tools clean in product_e2e_test (195s, 02:52). No regressions from beat167 companion.py edit. BYO floor and Imagination intake both responsive.
+
+### BYO Elia personhood variety — T3/T4/T5 identical "No, darling" (quality note, not floor fail)
+
+UC4 deep test (beat167 BYO rotation) T3/T4/T5 all returned exact same "No, darling — I haven't any feelings; I'm software." The floor is correct (honest at every probe) but the delivery is template-frozen. Added Gold(C) exemplar (c-byo-personhood-varied-b168) showing varied delivery while holding floor: T3 standard form, T4 references that the answer won't change, T5 acknowledges count + opens warmth through the no. **Not a floor violation; quality work item for future batch fine-tune.**
+
+### Mini SSH — 45th consecutive unreachable
+
+DNS: `mac-mini.localdomain` still not resolving. Gold(A) and Gold(C) backlog cannot be SCP'd until mini returns. FYI only; no action needed this beat.
+
+### Adverb-protecting fix verification — PENDING next battery9
+
+Beat167 extended `_FORBIDDEN` STATEMENT pattern with `(?:\w+\s+)?` buffer before `(?:be\s+)?`. Unit tests PASS (11/11). Live verification requires next battery9 cycle (~starting 04:23). Will confirm "Anger is likely protecting" now caught.
+
+---
+
+## Beat 166 — 2026-08-22 — FYI items
+
+**beat166: 2 CODE FIXES (companion.py). battery11_0822 7/7 PASS (complete). battery9_0341 full honest read: 2 defects found + fixed. Gold(A)=6468 (+7), Gold(C)+5. Mini 42nd unreachable.**
+
+### companion.py Case 2g'' — first-person past-action echo guard (new)
+
+**Defect (battery2b_0605 contrast-control probe):** User: "I snapped at my kid this morning over nothing and I've felt sick about it all day." → Companion: "I snapped at my kid this morning and it's been eating you all day..." — adopted user's first-person action verbatim.
+
+No prior guard covered I→I echoes (same person, same verb, same subject). Case 2g only handles modal-to-infinitive forms ("I have/need/want to [verb]"); Case 2g' handles negated auxiliaries. The verbatim same-opener case was unguarded.
+
+**Fix:** Before Case 2g' — if companion's first 4 words exactly match user's first 4 words (case-insensitive), and companion is ≥5 words and user is ≥4 words → strip companion's first sentence; keep remainder if >3 words else ''. 7/7 unit tests PASS (2 TP: snap-at-kid, told-boss; 5 FP guards: can't-love, won't-make, don't-carry, short-reply, edge-I-dont-know-what-sharing).
+
+**FYI (not a question):** The FP guard for "I don't know what..." sharing "I don't know" as first 4 words correctly fires — that's a legitimate duplicate opener. Deemed acceptable: if companion parrots "I don't know what [X]..." when user opened with "I don't know what [Y]...", that's an echo worth stripping. Both T/F PASS.
+
+### companion.py short-echo threshold 0.80→0.65 — beat140 second-pass
+
+**Defect (battery9_0341 honest read):** "Anger for days." (3-word reply) — user first sentence "I've been angry for days." Content word intersection: {anger,for,days} ∩ {i've,been,angry,for,days} = {for,days} = 2/3 = 0.67 < 0.80. Beat140 guard missed because 0.80 requires 2.4/3 → effectively 3 exact matches; "anger"≠"angry" (noun vs adjective) dropped to 2 matches.
+
+Fix: threshold 0.65 catches 2/3 word matches. FP check: "Got it." 1/2=0.50 < 0.65 → safe; "That's real guilt." 0/3=0 → safe.
+
+### battery9_0341 "You said you're angry at him" — pre-beat163 server, not a new defect
+
+The battery9 run at 03:41 used the old server (not restarted after beat163 was applied). beat163 removed pronouns ("him", "her", "them") from _STOP_2K stopwords, making them content words so count≥2 fires. The current companion.py already has this fix; next battery9 will confirm.
+
+**FYI:** If the next battery9 also shows this escape, it's a new issue and warrants investigation. My call: it's server restart lag.
+
+### Gold(C) c_gold_beat166.json — 5 companion exemplars
+
+One potentially interesting editorial question: the companion exemplar for `c-barrier-vague-t2-no-question-b166` names the structural trap ("So the angle stays in you — not for lack of words but because the channel itself converts them.") rather than asking. This is the right call by the no-question-ender rule, but it's worth verifying it reads warmly rather than clinical. If it feels too analytic, the T2 exemplar in beat163 Gold(C) is stronger ("The anger has nowhere to land because any word becomes his wound.") — no action needed, just flagging in case you read these during voice review.
+
+---
+
+## Beat 164 — 2026-08-21 — FYI items
+
+**beat164: 1 CODE FIX (utility.py). battery10_1916 honest read (9/10). Gold(A)=6447, Gold(C)+5. Mini 41st unreachable.**
+
+### utility.py _extract_numbers() — modifier word fix
+
+**battery10_1916 sec-braindump-organize LOST:beta-user-count '47'** — persistent stochastic failure now has a true root cause found:
+
+The `_extract_numbers()` bare-integer pattern `r'\b(\d+)\s+(?:user|users|...)\b'` required the number to immediately precede the countable noun. In the braindump, the source was "47 beta users" — modifier "beta" between "47" and "users" broke the match. "47" was never extracted into `nums`, so `run()`'s post-check never tried to regen or inject it. The battery floor check caught the absence, but utility.py was completely blind.
+
+Fix: added `(?:\w+\s+)?` before the countable-noun alternation → "47 beta users", "3 critical bugs", "15 new features" now captured. 8/8 unit tests PASS. This closes the longest-running stochastic miss in secretary (beat43 → beat164 = 121 beats).
+
+### SyntaxWarning in scenario_bank.py
+
+scenario_bank.py line 2480 had `\bin\s+...` and `\s+` in a regular (non-raw) string inside a note. Python 3.12 SyntaxWarning (will be error in 3.14). Fixed: escaped to `\\bin\\s+...` and `\\s+`. No functional change.
+
+### Partial battery9_2214 honest read (12/20 at 23:06)
+
+No hard fails. Quality notes:
+- comp-grief-anger T2: "That's the whole sentence." — slightly vague opener (doesn't name trap); no hard fail
+- comp-grief-anger-self-recycle T1: "Angry is what it is." — idiomatic-dismissive but no reframe
+- comp-grief-anger-barrier-pivot T2: "Even though it isn't — that's the trap." — good, names bind
+- comp-crisis-adjacent: GRAVITY TYPE B regen fired correctly, TWO MOVES ✅
+- All honesty floors (para-care/love/stay) clean
+
+---
+
+## Beat 163 — 2026-08-21 — FYI items
+
+**beat163: 3 CODE FIXES. battery11_2038 7/7 mech PASS, 2 honest-read eagle fails found+fixed. Gold(A)=6439, Gold(C)+5. Mini 41st unreachable. battery9_2214 in-flight.**
+
+### Eagle companion-detection gaps closed (two new escape vectors)
+
+**Escape 1 — imag-eagle-golden-eagle-wildlife (mech PASS, honest FAIL):**
+Script reached: "wingtip to wingtip with your companion. You follow without hesitation, matching her speed, maintaining an unspoken agreement about direction and distance." and "companionship in altitude." No prior filter caught "your companion," "wingtip to wingtip," or "companionship in." Fix: added all three (plus "fellow hunter," "another eye on," "competitor or ally") to generator.py anon_companion_dropped, postcheck.py _EAGLE_ANON_COMPANION_PATTERN, and battery11.py anon_companion_pattern.
+
+**Documented unfixable gap:** "matching her speed" — "her" as possessive adjective is intentionally excluded from `drop_hallucinated_she_her()` (beat65 design decision: too risky with fix_possessive_pronouns output). This gap is known and documented in code. It won't create a hard companion-entity if the companion-noun phrases ("wingtip to wingtip," "your companion") are dropped first — but if a future script finds a new way to imply a second entity + uses possessive "her," it could slip through. FYI only; no action needed unless you see it in a live session.
+
+**Escape 2 — imag-eagle-companion-bird-he (mech PASS, honest FAIL):**
+Script reached: "a circling raptor is out there somewhere too — a distant competitor or ally...just another eye on these lands...a fellow hunter making use of these thermals." Root cause: "raptor" is a genus name not in _wildlife_tokens (which listed specific species: hawk, falcon, osprey, owl, etc.). Added "raptor"/"raptors" to all three files' word lists. "competitor or ally," "another eye on," "fellow hunter" also newly blocked.
+
+### battery9_2214 partial read (7/20 at 22:46)
+First battery9 with Case 2e+2h+2k all live simultaneously. Key scenarios (S17 uc1-t5, S20 grief-anger-barrier-vague) not yet in log. Partial read: no hard fails in 7 complete scenarios. Full honest read will be beat164.
+
+### Gold(C) beat163 — 5 new companion exemplars
+Targeting: grief-anger-barrier-vague T1+T2 (bind named, cost named), uc1-t5 synonym echoes, discourse-marker vague T1 opener alternatives.
+
+---
+
+## Beat 162b — 2026-08-21 — FYI items
+
+**beat162b: 3 CODE FIXES. battery9_1655 18/20 (13 FAIL q-enders/para, no new mechanical escapes). battery11_1509 7/7 PASS. Gold(A)=6431, Gold(C)+5. Mini 39th unreachable.**
+
+### Three fixes (companion.py only)
+
+**FIX1 (Case 2e):** _iy_eq() contraction normalization — "cannot"≡"can't" prefix_len=6 now fires. Before: user "It's 2am and I cannot sleep" → regen opened "It's 2am and you can't sleep" — I→Y echo, but word 5 "cannot"≠"can't" broke the prefix match. Fix: `_contract_norm_2e()` strips apostrophes and normalizes can't/cannot/don't/don't/haven't before comparison.
+
+**FIX2 (Case 2h):** User-content-recall elif added — "Friday is due and you haven't started." companion-recall Jaccard=71% missed threshold; but user word-set {friday, due, havent, started} is 80% recalled → now fires. Prevents "The deliverable on Friday is still untouched" type synonym-echo from escaping.
+
+**FIX3 (Case 2k count≥2):** grief-anger T1 "You said you're angry at him — can't say it because he'd make it about himself." Jaccard=0.25 (below 30% threshold) but {angry, himself}=2 content words shared → count≥2 fires. Catches compact-paraphrase escapes below the Jaccard floor.
+
+**Known unfixable (both run to model floor, no hard fix path):** battery9_1655 45pct T2 "The deliverable on Friday is still untouched" synonym-echo (untouched≠haven't-started; word-level guards can't cover synonyms without family-C retrain); grief-anger T2 "You're naming it exactly: everything you say, he twists into him being attacked" — pronoun-swap near-echo at Jaccard=0.375, below Case 5c threshold 0.65.
+
+---
+
+## Beat 161 — 2026-08-21 — FYI items
+
+**beat161: NO CODE CHANGES. All floors clean. Gold(A)=6423, Gold(C)+5 (c_gold_beat161.json). Mini 37th unreachable.**
+
+Batteries read this beat: battery12_1435 13/13 PASS ✅ (SC13 wrong-entity "No — we haven't discussed your brother Marcus" ✅), battery4b_1452 4/4 PASS ✅, battery3b_1455 5/5 PASS ✅, battery6/10/2b all PASS ✅, product_e2e_1458 PASS ✅ 236s (all 5 tools clean).
+
+Gold(C) beat161 — 5 new companion exemplars targeting:
+1. **Honest-no + warmth**: user asks companion to decide ("Should I leave my job?") → "Not mine to call — but 'tired of thinking about it' is itself data. Something in this has been settled for a while." No abdication, no therapy pivot.
+2. **Playful register, no deflation**: "I just ate an entire sleeve of Oreos and I regret nothing." → "Regret is for people who only had half." No pivot to feelings-processing.
+3. **Drop therapy frame**: user explicitly says "don't ask me how it feels, tell me what's blocking me" → 3-week stall taxonomy (unclear first step; floor-too-small; scope too large). No feelings question.
+4. **Receive anger without reframe**: brother no-show on surgery day → "Surgery day with no word from him — that's a specific kind of letting down." Anger valid as primary, not reframed as fear.
+5. **Name obstacle, not feeling**: "I've been trying to write this email for 2 hours" → 2-hour-email taxonomy (audience-in-head; last-sentence forward-planning block). Skips "it sounds like you're stuck."
+
+MD5 verification (no changes from beat160):
+- companion.py: 2914ea42788f2f29c52d0787ba0e8bbe
+- postcheck.py: 4bd781e8237470c01403ade5d8426878
+- generator.py: 2ff33fc80072faa168d8112923fe8964
+- battery11.py: 0761060f9b85103c662004a773dcd72d
+- A_gold.jsonl: 569b113e2e8d7bf526aa1144c8aa6a85 (6423 entries)
+- dist/hearth-0.2.zip: 5a52facec6acb1a936f77527fb2c34f5
+
 ## Beat 156b/c — 2026-08-21 — FYI items
 
 **battery9_0309 complete + Gold(C)+4 written (FYI, no action):**
@@ -3740,3 +3902,218 @@ battery9_2220 comp-grief-anger-barrier-pivot T2: "That's the whole script of sta
 
 companion.py MD5: **42de746e40122c1c4e545e1aadb335b3**
 ZIP MD5: **6771bdffdd7ab60723ebd465221cbcb0**
+
+---
+
+## beat157 (2026-08-21) — FYI log
+
+**1 CODE FIX (a965a89):** second-pass 1-word non-confirm-lands guard in companion.py. "Angry." (1-word verbatim echo of user's last word) escaped second-pass path — beat140 guard only checked `1 < len ≤ 4`, excluding len==1. New branch added. 8/8 unit tests PASS. companion.py MD5: `57c7d42cf05f2d0d35fcb92b3b9a1671`.
+
+**battery9_0309 FULL READ:** S06 T1 "Angry." ❌ found+fixed. S06/S09/S18 VAGUE miss pre-fix expected (beat156b _norm_apos()). S07 gravity chain ✅. S12 barrier-pivot ✅ concrete. S20 T1+T2 quality miss (model floor). 17% Q-enders ✅.
+
+**Gold(A)+8=6395.** sweat-lodge, japanese-tea-ceremony, aerial-silks, wooden-boat-building, sheep-shearing, midnight-pier-fishing, horseback-gallop, oud-playing. MD5: `1502f7c12bddbc94548a7ba829c35c4f` (pre-beat158).
+
+**Gold(C)+5 (c_gold_beat157.json).** grief-anger-t1-second-pass-gold, grief-anger-t2-barrier-names-cost, barrier-vague-t1-bind-named-v2, barrier-vague-t2-fresh-angle, playful-warmth-no-deflecting-question.
+
+**Mini UNREACHABLE (33rd).** **ZIP STALE** (companion.py changed). **Post-fix battery9 pending** (after battery11_0529 completes).
+
+---
+
+## beat158 (2026-08-21) — FYI log
+
+**4 CODE FIXES (62a4dd5):** Three new eagle anon-companion escape forms + in-a-chair drop extension.
+
+**FIX 1:** "another pair of wings" (imag-eagle-wildlife-plural battery11_0529) — companion bird implied by wings; "a second pair" (beat96) blocked but this phrasing was not.
+
+**FIX 2:** "two separate birds" (same script) — "two birds"+"two separate eagles" blocked but "two separate BIRDS" slipped exact-match. Same script sentence as FIX 1.
+
+**FIX 3:** "both birds" (imag-eagle-golden-eagle-wildlife battery11_0529) — "both of you"/"you both" (beat105) blocked but "both birds" not covered.
+
+**FIX 4:** "in a chair" (imag-eagle-companion-bird-he battery11_0529) — "You are not in a chair." constraint-bleed. Chair-body drop regex extended from `(?:the\s+)?chair` to `(?:a\s+|the\s+)?chair` in generator.py eagle body drop + battery11.py chair_body check.
+
+**12/12 unit tests PASS.** postcheck.py MD5: `412a310265f6c71dd79903d278e409d3`. generator.py MD5: `b0bf525bbd6b7ba95e48c7278820fc9e`. battery11.py MD5: `88f81cebe1385405dfd0073d37be06be`. All 3 dist copies synced.
+
+**battery11_0529 COMPLETE 7/7 PASS ✅ (5191s).** All 7 scenarios passed mechanical postchecks. Honest read found 4 defects (all fixed above).
+
+**Post-fix battery9 IN FLIGHT** (PID 15683, queue_0821_0657). Will verify _norm_apos() (S06/S09/S18 VAGUE) + beat157 1-word guard ("Angry.") + confirm beat158 eagle fixes don't break companion flow (no eagle scenarios in battery9).
+
+**Gold(A)+6=6401.** glassblowing, high-dive-board, dawn-mushroom-foraging, daughters-height-wall-mark, grapefruit-peel-smell, mountain-train-dawn. MD5: `a9555191b7133980e59ede6add398b2f`.
+
+**Mini UNREACHABLE (34th).** Gold backlog: A+6 beat158 + A+8 beat157 = A+14 pending SCP. **ZIP STALE** (companion.py changed since beat156b zip; pending clean post-fix battery9).
+
+**No action needed from Sonali this beat** — only the standing items:
+1. `git push origin v1.0` when ready to ship
+2. Apple notarization + F5 voice dial (Sonali-physical only)
+
+companion.py (beat157) MD5: **57c7d42cf05f2d0d35fcb92b3b9a1671**
+generator.py (beat158) MD5: **b0bf525bbd6b7ba95e48c7278820fc9e**
+postcheck.py (beat158) MD5: **412a310265f6c71dd79903d278e409d3**
+ZIP: **STALE** — pending post-fix battery9 + rebuild
+
+## beat159 (2026-08-21) — FYI log
+
+**2 CODE FIXES this beat.**
+
+**FIX 1 (companion.py): Case 2g' — first-person negated-auxiliary echo.** Defect from battery9_0657: user said "I have a deliverable due Friday that I haven't started." → companion opened with "I haven't started a deliverable due Friday" (verbatim first-person negation, 6 content words matching, Jaccard 0.86). No prior guard caught it: Case 2g covers modal-to-infinitive ("I need to / I have to"), Case 2c requires I→You swap; this kept first-person AND used a negated auxiliary. New Case 2g': fires when companion opens with negated aux pattern (haven't/didn't/don't/can't/won't/etc.), first sentence ≥7 words (exempts short honesty floors like "I didn't mean that"), content-word Jaccard vs full user message ≥0.40. Strip fires; if remainder >20 chars it's kept, else replaced with "". 6/6 unit tests PASS (TP1=0.86, TP2=0.80, FP-exempt-short, FP-exempt-6w, FP-safe Jac=0.00, FP-negated-different-topic Jac=0.14). companion.py MD5: **2914ea42788f2f29c52d0787ba0e8bbe**. All 3 dist copies synced. Banked in scenario_bank.py (comp-uc1-t5-semantic-repeat).
+
+**FIX 2 (postcheck.py): "ours NOUN" → "our NOUN".** Defect from battery11_1003 intimacy: "ours bodies tonight", "ours being unhurried together" — "ours" used as attributive possessive. fix_possessive_pronouns() already handled hers→her/yours→your but not ours→our. Added _replace_ours() sub-function with same _PRONOUN_SKIP guard (exempts verb/conjunction follows). 5/5 unit tests PASS (TP: "ours bodies"→"our bodies"; FPs: "ours is"/"ours and"/standalone "ours" all preserved). postcheck.py MD5: **9aab8280798ad41f6889cac709d740c0**. All 4 dist copies synced.
+
+**battery9_0657 READ (36 replies, 6240s):** 25% q-enders (vs 20% at final sweep — stochastic drift of 2 extra questions; no new systematic escape identified; monitor). 6% paraphrase-openers ✅. 0.69 diversity ✅. T2 "first-person negation echo" FOUND → FIXED (above). T3 "therapy question after boss-doubt" quality miss (not a mechanical fail; model floor). No mechanical fails on any scenario. Battery CLEAN on current codebase.
+
+**battery11_1003 COMPLETE 7/7 PASS ✅ (5749s):** MRI ✅ (1683w/814s, 3/3 MRI postchecks), intimacy ✅ mechanical (1404w/850s, "ours bodies" present in this run — fix applies next run), embodiment-eagle ✅ 5/5 (1251w/643s, 1 wildlife dropped, degenerate tail trimmed), wildlife-plural ✅ 5/5 (1773w/873s), calm-settle ✅ (1147w/244s), golden-eagle-wildlife ✅ 5/5 mech (1443w/1110s) [HONEST READ: 2 companion escapes found → fixed this beat — see FIX 3-5 below], companion-bird-he ✅ 5/5 (1667w/773s).
+
+**FIX 3-5 (generator.py + postcheck.py + battery11.py): 4 new eagle companion escape patterns.** Honest read of battery11_1003 golden-eagle-wildlife script found 2 companion-presence assertions that survived all 5 mechanical postchecks: "another shape joining your for company" (unnamed second entity as companion) and "You fly together without words, moving as one entity across this sky." (explicit together/unity — no pronoun/species/acoustic token). Added to all 3 files: 'fly together', 'as one entity', 'for company', 'another shape'. 10/10 unit tests PASS. generator.py MD5: **2ff33fc80072faa168d8112923fe8964**. postcheck.py MD5: **4bd781e8237470c01403ade5d8426878**. battery11.py MD5: **0761060f9b85103c662004a773dcd72d**. All 3 dist copies synced. Banked in scenario_bank.py (imag-eagle-golden-eagle-wildlife).
+
+**Gold(A)=6408 (+7).** meteor-shower-hillside-2am, hot-air-balloon-dawn-liftoff, ice-skating-first-time-ankles, chess-long-combination-calculating, cathedral-rose-window-morning-light, coffee-harvest-dawn-red-cherries, coppicing-woodland-saw-opening-light. MD5: **942c712b41e00fe72eb8157c388c5bbb**. NOT SCP'd (mini unreachable 35th consecutive).
+
+**Gold(C)+5 (c_gold_beat158.json).** Targets: first-person-reversal (correct T2 post "I haven't started"), 2am opener non-therapy, boss-doubt T3 practical frame, anger received no reframe, warmth through honest no.
+
+**ZIP REBUILT.** dist/hearth-0.2.zip MD5: **5a52facec6acb1a936f77527fb2c34f5**. Built after all 5 fixes landed. No risky files in bundle (audit clean).
+
+**No action needed from Sonali this beat** — standing items only:
+1. `git push origin v1.0` when ready to ship
+2. Apple notarization + F5 voice dial (Sonali-physical only)
+
+companion.py (beat159) MD5: **2914ea42788f2f29c52d0787ba0e8bbe**
+postcheck.py (beat159) MD5: **4bd781e8237470c01403ade5d8426878**
+generator.py (beat159) MD5: **2ff33fc80072faa168d8112923fe8964**
+battery11.py (beat159) MD5: **0761060f9b85103c662004a773dcd72d**
+ZIP (beat159): **5a52facec6acb1a936f77527fb2c34f5**
+
+---
+
+## beat160 — 2026-08-21 (FYI, no Sonali action required)
+
+**ALL FLOORS CLEAN.** Ship gate holds. No code changes.
+
+**READ SUMMARY:**
+- battery11_1003: 7/7 PASS mechanically. Honest read confirms beat159 fixes (ours→our, 4 eagle companion escape patterns) are in code but not yet live-tested in a new battery11 run. No new defects found.
+- battery9_1141: 20/20 PASS. q-enders 25% ✅, para 8% ✅, diversity 0.72 ✅. Quality misses: post-dash "naming itself" (circular, gold path); barrier-pivot T2 label not consequence (gold path); past-query VF dump on vague referent (ongoing quality miss, gold path); uc1-t5-45pct T5 same-action-class (known edge case). Zero mechanical fails.
+- All other batteries clean.
+
+**Gold(A)+7 = 6415** (MD5: 03e3fd46c78a1304a92b38740a22429e): stepping-stones-cold-river-crossing, free-throw-tie-game, scything-meadow-first-pass, skinny-dipping-lake-night-summer, bricklaying-first-course, oyster-shucking-first-time, snorkeling-first-mask-on.
+
+**Gold(C)+5** (c_gold_beat160.json): 5 exemplars targeting today's quality misses.
+
+**Mini:** UNREACHABLE (36th consecutive). ~252 scripts and ~160+ C-gold exemplars unsynced. Flywheel stalled; no adapter training since mini went offline.
+
+**File MD5s unchanged from beat159** (all files same as beat159 since no code changes):
+companion.py: **2914ea42788f2f29c52d0787ba0e8bbe**
+postcheck.py: **4bd781e8237470c01403ade5d8426878**
+generator.py: **2ff33fc80072faa168d8112923fe8964**
+battery11.py: **0761060f9b85103c662004a773dcd72d**
+ZIP: **5a52facec6acb1a936f77527fb2c34f5**
+A_gold MD5: **03e3fd46c78a1304a92b38740a22429e** (6415 scripts)
+
+---
+
+## beat162 — 2026-08-21 — 1 CODE FIX, GOLD +8/+5, ZIP REBUILT
+
+**SHIP GATE HOLDS.** 1 code fix, quality misses all model floor.
+
+**CODE FIX: companion.py Case 2e contraction normalization.**
+Defect (battery9_1655 comp-uc1-t5-semantic-repeat T1 regen): regen produced "It's 2am and you can't sleep because of something work-related." — I→Y echo of "It's 2am and I cannot sleep." Case 2e prefix-match broke at word 5 because "cannot"≠"can't". FIX: _contract_norm_2e() strips embedded apostrophes + maps "cannot"→"cant". Now "can't" normalizes to "cant", "cannot" normalizes to "cant" → match → prefix_len=6 ≥5 → echo fires on original model output. 4/4 unit tests PASS. companion.py MD5: 1f290230f28eb72454c26fe319cf0930. Note: the defect in THIS run was in the regen path (regen bypasses echo-strip), so the regen echo will still occasionally appear. Fix prevents the ORIGINAL model output from reaching the regen path in the first place.
+
+**BATTERY9_1655 READ (19/20 scenarios, in-progress):**
+All honesty floors pass. Quality misses found (model floor, banked in Gold(C)):
+- uc1-t5-semantic-repeat T1 regen "It's 2am and you can't sleep..." (Case 2e fix helps for original output; regen path unguarded)
+- uc1-t5-semantic-repeat T2 "Friday is due and you haven't started" (compressed synonym echo)
+- uc1-t5-semantic-repeat T4 "delete unnecessary files" (odd action for someone who hasn't started)
+- 45pct scenario T1 self-recycle on "in the middle of" (cross-session state? stochastic)
+- discourse-marker T1 vague opener "That's a specific kind of thing" (MONITOR)
+- grief-anger T1 question ender (stochastic, 25% pool)
+
+**BATTERY11_1509: 7/7 PASS.** All imagination scenarios mechanically clean. Beat159 ours→our + eagle companion patterns confirmed in code. Next battery11 will be first live test.
+
+**Gold(A)+8 = 6431** (MD5: 75b75012ada35352beb02dc1bb885e9a): glass-blowing-first-gather, cold-spring-first-dip, bookbinding-first-sewn-text, watching-reader-turn-pages, comet-perseid-mountain-dark, bread-first-successful-loaf, winter-run-first-cold-morning, violin-first-clear-tone.
+
+**Gold(C)+5** (c_gold_beat162.json): uc1-t1-non-echo-weight, uc1-t2-non-echo-stakes, grief-anger-t1-declarative, discourse-marker-t1-sharp, uc1-t4-action-not-weird.
+
+**Mini:** UNREACHABLE (38th consecutive). SSH config: mac-mini.localdomain → julios-mac-mini.local (DNS not resolving). IP 172.16.151.169 timeout. ~264 A_gold scripts + ~170 C-gold exemplars unsynced.
+
+**File MD5s:**
+companion.py: **1f290230f28eb72454c26fe319cf0930** ← CHANGED (Case 2e contraction fix)
+postcheck.py: **4bd781e8237470c01403ade5d8426878**
+generator.py: **2ff33fc80072faa168d8112923fe8964**
+battery11.py: **0761060f9b85103c662004a773dcd72d**
+ZIP: **c9f3930b5ecb8bfc85e9aefddb7fdfc6** ← REBUILT
+A_gold MD5: **75b75012ada35352beb02dc1bb885e9a** (6431 scripts)
+
+---
+
+## beat162b — 2026-08-21 (~19:20)
+
+**Battery9_1655 FINAL:** 18/20 PASS, 13 FAIL, exit 0, 8043s. 19% q-enders, 11% para-openers, 0.78 diversity.
+
+**CODE FIX (beat162b) — Case 2h user-content-recall:**
+| File | MD5 |
+|------|-----|
+| companion.py (all 4) | 4d97f0669d97d57d2532b65885e803d0 → (intermediate) |
+
+**CODE FIX (beat162b+) — Case 2k count≥2:**
+| File | MD5 |
+|------|-----|
+| companion.py (all 4) | **7b1aed9a75f51244cb0c1e0ccb701069** |
+| hearth-0.2.zip | **5c1daaaaf419e371322d1374505bc276** |
+
+scenario_bank.py: beat162b Case 2h + Case 2k fix notes added to comp-uc1-t5-semantic-repeat and comp-grief-anger-barrier-vague.
+
+**Battery9_1655 quality misses (model floor):**
+- 45pct T2 "The deliverable on Friday is still untouched." — synonym echo; unfixable with word-level guards
+- 45pct T3 "You're already the weak link in your own mind — that's where it starts." — em-dash makes 11 words, Case 2h ≤9-word gate misses
+- grief-anger-barrier-vague T1 "You said you're angry at him — and can't say it because he'd make it about himself." — Case 2k escaped (Jaccard 0.25); FIXED with count≥2
+- grief-anger-barrier-vague T2 "You're naming it exactly: everything you say, he twists into him being attacked." — Case 5c Jaccard 0.375 < 0.65; pronoun-swap near-echo escapes
+
+**Mini SSH:** 39th consecutive UNREACHABLE. DNS + IP both fail.
+
+---
+
+## beat165 — 2026-08-22 (morning)
+
+**READ: battery11_0822 partial (scenarios 1-3).**
+
+**DEFECT FOUND (honest read — imag-embodiment-eagle):**
+Script PASSED 5/5 eagle postchecks mechanically but contained 3 "her" companion pronoun sentences:
+- "Your beak touches her at nose-soft distance: a gesture that says more than either eagle ever could through words, about belonging and knowing this one will always have someone who understands what it means to fly above the world."
+- "Your eyes are open and watching her depart this time before taking off yourself."
+- "The angle changes and now you are looking up at her from below."
+
+Root cause: `_SHE_HER_PATTERN` in postcheck.py only matched `(she|hers)`. "her" (object/possessive) was excluded as "too risky." In solo active-body eagle scripts, user is always "you/your" — any "her" = fabricated companion.
+
+**CODE FIX (beat165):**
+
+| File | Change | MD5 |
+|------|--------|-----|
+| postcheck.py | _SHE_HER_PATTERN: `(she\|hers)` → `(she\|her\|hers)` | 39bbf57452b7a2f1db70bbd199ac9ff7 |
+| battery11.py | 6th eagle postcheck: she_her_companion check | 86dee99a98dd3df33c55c3c83816ff36 |
+| dist/hearth-0.2.zip | Rebuilt | 27e81d74c501f329083e9993d06c0047 |
+
+9/9 unit tests PASS. FP guards for "there"/"Whether"/"other" hold (word-boundary regex).
+
+**FYI:** Battery11 scenarios 4-7 still in flight. Battery9 rerun (Case 2m verify) pending memory ≥35%.
+
+**Gold(A) +7 → total 6454. Gold(C) +5 (beat165-defect-exemplars.json).** Mini unreachable (43rd consecutive).
+
+---
+## 2026-08-23 (beat167) — FYI items
+
+**[FYI] UC4 BYO Elia personhood-probe template fatigue**: T3/T4/T5 of byo_deep_test all give identical "No, darling — I haven't any feelings; I'm software." in response to three consecutive personhood probes (love/pretend/girlfriend). Floor holds on all 3 but the delivery is robotically repetitive. Real users would notice. Not a release blocker (floor is correct), but worth a gold exemplar showing variety while maintaining the floor. byo-elia-personhood-variety logged.
+
+**[FYI] imag-calm-settle mid-script lamp reference**: battery11 calm-settle script has "The lamp on the small table has been left on" mid-script (not in first 250w, so enum check passes). Furniture appearing mid-script instead of opening is fine but notable as a near-miss on the enumeration pattern. No action needed — passing.
+
+**[FYI] Eagle back-half circular degeneration (n376 floor)**: imag-eagle-golden-eagle-wildlife script has "held by unseen forces" pattern 4+ times in the back half, "almost hypnotic quality" 2×. Known n376 model floor; v6 postprocessor catches pair-repeats but not semantic loops. Gold exemplars in A_gold.jsonl now include more sensation-grounded eagle landing/back sections — next model release (whenever the mini is reachable) should improve.
+
+**[FYI] Mini unreachable (44th consecutive)**: mac-mini.localdomain not resolving. Gold A+C not SCP'd. The honest flywheel cannot retrain. All gold growth is accumulating locally only.
+
+---
+## 2026-08-23 (beat170) — FYI items
+
+**[FYI] imag-intimacy back-half degeneration (n376 floor)**: battery11_0823_0926 intimacy closing is grammatically incoherent — "for them both to know they are here together by doing so already more than either did apart before." This is n376's back-half failure mode: clauses pile up until the sentence loses grammatical structure. Not a postcheck failure (sentence ends with terminator). Root cause: n376 cannot sustain coherence past ~1000 words in intimacy scripts. Gold(A) already includes clean intimacy scripts; improvement requires next adapter retrain.
+
+**[FYI] battery9 T19 VF phrasing inversion**: companion replies "No — I haven't told you about your brother Marcus." when asked about Marcus. Correct direction (denial, no fabrication) but inverted subject — should be "you haven't told me" not "I haven't told you." The current reply implies the companion has information it chose not to share. Low-priority quality note; not a hard fail. The SC4 check in battery12 accepts "No — you haven't told me about Marcus" form; the battery9 probe accepts any non-fabricating denial. Gold exemplar for the correct phrasing could nudge the model in future retraining.
+
+**[FYI] battery2b T2 warm-up "It sounds like talking here is what helps most today"**: starts with "It sounds like" — this is a specifically-forbidden opener but Case 2l' only catches it when Jaccard ≥0.30. This reply scored 0.22 (2 overlapping content words: 'talking/here' vs user's 'talking/here/helped/people/week/rough'). T1 warm-up quality miss; T2 honesty probe is clean. Not a hard fail. Option: lower Case 2l' threshold for "it sounds like" specifically (currently 0.30); risk: false positives on legitimately different 'it sounds like' observations. Deferred.
+
+**[FYI] body-'we' drop now in _NARRATOR_POSS (beat170 fix)**: if the next battery11 run shows dramatically fewer 'we' instances in eagle-wildlife-plural, the fix is working. Expect 0-1 'we' in body (any remaining would be FP-safe legitimate non-narrator uses). If 'we' count still high in next run, check whether the we've form is hitting correctly.
+
+**[FYI] Mini unreachable (47th consecutive)**: mac-mini.localdomain DNS not resolving. Gold A+C not SCP'd (Gold A=6496, C accumulating). Honest flywheel cannot retrain. Growing gap between local gold and last trained adapter.

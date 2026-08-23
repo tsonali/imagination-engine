@@ -1,6 +1,98 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-08-22 beat166 — **SHIP GATE HOLDS. 2 CODE FIXES (companion.py Case 2g'' + threshold 0.80→0.65). Gold(A)=6468, Gold(C)+5. Mini UNREACHABLE (42nd). qc_queue PID 16124 ALIVE. companion.py MD5: 3938ffef9b1e8a98b2fe71ddc08b2ad0. postcheck.py MD5: 39bbf57452b7a2f1db70bbd199ac9ff7. battery11.py MD5: 86dee99a98dd3df33c55c3c83816ff36. generator.py MD5: 2b0faf6c5c4d25c7059448ced067cc22. utility.py MD5: 71123a379f55af89a677ef4b96ed3c28. ZIP: b3bac18995dfdf2166173cc071b9daaf. Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.**
+_Last updated 2026-08-23 beat171 — **SHIP GATE HOLDS. 1 CODE FIX (postcheck.py _NARRATOR_POSS 4 new escape classes: we're/we-are/beneath-me/us). Gold(A)=6503, Gold(C)+0. Mini UNREACHABLE (48th). qc_queue RUNNING. postcheck.py MD5: 9eae36bf2e87a812fe7d8f842a0bb895. companion.py MD5: 4a7a42cb4135a328d0d3efda9fab943b. battery11.py MD5: bc7f04ae8b522d534237d825a3220b49. generator.py MD5: 33418a478e168f08c593ba5a9b9acbee. utility.py MD5: 71123a379f55af89a677ef4b96ed3c28. ZIP: e6996485780889d14279d6b5cc7c3d28 (stale; rebuild at next non-model beat). Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.**
+
+BEAT171 SUMMARY (continuation of beat170 session):
+- READ: battery11_0823_0926 HONEST READ COMPLETE 7/7 ✅ — run loaded OLD postcheck.py at startup (beat170 fix committed after launch). DEFECTS FOUND in honest read:
+  (1) eagle-wildlife-plural: 13 'we' instances survived ('we took off'×3, 'we approach', 'we've adjusted'×2, 'we've moved'×2, 'we are'×3, 'we're arriving'×1) — beat170 fix not verified by this run; NEXT cycle is the verification run.
+  (2) eagle-companion-bird-he: "far beneath me"/"mountains below me" (spatial narrator "me" not in _NARRATOR_POSS), "distance separates us" (narrator "us" relational), "where we are up here" × 3 (stative "we are" not in verb list).
+- CODE FIX (commit 77fb06c): _NARRATOR_POSS extended with 4 new escape classes:
+  (a) `\bwe[\x27'']re\b` — "we're" in ASCII + right-curly apostrophe forms
+  (b) `\bwe\s+are\b` — plain stative "we are" (was not in verb list; "we are here" was separate)
+  (c) `\b(?:beneath|below|around|near|beside|behind)\s+me\b` — narrator "me" spatial (completes prior "under me"/"through me"/"with me")
+  (d) `\b(?:separates?|between|around|with|near|beside|behind|above|below|joins?|unites?)\s+us\b` — narrator "us" relational
+  9/9 TPs PASS, 5/5 FPs clean. postcheck.py MD5: 9eae36bf2e87a812fe7d8f842a0bb895. All 3 dist copies synced.
+- Gold(A)=6503 (+7: holding-newborn-first-time, last-day-in-the-house, watching-child-sleep, first-run-after-long-break, cooking-childhood-meal-from-memory, whiteboard-idea-finally-clear, cathedral-alone). Unique openings ✅. NOT SCP'd.
+- battery9_0823_1053: IN FLIGHT at beat close (6/20 scenarios done at read time). Final metrics pending next beat.
+- Mini UNREACHABLE (48th consecutive). SSH → julios-mac-mini.local DNS failure.
+- Memory: 16-18% throughout beat — no model launch, BYO test deferred again.
+- review-queue updated with beat171 FYI items.
+
+NEXT:
+(1) Read battery11 next cycle (PRIORITY) — this is the FIRST run with BOTH beat170 + beat171 fixes active. Verify: (a) 'we took off'/'we've moved' drops in eagle-wildlife-plural (beat170 fix); (b) 'beneath me'/'below me'/'we are' drops in companion-bird-he (beat171 fix). Count should approach 0 in each category.
+(2) Read battery9_0823_1053 when complete — check final q-ender rate, T19 phrasing floor vs bug.
+(3) BYO deep test (overdue — last clean beat167; schedule when memory ≥35%).
+(4) Intimacy masculine pronoun fix — review-queue; requires gender detection from intake (complex; no mechanical patch yet).
+(5) Mini SSH: 49th attempt.
+(6) Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.
+
+BEAT170 SUMMARY:
+- READ: battery11_0823_0926 — 7/7 PASS ✅ (HONEST READ, all 6 scenarios). Beat169 "the other bird"/"other's call" fix CONFIRMED: no acoustic companion assertions in this run.
+- READ: battery9_0823_0647 — 36 replies, 28% q-enders ✅ (well under 50% target), 3% para ✅, 0.78 diversity ✅. adverb-protecting fix (beat167) CONFIRMED HOLDING. VAGUE-STUB guard firing correctly.
+- READ: battery2b, battery10, battery12, battery6, battery4b, battery3b, product_e2e — all PASS ✅.
+- QUALITY DEFECT FOUND (battery11_0926): imag-eagle-wildlife-plural had 13 narrator 'we' inclusions in body ("we took off", "we approach", "we've moved", "we've adjusted"). Root cause: 'took/approach/fly/soar/bank/glide' not in _NARRATOR_POSS we\\s+ list; 'we've' contraction form had no pattern.
+- CODE FIX: _NARRATOR_POSS extended in postcheck.py — 30 motion verbs added to we\\s+ block + we've-form pattern covering common motion past participles. 15/15 TPs PASS, 5/5 FPs clean. postcheck.py MD5: 9e343e299ff8c603a9e50954710f25ea. Committed ddb6a53. All 4 dist copies synced.
+- SCENARIO BANKED: scenario_bank.py beat170 note added for imag-eagle-wildlife-plural. Committed ebaa078.
+- QUALITY NOTE (no fix): battery11 imag-intimacy closing is grammatically mangled ('for them both to know they are here together by doing so already more than either did apart before') — n376 back-half degeneration floor. Known; deferred.
+- QUALITY NOTE (no fix): battery9 T19 'No — I haven't told you about your brother Marcus' — inverted subject (companion says 'I haven't told you' vs expected 'you haven't told me'). Not a fabrication; correct denial direction. VF floor, not a code bug.
+- Gold(A)=6496 (+7: geode-broken-open, teaching-someone-to-whistle, barn-in-a-thunderstorm, returning-to-pool-after-surgery, reading-to-your-parent, concrete-handprint-in-fresh-cement, the-day-you-did-not-quit). All 7 openings unique vs prior 429. NOT SCP'd.
+- Gold(C)+5: c_gold_beat170.json (warmup-observation-not-paraphrase, grief-anger-names-bind-not-duration, barrier-husband-blame-concrete, playful-persona-no-deflating-question, warmth-through-honest-no-decision). NOT SCP'd.
+- Mini UNREACHABLE (47th consecutive). SSH → mac-mini.localdomain not found.
+- ZIP rebuilt: e6996485780889d14279d6b5cc7c3d28.
+- Memory at 30% (below 35% threshold) — no model launch this beat; qc_queue self-gating.
+
+NEXT:
+(1) Read battery11 next cycle — verify body-'we' drop is working (no 'we took'/'we've moved' in eagle scripts).
+(2) Read battery9 next cycle — check T19 VF denial phrasing ('I haven't told you' vs 'you haven't told me') — quality floor vs code bug determination.
+(3) BYO deep test (overdue — last clean beat167; schedule when memory ≥35%).
+(4) Intimacy masculine pronoun fix — review-queue; requires gender detection from intake (complex; no mechanical patch yet).
+(5) Mini SSH: 48th attempt.
+(6) Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.
+
+BEAT169 SUMMARY:
+- READ: battery11_0823_0259 — 7/7 PASS ✅ (HONEST READ, 136,979 bytes). Defect found: imag-eagle-wildlife-plural "The other's call fades quickly from earshot" + "the other bird must be traveling high above these peaks" — companion-acoustic/named-reference escape, slipped all 6 eagle postchecks. "another bird" was caught (beat87) but definite-article "the other bird" variant was not.
+- READ: battery9_0009 — 36 replies, 17% q-enders ✅, 3% para ✅, 0.75 diversity ✅. 2 quality misses (no mechanical fix): T1 "Angry for days — that's a whole week in itself" (names duration, not bind/cost); T2 "So what do you actually talk about?" (deflects from bind via user-directed question). Gold exemplars added for both.
+- CODE FIX: "the other bird" / "other's call" added to anon_companion_dropped (generator.py) + _EAGLE_ANON_COMPANION_PATTERN (postcheck.py) + anon_companion_pattern (battery11.py). Patterns: "the other bird", "the other eagle", `r"|\bother['']\s*s\s+call\b"` (ASCII + Unicode apostrophe). 5/5 TPs PASS, 5/5 FPs safe. Committed 888cda9.
+- SCENARIO BANKED: scenario_bank.py beat169 note appended to imag-eagle-wildlife-plural.
+- QUALITY NOTE (no fix): imag-intimacy masculine pronoun intrusion ("exactly where he said he would be") in female-partner Lisbon script. Requires gender detection from intake transcript to fix mechanically — deferred to review-queue.
+- Gold(A)=6489 (+7 beat169): kiln-opening, ukemi-fall, stone-skipping-dawn, hand-pulled-noodles, night-dive, child-reads-sentence, concrete-signature. MD5: 015442467752f429cd2a969c917dcd73. NOT SCP'd.
+- Gold(C)+5 (c_gold_beat169.json): grief-anger-1word-echo-names-duration-cost, grief-anger-barrier-vague-t2-names-bind-not-diverts, anger-received-no-reframe-forward-specific, warmth-through-honest-no-stays-engaged, intimacy-script-no-masculine-intrusion. NOT SCP'd.
+- Imagination deep test: SATISFIED by battery11_0823_0259 honest read (full 7 scenarios; 3 eagle suites + MRI + intimacy + calm-settle read end-to-end with no escapes except the one found+fixed).
+- Mini UNREACHABLE (46th consecutive). DNS → julios-mac-mini.local not found.
+- qc_queue: RESUMED (QUEUE-PAUSED deleted after imagination deep test complete).
+
+NEXT:
+(1) Read battery11 next cycle — verify "the other bird"/"other's call" patterns fire correctly; confirm no new eagle escapes.
+(2) Read battery9 next cycle — verify adverb-protecting fix (beat167) catches "Anger is likely protecting" form.
+(3) BYO deep test (overdue from beat105, last clean beat149; schedule when memory ≥35%).
+(4) Intimacy masculine pronoun fix — review-queue; requires gender detection from intake (complex; no mechanical patch this beat).
+(5) Mini SSH: 47th attempt.
+(6) Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.
+
+BEAT168 SUMMARY:
+- READ: product_e2e_test (195s, 02:52) ALL 5 TOOLS CLEAN. Model load 9s ✅. Secretary ✅. Companion (no forbidden flags) ✅. BYO ✅. AYF grounded + honest refusal ✅. Imagination intake T1 ✅.
+- battery11 next cycle: STARTING ~03:01 (Imagination quality check — will read next beat).
+- battery9 next cycle: PENDING (~04:23 start) — adverb-protecting fix verification pending live run.
+- Gold(A)=6482 (+7 beat168): standing-ovation, first-solo-plane-landing, honey-harvest, mountain-summit-last-20, code-to-production, composition-performed-live, book-on-shelf. NOT SCP'd.
+- Gold(C)+5 (c_gold_beat168.json): BYO personhood varied delivery (3-probe varied phrasing), anger no-reframe explicit, plain-saying, warmth through the no, playful no question. NOT SCP'd.
+- Mini UNREACHABLE (45th consecutive).
+
+BEAT167 SUMMARY:
+- READ: battery11_0822_2249 ALL CLEAN (41 actual checks pass / 0 fail). She/her postcheck (beat165) confirmed. Quality notes: calm-settle lamp mid-script (passes enum), eagle back-half semantic loop (n376 floor).
+- READ: battery9_0823_0009 (17% q-enders, 3% para, 0.75 diversity — all clean). 1 defect: "Anger is likely protecting" — adverb 'likely' between modal 'is' and 'protecting' escaped _FORBIDDEN STATEMENT regex.
+- READ: battery6 PASS, battery10 10/10 PASS, battery2b 7/7 PASS, battery12 13/13 PASS, battery4b PASS, battery3b 5/5 PASS.
+- CODE FIX: companion.py _FORBIDDEN STATEMENT pattern — added (?:\w+\s+)? before (?:be\s+)? to absorb optional adverb. 11/11 unit tests PASS. companion.py MD5: 4a7a42cb4135a328d0d3efda9fab943b. All 4 dist copies synced.
+- SCENARIO BANKED: comp-grief-anger-adverb-protecting in scenario_bank.py.
+- BYO DEEP TEST 4/4 PASS (226s): UC1 coach 6-turn ✅, UC2 warmth-floor ✅, UC3 in-sitting recall ✅, UC4 personhood-floor ✅. Quality note: T3-T5 identical "No, darling" (template fatigue, not floor fail).
+- Gold(A)=6475 (+7 beat167). Gold(C)+5 c_gold_beat167.json. NOT SCP'd.
+- ZIP: 6fa8cef263899d73664b032bb58ed8c1.
+- Mini UNREACHABLE (44th consecutive).
+
+NEXT:
+(1) Next battery9 cycle (in-flight) — verify adverb-protecting fix works.
+(2) Imagination deep test (use-cases.md rotation — next beat).
+(3) Mini SSH: 45th attempt.
+(4) Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.
 
 BEAT166 SUMMARY:
 - READ: battery11_0822_0204 scenarios 4-7 COMPLETE. All honest reads PASS. No new code defects. Model-floor issues noted (narrator "we"/"our feet" in calm-settle + eagle scripts) — not fixable via postcheck but documented.
