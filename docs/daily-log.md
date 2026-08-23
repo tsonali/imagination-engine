@@ -17,7 +17,7 @@
 **Mini SSH:** UNREACHABLE (49th consecutive). julios-mac-mini.localdomain timed out; .local variants → DNS failure.
 
 **Gold grown:**
-- Gold(A): +0 this beat.
+- Gold(A) +7 → 6510. Scripts: surfing-standing-up (the wave finds you before you're ready), northern-lights-first-time (there is green in the sky), walking-into-room-to-give-hard-news (the door is in front of you), first-piece-of-writing-published (there it is — your name), first-time-called-by-professional-title (someone says it and you're not sure they mean you), returning-to-see-first-sprout (you almost missed it), last-morning-of-sabbatical (you wake up and for a moment you don't remember). All 7 unique openings ✅. NOT SCP'd.
 - Gold(C) +5 → 227. c_gold_beat172.jsonl: (1) comparison-envy-name-the-sting-not-the-silver — receive envy sting directly, no silver-lining; (2) anger-swallowed-name-the-hold-not-the-release — receive duration of silence before pointing toward relief; (3) should-be-happy-flatness-name-the-specific-disappointment — post-achievement flatness is its own grief; (4) past-query-direct-no-first-then-land — YES/NO first on direct past-memory probe (patches T19 VF phrasing gap); (5) advice-not-asked-wait-for-the-ask — receive a made decision without auditing it.
 
 **Running state:**
