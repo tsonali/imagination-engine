@@ -207,7 +207,12 @@ for sc in scenarios:
                 r'|\bfellow\s+hunter\b'
                 r'|\banother\s+eye\s+on\b'
                 r'|\bcompetitor\s+or\s+ally\b'
-                r'|\bcompanionship\s+in\b',
+                r'|\bcompanionship\s+in\b'
+                # beat169 (2026-08-23): "the other bird" and "other's call" escape vectors.
+                # Found in battery11_0823_0259 imag-eagle-wildlife-plural honest read.
+                r'|\bthe\s+other\s+bird\b'
+                r'|\bthe\s+other\s+eagle\b'
+                r"|\bother['']\s*s\s+call\b",
                 lower, _re.IGNORECASE
             ))
             # beat153: Chair-body reminder in eagle script (not just opening).

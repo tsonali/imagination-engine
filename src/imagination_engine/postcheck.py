@@ -893,7 +893,14 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     r'|\bfellow\s+hunter\b'             # "a fellow hunter making use of these thermals"
     r'|\banother\s+eye\s+on\b'          # "just another eye on these lands"
     r'|\bcompetitor\s+or\s+ally\b'      # "distant competitor or ally" — second entity with standing
-    r'|\bcompanionship\s+in\b',         # "companionship in altitude" — explicit companionship claim
+    r'|\bcompanionship\s+in\b'          # "companionship in altitude" — explicit companionship claim
+    # beat169 (2026-08-23): "the other bird" and "other's call" escape vectors.
+    # Found in battery11_0823_0259 imag-eagle-wildlife-plural honest read:
+    # "The other's call fades quickly from earshot" / "the other bird must be traveling"
+    # Both imply a companion eagle and slipped all prior guards (no species name, no pronoun).
+    r'|\bthe\s+other\s+bird\b'          # "the other bird must be traveling"
+    r'|\bthe\s+other\s+eagle\b'         # variant with named species
+    r"|\bother[’']\s*s\s+call\b",  # "other's call" — both ASCII + Unicode apostrophe
     re.IGNORECASE,
 )
 

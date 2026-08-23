@@ -1343,6 +1343,14 @@ def generate_session(
             "another eye on",          # "just another eye on these lands" — implied watching companion
             "competitor or ally",      # "distant competitor or ally" — second entity with standing
             "companionship in",        # "companionship in altitude" — explicit companionship claim
+            # beat169 (2026-08-23): "the other bird" and "other's call" escape vectors.
+            # Found in battery11_0823_0259 imag-eagle-wildlife-plural honest read:
+            # "The other's call fades quickly from earshot as you concentrate on flight again"
+            # "the other bird must be traveling high above these peaks toward somewhere else"
+            # Both imply a companion eagle via sound and named reference; slipped all prior guards.
+            "the other bird",          # "the other bird must be traveling" — implied companion
+            "the other eagle",         # variant with named species
+            "other's call",            # "The other's call fades" — acoustic companion (ASCII apostrophe)
         ))
         if anon_companion_dropped:
             log.warning('[v6] %d anonymous-companion sentence(s) dropped (you/we both in solo eagle active-body)',
