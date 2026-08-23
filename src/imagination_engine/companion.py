@@ -532,7 +532,13 @@ _FORBIDDEN = [
     # husband" (3 words) separates "anger" from "is protecting". Pattern now uses
     # (?:\s+\w+){0,3} to allow 0-3 intervening word tokens before the copula.
     # 9/9 unit tests PASS (incl. beat116 form; 0/3 FP on non-feeling "is protecting" contexts).
-    r"\b(?:anger|angry|sadness|grief|anxiety|anxious|fear|fearful|shame|shameful|guilt|guilty|frustration|frustrated|rage|hurt|pain|painful)\b(?:\s+\w+){0,3}\s+(?:might|could|may|is|are|was|were)\s+(?:be\s+)?(?:hiding|protecting|guarding|covering)\b",
+    # beat167: adverb-between-modal escape: "Anger is likely protecting something else
+    # underneath." — "likely" sits between "is" and "protecting"; prior pattern required
+    # (?:be\s+)? immediately after the modal, so "is likely protecting" escaped.
+    # FIX: added (?:\w+\s+)? before (?:be\s+)? to absorb one optional adverb (likely,
+    # probably, just, really, actually). 11/11 unit tests PASS (new TP: "anger is likely
+    # protecting", "anger might probably be hiding"; old TPs all hold; 0 new FP).
+    r"\b(?:anger|angry|sadness|grief|anxiety|anxious|fear|fearful|shame|shameful|guilt|guilty|frustration|frustrated|rage|hurt|pain|painful)\b(?:\s+\w+){0,3}\s+(?:might|could|may|is|are|was|were)\s+(?:\w+\s+)?(?:be\s+)?(?:hiding|protecting|guarding|covering)\b",
     # therapy-reframe PRONOUN form: "what's it protecting you from?" (beat112b)
     # beat112b: comp-grief-anger-1word-echo T1 (battery9 0809_1738) produced "Anger for
     # days — what's it protecting you from?" — the pronoun "it" substitutes for "anger"
@@ -2549,6 +2555,32 @@ class Companion:
                         log.warning(
                             "companion: PAST-QUERY second-person open corrected (prepended 'No — ')"
                         )
+
+        # beat172: "No — I haven't told you [about X]" perspective escape.
+        # Root cause: the main PAST-QUERY guard (beat88+119) fires on replies that START with
+        # "You haven't..." or "I haven't...". But n376 sometimes generates "No — I haven't told
+        # you about Marcus." in one shot — starts with "No", so the ^[Ii] haven't regex misses it.
+        # The inverted phrasing ("I haven't told you") implies companion has secret info it chose
+        # not to share — semantically wrong. Fix: after all regen paths, normalize the form.
+        # TP: "No — I haven't told you about your brother Marcus." →
+        #     "No — you haven't told me about your brother Marcus."
+        # TP: "No — I haven't told you anything about that." →
+        #     "No — you haven't told me anything about that."
+        # FP: "No — you haven't told me about Marcus." → no change (doesn't match)
+        # FP: "No — I don't have that." → no change ("haven't told you" not present)
+        if _is_memory_probe(user_message) and reply:
+            _pq_post_strip = reply.strip()
+            _pq_reversed = re.sub(
+                r"^(No\s*[—\-]\s*)[Ii]\s+haven'?t\s+told\s+you\b",
+                r"\1you haven't told me",
+                _pq_post_strip,
+            )
+            if _pq_reversed != _pq_post_strip:
+                reply = _pq_reversed
+                log.warning(
+                    "companion: PAST-QUERY 'No — I haven't told you' normalized to "
+                    "'No — you haven't told me' (perspective fix, beat172)"
+                )
 
         # Thin-VF-reply guard (beat118): model replied with ≤3 words (e.g. just "Yes.")
         # to a memory probe when VF has content covering the query.  The PAST-QUERY guard
