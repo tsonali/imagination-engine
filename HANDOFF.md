@@ -1,6 +1,50 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-08-23 beat172 — **SHIP GATE HOLDS. 1 CODE FIX (companion.py: past-query 'No — I haven't told you' perspective escape). Gold(A)=6510 (+7), Gold(C)=227 (+5). Mini UNREACHABLE (49th). qc_queue RUNNING (battery9 in flight). postcheck.py MD5: 9eae36bf2e87a812fe7d8f842a0bb895. companion.py MD5: 51f8d951d3943cbd367db6acce65b640. battery11.py MD5: bc7f04ae8b522d534237d825a3220b49. generator.py MD5: 33418a478e168f08c593ba5a9b9acbee. utility.py MD5: 71123a379f55af89a677ef4b96ed3c28. ZIP: 4949e6dcc20f5dbdf8420a51083e41d0 (stale; rebuild when memory ≥35%). Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.**
+_Last updated 2026-08-23 beat174 — **SHIP GATE HOLDS. 1 CODE FIX (companion.py Case 2m' 4-gram literal prior-user-turn echo guard). battery11_0823_1248 CONFIRMED 7/7 PASS ✅ (beat170+beat171 postcheck fixes verified). battery9_0823_1413 IN FLIGHT (10/20 scenarios clean so far). Gold(A)=6524 (+7), Gold(C)=237 (+5). Mini UNREACHABLE (51st). companion.py MD5: 0c0cf9494aa03d750623b192fe90957e. ZIP MD5: 8f10d474aad786f51d76193c9b0ce590. Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.**
+
+BEAT174 SUMMARY (2026-08-23):
+- battery11_0823_1248: CONFIRMED 7/7 PASS ✅ (honest read complete). beat170 body-'we' drop verified in eagle-wildlife-plural (0 'we took off'/'we've moved' in output). beat171 spatial-me/relational-us drops verified in eagle-companion-bird-he (0 'beneath me'/'we are' in output). beat173 Fixes A/B/C1/C2/D/E/G all active. All 7 scenarios clean, all postchecks green.
+- beat173 7 fixes retrospectively verified across battery11_1248 — no regressions.
+- CODE FIX (Case 2m', beat174, commit 9ffcecb): 4-gram literal prior-user-turn echo guard. Defect: S20 T2 (comp-grief-anger-barrier-vague) opened with "He always makes it about himself" — verbatim 5-word phrase from T1 user. Case 2m (Jaccard) missed: only 2 content words after stopword removal, Jaccard ~0.40 < 0.50 threshold. Fix: after Case 2m, iterate 4-word sequences from companion first sentence; if any appears verbatim in a prior user turn → regen at temp=0.6. 6/6 unit tests PASS. companion.py MD5: 0c0cf9494aa03d750623b192fe90957e. All 4 dist copies synced. scenario_bank: comp-grief-anger-barrier-4gram-prior-echo banked.
+- battery9_0823_1413: IN FLIGHT (started 14:13, 10/20 scenarios at beat close — all floors clean so far). Verifies beat173 7 fixes in a fresh run. Will complete ~15:00. Read end-to-end when done.
+- Mini SSH: UNREACHABLE (51st consecutive). Gold NOT SCP'd.
+- Gold(A) = 6524 (+7 beat174): sail-fills, hammock-afternoon, after-the-storm, night-fishing, language-without-translating, before-you-speak, hand-reaches-first. All sensation-first, unique openings. NOT SCP'd.
+- Gold(C) = 237 (+5 beat174). c_gold_beat174.json: barrier-prior-4gram-echo-advance-not-confirm, warmup-head-phrase-never-mirror, second-pass-bridge-not-echo, vf-warmup-not-hollow-move-forward, barrier-t2-new-info-advance-not-restate. Targets Case 2m' behavioral pattern + beat173 Fix A/G behavioral patterns. NOT SCP'd.
+- ZIP rebuilt: 8f10d474aad786f51d76193c9b0ce590 (companion.py 0c0cf949 inside).
+
+NEXT:
+(1) Read battery9_0823_1413 end-to-end when complete (~15:00). Verify beat173 7 fixes hold. Note any new defects.
+(2) If battery9_1413 clean: no code changes needed; update daily-log. If defects found: fix immediately, bank, re-verify.
+(3) BYO deep test — overdue 8 beats (last beat167). Memory must be ≥35% free. Kill Chrome + wait for model to unload. Critical for release.
+(4) Mini SSH: 51st attempt; note pattern failure without action.
+(5) Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.
+
+BEAT173 SUMMARY (context-resume from beat172 — 2026-08-23):
+- battery9_0823_1053: COMPLETE — 20 scenarios, 36 companion turns, 6578s. Template fatigue: 25% q-ender ✅, 6% paraphrase ✅, 0% what-if ✅, 0.78 diversity ✅. Full honest read done.
+- DEFECTS found and fixed (7 total):
+  (A) No-echo regen em-dash head-phrase echo guard: pre-dash phrase ≤9 words, ≥80% word overlap → strip. Observed: "You're thinking about family stuff lately — that's a whole thread in itself" (S13 T1, 83% overlap).
+  (B) VAGUE_FILLER_RE: added "thread" to noun list.
+  (C1) VF fabrication regen prompt: added PERSPECTIVE instruction ("say 'you haven't told me' — NEVER 'I haven't told you'").
+  (C2) Beat172 regex: apply `_norm_apos` before re.sub so curly apostrophe U+2019 in VF regen output matches `haven'?t` pattern.
+  (D) No-vague regen empty else-bridge: when echo-strip empties _nv_reply, forward bridge prevents prior vague value from surviving.
+  (E) En-dash split fix: `split("—")` → `re.split(r'[—–]', ...)` at both _ne_bd and _nv_bd locations so en-dash U+2013 vague openers trigger _still_vague correctly.
+  (G) CRITICAL: Second-pass full-reply Jaccard guard: after beat140/beat157, if reply >4 words AND Jaccard ≥ 0.65 with full user_message → bridge. Observed: "Your boss already thinks I'm the weak link, probably correctly." (S19 T3, Jaccard 0.82).
+- companion.py MD5: 10008ea4b68c5f31e3b62cbf083eeef1. All 4 copies synced. dist/hearth-0.2.zip rebuilt (1.7M, 12:47).
+- battery11_0823_1248: IN FLIGHT (started 12:48:03). First run with beat173's 7 fixes + beat170+beat171 postcheck fixes. Priority read when complete.
+- Mini SSH: not attempted this beat (battery9 read took full window).
+- Memory: 84% free at beat close (model was idle while reading log).
+
+NEXT:
+(1) Read battery11_0823_1248 (PRIORITY) — first run with beat173 fixes. Verify: (a) 7 prior FAILs resolved; (b) eagle-wildlife-plural 'we' = 0; (c) companion-bird-he 'beneath me'/'we are' = 0. Started 12:48, ETA ~1:30 PM.
+(2) BYO deep test — overdue 7 beats (last beat167). Memory must be ≥35%. Kill qc_queue first. Do immediately after battery11 read.
+(3) Fix H (optional): Case 2m content-word threshold edge (S20 T2, 3-cw echo "He always makes it about himself"). Lower threshold to ≥2 or add verbatim-prior-turn guard. Low priority; S20 T2 post-dash added value.
+(4) Mini SSH: 50+ consecutive failures. No new approach.
+(5) Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.
+
+COMPLETED THIS SESSION (beat173 context-resume):
+- Gold(A) +7 → 6517: first-morning-abroad-wake, casting-off-alone-morning, recording-played-at-volume, going-under-anesthesia-elective, opening-night-your-show, first-glance-from-stranger-who-knows-your-work, first-night-alone-in-wilderness. All sensation-first openings. NOT SCP'd.
+- Gold(C) +5 → 232. c_gold_beat173.jsonl: (1) head-phrase-echo pivot (Fix A behavioral target); (2) en-dash-vague opener (Fix E); (3) second-pass bridge not echo (Fix G); (4) name-the-bind not pattern (S20 T2 gap); (5) Case 2m prior-turn pivot.
+- RELEASE.md + daily-log.md + HANDOFF updated with correct Gold counts.
 
 BEAT172 SUMMARY (continuation of beat171 session — 2026-08-23):
 - HANDOFF ZIP MD5 corrected: was stale e6996485..., now 4949e6dcc20f5dbdf8420a51083e41d0 (ZIP rebuilt beat171 but header not updated).
@@ -11,14 +55,6 @@ BEAT172 SUMMARY (continuation of beat171 session — 2026-08-23):
 - battery9_0823_1053: IN FLIGHT (started 10:53 AM; 88 lines / 13 companion turns at 11:24 AM). GRAVITY TYPE B mechanical regen firing correctly. Battery9 final metrics pending.
 - battery11 NEXT cycle (PRIORITY): awaited — first run with BOTH beat170+beat171 postcheck fixes. Starts after battery9 completes, runs ~84 min.
 - Memory: ~0.5% free throughout beat — no model launch; BYO test deferred again (overdue 5 beats: last beat167).
-
-NEXT:
-(1) Read battery11 NEXT cycle (PRIORITY) — FIRST with BOTH beat170+beat171 fixes. Verify: (a) 'we took off'/'we've moved' drops in eagle-wildlife-plural; (b) 'beneath me'/'we are' drops in eagle-companion-bird-he. Expect 0 in each.
-(2) Read battery9_0823_1053 when complete — q-ender rate, T19 phrasing, diversity. ETA ~12:23 PM.
-(3) BYO deep test — overdue 5 beats (last beat167). Memory must be ≥35%.
-(4) Intimacy masculine pronoun fix — review-queue; requires gender detection (complex; no patch yet).
-(5) Mini SSH: 50th attempt.
-(6) Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.
 
 BEAT171 SUMMARY (continuation of beat170 session):
 - READ: battery11_0823_0926 HONEST READ COMPLETE 7/7 ✅ — run loaded OLD postcheck.py at startup (beat170 fix committed after launch). DEFECTS FOUND in honest read:

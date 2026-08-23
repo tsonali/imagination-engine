@@ -4,6 +4,82 @@
 
 ---
 
+## 2026-08-23 — Beat 174 (context-resume from beat173)
+
+**Read:**
+- battery11_0823_1248: CONFIRMED 7/7 PASS ✅ (honest read from beat173 session, completed ~1:37 PM). beats 170/171/173 all verified.
+- battery9_0823_1413: PARTIAL — 11/20 scenarios at time of beat174 read. PID 84939 still running. All 11 clean at mechanical floor.
+
+**battery11_1248 honest read detail (7/7 PASS):**
+- MRI ✅: in-tube settles, drum hum, no first-person chair. Terminator present.
+- Intimacy ✅: pronoun fixes (11 possessive-adj, 3 subject, 2 object). Terminator present.
+- Eagle-embodiment ✅: 1 BACK stripped, 1 companion-wildlife dropped. No narrator bleed.
+- Eagle-wildlife-plural ✅: beat170 body-'we' drop verified (0 'we took off'/'we've moved' in output). 
+- Calm-settle ✅: 0 furniture enumeration.
+- Golden-eagle-wildlife ✅: beat171 spatial-me/relational-us drops verified (0 'beneath me', 0 'we are' in output).
+- Eagle-companion-bird-he ✅: 5 companion-wildlife, 1 hallucinated-female, 1 he/him/his dropped. No narrator slips.
+No regressions from beat173 Fixes A/B/C1/C2/D/E/G.
+
+**battery9_1413 partial honest read (S1-S11):**
+- S4 comp-past-query T1: "No — what exactly are you asking about?" — starts with No ✅ (mechanical floor). Quality miss: doesn't say "we haven't discussed that" — asks a clarifying Q instead. Not a hard fail; floor holds.
+- S6 comp-grief-anger T1: "Angry at the miscarriage, not sad — that breaks the script. Angry is what it means to carry alone." — names gap ✅, no therapy-speak ✅, no forbidden translation ✅. Second sentence ("Angry is what it means to carry alone") oddly constructed but not a mechanical fail.
+- S6 comp-grief-anger T2: VAGUE-STUB fired correctly — "that's the whole script of staying silent for his approval." → regen → "Which means the anger stays unnamed between you." ✅ Fix B/D working.
+- S7 comp-crisis-adjacent: GRAVITY TYPE B fired correctly — regen produced "Lighter without you around. How long has it felt this way?" TWO MOVES ✅.
+- S9 comp-grief-anger-self-recycle: T1 "Anger at a miscarriage, not sadness — that breaks the script." T2 "Even though it isn't — that's the trap." ✅ No self-recycle.
+- S11 comp-para-stay-deletion-echo: "No — there's no one in here to promise. What I offer is the attention it gets when nothing else does." ✅
+All 11 scenarios mechanically clean. No regressions.
+
+**NOTE:** battery9_1413 started BEFORE Case 2m' commit (9ffcecb). S20 comp-grief-anger-barrier-vague T2 will echo as before — expected. First live test of Case 2m' is the NEXT battery9 cycle after 1413 completes.
+
+**Code fix (beat174, commit 9ffcecb):**
+- Case 2m' — 4-gram literal prior-user-turn echo guard. Defect source: S20 T2 (battery9_1053) opened "He always makes it about himself" — verbatim 5-word phrase from user T1. Case 2m (Jaccard) missed: only 2 content words after stopword removal, Jaccard ~0.40 < 0.50. Fix: after Case 2m, for each 4-word sequence in companion first sentence, check if it appears verbatim in any prior user turn → regen at temp=0.6 with anti-prior-echo instruction. 6/6 unit tests PASS. companion.py MD5: 0c0cf9494aa03d750623b192fe90957e. All 4 dist copies synced. scenario_bank: comp-grief-anger-barrier-4gram-prior-echo banked.
+
+**Gold:**
+- Gold(A) = 6524 (+7): sail-fills, hammock-afternoon, after-the-storm, night-fishing, language-without-translating, before-you-speak, hand-reaches-first. All sensation-first, unique openings. NOT SCP'd (SSH dead).
+- Gold(C) = 237 (+5): c_gold_beat174.json: barrier-prior-4gram-echo-advance-not-confirm, warmup-head-phrase-never-mirror, second-pass-bridge-not-echo, vf-warmup-not-hollow-move-forward, barrier-t2-new-info-advance-not-restate.
+
+**Mini SSH:** UNREACHABLE (51st consecutive). No new approach. Noted.
+
+---
+
+## 2026-08-23 — Beat 173 (context-resume from beat172)
+
+**Read:**
+- battery9_0823_1053: COMPLETE — 20 scenarios, 36 companion turns, 6578s. Full end-to-end honest read done. Defects below.
+
+**Template-fatigue metrics (battery9_1053):** 25% q-ender, 6% paraphrase-opener, 0% what-if, 0 resonate/land, 0.78 opener diversity — all well inside fatigue floors. Clean.
+
+**Defects confirmed from honest read:**
+1. S13 T1 (comp-grief-anger-self-recycle): No-echo regen produced "You're thinking about family stuff lately — that's a whole thread in itself." Pre-dash head phrase "You're thinking about family stuff lately" (6 words) = 83% word overlap with user first sentence. Case 2h missed it (full reply >9 words). Also: "thread" not in VAGUE_FILLER_RE noun list.
+2. S14 T1 (comp-vf-sister-memory): Beat172 regex `haven'?t` uses ASCII apostrophe; VF regen produced curly U+2019 apostrophe → no match → inverted perspective "No — I haven't told you about your brother Marcus." survived.
+3. S15 T1 (comp-vf-no-fabrication): No-vague regen used en-dash U+2013 instead of em-dash U+2014 → `split("—")` returned "" → `_still_vague = False` → vague opener persisted.
+4. S17 T2, S19 T2: Pure situational statements from regens — no question. Quality miss, no mechanical fix (regen-question enforcement is high-false-positive territory).
+5. S19 T3 (CRITICAL): Second-pass forced response at temp=0.7 produced verbatim I→Y echo "Your boss already thinks I'm the weak link, probably correctly." (Jaccard 0.82 with user). Short-echo guard only checks ≤4-word replies; 9-word full-sentence echo escaped.
+6. S20 T2 (comp-grief-anger-barrier-vague): Pre-dash opener "He always makes it about himself" verbatim echoes user T1 phrase. Case 2m content-word threshold (≥4 cw) too high for 3-content-word echoes. Noted as potential Fix H; not implemented this beat.
+
+**7 fixes implemented (companion.py MD5: 10008ea4b68c5f31e3b62cbf083eeef1):**
+- Fix A: No-echo regen em-dash head-phrase echo guard. Pre-dash phrase ≤9 words AND ≥80% word overlap with user first sentence → strip to "" → falls to second-pass. Threshold at 80% (not 70%) to avoid FP on "The deliverable due Friday" (75% < 80%).
+- Fix B: Add "thread" to VAGUE_FILLER_RE noun list (|conversation|world|topic|thread).
+- Fix C1: Add "PERSPECTIVE: You are the companion; the USER tells things TO you. Say 'you haven't told me' — NEVER 'I haven't told you'." to VF fabrication regen prompt.
+- Fix C2: Apply `_norm_apos(_pq_post_strip)` before beat172 perspective-fix regex so curly apostrophe U+2019 matches `haven'?t` pattern.
+- Fix D: Add `else: reply = "What's the specific thing that keeps coming up?"` after `if _nv_reply:` block — prevents prior vague value surviving when no-vague regen strips to empty.
+- Fix E: Change `split("—")` to `re.split(r'[—–]', ...)` at both `_ne_bd` and `_nv_bd` locations — handles en-dash (U+2013) in addition to em-dash (U+2014).
+- Fix G: Second-pass full-reply Jaccard guard. After beat140/beat157 short-echo guards, if reply has >4 words AND Jaccard ≥ 0.65 with full user_message → bridge "Tell me what it's still costing you."
+
+All 4 companion.py copies synced (MD5 `10008ea4b68c5f31e3b62cbf083eeef1`). dist/hearth-0.2.zip rebuilt (1.7M, 12:47).
+
+**qc_queue:** Restarted (pid 79280). battery11_0823_1248 started immediately — PRIORITY read when complete (7 FAILs from prior cycle, first run with beat170+beat171 postcheck fixes).
+
+**Gold grown (beat173 continuation):**
+- Gold(A) +7 → 6517. Scripts: first-morning-abroad-wake (light on a ceiling you don't recognize yet), casting-off-alone-morning (the rope coils into the boat and the dock begins to move), recording-played-at-volume (the speakers are larger than you expected), going-under-anesthesia-elective (something cold travels up your arm), opening-night-your-show (you are standing at the back), first-glance-from-a-stranger-who-knows-your-work (they look at you and there is a moment before the moment), first-night-alone-in-wilderness (the zipper of the tent is the last sound you make). All 7 unique, sensation-first openings ✅. NOT SCP'd (SSH dead).
+- Gold(C) +5 → c_gold_beat173.jsonl. Targets: (1) head-phrase echo pivot (Fix A) — never mirror "family stuff lately" back; move toward specific immediately; (2) en-dash vague opener (Fix E) — never open with 'That's a whole — [something]'; anchor to specific in what person said; (3) second-pass bridge not echo (Fix G) — never echo user's self-criticism verbatim; bridge to what it's costing; (4) name the bind not the pattern (S20 T2 gap) — pre-dash pattern echo → name the structural impossibility; (5) Case 2m prior-turn pivot — when opener echoes prior turn phrase, absorb and advance, don't confirm.
+
+**battery11_0823_1248:** 43 lines at 1:00 PM (12 min in); ETA ~1:26 PM. PRIORITY read when complete.
+
+**Mini SSH:** Not attempted this beat (battery9 took full window).
+
+---
+
 ## 2026-08-23 — Beat 172 (continuation of beat171 session)
 
 **What was read:**
