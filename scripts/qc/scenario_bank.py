@@ -3731,7 +3731,19 @@ BANK: list[Scenario] = [
              "Jaccard vs T4 = ~18%%, below 45%% → guard didn't fire → T5 = same action class "
              "(writing) as T4. Same beat108 edge case; battery verdict = PASS (Jaccard below "
              "threshold); honest read = action-class repeat. Gold(C) exemplar in "
-             "c_gold_beat153d.json shows correct T5 pivot to physical action (step away, water)."),
+             "c_gold_beat153d.json shows correct T5 pivot to physical action (step away, water). "
+             "CRITICAL DEFECT (beat173 2026-08-23 battery9_1053 T3): second-pass forced response "
+             "(temp=0.7) produced 'Your boss already thinks I'm the weak link, probably "
+             "correctly.' — verbatim I→Y echo of user message 'My boss already thinks I'm the "
+             "weak link. Probably correctly.' Jaccard 0.82 with full user_message. beat140/beat157 "
+             "short-echo guards only fire for ≤4-word replies; 9-word echo escaped. "
+             "ROOT CAUSE: second-pass no-echo-strip rule is intentional ('blank reply is worse "
+             "than mild echo'), but a FULL verbatim echo is not mild. "
+             "FIX (beat173 Fix G): after beat140/beat157, if reply >4 words AND Jaccard(reply, "
+             "user_message) ≥ 0.65 → bridge 'Tell me what it's still costing you.' "
+             "companion.py MD5: 10008ea4b68c5f31e3b62cbf083eeef1. "
+             "Check: T3 second-pass must NOT produce a reply with Jaccard ≥0.65 vs user message; "
+             "Fix G bridge should fire and replace verbatim echo."),
     Scenario("comp-grief-anger-barrier-vague", "companion", "robustness", "high",
         always=True,
         turns=[
@@ -4093,7 +4105,16 @@ BANK: list[Scenario] = [
             "5/5 guard logic tests PASS. companion.py MD5: d8d8ea89772d49ec696d59d588f57f14. "
             "All 4 dist copies synced. "
             "Check: T2 must NOT start with 'I don't know' after user says 'I don't know'; "
-            "must name what the bind/barrier creates for the user."
+            "must name what the bind/barrier creates for the user. "
+            "QUALITY MISS (beat173 2026-08-23 battery9_1053 T2): companion T2 opened "
+            "'He always makes it about himself — so you can't say anything without him "
+            "taking center stage.' The pre-dash opener 'He always makes it about himself' "
+            "verbatim echoes user T1 phrase 'he always makes it about himself'. "
+            "Case 2m requires ≥4 content words in companion first sentence; {always, makes, "
+            "himself} = 3 content words → below threshold → no fire. Post-dash adds value "
+            "'so you can't say anything without him taking center stage' (names bind). "
+            "Not a hard failure. Potential Fix H (Case 2m threshold ≤3 cw or verbatim-match "
+            "guard on prior-turn phrases) — deferred to next beat. No change this beat."
         ),
     ),
     Scenario(
@@ -4424,6 +4445,35 @@ BANK: list[Scenario] = [
             "All 4 dist copies synced. "
             "Check: T1 must NOT say '[feeling] is likely/probably/just/really protecting' "
             "or any adverb-interpolated form of the anger-protection reframe."
+        ),
+    ),
+    Scenario(
+        id="comp-grief-anger-barrier-4gram-prior-echo",
+        product="companion",
+        dim="helpfulness",
+        severity="high",
+        always=False,
+        turns=[("grief-anger-multi", [
+            "I'm angry at my husband. I can't say it to him because he always makes it about himself.",
+            "I don't know. Everything I say he twists into me attacking him.",
+        ])],
+        checks=[],
+        note=(
+            "DEFECT (beat173 2026-08-23 battery9_1053 comp-grief-anger-barrier-vague S20 T2): "
+            "companion T2 opened with 'He always makes it about himself — so you can't say "
+            "anything without him taking center stage.' — verbatim 5-word phrase from user T1 "
+            "('he always makes it about himself'). Case 2m (Jaccard) missed because stopword "
+            "removal leaves only 2 content words ({makes, himself}), below Case 2m threshold=4, "
+            "and Jaccard ~0.40 < 0.50. "
+            "FIX (beat174): Case 2m' added to companion.py — 4-gram literal sequence check: "
+            "for each prior user turn in history, if any 4-word consecutive sequence from "
+            "companion first sentence appears verbatim (case-insensitive) in that prior user "
+            "turn → regen at temp=0.6 with anti-prior-echo instruction. "
+            "6/6 unit tests PASS (TP: 'he always makes it', 'everything i say he'; "
+            "FP-safe: 'you can never say anything', 'the thing about staying quiet'). "
+            "companion.py MD5: 0c0cf9494aa03d750623b192fe90957e. All 4 dist copies synced. "
+            "Check: T2 must NOT open with verbatim 4+-word phrase from prior user turn; "
+            "must name what T2's new info creates rather than confirming what T1 established."
         ),
     ),
 ]

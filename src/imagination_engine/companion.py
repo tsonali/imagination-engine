@@ -1973,7 +1973,7 @@ class Companion:
             # ("That’s") is matched correctly.
             r"^(?:that[‘’]?s|it[‘’]?s|this is)\s+(?:been\s+)?(?:(?:the|a|all|just)\s+)*"
             r"(?:whole\s+)?(?:thing|this|script|story|situation|picture|deal"
-            r"|conversation|world|topic)"
+            r"|conversation|world|topic|thread)"
             r"(?:\s+(?:in\s+itself|of\s+\w+(?:\s+\w+){0,4}))?"
             r"\s*[.!?]?\s*$",
             re.IGNORECASE,
@@ -2102,6 +2102,36 @@ class Companion:
                                 )
                                 reply = "That's going to sit with you today."
 
+            # beat173 Fix A: em-dash head-phrase echo guard on no-echo regen output.
+            # Observed (S13 T1): no-echo regen produced "You're thinking about family
+            # stuff lately — that's a whole thread in itself." The pre-dash head phrase
+            # "You're thinking about family stuff lately" (6 words) had 5/6=83% word
+            # overlap with user's first sentence. Case 2h misses it because the full
+            # em-dash-joined string is >9 words; _strip_echo only splits to check the
+            # ≤9-word head phrase inside Case 2h. Fix: check the pre-dash head phrase
+            # independently — if ≤9 words AND ≥80% word overlap with user first sentence
+            # → strip to empty → falls through to second-pass.
+            if reply and "—" in reply:
+                _r1_hp = reply.split("—")[0].strip()
+                _r1_hp_words = re.findall(r"[a-z']+", _r1_hp.lower())
+                if _r1_hp_words and len(_r1_hp_words) <= 9:
+                    _r1_u1_words = re.findall(
+                        r"[a-z']+",
+                        re.split(r'[.!?]', user_message)[0].lower()
+                    )
+                    if _r1_u1_words:
+                        _r1_hp_overlap = (
+                            len(set(_r1_hp_words) & set(_r1_u1_words))
+                            / max(len(_r1_hp_words), 1)
+                        )
+                        if _r1_hp_overlap >= 0.80:
+                            log.warning(
+                                "companion: no-echo regen head-phrase echo "
+                                "(%.0f%% overlap, beat173 Fix A) — stripping",
+                                _r1_hp_overlap * 100,
+                            )
+                            reply = ""
+
         # beat133: post-no-echo-regen vague-stub check. The VAGUE-STUB guard (above,
         # ~line 1706) ran on the echo-stripped reply (which was ""), didn't fire, and
         # the no-echo regen output is never re-checked. Observed escape: echo-strip
@@ -2109,7 +2139,8 @@ class Companion:
         # it bring up for you?" — vague opener + deflecting question, unchecked.
         # Fix: re-apply the SAME _VAGUE_FILLER_RE check on the regen output here.
         if reply:
-            _ne_bd = reply.split("—")[0].strip() if "—" in reply else ""
+            # beat173 Fix E: extend em-dash split to also handle en-dash (U+2013).
+            _ne_bd = re.split(r'[—–]', reply)[0].strip() if re.search(r'[—–]', reply) else ""
             _ne_fs_m = re.match(r"^([^.!?]+[.!?])", reply)
             _ne_fs = _ne_fs_m.group(1).strip() if _ne_fs_m else reply
             if (
@@ -2143,7 +2174,11 @@ class Companion:
                     # without the follow-on question), which passed _is_vague only
                     # because it missed the sentence (e.g., "That's a whole thing
                     # in itself." accepted after the prior regen was caught).
-                    _nv_bd = _nv_reply.split("—")[0].strip() if "—" in _nv_reply else ""
+                    # beat173 Fix E: extend em-dash split to also handle en-dash (U+2013).
+                    _nv_bd = (
+                        re.split(r'[—–]', _nv_reply)[0].strip()
+                        if re.search(r'[—–]', _nv_reply) else ""
+                    )
                     _nv_fs_m = re.match(r"^([^.!?]+[.!?])", _nv_reply)
                     _nv_fs = _nv_fs_m.group(1).strip() if _nv_fs_m else _nv_reply
                     _still_vague = (
@@ -2158,6 +2193,16 @@ class Companion:
                         )
                         _nv_reply = "What's the specific thing that keeps coming up?"
                     reply = _nv_reply
+                else:
+                    # beat173 Fix D: no-vague regen stripped to empty by echo-strip.
+                    # When _strip_echo empties _nv_reply, `if _nv_reply:` is False and
+                    # `reply` retains the prior vague value. Apply a forward bridge
+                    # rather than accepting the vague opener.
+                    log.warning(
+                        "companion: no-vague regen echo-stripped to empty "
+                        "(beat173 Fix D) — applying bridge"
+                    )
+                    reply = "What's the specific thing that keeps coming up?"
 
         # Second-pass fallback: if regen ALSO stripped to empty (model still echoes
         # after explicit no-echo instruction), generate forward-facing response that
@@ -2266,6 +2311,25 @@ class Companion:
                         reply[:40]
                     )
                     reply = "Tell me what it's still costing you."
+                # beat173 Fix G: second-pass long verbatim echo guard.
+                # beat140 only catches 2-4 word echoes; the second-pass can produce a
+                # full-sentence I→Y echo like "Your boss already thinks I'm the weak link,
+                # probably correctly." (S19 T3: Jaccard 0.82 with user message). The
+                # no-echo-strip rule skips ALL length replies on second-pass; this catches
+                # the gap for replies ≥5 words via full-reply Jaccard.
+                if reply and len(_sp2_r) > 4:
+                    _spg_um = set(re.findall(r"[a-z']+", user_message.lower()))
+                    _spg_rm = set(_sp2_r)
+                    _spg_union = _spg_um | _spg_rm
+                    if _spg_union:
+                        _spg_jacc = len(_spg_um & _spg_rm) / len(_spg_union)
+                        if _spg_jacc >= 0.65:
+                            log.warning(
+                                "companion: second-pass long verbatim echo "
+                                "(Jaccard %.2f, beat173 Fix G) — applying bridge",
+                                _spg_jacc,
+                            )
+                            reply = "Tell me what it's still costing you."
 
         flagged = _check_forbidden(reply)
         if flagged:
@@ -2454,7 +2518,9 @@ class Companion:
                 "denial. The FIRST WORD of your response MUST be 'No'. Example correct "
                 "forms: 'No — you haven\\'t told me about that.' / 'No, I don\\'t have "
                 "anything about [name] from you.' FORBIDDEN: starting with 'Yes', 'I "
-                "remember', 'You told me', or any affirmative. Say No first."
+                "remember', 'You told me', or any affirmative. Say No first. "
+                "PERSPECTIVE: You are the companion; the USER tells things TO you. "
+                "Say 'you haven\\'t told me' — NEVER 'I haven\\'t told you'."
             )
             _vf_chunks = []
             for piece in self.engine.stream(
@@ -2570,12 +2636,16 @@ class Companion:
         # FP: "No — I don't have that." → no change ("haven't told you" not present)
         if _is_memory_probe(user_message) and reply:
             _pq_post_strip = reply.strip()
+            # beat173 Fix C2: normalize curly apostrophe → straight before regex so
+            # VF-regen output like "No — I haven’t told you" (U+2019 from the
+            # model's typographic output) matches the ASCII `haven'?t` pattern.
+            _pq_post_norm = _norm_apos(_pq_post_strip)
             _pq_reversed = re.sub(
                 r"^(No\s*[—\-]\s*)[Ii]\s+haven'?t\s+told\s+you\b",
                 r"\1you haven't told me",
-                _pq_post_strip,
+                _pq_post_norm,
             )
-            if _pq_reversed != _pq_post_strip:
+            if _pq_reversed != _pq_post_norm:
                 reply = _pq_reversed
                 log.warning(
                     "companion: PAST-QUERY 'No — I haven't told you' normalized to "
@@ -3034,6 +3104,61 @@ class Companion:
                                 if _c2m_reply:
                                     reply = _c2m_reply
                                 break
+
+        # Case 2m' (beat174): 4-gram literal echo — companion first sentence contains
+        # a verbatim 4-word sequence from a prior user turn that Jaccard misses because
+        # stopword removal leaves <4 content words. Example: T2 "He always makes it
+        # about himself" echoes T1 user "he always makes it about himself"; content
+        # words after stopword removal = {makes, himself} = 2 (< Case 2m threshold=4)
+        # and Jaccard ≈ 0.40 (< 0.50 threshold). New guard: any 4-gram from companion
+        # first sentence found verbatim (case-insensitive) in a prior user turn → regen.
+        if reply and self.history:
+            _prior_user_msgs_c2mp = [
+                m['content'] for m in self.history
+                if m.get('role') == 'user'
+            ]
+            if _prior_user_msgs_c2mp:
+                _r_fsent_c2mp = re.split(r'[.!?—]', reply)[0].strip()
+                _r_words_c2mp = _r_fsent_c2mp.lower().split()
+                _c2mp_fired = False
+                if len(_r_words_c2mp) >= 4:
+                    for _pu_c2mp in _prior_user_msgs_c2mp:
+                        _pu_lower = _pu_c2mp.lower()
+                        for _ki in range(len(_r_words_c2mp) - 3):
+                            _gram4 = ' '.join(_r_words_c2mp[_ki:_ki + 4])
+                            if _gram4 in _pu_lower:
+                                log.warning(
+                                    "companion: PRIOR-USER-4GRAM (Case 2m') — "
+                                    "first sentence has 4-gram verbatim in prior "
+                                    "user turn: '%s'", _gram4
+                                )
+                                _c2mp_user = user_message + (
+                                    "\n\nCRITICAL: Your response opened by repeating "
+                                    "a phrase the user said EARLIER in this conversation "
+                                    "— not what they just said now. Start fresh. Name "
+                                    "what the current situation creates for them. "
+                                    "No phrasing from earlier turns."
+                                )
+                                _c2mp_chunks = []
+                                for _piece_c2mp in self.engine.stream(
+                                    messages=[
+                                        {"role": "system", "content": COMPANION_SYSTEM},
+                                        {"role": "user", "content": _c2mp_user},
+                                    ],
+                                    max_tokens=max_tokens, temperature=0.6,
+                                ):
+                                    _c2mp_chunks.append(_piece_c2mp)
+                                _c2mp_reply = _strip_echo(
+                                    "".join(_c2mp_chunks).strip(), user_message
+                                )
+                                _c2mp_reply = _strip_chat_format_bleed(_c2mp_reply)
+                                _c2mp_reply = _strip_thats_real_tic(_c2mp_reply)
+                                if _c2mp_reply:
+                                    reply = _c2mp_reply
+                                _c2mp_fired = True
+                                break
+                    if _c2mp_fired:
+                        pass  # already handled above
 
         # Case 2n (beat142): "I don't know" user-opener mirror — companion must never
         # open with "I don't know" after the user says "I don't know" as their first
