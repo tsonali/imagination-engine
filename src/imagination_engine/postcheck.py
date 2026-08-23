@@ -435,6 +435,11 @@ _NARRATOR_POSS = re.compile(
     r"|\bwith\s+me\b"                  # should be "with you"
     r"|\bwe\s+(?:started|are\s+now|were\s+both|had\s+been|come\s+back)\b"  # narrator "we" (specific forms)
     r"|\bwe\s+(?:reach|reached|walk|walked|came|come|arrive|arrived|ran|run|go|went|were\s+here|need|sat|sit|stand|stood|move|moved|used\s+to|begin|began|open|opened|return|returned|end|ended|close|closed|start|started|leave|left|lift|lifted|drift|drifted|wake|woke|fade|faded)\b"  # narrator "we" + motion/state verbs
+    # beat170 (2026-08-23): eagle-body 'we' narrator inclusions — "we took off", "we approach",
+    # "we've moved" etc. escaped because (a) verbs missing from list, (b) "we've" contraction form
+    # not covered. Found in battery11_0823_0926 imag-eagle-wildlife-plural (13 'we' instances).
+    r"|\bwe\s+(?:took|approach|approached|adjust|adjusted|fly|flew|soar|soared|bank|banked|glide|glided|gain|gained|climb|climbed|descend|descended|ascend|ascended|travel|traveled|travelled|continue|continued|turn|turned|circle|circled|pass|passed|cross|crossed|dive|dove|dived|swing|swung|rise|rose|drop|dropped|head|headed|carry|carried)\b"  # active-body motion verbs missed by prior list
+    r"|\bwe(?:['’]ve)\s+(?:moved|adjusted|traveled|travelled|soared|flown|gained|climbed|banked|circled|crossed|ascended|descended|continued|turned|passed|glided|approached|drifted|risen|gone)\b"  # "we've [past-participle]" narrator contraction form
     r"|\bmy\s+(?:hand|hands|breath|side|step|voice|foot)\b"   # narrator body-part possessives
     r"|\bboth\s+of\s+us\b"             # "both of us" narrator collective
     r"|\bfor\s+us\b"                   # "for us" narrator collective
