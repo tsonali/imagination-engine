@@ -12,7 +12,7 @@
 
 **What was fixed:**
 - HANDOFF.md ZIP MD5 corrected: was stale e6996485..., now 4949e6dcc20f5dbdf8420a51083e41d0 (ZIP rebuilt beat171 but HANDOFF not updated).
-- No code changes this beat.
+- companion.py beat172 (commit f6aee41): past-query 'No — I haven't told you' perspective escape. Root cause identified from battery9_0647 T19 honest read: when model generates "No — I haven't told you about your brother Marcus." directly (with self-generated "No — " prefix), beat119's `^[Ii] haven't` regex doesn't match (starts with "No — "), and beat154's `^You haven't` replacement also doesn't match. The reversed perspective ("I haven't told you") implies companion has secret info it chose not to share. Fix: post-normalization `re.sub(r'^(No\s*[—-]\s*)[Ii]\s+haven\'?t\s+told\s+you\b', r'\1you haven\'t told me', reply.strip())` — fires AFTER all regen paths, preserves Marcus reference, no regen cost. 3/3 TPs PASS, 3/3 FPs clean. companion.py MD5: 51f8d951d3943cbd367db6acce65b640. 3 dist copies synced.
 
 **Mini SSH:** UNREACHABLE (49th consecutive). julios-mac-mini.localdomain timed out; .local variants → DNS failure.
 

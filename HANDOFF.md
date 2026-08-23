@@ -1,16 +1,16 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-08-23 beat172 — **SHIP GATE HOLDS. NO CODE CHANGES this beat. Gold(A)=6510 (+7), Gold(C)=227 (+5). Mini UNREACHABLE (49th). qc_queue RUNNING (battery9 in flight). postcheck.py MD5: 9eae36bf2e87a812fe7d8f842a0bb895. companion.py MD5: 4a7a42cb4135a328d0d3efda9fab943b. battery11.py MD5: bc7f04ae8b522d534237d825a3220b49. generator.py MD5: 33418a478e168f08c593ba5a9b9acbee. utility.py MD5: 71123a379f55af89a677ef4b96ed3c28. ZIP: 4949e6dcc20f5dbdf8420a51083e41d0. Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.**
+_Last updated 2026-08-23 beat172 — **SHIP GATE HOLDS. 1 CODE FIX (companion.py: past-query 'No — I haven't told you' perspective escape). Gold(A)=6510 (+7), Gold(C)=227 (+5). Mini UNREACHABLE (49th). qc_queue RUNNING (battery9 in flight). postcheck.py MD5: 9eae36bf2e87a812fe7d8f842a0bb895. companion.py MD5: 51f8d951d3943cbd367db6acce65b640. battery11.py MD5: bc7f04ae8b522d534237d825a3220b49. generator.py MD5: 33418a478e168f08c593ba5a9b9acbee. utility.py MD5: 71123a379f55af89a677ef4b96ed3c28. ZIP: 4949e6dcc20f5dbdf8420a51083e41d0 (stale; rebuild when memory ≥35%). Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.**
 
 BEAT172 SUMMARY (continuation of beat171 session — 2026-08-23):
 - HANDOFF ZIP MD5 corrected: was stale e6996485..., now 4949e6dcc20f5dbdf8420a51083e41d0 (ZIP rebuilt beat171 but header not updated).
 - Mini UNREACHABLE (49th consecutive). julios-mac-mini.localdomain → timed out; .local variants → DNS failure.
 - Gold(A)=6510 (+7 beat172): surfing-standing-up, northern-lights-first-time, walking-into-room-hard-news, first-piece-of-writing-published, first-professional-title, returning-to-see-first-sprout, last-morning-of-sabbatical. All unique openings ✅. NOT SCP'd.
 - Gold(C)=227 (+5 beat172). c_gold_beat172.jsonl: comparison-envy-name-the-sting-not-the-silver, anger-swallowed-name-the-hold-not-the-release, should-be-happy-flatness-name-the-specific-disappointment, past-query-direct-no-first-then-land, advice-not-asked-wait-for-the-ask. Target behavioral gaps: envy/comparison, swallowed-anger duration weight, post-achievement flatness as grief, past-session honesty protocol (patches T19 VF direction defect), unsolicited-advice avoidance.
-- battery9_0823_1053: IN FLIGHT (started 10:53 AM; ~90 min runtime; ETA ~12:23 PM). 53 lines at beat close. GRAVITY TYPE B mechanical regen firing correctly (logged in output). Battery9 final metrics pending.
-- battery11 NEXT cycle (PRIORITY): awaited — first run with BOTH beat170+beat171 postcheck fixes. Starts after battery9 completes (~12:23 PM), runs ~84 min, done ~1:47 PM.
+- CODE FIX (commit f6aee41): companion.py beat172 — past-query 'No — I haven't told you' perspective escape. Root cause: when model generates "No — I haven't told you about Marcus." in one shot, it starts with "No" so beat119's `^[Ii] haven't` guard doesn't fire; beat154's `^You haven't` replacement also doesn't match. Fix: post-normalization re.sub after all regen paths: 'No — I haven't told you [about X]' → 'No — you haven't told me [about X]'. Preserves Marcus reference. 3/3 TPs PASS, 3/3 FPs clean. companion.py MD5: 51f8d951d3943cbd367db6acce65b640. 3 dist copies synced.
+- battery9_0823_1053: IN FLIGHT (started 10:53 AM; 88 lines / 13 companion turns at 11:24 AM). GRAVITY TYPE B mechanical regen firing correctly. Battery9 final metrics pending.
+- battery11 NEXT cycle (PRIORITY): awaited — first run with BOTH beat170+beat171 postcheck fixes. Starts after battery9 completes, runs ~84 min.
 - Memory: ~0.5% free throughout beat — no model launch; BYO test deferred again (overdue 5 beats: last beat167).
-- No code changes this beat.
 
 NEXT:
 (1) Read battery11 NEXT cycle (PRIORITY) — FIRST with BOTH beat170+beat171 fixes. Verify: (a) 'we took off'/'we've moved' drops in eagle-wildlife-plural; (b) 'beneath me'/'we are' drops in eagle-companion-bird-he. Expect 0 in each.
