@@ -439,10 +439,21 @@ _NARRATOR_POSS = re.compile(
     # "we've moved" etc. escaped because (a) verbs missing from list, (b) "we've" contraction form
     # not covered. Found in battery11_0823_0926 imag-eagle-wildlife-plural (13 'we' instances).
     r"|\bwe\s+(?:took|approach|approached|adjust|adjusted|fly|flew|soar|soared|bank|banked|glide|glided|gain|gained|climb|climbed|descend|descended|ascend|ascended|travel|traveled|travelled|continue|continued|turn|turned|circle|circled|pass|passed|cross|crossed|dive|dove|dived|swing|swung|rise|rose|drop|dropped|head|headed|carry|carried)\b"  # active-body motion verbs missed by prior list
-    r"|\bwe(?:['’]ve)\s+(?:moved|adjusted|traveled|travelled|soared|flown|gained|climbed|banked|circled|crossed|ascended|descended|continued|turned|passed|glided|approached|drifted|risen|gone)\b"  # "we've [past-participle]" narrator contraction form
+    r"|\bwe(?:[‘’]ve)\s+(?:moved|adjusted|traveled|travelled|soared|flown|gained|climbed|banked|circled|crossed|ascended|descended|continued|turned|passed|glided|approached|drifted|risen|gone)\b"  # "we’ve [past-participle]" narrator contraction form
+    # beat171 (2026-08-23): stative "we are"/"we’re" escape (found: "where we are up here",
+    # "like we’re arriving") — plain \bwe\s+are\b was not in the verb list; "we’re" contraction
+    # form had no pattern at all. Found in 09:26 eagle-wildlife-plural honest read.
+    r"|\bwe[\x27’’]re\b|\bwe\s+are\b"  # "we’re" (ASCII \x27 + curly) and "we are"
     r"|\bmy\s+(?:hand|hands|breath|side|step|voice|foot)\b"   # narrator body-part possessives
+    # beat171 (2026-08-23): narrator "me" preposition gaps — "beneath me"/"below me" not caught.
+    # Line 433-435 already has "under me"/"through me"/"with me". Extending to full spatial set.
+    # Found in imag-eagle-companion-bird-he 09:26 honest read ("far beneath me", "mountains below me").
+    r"|\b(?:beneath|below|around|near|beside|behind)\s+me\b"  # narrator "me" spatial prepositions
     r"|\bboth\s+of\s+us\b"             # "both of us" narrator collective
     r"|\bfor\s+us\b"                   # "for us" narrator collective
+    # beat171 (2026-08-23): narrator "us" forms beyond "both of us"/"for us" — "distance separates us",
+    # "between us" etc. Found in imag-eagle-companion-bird-he 09:26 honest read.
+    r"|\b(?:separates?|between|around|with|near|beside|behind|above|below|joins?|unites?)\s+us\b"  # narrator "us" spatial/relational
     # Grief-pet dog-POV leak (beat70): model puts listener in animal's body and refers
     # to the human as "your handler" / "your owner" — immediate perspective failure.
     r"|\byour\s+(?:handler|owner|master)\b"
