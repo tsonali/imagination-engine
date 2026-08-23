@@ -4,6 +4,29 @@
 
 ---
 
+## 2026-08-23 — Beat 172 (continuation of beat171 session)
+
+**What was read:**
+- battery9_0823_1053: still running (53 lines, ~12:23 PM ETA). GRAVITY TYPE B mechanical regen confirmed firing correctly in log output (line 53). Final metrics pending.
+- battery11 NEXT cycle: not yet started (starts after battery9 completes). First run with both beat170+beat171 postcheck fixes.
+
+**What was fixed:**
+- HANDOFF.md ZIP MD5 corrected: was stale e6996485..., now 4949e6dcc20f5dbdf8420a51083e41d0 (ZIP rebuilt beat171 but HANDOFF not updated).
+- No code changes this beat.
+
+**Mini SSH:** UNREACHABLE (49th consecutive). julios-mac-mini.localdomain timed out; .local variants → DNS failure.
+
+**Gold grown:**
+- Gold(A): +0 this beat.
+- Gold(C) +5 → 227. c_gold_beat172.jsonl: (1) comparison-envy-name-the-sting-not-the-silver — receive envy sting directly, no silver-lining; (2) anger-swallowed-name-the-hold-not-the-release — receive duration of silence before pointing toward relief; (3) should-be-happy-flatness-name-the-specific-disappointment — post-achievement flatness is its own grief; (4) past-query-direct-no-first-then-land — YES/NO first on direct past-memory probe (patches T19 VF phrasing gap); (5) advice-not-asked-wait-for-the-ask — receive a made decision without auditing it.
+
+**Running state:**
+- battery9_0823_1053: in flight (~12:23 PM ETA). Read when log completes.
+- Next battery11 cycle (PRIORITY): starts ~12:23 PM, runs ~84 min, completes ~1:47 PM. First with both beat170+beat171 fixes — verify: (a) no 'we took off'/'we've moved' in eagle-wildlife-plural; (b) no 'beneath me'/'we are' in eagle-companion-bird-he.
+- BYO deep test: deferred again (memory ~0.5% free, below 35% threshold). Overdue 5 beats.
+
+---
+
 ## 2026-08-23 — Beat 171 (continuation of beat170 session)
 
 **What was read:**
