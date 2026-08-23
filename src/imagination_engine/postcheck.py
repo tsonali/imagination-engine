@@ -541,12 +541,15 @@ def fix_subject_pronouns(text: str) -> tuple[str, int]:
 
 
 def fix_possessive_pronouns(text: str) -> tuple[str, int]:
-    """Replace 'hers NOUN' → 'her NOUN' and 'yours NOUN' → 'your NOUN'.
+    """Replace 'hers/yours/ours NOUN' → 'her/your/our NOUN'.
 
     The fine-tuned model sometimes generates 'hers own side', 'hers eyes',
-    'yours apartment' — using the standalone possessive pronoun as an attributive
-    adjective. This is a training artifact caught on n242 and n243 intimate scenes.
-    The fix is inline substitution (not sentence-drop) so no content is lost.
+    'yours apartment', 'ours bodies tonight' — using the standalone possessive
+    pronoun as an attributive adjective. This is a training artifact caught on
+    n242/n243/n376 intimate scenes. The fix is inline substitution (not
+    sentence-drop) so no content is lost.
+    beat155: extended to cover 'ours NOUN' → 'our NOUN' (beat155 observed
+    'ours bodies tonight' in imag-intimacy battery11_1003 run).
     """
     fixed = 0
 
@@ -566,8 +569,17 @@ def fix_possessive_pronouns(text: str) -> tuple[str, int]:
         fixed += 1
         return f"your {word}"
 
+    def _replace_ours(m: "re.Match") -> str:
+        nonlocal fixed
+        word = m.group(1)
+        if word.lower() in _PRONOUN_SKIP:
+            return m.group(0)
+        fixed += 1
+        return f"our {word}"
+
     text = re.sub(r"\bhers\s+(\w+)", _replace_hers, text, flags=re.IGNORECASE)
     text = re.sub(r"\byours\s+(\w+)", _replace_yours, text, flags=re.IGNORECASE)
+    text = re.sub(r"\bours\s+(\w+)", _replace_ours, text, flags=re.IGNORECASE)
     return text, fixed
 
 
@@ -752,11 +764,14 @@ def drop_active_body_wildlife(text: str, tokens: tuple) -> tuple[str, int]:
     return " ".join(kept), dropped
 
 
-# She/her subject pronouns that signal a hallucinated 3rd-person female in a solo script.
-# "her" alone is excluded — too risky to drop (appears as possessive adjective in
-# fix_possessive_pronouns output: "her voice" after "hers voice" fix). Only "she" as
-# a subject pronoun and "hers" as a standalone possessive are unambiguous 3rd-person.
-_SHE_HER_PATTERN = re.compile(r'\b(she|hers)\b', re.IGNORECASE)
+# She/her/hers pronouns signalling a hallucinated 3rd-person female in a solo script.
+# "her" is included: in active-body scripts the user is always "you/your", so any "her"
+# (object: "watching her depart", "beak touches her") or possessive ("her wings") refers
+# to a fabricated companion. Safe to drop when called only for transcripts with no named
+# female. beat165: added "her" after battery11_0822 eagle script contained "beak touches
+# her at nose-soft distance" / "watching her depart" / "looking up at her from below" —
+# all surviving the she/hers-only filter (3 female sentences dropped, 3+ "her" escaped).
+_SHE_HER_PATTERN = re.compile(r'\b(she|her|hers)\b', re.IGNORECASE)
 
 
 def drop_hallucinated_she_her(text: str) -> tuple[str, int]:
@@ -854,7 +869,31 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     # own particular meanings" — "both of you"/"you both" (beat105) blocked but "both birds" not.
     r'|\banother\s+pair\s+of\s+wings\b'  # "another pair of wings ahead"
     r'|\btwo\s+separate\s+birds\b'       # "two separate birds moving through a shared sky"
-    r'|\bboth\s+birds\b',                # "both birds carrying their own particular meanings"
+    r'|\bboth\s+birds\b'                 # "both birds carrying their own particular meanings"
+    # beat159 (2026-08-21): two new escape forms found in battery11_1003 golden-eagle-wildlife
+    # honest read — mechanical 5/5 PASS but script contained companion-presence assertions:
+    # "another shape joining your for company" — unnamed second shape implies companion;
+    # "You fly together without words, moving as one entity across this sky." — explicit
+    # together/unity assertion, no pronoun/species/acoustic token, slipped all prior guards.
+    r'|\bfly\s+together\b'               # "fly together without words"
+    r'|\bas\s+one\s+entity\b'            # "moving as one entity across this sky"
+    r'|\bfor\s+company\b'                # "joining your for company"
+    r'|\banother\s+shape\b'              # "another shape joining your"
+    # beat163 (2026-08-21): four new escape forms found in battery11_2038 honest read:
+    # (1) imag-eagle-golden-eagle-wildlife: "wingtip to wingtip with your companion. You
+    # follow without hesitation, matching her speed" — "your companion" as explicit named
+    # companion reference (stronger than "your partner"); "wingtip to wingtip" signals
+    # formation flying. Both slipped all prior guards.
+    # (2) imag-eagle-companion-bird-he: "a circling raptor...distant competitor or ally" /
+    # "another eye on these lands" / "a fellow hunter making use of these thermals" — all
+    # companion-entity assertions in a solo script; "raptor" not in _wildlife_tokens;
+    # "fellow hunter"/"another eye"/"competitor or ally" not in any prior filter.
+    r'|\byour\s+companion\b'             # "wingtip to wingtip with your companion"
+    r'|\bwingtip\s+to\s+wingtip\b'      # explicit formation/pair flying signal
+    r'|\bfellow\s+hunter\b'             # "a fellow hunter making use of these thermals"
+    r'|\banother\s+eye\s+on\b'          # "just another eye on these lands"
+    r'|\bcompetitor\s+or\s+ally\b'      # "distant competitor or ally" — second entity with standing
+    r'|\bcompanionship\s+in\b',         # "companionship in altitude" — explicit companionship claim
     re.IGNORECASE,
 )
 

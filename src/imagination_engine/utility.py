@@ -175,9 +175,12 @@ def _extract_numbers(text: str) -> list[str]:
     # Time/count: 11 months, 4,200, 54 (NPS)
     found += re.findall(r'\b\d[\d,]*\s+(?:months?|years?|weeks?|days?|hours?)\b', text, re.I)
     # Bare integer counts before common countable nouns (e.g. "3 bugs", "47 users")
-    # Catches standalone counts not covered by dollar/percent/time patterns above.
+    # beat164 (2026-08-21): allow one optional modifier word so "47 beta users" is
+    # captured — prior pattern required number to IMMEDIATELY precede the noun, so
+    # "47 beta users" slipped through (modifier "beta" broke the match). The modifier
+    # group (?:\w+\s+)? is optional so "47 users" still matches.
     found += re.findall(
-        r'\b(\d+)\s+(?:bug|bugs|issue|issues|item|items|task|tasks|error|errors|'
+        r'\b(\d+)\s+(?:\w+\s+)?(?:bug|bugs|issue|issues|item|items|task|tasks|error|errors|'
         r'ticket|tickets|user|users|account|accounts|point|points|customer|customers|'
         r'problem|problems|change|changes|step|steps|people|person|seat|seats|'
         r'feature|features|sprint|sprints|release|releases)\b',

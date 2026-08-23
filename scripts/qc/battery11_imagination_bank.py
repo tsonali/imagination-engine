@@ -112,7 +112,11 @@ for sc in scenarios:
                                "young bird", "young birds", "younger bird", "younger eagle",
                                "the larger one", "bird of prey", "birds of prey",
                                # beat135: ground wildlife with agency in eagle scripts
-                               "mountain sheep", "mountain goat", "bighorn sheep", "bighorn")
+                               "mountain sheep", "mountain goat", "bighorn sheep", "bighorn",
+                               # beat163: "raptor"/"raptors" escape found in battery11_2038
+                               # imag-eagle-companion-bird-he: "a circling raptor" used the genus
+                               # name rather than a specific species, slipping the token filter.
+                               "raptor", "raptors")
             _WILDLIFE_ARTICLE = ("bear",)
             hallucinated_wildlife = (
                 any(re.search(r"\b" + re.escape(w) + r"\b", lower)
@@ -184,7 +188,26 @@ for sc in scenarios:
                 # "both birds" (golden-eagle-wildlife) — "both of you"/"you both" blocked but not this.
                 r'|\banother\s+pair\s+of\s+wings\b'
                 r'|\btwo\s+separate\s+birds\b'
-                r'|\bboth\s+birds\b',
+                r'|\bboth\s+birds\b'
+                # beat159 (2026-08-21): battery11_1003 golden-eagle-wildlife honest read
+                # found two escapes that passed mechanical 5/5 postchecks:
+                # "another shape joining your for company" / "fly together without words,
+                # moving as one entity across this sky"
+                r'|\bfly\s+together\b'
+                r'|\bas\s+one\s+entity\b'
+                r'|\bfor\s+company\b'
+                r'|\banother\s+shape\b'
+                # beat163 (2026-08-21): new escape forms found in battery11_2038 honest read.
+                # GOLDEN-EAGLE-WILDLIFE: "your companion" / "wingtip to wingtip" — companion
+                # bird asserted by direct reference and formation-flight geometry.
+                # COMPANION-BIRD-HE: "fellow hunter" / "another eye on" / "competitor or ally" /
+                # "companionship in altitude" — companion entity framed as co-hunter/co-observer.
+                r'|\byour\s+companion\b'
+                r'|\bwingtip\s+to\s+wingtip\b'
+                r'|\bfellow\s+hunter\b'
+                r'|\banother\s+eye\s+on\b'
+                r'|\bcompetitor\s+or\s+ally\b'
+                r'|\bcompanionship\s+in\b',
                 lower, _re.IGNORECASE
             ))
             # beat153: Chair-body reminder in eagle script (not just opening).
@@ -198,10 +221,18 @@ for sc in scenarios:
                 r'\byour\s+chair\b|\bin\s+(?:a\s+|the\s+)?chair\b|\bfrom\s+(?:your\s+)?chair\b',
                 lower, _re.IGNORECASE
             ))
+            # beat165 (2026-08-22): "her" object/possessive pronoun as companion signal.
+            # battery11_0822 imag-embodiment-eagle script contained "beak touches her at
+            # nose-soft distance" / "watching her depart" / "looking up at her from below"
+            # — she/hers sentences were dropped (3 dropped) but "her" survived. In solo
+            # active-body eagle scripts the user is always "you/your", so any "she/her/hers"
+            # = fabricated companion. postcheck.py _SHE_HER_PATTERN now includes "her" (beat165).
+            she_her_companion = bool(_re.search(r'\b(she|her|hers)\b', lower))
             print(f"\n>>> EAGLE POSTCHECKS:", flush=True)
             print(f"  {'❌ FAIL' if hallucinated_wildlife else '✅ PASS'} — no hallucinated companion animal", flush=True)
             print(f"  {'❌ FAIL' if anon_companion else '✅ PASS'} — no anonymous companion ('you both'/'we both')", flush=True)
             print(f"  {'❌ FAIL' if anon_companion_pattern else '✅ PASS'} — no anon companion ('a second pair'/'your mate')", flush=True)
+            print(f"  {'❌ FAIL' if she_her_companion else '✅ PASS'} — no she/her/hers companion pronoun in eagle script", flush=True)
             print(f"  {'❌ FAIL' if chair_open else '✅ PASS'} — opening not chair-anchored", flush=True)
             print(f"  {'❌ FAIL' if chair_body else '✅ PASS'} — no chair-body-reminder in full script", flush=True)
         if sc.id == "imag-calm-settle" and first:

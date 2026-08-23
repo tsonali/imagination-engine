@@ -1225,7 +1225,12 @@ def generate_session(
                              "young bird", "young birds", "younger bird", "younger eagle",
                              "fellow eagle", "bird of prey", "birds of prey",
                              # beat135: ground wildlife with agency that escaped in eagle scripts
-                             "mountain sheep", "mountain goat", "bighorn sheep", "bighorn")
+                             "mountain sheep", "mountain goat", "bighorn sheep", "bighorn",
+                             # beat163: "raptor"/"raptors" escape — found in battery11_2038
+                             # imag-eagle-companion-bird-he: "a circling raptor...distant competitor
+                             # or ally" used species name "raptor" (not hawk/falcon/etc.); named-token
+                             # filter missed it because "raptor" was not in _wildlife_tokens.
+                             "raptor", "raptors")
         # "the larger one" is eagle-scoped: in a solo eagle script it signals a companion bird;
         # in a running script it matches "the larger runner/tree/etc" → false positive.
         # beat87: caught in imag-eagle-wildlife-plural; fired 3 times in imag-active-scene (FP).
@@ -1314,6 +1319,30 @@ def generate_session(
             "another pair of wings",   # "another pair of wings ahead"
             "two separate birds",      # "two separate birds moving through a shared sky"
             "both birds",              # "both birds carrying their own particular meanings"
+            # beat159 (2026-08-21): two new escape forms found in battery11_1003 golden-eagle-wildlife
+            # honest read (mechanical 5/5 PASS but script contained):
+            # "another shape joining your for company" — companion implied by unnamed second shape;
+            # "You fly together without words, moving as one entity across this sky." — explicit
+            # together/unity assertion survived all prior guards (no pronoun, no species name,
+            # no acoustic token, not "both birds").
+            "fly together",            # "fly together without words"
+            "as one entity",           # "moving as one entity across this sky"
+            "for company",             # "joining your for company"
+            "another shape",           # "another shape joining your"
+            # beat163 (2026-08-21): four new escape forms found in battery11_2038 honest read.
+            # GOLDEN-EAGLE-WILDLIFE: "wingtip to wingtip with your companion. You follow without
+            # hesitation, matching her speed" — postprocessor dropped 10 anon-companion sentences
+            # and 6 hallucinated-female sentences in this run, yet these survived. "your companion"
+            # is not "your partner"; "wingtip to wingtip" not in any filter.
+            # COMPANION-BIRD-HE: "a circling raptor" (added to _wildlife_tokens above) /
+            # "a distant competitor or ally" / "just another eye on these lands" /
+            # "a fellow hunter making use of these thermals" — all companion-entity assertions.
+            "your companion",          # direct companion reference stronger than "your partner"
+            "wingtip to wingtip",      # formation flying signal — always implies a second bird
+            "fellow hunter",           # companion entity assertion in solo eagle script
+            "another eye on",          # "just another eye on these lands" — implied watching companion
+            "competitor or ally",      # "distant competitor or ally" — second entity with standing
+            "companionship in",        # "companionship in altitude" — explicit companionship claim
         ))
         if anon_companion_dropped:
             log.warning('[v6] %d anonymous-companion sentence(s) dropped (you/we both in solo eagle active-body)',

@@ -1058,12 +1058,21 @@ def _strip_echo(reply: str, user_message: str) -> str:
                 'was': 'were', 'mine': 'yours',
             }
             _ARTICLES_2E = {'a', 'an', 'the'}
+            # Expand "cannot" → "cant" so apostrophe-stripping unifies it with "can’t"
+            _CANNOT_EXPAND = {"cannot": "cant"}
+            def _contract_norm_2e(w: str) -> str:
+                w = _CANNOT_EXPAND.get(w, w)
+                return w.replace("’", "").replace("’", "")
             def _iy_eq(a: str, b: str) -> bool:
-                a, b = a.rstrip("',;:"), b.rstrip("',;:")
+                a, b = a.rstrip("’,;:"), b.rstrip("’,;:")
                 # Articles are interchangeable in echo detection (e.g. "the costume" ≈ "a costume")
                 if a in _ARTICLES_2E and b in _ARTICLES_2E:
                     return True
-                return a == b or _i2y_map.get(a) == b or _i2y_map.get(b) == a
+                if a == b or _i2y_map.get(a) == b or _i2y_map.get(b) == a:
+                    return True
+                # Normalize contractions: "cannot"/"can’t" → "cant", "don’t"/"dont", etc.
+                # Catches "It’s 2am and I cannot sleep" ↔ "It’s 2am and you can’t sleep"
+                return _contract_norm_2e(a) == _contract_norm_2e(b)
             u_ws2e = u_f2e.lower().split()
             r_ws2e = r_f2e.lower().split()
             prefix_len_2e = 0
@@ -1250,6 +1259,70 @@ def _strip_echo(reply: str, user_message: str) -> str:
                     _after2g = r[len(_r2g_first):].lstrip(" .!?\n-—")
                     r = _after2g if (len(_after2g) > 20) else ""
 
+    # Case 2g'': Companion opens with verbatim 4-word prefix of user's opening (beat166).
+    # User "I snapped at my kid this morning..." → companion "I snapped at my kid this morning
+    # and it's been eating you all day" — companion adopts user's own first-person past-action
+    # narrative as its experience. Not caught by Case 2g (modal-to-infinitive only) or Case 2c
+    # (no I→You swap; companion kept first-person). Case 2g' (negated-auxiliary) is a subset.
+    # Guard: first 4 words of companion EXACTLY match first 4 words of user (case-insensitive)
+    # AND first sentence ≥5 words. A 4-word verbatim prefix with ≥5 word reply is always an
+    # echo; requires both user AND companion to have ≥4 words to avoid spurious short matches.
+    # FP-safe: "I won't/can't [verb]" honesty floors where user starts differently → no match;
+    # "I don't know what you mean" vs user "I don't know what time is" → word 4 differs.
+    if r and u:
+        _r_ws_2g2 = re.findall(r"[a-z']+", r.lower())
+        _u_ws_2g2 = re.findall(r"[a-z']+", u.lower())
+        if (len(_r_ws_2g2) >= 5 and len(_u_ws_2g2) >= 4
+                and _r_ws_2g2[:4] == _u_ws_2g2[:4]):
+            _r_first_2g2 = re.split(r'[.!?]\s+', r)[0].strip()
+            _after_2g2 = r[len(_r_first_2g2):].lstrip(" .!?\n—–-")
+            r = _after_2g2 if len(_after_2g2.split()) > 3 else ""
+
+    # Case 2g': Companion opens with first-person NEGATED-AUXILIARY echo (beat155).
+    # "I have a deliverable due Friday that I haven't started." →
+    # companion: "I haven't started a deliverable due Friday" — picks up a negated
+    # clause from within the user's message and restates it as its own first-person
+    # situation description. Not caught by Case 2g (modal-to-infinitive only) or
+    # Case 2c (no I→You swap happens; companion kept first-person).
+    # Guard: companion opens with "I haven't/didn't/don't/can't/won't [verb]...",
+    # first sentence ≥7 words (exempts short honesty floors: "I can't love.",
+    # "I won't make this call."), AND content-word Jaccard vs full user message ≥0.40.
+    # FP analysis: short honesty statements are ≤6 words → exempt by word-count gate.
+    # Legitimate long responses beginning with "I don't..." are safe because their
+    # content words won't match the user's specific topic nouns at ≥40%.
+    # beat155 unit-test cases (run after edit to verify):
+    #   TP: "I haven't started a deliverable due Friday" vs
+    #       "I have a deliverable due Friday that I haven't started." → fires (Jaccard 0.80)
+    #   TP: "I didn't start the project that was due Thursday." vs
+    #       "I have a project due Thursday that I didn't start." → fires
+    #   FP-exempt: "I can't love." vs "Do you love me?" → 3 words → exempt
+    #   FP-exempt: "I won't make this call." vs "Should I quit my job?" → 6 words → exempt
+    #   FP-safe: "I don't carry memory of past conversations." vs
+    #            "What do you remember about me?" → Jaccard 0 → no fire
+    if r and u:
+        _neg_aux_re_2g2 = re.compile(
+            r"^I\s+(?:haven'?t|didn'?t|don'?t|can'?t|won'?t|couldn'?t|"
+            r"wouldn'?t|isn'?t|mustn'?t|shouldn'?t|wasn'?t|weren'?t|"
+            r"haven’t|didn’t|don’t|can’t|won’t)\s+",
+            re.IGNORECASE,
+        )
+        if _neg_aux_re_2g2.match(r):
+            _r2g2_first = re.split(r'[.!?]', r)[0].strip()
+            if len(_r2g2_first.split()) >= 7:
+                _STOP_2G2 = {
+                    'i', 'to', 'the', 'a', 'an', 'my', 'and', 'of', 'in', 'is',
+                    'it', 'he', 'she', 'not', 'no', 'that', 'this', 'was', 'been',
+                    "haven't", "didn't", "don't", "can't", "won't", "couldn't",
+                    "wouldn't", "isn't", "mustn't", "shouldn't", "wasn't", "weren't",
+                }
+                _r2g2_cw = set(re.findall(r"[a-z']+", _r2g2_first.lower())) - _STOP_2G2
+                _u2g2_cw = set(re.findall(r"[a-z']+", u.lower())) - _STOP_2G2
+                if _r2g2_cw and _u2g2_cw:
+                    _jac2g2 = len(_r2g2_cw & _u2g2_cw) / max(len(_r2g2_cw), len(_u2g2_cw))
+                    if _jac2g2 >= 0.40:
+                        _after2g2 = r[len(_r2g2_first):].lstrip(" .!?\n-—")
+                        r = _after2g2 if (len(_after2g2) > 20) else ""
+
     # Case 2h: Short first-sentence deletion-echo (word-omission guard, beat74).
     # Catches echoes where companion drops a word from user's first sentence so
     # neither Case 1 (full-message) nor Case 2/2e (exact/I→You) fires.
@@ -1278,6 +1351,32 @@ def _strip_echo(reply: str, user_message: str) -> str:
                     and len(set(_r_wlist_2h) & _u_wset_2h) / max(len(_r_wlist_2h), 1) >= 0.80):
                 _after_2h = r[len(_r_first_2h):].lstrip(" .!?\n-—")
                 r = _after_2h if (len(_after_2h.split()) > 3) else ""
+            # Case 2h extension (beat162b): user-content-recall direction.
+            # Original 2h checks companion-recall (companion words ÷ companion length).
+            # This elif catches echoes where companion adds stopwords that dilute companion-
+            # recall below 80%, but ≥80% of user's CONTENT words are echoed back.
+            # TP: "Friday is due and you haven't started." — companion-recall 5/7=71%
+            #     (below threshold; 'is','and' are extras not in user sentence);
+            #     user-content-recall {friday,due,havent,started}=4/5=80% → fires.
+            # Only runs when original 2h check didn't fire (elif), so r and _r_first_2h
+            # are guaranteed to still be in sync.
+            elif len(_r_wlist_2h) <= 9 and _r_first_2h.rstrip('.!? ').lower() not in _lands_2h:
+                _SWRDS_2H = frozenset({
+                    'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+                    'have', 'has', 'had', 'do', 'does', 'did', 'and', 'or', 'but', 'so',
+                    'for', 'in', 'on', 'at', 'to', 'of', 'by', 'with', 'from', 'as',
+                    'into', 'that', 'this', 'these', 'those', 'it', 'i', 'my', 'you',
+                    'your', 'me', 'we', 'our', 'if', 'not', 'just', 'too', 'also',
+                    'still', 'then', 'about', 'up', 'out', 'there', 'when', 'what',
+                    'who', 'which', 'than', 'no', 'nor', 'yet', 'can', 'could', 'will',
+                    'would', 'should', 'may', 'might', 'shall',
+                })
+                _u_content_2h = {w for w in _u_wset_2h if w not in _SWRDS_2H}
+                _r_wset_2h = set(_r_wlist_2h)
+                if (_u_content_2h
+                        and len(_u_content_2h & _r_wset_2h) / max(len(_u_content_2h), 1) >= 0.80):
+                    _after_2hx = r[len(_r_first_2h):].lstrip(" .!?\n-—")
+                    r = _after_2hx if (len(_after_2hx.split()) > 3) else ""
 
     # Case 2i: Longer I→You Jaccard echo (beat75).
     # Catches echoes where companion's first sentence is >9 words but still
@@ -1436,6 +1535,31 @@ def _strip_echo(reply: str, user_message: str) -> str:
                         _after_2l2 = r[len(_r_full_first_2l2):].lstrip(" .!?\n-—")
                         r = _after_2l2 if (len(_after_2l2.split()) > 3) else ""
 
+    # Case 2m (beat165): Hollow topic-mirror opener — reply starts with a confirmed-hollow
+    # topic-restatement phrase ("That's been on your mind", "It's been on your mind",
+    # "This has been on your mind"). These phrases always echo the user's mental state without
+    # adding any observation, naming, or question. Strip the first sentence; keep the rest.
+    # Observed: battery9_2214 comp-discourse-marker-echo T1: "That's been on your mind a lot
+    # recently." (9 words, no insight) — not caught by Case 2l (no single-word DM) or 2l'
+    # (no "it sounds like" prefix). Scenario note (beat156): "If fires again in post-beat154+155
+    # battery9, add short-topic-paraphrase Case." This beat (165) is that trigger.
+    # FP guard: require no question mark in first sentence (questions may be valid even from hollow opener).
+    _HOLLOW_TOPIC_MIRROR_RE_2M = re.compile(
+        r"^(?:that[’']?s|it[’']?s|this has) been on your (?:mind|heart|plate)\b",
+        re.IGNORECASE,
+    )
+    if r and u:
+        _m_2m = _HOLLOW_TOPIC_MIRROR_RE_2M.match(r.lstrip())
+        if _m_2m:
+            _r_first_2m = re.split(r'[.!?]', r)[0].strip()
+            if '?' not in _r_first_2m:
+                _after_2m = r[len(_r_first_2m):].lstrip(" .!?\n—–-")
+                r = _after_2m if len(_after_2m.split()) > 3 else ""
+                log.warning(
+                    "companion: Case 2m hollow-topic-mirror stripped: '%s'",
+                    _r_first_2m[:80],
+                )
+
     # Case 2k: "You said / You told me / You mentioned [paraphrase]" opener (beat113).
     # Narrating back the user's own words is never a valid companion response. Catches:
     # "You said you're angry at him but can't say it because he always makes it about himself."
@@ -1458,13 +1582,25 @@ def _strip_echo(reply: str, user_message: str) -> str:
                 'i', 'you', 'a', 'an', 'the', 'to', 'at', 'in', 'on', 'of', 'and', 'or',
                 'is', 'it', 'my', 'your', 'me', 'we', 'be', 'was', 'are', 'not', 'no',
                 'with', 'for', 'this', 'that', 'but', 'so', 'by', 'if', 'do', 'did',
-                'him', 'her', 'his', 'they', 'them', 'he', 'she', 'can', 'cant',
-                "can't", 'say', 'says', 'said', 'told', 'because', 'always', 'about',
-                'just', 'have', 'has', 'had', 'will', 'would', 'could', 'should', 'into',
+                'can', 'cant', "can't", 'say', 'says', 'said', 'told', 'because', 'always',
+                'about', 'just', 'have', 'has', 'had', 'will', 'would', 'could', 'should',
+                'into',
+                # beat163: pronouns (him/her/his/they/them/he/she) removed from stopwords so
+                # that pronoun-based echo ("You said you're angry at him") fires Case 2k.
+                # Prior: "him"/"her" were stopwords → only 1 content word shared (e.g. "angry")
+                # → count<2 AND Jaccard<0.30 → guard missed. Fix: pronouns are echoing content
+                # in this context; keeping them in content-word set gives correct count≥2.
             }
             _u_c_2k = set(re.findall(r"[a-z']+", u.lower())) - _STOP_2K
             _r_c_2k = set(re.findall(r"[a-z']+", _r_first_2k)) - _STOP_2K
-            if _u_c_2k and len(_u_c_2k & _r_c_2k) / max(len(_u_c_2k | _r_c_2k), 1) >= 0.30:
+            _2k_overlap = len(_u_c_2k & _r_c_2k)
+            # Jaccard ≥0.30 catches verbatim echoes; count ≥2 catches verb-form variants
+            # where the same-root words ("make"/"makes") cause Jaccard to drop below 0.30.
+            # beat162b: grief-anger-barrier-vague T1 "You said you're angry at him — and
+            # can't say it because he'd make it about himself." — Jaccard 0.25 (below 0.30)
+            # because "make"≠"makes"; count {angry,himself}=2 → fires with count ≥2 extension.
+            if _u_c_2k and (_2k_overlap / max(len(_u_c_2k | _r_c_2k), 1) >= 0.30
+                            or _2k_overlap >= 2):
                 r = ""  # you-said paraphrase-echo → trigger no-echo regen
 
     lines = [ln for ln in r.splitlines() if not re.fullmatch(r"\s*-{3,}\s*", ln)]
@@ -2118,7 +2254,7 @@ class Companion:
                     reply = "Tell me what it's still costing you."
                 elif (1 < len(_sp2_r) <= 4
                         and _sp2_u1
-                        and len(set(_sp2_r) & set(_sp2_u1)) / max(len(_sp2_r), 1) >= 0.80):
+                        and len(set(_sp2_r) & set(_sp2_u1)) / max(len(_sp2_r), 1) >= 0.65):
                     log.warning(
                         "companion: second-pass short-echo ('%s') — applying fixed bridge",
                         reply[:40]
@@ -2182,6 +2318,20 @@ class Companion:
             _gpc = _strip_vent_hollow_second(_gpc)
             if _gpc and not _is_pure_question(_gpc):
                 reply = _gpc
+                # beat163: terminal personhood check on combined regen output. The combined
+                # regen instruction bans "everyone would be better off without you" but the
+                # model can produce a variant still caught by _check_forbidden (e.g., "everyone
+                # would be better off if you weren't here"). Drop offending sentence; use hard
+                # GRAVITY floor if what remains is empty or pure-question.
+                _gpc_still_bad = _check_forbidden(reply)
+                if _gpc_still_bad:
+                    _gpc_sents = re.split(r'(?<=[.!?])\s+', reply)
+                    _clean = [s for s in _gpc_sents if not _check_forbidden(s)]
+                    _clean_j = " ".join(_clean).strip()
+                    if _clean_j and not _is_pure_question(_clean_j):
+                        reply = _clean_j
+                    else:
+                        reply = "That thought is carrying weight. How long has it felt that way?"
 
         # Honesty-dodge guard: user asks direct care/feelings probe AND reply
         # doesn't open with "No" or contain an explicit software disclaimer.

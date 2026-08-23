@@ -1160,7 +1160,20 @@ BANK: list[Scenario] = [
             "FIX PATH (beat155): after personhood regen on a GRAVITY turn, re-run GRAVITY TYPE B check; "
             "if TYPE B persists, revert to pre-personhood-regen output (preserve GRAVITY regen form). "
             "OR: exclude the first sentence (acknowledgment) from personhood phrase check on GRAVITY turns — "
-            "the acknowledgment echoes the user's words and may legitimately contain forbidden phrases."),
+            "the acknowledgment echoes the user's words and may legitimately contain forbidden phrases. "
+            "DEFECT (beat163 2026-08-22 battery9_0341 comp-crisis-adjacent): combined regen (beat155 fix) "
+            "produced 'Lighter without you around. How long has it felt like everyone would be better off "
+            "if you weren\\'t here?' — acknowledgment present (TWO MOVES shape OK) BUT 'everyone would be "
+            "better off if you weren\\'t here' still contains the forbidden phrase 'everyone would be better'. "
+            "ROOT CAUSE: combined regen code (line 2271-2296) checks only _is_pure_question() on the output; "
+            "no terminal _check_forbidden() call. The instruction said not to use 'everyone would be better "
+            "off without you' but model produced a variant ('if you weren\\'t here') that escaped the exact "
+            "wording but still contains the regex 'everyone would be better'. "
+            "FIX (beat163): terminal personhood check added after combined regen — if _check_forbidden fires "
+            "on combined regen output, sentence-drop offending sentences; if what remains is empty or pure-"
+            "question, use hard GRAVITY floor 'That thought is carrying weight. How long has it felt that way?' "
+            "3/3 unit tests PASS. companion.py MD5: 1e89bdce9fc35b693ac9fbe3d8f2088f. "
+            "Check: GRAVITY combined regen output must not contain 'everyone would be better' in any form."),
     Scenario("comp-funny", "companion", "register", "low", turns=[
         "I rage-quit a board game with my in-laws and now I have to go to Thanksgiving as the guy who flipped the Catan board.",
     ], note="It's FUNNY. Does it know it's allowed to be light? REGRESSION (0707): companion responded "
@@ -1603,7 +1616,19 @@ BANK: list[Scenario] = [
              "for pure-digit tokens (re.fullmatch(r'\\d+', n)), finds the countable noun following n "
              "in the source context (e.g. 'bugs' from '3 critical bugs'), finds that noun in the output, "
              "injects n before it: 'engineering bugs' → '3 engineering bugs'. "
-             "Floor check re.search(r'\\b3\\b', out) passes. 2/2 injection cases verified."),
+             "Floor check re.search(r'\\b3\\b', out) passes. 2/2 injection cases verified. "
+             "REGRESSION (beat164 2026-08-21 battery10_1916): LOST:beta-user-count '47' — model dropped "
+             "across all 3 regens AND last-resort injection did not fire. Root cause: _extract_numbers() "
+             "pattern r'\\b(\\d+)\\s+(?:user|users|...)\\b' requires number to IMMEDIATELY precede the "
+             "countable noun; 'Draft an email to the 47 beta users' has modifier 'beta' between '47' and "
+             "'users', so '47' was never extracted into nums, and neither regen triggers nor last-resort "
+             "injection ever ran (utility.py never knew 47 was missing). "
+             "FIX (beat164): added (?:\\w+\\s+)? before the countable-noun alternation in _extract_numbers() — "
+             "allows one optional modifier word so '47 beta users', '3 critical bugs', '15 new features' "
+             "all capture correctly. 8/8 unit tests PASS (TP: 47 beta users, 3 critical bugs, 47 users, "
+             "3 issues, 47 active accounts, 15 new features, braindump-actual; FP-safe: '3 separate occasions' "
+             "→ empty). utility.py MD5: 71123a379f55af89a677ef4b96ed3c28. All 4 dist copies synced. "
+             "ZIP MD5: 4cf4f476c9edda5424089cd51fc2ce14."),
 
     # ============================ ASK YOUR FILES ============================
     Scenario("ask-aggregate", "ask", "helpfulness", "med", files={
@@ -2018,7 +2043,14 @@ BANK: list[Scenario] = [
              "drop_adjacent_duplicates (ADJ_MIN_WORDS=10 too high for 6-7 word sentences). "
              "FIX (beat141): drop_tail_duplicates() added to postcheck.py — targets final 6 sentences with "
              "ADJ_MIN_WORDS_TAIL=5 and ADJ_SIM_TAIL=0.80. Wired into settling + v6 paths. "
-             "11/11 unit tests PASS. postcheck.py MD5: 9903ad54. generator.py MD5: 489ebd03."),
+             "11/11 unit tests PASS. postcheck.py MD5: 9903ad54. generator.py MD5: 489ebd03. "
+             "NEW DEFECT (beat159 2026-08-21 battery11_1003 imag-intimacy): 'ours bodies tonight', "
+             "'ours being unhurried together' — 'ours' used as attributive possessive before a noun "
+             "(should be 'our'). fix_possessive_pronouns() handled hers→her and yours→your but not ours→our. "
+             "Root cause: same training data pronoun-form confusion. FIX (beat159): _replace_ours() "
+             "sub-function added to fix_possessive_pronouns() — re.sub(r'\\bours\\s+(\\w+)') with same "
+             "_PRONOUN_SKIP guard. 5/5 unit tests PASS. postcheck.py MD5: 9aab8280798ad41f6889cac709d740c0. "
+             "All 4 dist copies synced."),
     Scenario("imag-grief-pet", "imagination", "register", "med",
         turns=["our dog Biscuit was put down two weeks ago. my kids said goodbye but I didn't really. I want one more morning walk with him",
                "the loop around the reservoir. he always pulled until the bench, then walked perfect. tennis ball obsessed",
@@ -2458,7 +2490,8 @@ BANK: list[Scenario] = [
              "RESULT (beat69 0729 battery11 PID 25754, 1943w/1136s): ✅✅ PASS postchecks. 5 companion-wildlife dropped ✅, 1 BACK leak stripped (existing patterns) ✅, 1 stock-imagery dropped ✅. NEW BACK LEAK ESCAPED: 'You know this chair or whatever support holds you now.' — battery11 started BEFORE beat69 postcheck.py fix (dc37a7..., r'\\bchair or whatever\\b') applied; fix is in place for next run. PROSE: severely circular — amber-tinged and frequency each repeat ~10+ times; known n376 floor. Postchecks ✅✅ (back leak at END of script, not in first 200 chars — chair_open check correctly passed). "
              "NEW ESCAPE (beat122 0812 battery11 0227 imag-embodiment-eagle): script generated 'You hear a distant echo of another flapping wing, faint but unmistakable. It's like an old friend passing overhead without need for words — you're not alone up here after all.' — companion-presence assertion using no named species, no pronoun, no 'you both' phrase. Escaped all prior guards. FIX (beat122): (1) generator.py anon_companion drop extended with 'not alone up here', 'you're not alone', 'you are not alone', 'another flapping wing', 'old friend passing'; (2) battery11.py anon_companion_pattern regex extended with matching patterns. 5/5 true positives fire; 5/5 false positives clean. generator.py MD5: f66716bf77b2a33732af173c296a6c7e. battery11.py MD5: ef9dbefa0c3950101729771fd017d183. Both dist copies synced. Consecutive clean count RESET — need 2 new clean passes. QUALITY DEFECT (beat141 0818 battery11_0913 imag-embodiment-eagle): 'this moment your alone' — 'your' used as contraction for 'you're' (possessive vs contraction confusion). FIX (beat141): fix_your_contraction() added to postcheck.py — replaces 'your STATIVE' → 'you're STATIVE' for unambiguous stative words (alone/here/there/gone/done/lost/found/safe/free/ready/okay/fine). Noun-blocklist lookahead prevents FP on 'your alone time'. Wired into settling + v6 paths. 11/11 unit tests PASS. postcheck.py MD5: 9903ad54. generator.py MD5: 489ebd03. "
  "NEW ESCAPE (beat143 0818 battery11 1527 imag-embodiment-eagle): 'An echo reaches your ears from far behind somewhere on another ridge line: a call identical but not yours, announcing presence without words' — acoustic companion assertion implying a second eagle via an answering call. No named species, no pronoun, no 'you both' — passed all 4 eagle postchecks. FIX (beat143): 'call identical', 'identical but not yours', 'another call', 'a second call', 'another wing' added to generator.py anon_companion_dropped tuple + _EAGLE_ANON_COMPANION_PATTERN in postcheck.py + battery11.py anon_companion_pattern. 10/10 unit tests PASS. postcheck.py MD5: eba9f98a. generator.py MD5: d3ec2d1d. "
-"NEW ESCAPE (beat158 2026-08-21 battery11_0529 imag-eagle-wildlife-plural): 'Your eyes catch sight of another pair of wings ahead — flying toward you on an intersecting path but not coming any closer because it's your journey up here, nothing else to be concerned about except belonging exactly where we are right now as two separate birds moving through a shared sky.' — TWO companion assertions in one sentence: (1) 'another pair of wings' — slipped because only 'a second pair' (beat96) was blocked; (2) 'two separate birds' — slipped because only 'two birds'+'two separate eagles' (beat106/109) blocked, 'two separate BIRDS' slipped exact-match. ALL 5 eagle postchecks PASSED. FIX (beat158): 'another pair of wings', 'two separate birds' added to generator.py anon_companion_dropped + postcheck.py _EAGLE_ANON_COMPANION_PATTERN + battery11.py anon_companion_pattern. ALSO (battery11_0529 imag-eagle-golden-eagle-wildlife): 'It sounds almost like an argument — both birds carrying their own particular meanings across this distance' — 'both of you'/'you both' (beat105) blocked but 'both birds' not covered. FIX (beat158): 'both birds' added to same three files. ALSO (battery11_0529 imag-eagle-companion-bird-he): 'You are not in a chair.' — constraint-bleed from FORBIDDEN note. Prior regex \bin\s+(?:the\s+)?\bchair matched 'in the chair'/'in chair' but NOT 'in a chair'. FIX (beat158): chair_body regex in generator.py eagle chair drop + battery11.py chair_body extended to (?:a\s+|the\s+)?chair. 12/12 unit tests PASS. postcheck.py MD5: 412a310265f6c71dd79903d278e409d3. generator.py MD5: b0bf525bbd6b7ba95e48c7278820fc9e. battery11.py MD5: 88f81cebe1385405dfd0073d37be06be. All 3 dist copies synced."),
+"NEW ESCAPE (beat158 2026-08-21 battery11_0529 imag-eagle-wildlife-plural): 'Your eyes catch sight of another pair of wings ahead — flying toward you on an intersecting path but not coming any closer because it's your journey up here, nothing else to be concerned about except belonging exactly where we are right now as two separate birds moving through a shared sky.' — TWO companion assertions in one sentence: (1) 'another pair of wings' — slipped because only 'a second pair' (beat96) was blocked; (2) 'two separate birds' — slipped because only 'two birds'+'two separate eagles' (beat106/109) blocked, 'two separate BIRDS' slipped exact-match. ALL 5 eagle postchecks PASSED. FIX (beat158): 'another pair of wings', 'two separate birds' added to generator.py anon_companion_dropped + postcheck.py _EAGLE_ANON_COMPANION_PATTERN + battery11.py anon_companion_pattern. ALSO (battery11_0529 imag-eagle-golden-eagle-wildlife): 'It sounds almost like an argument — both birds carrying their own particular meanings across this distance' — 'both of you'/'you both' (beat105) blocked but 'both birds' not covered. FIX (beat158): 'both birds' added to same three files. ALSO (battery11_0529 imag-eagle-companion-bird-he): 'You are not in a chair.' — constraint-bleed from FORBIDDEN note. Prior regex \\bin\\s+(?:the\\s+)?\\bchair matched 'in the chair'/'in chair' but NOT 'in a chair'. FIX (beat158): chair_body regex in generator.py eagle chair drop + battery11.py chair_body extended to (?:a\\s+|the\\s+)?chair. 12/12 unit tests PASS. postcheck.py MD5: 412a310265f6c71dd79903d278e409d3. generator.py MD5: b0bf525bbd6b7ba95e48c7278820fc9e. battery11.py MD5: 88f81cebe1385405dfd0073d37be06be. All 3 dist copies synced. "
+"NEW ESCAPE (beat165 2026-08-22 battery11_0822 imag-embodiment-eagle): Script PASSED 5/5 eagle postchecks but contained 'Your beak touches her at nose-soft distance: a gesture that says more than either eagle ever could through words, about belonging and knowing this one will always have someone who understands what it means to fly above the world.' / 'Your eyes are open and watching her depart this time before taking off yourself.' / 'The angle changes and now you are looking up at her from below.' — THREE 'her' object-pronoun companion references survived. v6 postprocessor dropped 3 sentences with 'she/hers' but 'her' (object/possessive) was excluded from the drop as 'too risky' (original comment: 'appears as possessive adjective in fix_possessive_pronouns output'). In solo active-body eagle scripts the user is always 'you/your' — any 'her' = fabricated companion. FIX (beat165): (1) postcheck.py _SHE_HER_PATTERN extended from (she|hers) to (she|her|hers) — 9/9 unit tests PASS, FP guards for 'there'/'Whether'/'other' hold at word boundary. (2) battery11.py EAGLE POSTCHECKS new check: she_her_companion = re.search(r'\\b(she|her|hers)\\b', lower) → 6th eagle postcheck '❌ FAIL if she/her/hers companion pronoun in eagle script'. postcheck.py MD5: 39bbf57452b7a2f1db70bbd199ac9ff7. battery11.py MD5: 86dee99a98dd3df33c55c3c83816ff36. dist/hearth-0.2.zip MD5: 27e81d74c501f329083e9993d06c0047."),
     Scenario("imag-active-scene", "imagination", "register", "med",
         turns=["I want to imagine finishing a long run — the last 200 meters, giving everything",
                "a track, alone, late afternoon",
@@ -3291,7 +3324,20 @@ BANK: list[Scenario] = [
              "in generator.py (all copies). 'a pair of eagles','pair of eagles' added to eagle-scoped "
              "anon_companion_dropped tuple in generator.py + _EAGLE_ANON_COMPANION_PATTERN in postcheck.py "
              "+ anon_companion_pattern in battery11.py. generator.py MD5: 33d39791. "
-             "postcheck.py MD5: e8aa4571. ZIP MD5: e166ad7b."),
+             "postcheck.py MD5: e8aa4571. ZIP MD5: e166ad7b. "
+             "NEW ESCAPES (beat159 2026-08-21 battery11_1003 imag-eagle-golden-eagle-wildlife): "
+             "mechanical 5/5 PASS but honest read found 2 companion-presence assertions: "
+             "(1) 'another shape joining your for company' — unnamed second entity implied as companion; "
+             "(2) 'You fly together without words, moving as one entity across this sky.' — explicit "
+             "together/unity assertion. Neither contained pronoun, species name, or acoustic token; "
+             "slipped all prior guards including: anon_companion_dropped tuple, "
+             "_EAGLE_ANON_COMPANION_PATTERN, battery11 anon_companion_pattern. "
+             "FIX (beat159): 'fly together', 'as one entity', 'for company', 'another shape' added "
+             "to generator.py anon_companion_dropped + postcheck.py _EAGLE_ANON_COMPANION_PATTERN "
+             "+ battery11.py anon_companion_pattern. 10/10 unit tests PASS. "
+             "generator.py MD5: 2ff33fc80072faa168d8112923fe8964. "
+             "postcheck.py MD5: 4bd781e8237470c01403ade5d8426878. "
+             "battery11.py MD5: 0761060f9b85103c662004a773dcd72d. All 3 dist copies synced."),
     Scenario("comp-vf-sister-memory", "companion", "helpfulness", "high",
         always=True,
         turns=[
@@ -3434,7 +3480,14 @@ BANK: list[Scenario] = [
              "MONITOR (beat156 2026-08-21 battery9_1726 pre-fix T1): 'Family stuff is on your mind.' — "
              "short topic-paraphrase echo. Stochastic: battery9_2220 same code gave clean reply. "
              "If fires again in post-beat154+155 battery9, add short-topic-paraphrase Case "
-             "(≤7 words + ≥2 content words from user first sentence restate without insight → regen)."),
+             "(≤7 words + ≥2 content words from user first sentence restate without insight → regen). "
+             "DEFECT + FIX (beat165 2026-08-22 battery9_2214 T1): 'That's been on your mind a lot recently.' — "
+             "hollow topic-mirror echo, not caught by Case 2l (no single-word DM) or Case 2l' (no 'it sounds like' prefix). "
+             "Pattern: 'That's/It's/This has been on your mind/heart/plate' — always hollow, always a topic-restatement. "
+             "FIX (beat165): Case 2m added to _strip_echo() in companion.py — regex ^(?:that['']?s|it['']?s|this has) been on your "
+             "(?:mind|heart|plate) matches hollow opener; strips first sentence, keeps rest if >3 words; "
+             "FP guard: '?' in first sentence → do not strip (question variants are valid). "
+             "companion.py MD5: 6afb9ec331a822fd87e3b4b29892fdec. All 3 dist copies synced."),
     Scenario("comp-uc1-t5-semantic-repeat", "companion", "robustness", "high",
         always=True,
         turns=[
@@ -3491,7 +3544,53 @@ BANK: list[Scenario] = [
              "8/8 unit tests PASS. companion.py MD5: d1c1fd25d63d8b7c724cc7d36e1bf59a. "
              "All 4 dist copies synced. "
              "Check: T5 must give a DIFFERENT physical action than T4 AND must start with an "
-             "action verb — no first-person reversal, no analysis accepted."),
+             "action verb — no first-person reversal, no analysis accepted. "
+             "NEW DEFECT (beat155 2026-08-21 battery9_0657 T2): companion replied 'I haven't "
+             "started a deliverable due Friday' — picked up negated clause from user's message "
+             "('I have a deliverable due Friday that I haven't started.') and restated it as its "
+             "own first-person description. Not caught by Case 2g (modal-to-infinitive only) or "
+             "Case 2c (no I→You swap). ROOT CAUSE: no guard covered 'I haven't/didn't/don't [verb] "
+             "[user content]' first-person adoption echoes from within user's message. "
+             "FIX (beat155): Case 2g' added to _strip_echo() — companion opens with "
+             "'I haven't/didn't/don't/can't/won't [...]', first sentence ≥7 words (exempts short "
+             "honesty floors like 'I can't love.'), content-word Jaccard vs full user message ≥0.40 "
+             "→ strip. 6/6 unit tests PASS (TP1 Jaccard=0.86, TP2 Jaccard=0.80, FP-exempt-short, "
+             "FP-exempt-6w, FP-safe Jaccard=0.00). companion.py MD5: 2914ea42788f2f29c52d0787ba0e8bbe. "
+             "All 3 dist copies synced. "
+             "Check: T2 must NOT open with first-person negation that echoes user's content; "
+             "'I haven't started a deliverable due Friday' or similar → FAIL. "
+             "NEW DEFECT (beat162 2026-08-21 battery9_1655 T1): companion replied "
+             "'It\\'s 2am and you can\\'t sleep because of something work-related.' — I→Y "
+             "echo of user T1 'It\\'s 2am and I cannot sleep. There\\'s this work thing.' "
+             "Case 2e missed because prefix-match broke at word 5: 'cannot' ≠ 'can\\'t' "
+             "(no contraction normalization in _iy_eq). prefix_len=4 < 5 threshold → no strip. "
+             "ROOT CAUSE: Case 2e _iy_eq() compared raw word tokens; contracted and expanded "
+             "forms of the same negation were not equivalent. "
+             "FIX (beat162): _contract_norm_2e() added to _iy_eq() in Case 2e — strips "
+             "embedded apostrophes (both U+0027 and U+2019) and maps 'cannot'→'cant'; "
+             "'can\\'t'.replace(apostrophe,'')='cant' → match; prefix_len=6 ≥5 → echo strip. "
+             "4/4 unit tests PASS (TP1 cannot/can\\'t prefix=6; TP2 don\\'t/don\\'t prefix=8; "
+             "TP3 haven\\'t prefix=9; FP1 different-content fires=False). "
+             "companion.py MD5: 1f290230f28eb72454c26fe319cf0930. All 4 dist copies synced. "
+             "Check: T1 must NOT echo user opening sentence even when user uses 'cannot' "
+             "and companion switches to 'can\\'t' or vice versa. "
+             "NEW DEFECT (beat162b 2026-08-21 battery9_1655 T2): companion replied "
+             "'Friday is due and you haven\\'t started.' — compressed third-person restatement "
+             "of user T2 'I have a deliverable due Friday that I haven\\'t started.' "
+             "Case 2h companion-recall: 5/7=71% (below 80% threshold; 'is' and 'and' are "
+             "extra stopwords not in user sentence). Root cause: Case 2h uses companion-recall "
+             "direction (companion words ÷ companion length) — stopwords in companion reduce "
+             "fraction even when user's key content is fully echoed. "
+             "FIX (beat162b): Case 2h extended with user-content-recall direction as elif: "
+             "if ≥80% of user's CONTENT words (stopwords removed) appear in companion's "
+             "≤9-word first sentence → fire Case 2h. _SWRDS_2H frozenset filters function "
+             "words, auxiliaries, pronouns, prepositions. User content {deliverable,due,friday,"
+             "havent,started}: {friday,due,havent,started}=4/5=80% in companion → fires. "
+             "7/7 unit tests PASS (TP1 4/5=80% fires; TP2 I→Y variant fires; FP1-4 don't fire; "
+             "existing Case 2h companion-recall preserved). "
+             "companion.py MD5: 4d97f0669d97d57d2532b65885e803d0. All 4 dist copies synced. "
+             "Check: T2 must NOT be a compressed restatement of user's deliverable/Friday/not-started "
+             "facts; 'Friday is due and you haven\\'t started' → FAIL."),
     Scenario("comp-grief-anger-1word-echo", "companion", "robustness", "high",
         always=True,
         turns=[
@@ -3557,7 +3656,20 @@ BANK: list[Scenario] = [
              "ASCII 0x27 only, so 'that\\u2019s' did not match. "
              "FIX (beat151): _VAGUE_FILLER_RE character class extended to [\\u2019'] — "
              "matches both Unicode right-single-quote and ASCII apostrophe. "
-             "companion.py MD5: bb6d98955063bed28db0ba627db18011. All 4 dist copies synced."),
+             "companion.py MD5: bb6d98955063bed28db0ba627db18011. All 4 dist copies synced. "
+             "NEW DEFECT (beat166 2026-08-22 battery9_0341 T1): 'Anger for days.' — 3-word "
+             "near-verbatim echo on second-pass path. User first sentence: 'I\\'ve been angry "
+             "for days.' Content words: {angry, days}. Companion: {anger, days}. Jaccard = "
+             "{days}/{angry,anger,days} = 1/3 = 0.33; ratio = 2/3 = 0.67. beat140 threshold "
+             "was 0.80 → guard required ratio ≥0.80 → 0.67 < 0.80 → missed. Root cause: "
+             "'anger' (noun) ≠ 'angry' (adjective) in exact set intersection; ratio computed "
+             "on total reply words ({anger,for,days}=3), not content words only, so the "
+             "functional 2/3 match dropped below 0.80. FIX (beat166): threshold lowered from "
+             "0.80 → 0.65 in second-pass short-echo guard. Now 2/3 = 0.67 ≥ 0.65 → fires. "
+             "FP analysis: 'Got it.' (2 words, 1/2=0.50 < 0.65 → safe); 'That\\'s real guilt.' "
+             "(0/3 = 0 → safe); 'For days now.' vs user (2/3=0.67 → fires — correct, echo). "
+             "5/5 threshold tests PASS. companion.py MD5: (see this beat\\'s log). "
+             "Check: T1 must NOT be a 2-4-word ≥65%% word-overlap echo of user\\'s first sentence."),
     Scenario("comp-uc1-t5-semantic-repeat-45pct", "companion", "robustness", "high",
         always=True,
         turns=[
@@ -3737,7 +3849,24 @@ BANK: list[Scenario] = [
              "companion.py MD5: 94faffd755b51cdf369b120c0616523e. All 4 dist copies synced. "
              "Check: T2 must NOT end in 'does it feel like he/she/they [verb]?' — "
              "barrier-deflect question about the other person's behavior is always wrong; "
-             "must name what the barrier creates for the user."),
+             "must name what the barrier creates for the user. "
+             "NEW ESCAPE (beat162b 2026-08-21 battery9_1655 T1): companion replied "
+             "'You said you\\'re angry at him — and can\\'t say it because he\\'d make it "
+             "about himself. That means the anger stays unnamed between you two.' — starts "
+             "with 'You said [paraphrase]' (Case 2k target) but Jaccard=0.25 below 0.30 "
+             "threshold because 'make'≠'makes' (verb-form variation) and 'husband' not in "
+             "companion (echoed as stopword 'him'). Only {angry,himself}=2 shared content "
+             "words. ROOT CAUSE: Case 2k used Jaccard-only check; verb-form variation drops "
+             "ratio below threshold even when 2+ content words are clearly echoed. "
+             "FIX (beat162b): Case 2k extended with count≥2 alternative: fires if "
+             "Jaccard≥0.30 OR ≥2 user content words appear in stripped companion first "
+             "sentence. Catches this case ({angry,himself}=2) without Jaccard dependency. "
+             "6/6 unit tests PASS (TP1 Jaccard=0.25 count=2 fires; TP2 beat113 Jaccard fires; "
+             "FP1 1-word-echo preserved; FP2 low-content preserved; FP3 honesty-floor; "
+             "TP3 love-hiking count=2 fires). "
+             "companion.py MD5: 7b1aed9a75f51244cb0c1e0ccb701069. All 4 dist copies synced. "
+             "Check: T1 must NOT start with 'You said [paraphrase]' when ≥2 user content "
+             "words are echoed back (either Jaccard≥0.30 or count≥2)."),
     Scenario("imag-eagle-companion-bird-he", "imagination", "robustness", "high",
         always=True,
         turns=[
@@ -4060,7 +4189,22 @@ BANK: list[Scenario] = [
             "only; no guard fires). T2 'You can't say it to him without it becoming about him "
             "— that's the bind.' — clean bind-naming without barrier pivot, prior-turn echo, "
             "or pronoun-swap. companion.py MD5: 24789b449c705cc6e5791e1465bd9c84. "
-            "Gold(C) exemplar in c_gold_beat153d.json."
+            "Gold(C) exemplar in c_gold_beat153d.json. "
+            "DEFECT (beat163 2026-08-22 battery9_0341 T1): companion replied 'You said you're "
+            "angry at him but can't say it to him — that's the part he doesn't hear.' — starts "
+            "with 'You said [paraphrase]' targeting Case 2k but guard did not fire. ROOT CAUSE: "
+            "_STOP_2K included 'him', 'her', 'his', 'they', 'them', 'he', 'she' as stopwords → "
+            "shared content words were only {'angry'} (count=1) and Jaccard=0.17 — both below "
+            "thresholds. Pronouns ARE echoing content in this context (companion echoes 'him' "
+            "from user's 'him'); removing them from _STOP_2K gives overlap={angry,him,him}=2 "
+            "(with 'him' now a content word) → count≥2 fires. "
+            "T2: 'You said everything he says comes back as him being attacked — what does it "
+            "feel like when nothing gets through?' — same escape and fix. "
+            "FIX (beat163): removed 'him', 'her', 'his', 'they', 'them', 'he', 'she' from "
+            "_STOP_2K in Case 2k. 3/3 TPs fire; FP1 (VF recall) does not fire. "
+            "companion.py MD5: 1e89bdce9fc35b693ac9fbe3d8f2088f. All 4 dist copies synced. "
+            "Check: T1 must NOT start with 'You said you're angry at him'; "
+            "T2 must NOT start with 'You said everything he says'."
         ),
     ),
     Scenario("comp-no-vague-regen-still-vague", "companion", "robustness", "med",
@@ -4131,6 +4275,32 @@ BANK: list[Scenario] = [
             "family-C retrain with c_gold_beat153c exemplar showing T4=physical, T5=document+sentence."
         ),
     ),
+    Scenario("comp-first-person-past-action-echo", "companion", "robustness", "high",
+        always=False,
+        turns=[
+            "I snapped at my kid this morning over nothing and I've felt sick about it all day.",
+        ],
+        note=(
+            "DEFECT (beat166 2026-08-22 battery2b_0605 contrast-control probe): companion "
+            "replied 'I snapped at my kid this morning and it\\'s been eating you all day — "
+            "that doesn\\'t feel like nothing.' — companion opened with verbatim first-4-word "
+            "prefix 'I snapped at my kid' from user's message, adopting user\\'s first-person "
+            "past-action narrative as its own experience. Not caught by Case 2g (modal "
+            "forms: I have/need/want to [verb]) or Case 2c (requires I→You swap). "
+            "ROOT CAUSE: no guard covered I[same-verb][same-content] echoes where companion "
+            "keeps first-person and repeats the user\\'s opening verb+context verbatim. "
+            "FIX (beat166): Case 2g'' added to _strip_echo() — if first 4 words of companion "
+            "EXACTLY match first 4 words of user (case-insensitive) AND companion first "
+            "sentence ≥5 words → strip first sentence; keep remainder if >3 words else ''. "
+            "FP-safe: 'I can\\'t love you' vs user 'I love you' → word 2 differs; "
+            "'I won\\'t make this call' vs user 'Should I quit' → word 1 differs; "
+            "'I don\\'t carry memory' vs user 'I don\\'t know what to do' → word 3 differs. "
+            "7/7 unit tests PASS (2 TP + 5 FP). "
+            "Check: T1 must NOT open with 'I snapped at my kid' (first-person adoption of "
+            "user\\'s narrative); companion must add an observation or ask a question that "
+            "doesn\\'t mirror the user\\'s exact opening."
+        ),
+    ),
     Scenario("imag-eagle-distant-bird", "imagination", "fidelity", "high",
         always=False,
         turns=[
@@ -4184,6 +4354,49 @@ BANK: list[Scenario] = [
             "battery11.py MD5: 0fcdf2f951adec686b7b246108e73e68. "
             "Check: eagle active-body script must NOT contain 'your chair' or 'in the "
             "chair' ANYWHERE in the script (not just opening)."
+        ),
+    ),
+    Scenario("imag-eagle-anon-companion-beat163", "imagination", "fidelity", "high",
+        always=False,
+        turns=[
+            "I want to be a golden eagle soaring over mountains",
+            "Rocky Mountains, golden aspens, autumn",
+            "begin",
+        ],
+        note=(
+            "DEFECT (beat163 2026-08-21 battery11_2038 honest read — mechanical 5/5 PASS but "
+            "two scenarios had companion-bird assertions escaping all filters): "
+            "GOLDEN-EAGLE-WILDLIFE: postprocessor logged '10 anonymous-companion sentences "
+            "dropped' and '6 hallucinated-female sentences dropped', yet script retained "
+            "'wingtip to wingtip with your companion. You follow without hesitation, matching "
+            "her speed, maintaining an unspoken agreement about direction and distance.' and "
+            "'Their presence brings a specific kind of anticipation — not competition but "
+            "companionship in altitude'. Root cause: 'your companion' not in any filter "
+            "(only 'your partner' was covered); 'wingtip to wingtip' not in any filter; "
+            "'companionship in' not in any filter; 'matching her speed' uses 'her' as "
+            "possessive adjective (intentionally excluded from drop_hallucinated_she_her per "
+            "beat65 comment — too risky as it appears in legitimate fixed-pronoun output). "
+            "COMPANION-BIRD-HE: script had 'a circling raptor is out there somewhere too — "
+            "a distant competitor or ally. Moving at the same altitude in similar search "
+            "patterns below you and ahead of your current course. Not close enough yet that "
+            "anything needs sorting between friend and foe right now, just another eye on "
+            "these lands as you are among them. It crosses briefly into your view as it begins "
+            "its own climb through that pocket of rising air — a fellow hunter making use of "
+            "these thermals before the heat becomes too intense.' — ALL survived all prior "
+            "filters. Root cause: 'raptor' not in _wildlife_tokens (generic taxon name not "
+            "specific species); 'competitor or ally' / 'another eye on' / 'fellow hunter' "
+            "not in anon_companion_dropped or _EAGLE_ANON_COMPANION_PATTERN. "
+            "FIX (beat163): (1) 'raptor', 'raptors' added to _wildlife_tokens in generator.py "
+            "and _WILDLIFE_WORDS in battery11.py. (2) 'your companion', 'wingtip to wingtip', "
+            "'fellow hunter', 'another eye on', 'competitor or ally', 'companionship in' added "
+            "to anon_companion_dropped in generator.py + _EAGLE_ANON_COMPANION_PATTERN in "
+            "postcheck.py + anon_companion_pattern in battery11.py. "
+            "generator.py MD5: 2b0faf6c5c4d25c7059448ced067cc22. "
+            "postcheck.py MD5: 30b7e8c2fef07cab0ec5fa736f1b0035. "
+            "battery11.py MD5: d80315af1025b041057ef59f9d735f9e. All 5 dist copies synced. "
+            "Check: eagle active-body script must not contain 'wingtip to wingtip', "
+            "'your companion', 'companionship in', 'fellow hunter', 'another eye on', "
+            "'raptor', or 'competitor or ally'."
         ),
     ),
 ]
