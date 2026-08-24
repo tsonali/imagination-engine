@@ -9370,3 +9370,37 @@ BYO deep test overdue. Memory at 30% (below 35% threshold) — no model launch. 
 
 ### Running
 qc_queue running (PID 16124). Next cycles: battery11 (will verify body-'we' drop), battery9 (verify T19 phrasing floor vs bug). Memory self-gating at 35%. SHIP GATE HOLDS.
+
+---
+
+## 2026-08-24 (beat177) — qc_queue found dead ~19.5h; double-launch bug fixed
+
+### Read
+- **logs/qc/queue.log**: last entry before this beat was 08-23 19:16:13 — the queue had produced nothing for ~19.5 hours. Traced the stall to a crash storm at 19:03-19:16 last night: `battery9_engagement` launched twice 23s apart, then repeated `Killed: 9` on battery10/product_e2e/battery6, and a Metal GPU OOM abort (`Abort trap: 6`) mid-battery11 (imag-mri scenario, script cut off mid-generation).
+- Confirmed which of last night's logs are real vs void: `battery3b_ask_retest` completed cleanly (5/5 PASS, real content). `battery6_crosscut`, both `battery10_registers` attempts, `battery2b_honesty`, and `product_e2e_test` were all killed before producing any usable output — their logs from last night are noise, not results.
+- `launchd print gui/<uid>/com.hearth.qcqueue`: state stuck "spawn scheduled", last real stdout in `queue_launchd.log` dated Aug 5 — meaning launchd's own supervision (`KeepAlive` on the `hearth-qcqueue.js` node shim) hasn't actually been the thing keeping the queue alive for ~19 days. Every beat's manual `nohup bash scripts/qc_queue.sh` has been carrying that load instead.
+
+### Root cause
+`pkill -f qc_queue` (the heartbeat's standard pause-for-model-use step) matches `scripts/qc_queue.sh` but NOT `hearth-qcqueue.js` (no underscore in that filename) — so it kills the bash loop but leaves the node parent alive. launchd's `KeepAlive` then silently respawns a fresh `qc_queue.sh` around the same time a heartbeat does its own explicit `nohup bash scripts/qc_queue.sh` relaunch. Result: two independent copies of the queue loop, each walking the same `QUEUE` array, racing each other — exactly the "stacked model processes" scenario that caused the original 07-12 kernel panic. Last night's double battery9 launch and OOM abort is a second, less catastrophic instance of the same failure class.
+
+### Fixed
+- **scripts/qc_queue.sh**: added a portable mkdir-based single-instance lock at the top of the script (macOS ships no `flock`). `mkdir /tmp/hearth-qc-queue.lock.d` is atomic; a second invocation checks whether the PID recorded in the lock is still alive (`kill -0`) and exits immediately if so, rather than starting a competing loop. Stale locks (holder PID dead) self-clear. `trap ... EXIT` releases the lock on any exit path, including SIGTERM from `pkill`. `bash -n` syntax-clean. Verified live: relaunch acquired the lock (`/tmp/hearth-qc-queue.lock.d/pid` = new PID), queue.log shows a clean single "qc-queue runner started" line, battery11 running with no competing process.
+- Did **not** touch the launchd throttle/staleness issue this beat — it's a lower-priority gap (the manual-relaunch path already covers it every beat) but worth Sonali knowing: after a cold reboot, if no heartbeat has fired yet, launchd may not actually bring qc_queue back up on its own right now.
+
+### Verified better
+- Memory: 67% free at both check and relaunch (safely above the 35% gate).
+- Queue restarted 14:34:48, running battery11_imagination_bank cleanly as of beat close — first clean read of that battery expected next beat once it completes (~80-90 min typical).
+
+### Gold
+- Gold(A) +6 → 6544 (first-solo-night-drive, marathon-finish-line-uncertain, jar-finally-opens, cooking-for-someone-first-bite, waking-after-surgery-good-news, plane-wheels-leave-ground). All unique openings checked against the last 40+ entries.
+- Gold(C) +5 → c_gold_beat177.jsonl, written directly against the five named prompt-unfixable defect classes from the standing instructions: anger received without reframing-as-protection, therapy frame dropped instantly on redirect, plain verdict given when directly asked, playful register with no deflating meta-question, warmth threaded through (not instead of) the honest no.
+- Companion candidate pool is now at 234 total files — far past the "~40 strong exemplars" retrain trigger in the standing instructions, but that trigger was explicitly superseded at beat92 (mechanical fixes chosen over the family-C fine-tune path). No retrain attempted; noted so this isn't silently ignored.
+
+### Mini
+UNREACHABLE (54th consecutive). `mac-mini.localdomain` resolves via a pre-existing, already-verified SSH config alias to `julios-mac-mini.local` (matching known_hosts fingerprint — this is established infrastructure, not something new or suspicious) — it's just off-network right now. Gold not SCP'd; honest flywheel cannot retrain.
+
+### Use-case rotation
+Imagination deep test is the in-flight battery11 run (per established practice, battery11 end-to-end read IS the imagination deep test). Secretary was deep-tested this morning (beat176, 5/5 UC PASS). Next in rotation after Imagination: Ask-Your-Files — deferred to next beat to respect one-model-process-at-a-time while battery11 runs.
+
+### Running
+qc_queue running (PID 6482, lock-protected). battery11 in flight. Next beat should read battery11's results end-to-end and continue the rotation with Ask-Your-Files deep test once the model is free.

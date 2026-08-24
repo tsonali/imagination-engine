@@ -12,6 +12,27 @@ set -uo pipefail
 cd "$(dirname "$0")/.." || exit 1
 source .venv/bin/activate 2>/dev/null || true
 
+# SINGLE-INSTANCE LOCK (added 2026-08-24 after the 08-23 19:07 crash storm):
+# launchd's com.hearth.qcqueue (KeepAlive) restarts this script's PARENT node
+# shim automatically after `pkill -f qc_queue` kills only this bash process —
+# so a heartbeat's own "pause then nohup-relaunch" step can race launchd's
+# auto-respawn and produce TWO concurrent queue loops, each walking the QUEUE
+# independently. That double-run is what stacked battery9/battery10/product_e2e
+# and crashed battery11 with a Metal OOM abort on 2026-08-23. mkdir is atomic
+# on every filesystem here, unlike flock which macOS doesn't ship.
+LOCKDIR="/tmp/hearth-qc-queue.lock.d"
+if ! mkdir "$LOCKDIR" 2>/dev/null; then
+  OLDPID=$(cat "$LOCKDIR/pid" 2>/dev/null || echo "")
+  if [ -n "$OLDPID" ] && kill -0 "$OLDPID" 2>/dev/null; then
+    echo "[$(date '+%m-%d %H:%M:%S')] qc_queue.sh: another instance (pid $OLDPID) holds the lock — exiting" >> logs/qc/queue.log
+    exit 0
+  fi
+  rm -rf "$LOCKDIR"
+  mkdir "$LOCKDIR" 2>/dev/null || exit 0
+fi
+echo $$ > "$LOCKDIR/pid"
+trap 'rm -rf "$LOCKDIR"' EXIT
+
 # MEMORY HEADROOM GATE (added 2026-07-12 after the 12:37 kernel panic — wired-GPU exhaustion):
 # never launch a model battery without >=35% system memory free; kill ghosts and wait if needed.
 mem_ok() {
