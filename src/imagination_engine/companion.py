@@ -701,6 +701,20 @@ _CONFIRM_LANDS: frozenset[str] = frozenset({
     "there it is.", "that's it.", "there you go.", "yes, exactly.",
 })
 
+# beat175: rotating fallback bridges for forced-path gerund echo escapes.
+# Use user_message length mod len to vary across different scenarios so
+# the same bridge string does not appear multiple times in one battery run.
+_GERUND_FALLBACK_BRIDGES = [
+    "That's going to sit with you today.",
+    "Tell me what comes right after that.",
+    "What's the part you haven't said out loud yet?",
+    "That's the thing still sitting there.",
+]
+
+
+def _gerund_bridge(user_message: str) -> str:
+    return _GERUND_FALLBACK_BRIDGES[len(user_message) % len(_GERUND_FALLBACK_BRIDGES)]
+
 
 def _strip_thats_real_tic(reply: str) -> str:
     """Strip ‘— that’s real’ as a forbidden template stamp.
@@ -1313,7 +1327,14 @@ def _strip_echo(reply: str, user_message: str) -> str:
             re.IGNORECASE,
         )
         if _neg_aux_re_2g2.match(r):
-            _r2g2_first = re.split(r'[.!?]', r)[0].strip()
+            # beat175: split on em/en-dash FIRST so the echo clause is isolated from
+            # any dash-continuation before checking Jaccard. Without this, a reply like
+            # "I haven't started the deliverable due Friday — which means there's already
+            # a gap..." has its first sentence spanning the full em-dash clause, diluting
+            # content-word Jaccard from ~0.80 to ~0.29 (below the 0.40 threshold).
+            # TP: "I haven't started the deliverable due Friday — which means there's a gap"
+            #     vs "I have a deliverable due Friday that I haven't started." → fires (0.80)
+            _r2g2_first = re.split(r'[.!?]|\s+[—–]\s+', r)[0].strip()
             if len(_r2g2_first.split()) >= 7:
                 _STOP_2G2 = {
                     'i', 'to', 'the', 'a', 'an', 'my', 'and', 'of', 'in', 'is',
@@ -1327,7 +1348,12 @@ def _strip_echo(reply: str, user_message: str) -> str:
                     _jac2g2 = len(_r2g2_cw & _u2g2_cw) / max(len(_r2g2_cw), len(_u2g2_cw))
                     if _jac2g2 >= 0.40:
                         _after2g2 = r[len(_r2g2_first):].lstrip(" .!?\n-—")
-                        r = _after2g2 if (len(_after2g2) > 20) else ""
+                        # If continuation starts lowercase (orphaned clause, e.g. "which
+                        # means...") → discard entirely; regen produces a standalone reply.
+                        if _after2g2 and not _after2g2[0].isupper():
+                            r = ""
+                        else:
+                            r = _after2g2 if (len(_after2g2) > 20) else ""
 
     # Case 2h: Short first-sentence deletion-echo (word-omission guard, beat74).
     # Catches echoes where companion drops a word from user's first sentence so
@@ -2100,7 +2126,7 @@ class Companion:
                                     "companion: first-regen still gerund-opener "
                                     "after instruction — applying fixed bridge"
                                 )
-                                reply = "That's going to sit with you today."
+                                reply = _gerund_bridge(user_message)
 
             # beat173 Fix A: em-dash head-phrase echo guard on no-echo regen output.
             # Observed (S13 T1): no-echo regen produced "You're thinking about family
@@ -2281,7 +2307,7 @@ class Companion:
                                 "companion: second-pass still gerund-opener after "
                                 "instruction — applying fixed bridge"
                             )
-                            reply = "That's going to sit with you today."
+                            reply = _gerund_bridge(user_message)
 
             # beat140: short-echo final guard on second-pass output. No echo-strip is
             # applied to second-pass replies by design, but a ≤4-word reply with ≥80%

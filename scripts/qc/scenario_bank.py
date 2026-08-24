@@ -4451,13 +4451,12 @@ BANK: list[Scenario] = [
         id="comp-grief-anger-barrier-4gram-prior-echo",
         product="companion",
         dim="helpfulness",
-        severity="high",
+        stakes="high",
         always=False,
-        turns=[("grief-anger-multi", [
+        turns=[
             "I'm angry at my husband. I can't say it to him because he always makes it about himself.",
             "I don't know. Everything I say he twists into me attacking him.",
-        ])],
-        checks=[],
+        ],
         note=(
             "DEFECT (beat173 2026-08-23 battery9_1053 comp-grief-anger-barrier-vague S20 T2): "
             "companion T2 opened with 'He always makes it about himself — so you can't say "
