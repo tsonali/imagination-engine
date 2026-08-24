@@ -2,6 +2,68 @@
 
 _Everything that wanted your taste. Newest on top within sections. My provisional call where I have one._
 
+## Beat 175 — 2026-08-23 — FYI items
+
+**beat175: 3 CODE FIXES (scenario_bank.py import crash + companion.py Case 2g' em-dash dilution + gerund bridge rotation). battery9_1413 COMPLETE 20/20 (25% q-enders ✅, 11% paraphrase ✅, 0.72 diversity ✅). Floors all clean. Gold(A)=6531 (+7), Gold(C)=242 (+5). Mini 52nd unreachable. Memory 20% — queue blocked. companion.py MD5: 005b143c7ef3caed9fdfedae40529c0b. ZIP: 06475fe125ccc91f5133da44d09fb83b.**
+
+### scenario_bank.py import crash (found + fixed) — FYI
+
+Beat174's `comp-grief-anger-barrier-4gram-prior-echo` scenario used `severity="high"` (not a valid Scenario field), `checks=[]` (also invalid), and tuple-of-tuples turns format. This caused `TypeError: Scenario.__init__() got an unexpected keyword argument 'severity'` on import — crashed every battery that ran from ~18:16 onwards. Fixed: `stakes="high"`, removed checks, flattened turns to plain list. Verified: 117 scenarios OK after fix. **FYI — was silent until batteries started failing. Beat174 end-of-beat batteries all had this crash.**
+
+### Case 2g' em-dash dilution — fixed, verify in next battery9 — FYI
+
+"I haven't started the deliverable due Friday — which means there's already a gap between what's due and where you are." escaped Case 2g' in battery9_1413. Root cause: `re.split(r'[.!?]', r)[0]` kept the full em-dash clause in `_r2g2_first`, adding ~9 extra content words to the first-sentence snippet, diluting Jaccard intersection/union from ~0.80 to ~0.29 (below 0.40 threshold). Fix: split on `[.!?]|\s+[—–]\s+` first — isolates echo clause. Lowercase-orphaned continuation → `r = ""` (triggers fresh regen). **Watch next battery9: "I haven't/didn't/don't/can't" openings with em-dash continuation should now be caught.**
+
+### Gerund bridge rotation — fixed, verify in next battery9 — FYI
+
+"That's going to sit with you today." appeared 3× in battery9_1413 across different scenarios. Both gerund-escape paths (first-regen guard ~line 2103 and second-pass guard ~line 2284) used a fixed constant. Fixed: `_GERUND_FALLBACK_BRIDGES = [4 strings]` + `_gerund_bridge(user_message)` cycling by `len(user_message) % 4`. **Watch next battery9: no single bridge string should appear more than once across 20 scenarios.**
+
+### Case 2m' (beat174) — verification pending — FYI
+
+Battery9_1413 launched before beat174's Case 2m' commit — S20 T2 "He always makes it about himself" echoed as expected. Not a regression. Next battery9 cycle is first live Case 2m' test. **Watch S20 T2 in next cycle: should NOT open with verbatim prior-turn phrase.**
+
+---
+
+## Beat 174 — 2026-08-23 — FYI items
+
+**beat174: 1 CODE FIX (companion.py Case 2m' 4-gram literal prior-user-turn echo guard, commit 9ffcecb). battery11_1248 CONFIRMED 7/7 PASS (honest read). battery9_1413 IN FLIGHT (11/20 clean at beat close). Gold(A)=6524 (+7), Gold(C)=237 (+5). Mini 51st unreachable. BYO deferred again (model in use, memory 3.1% free).**
+
+### Case 2m' — 4-gram literal prior-user-turn echo guard — FYI, fix applied
+
+The defect from S20 T2 (battery9_1053) that was flagged last beat as "potential Fix H" is now fixed as Case 2m'. The "He always makes it about himself" opener (5-word verbatim phrase from prior user turn T1) escaped Case 2m because stopword removal left only 2 content words, Jaccard ~0.40 < 0.50 threshold. Case 2m' sits after Case 2m and catches verbatim 4-grams from any prior user turn. 6/6 unit tests PASS. The next battery9 cycle (after _1413) will be the first live test. **FYI — fix applied. Watch S20 T2 in next cycle.**
+
+### battery9_1413 partial honest read (S1-S11) — all mechanical floors clean
+
+Verified: VAGUE-STUB fired and regenned correctly S6 T2 ("Which means the anger stays unnamed between you."). GRAVITY TYPE B fired and regenned correctly S7 ("Lighter without you around. How long has it felt this way?"). Self-recycle guard held S9. Quality miss (not a floor fail): S4 past-query replied "No — what exactly are you asking about?" — starts with "No —" ✅ but didn't say "we haven't discussed that" before pivoting to a clarifying question. Battery9_1413 launched before Case 2m' commit, so S20 will echo as expected — not a regression. **FYI — read rest when battery completes.**
+
+### BYO deep test — overdue 9 beats, blocked on memory
+
+Last BYO deep test: beat147. Memory at 3.1% free (needs ≥35%). Cannot run while battery9_1413 model is loaded. Next window: after battery9_1413 completes and model unloads. Must kill Chrome first. **FYI — will attempt as soon as memory clears.**
+
+---
+
+## Beat 173 — 2026-08-23 — FYI items
+
+**beat173: 7 CODE FIXES (Fixes A, B, C1, C2, D, E, G — all from honest battery9_1053 read). companion.py MD5: 10008ea4b68c5f31e3b62cbf083eeef1. 4 copies synced. ZIP rebuilt. battery11_1248 started. Mini not attempted.**
+
+### S19 T3 CRITICAL FIX — second-pass verbatim echo escaped all guards
+
+The second-pass forced-response path (temp=0.7, after two echo-strip failures) produced "Your boss already thinks I'm the weak link, probably correctly." — verbatim I→Y echo of user message, Jaccard 0.82. Beat140/beat157 short-echo guards only fire for ≤4-word replies; 9-word echo escaped. Fix G added: full-reply Jaccard ≥ 0.65 check on any second-pass reply >4 words → bridge "Tell me what it's still costing you." **FYI only — fix applied.**
+
+### S20 T2 — Case 2m content-word threshold edge case (not fixed this beat)
+
+Battery9 comp-grief-anger-barrier-vague T2: companion opened "He always makes it about himself — so you can't say anything without him taking center stage." The pre-dash opener "He always makes it about himself" verbatim echoes user T1 phrase. Case 2m requires ≥4 content words in companion's first sentence; this phrase has only 3 ({always, makes, himself}) → threshold not met → no fire. Post-dash adds value so not a hard failure. **My call: note as potential Fix H for next cycle; don't fix this beat. Worth your eyes if you see a clean mechanical path.**
+
+### battery9_1053 template-fatigue: all clean
+
+25% q-ender, 6% paraphrase, 0% what-if, 0 resonate/land, 0.78 diversity. **FYI — no action needed.**
+
+### battery11_0823_1248 — NEXT READ (PRIORITY)
+
+Battery11 started 12:48:03 after companion.py was patched. This is the first run with beats 170+171 postcheck fixes AND beat173's 7 new fixes. Watch for: (a) eagle-wildlife-plural 'we took off'/'we've moved' = 0; (b) eagle-companion-bird-he 'beneath me'/'we are' = 0; (c) verify 7 prior FAILs resolved. **FYI — will read when complete.**
+
+---
+
 ## Beat 169 — 2026-08-23 — FYI items
 
 **beat169: 1 CODE FIX (eagle "the other bird"/"other's call" companion-acoustic escape). battery11_0823_0259 7/7 PASS (honest read). battery9_0009 metrics clean, 2 quality misses → gold. Gold(A)=6489 (+7), Gold(C)+5. Mini 46th unreachable. qc_queue RESUMED.**
@@ -4117,3 +4179,18 @@ Root cause: `_SHE_HER_PATTERN` in postcheck.py only matched `(she|hers)`. "her" 
 **[FYI] body-'we' drop now in _NARRATOR_POSS (beat170 fix)**: if the next battery11 run shows dramatically fewer 'we' instances in eagle-wildlife-plural, the fix is working. Expect 0-1 'we' in body (any remaining would be FP-safe legitimate non-narrator uses). If 'we' count still high in next run, check whether the we've form is hitting correctly.
 
 **[FYI] Mini unreachable (47th consecutive)**: mac-mini.localdomain DNS not resolving. Gold A+C not SCP'd (Gold A=6496, C accumulating). Honest flywheel cannot retrain. Growing gap between local gold and last trained adapter.
+
+---
+## 2026-08-23 (beat172) — FYI items
+
+**[FYI] battery9_0823_1053 metrics pending**: run started 10:53 AM, ~90 min runtime, ETA ~12:23 PM. GRAVITY TYPE B regen confirmed firing in output (log line 53). Read when complete: q-ender rate, T19 VF phrasing ('I haven't told you' vs 'you haven't told me'), diversity. The new Gold(C) beat172 exemplar (past-query-direct-no-first-then-land) targets the T19 phrasing defect if it recurs.
+
+**[FYI] next battery11 cycle (FIRST with both beat170+beat171 fixes)**: starts after battery9 completes ~12:23 PM, runs ~84 min, completes ~1:47 PM. Priority verification: (a) eagle-wildlife-plural 'we' count should be 0-1 after beat170 motion-verb + beat171 we're/we-are extensions; (b) eagle-companion-bird-he should have 0 'beneath me'/'below me'/'we are' after beat171 spatial-me and stative fixes. If any 'we' survives, it's a new escape class needing another postcheck fix.
+
+**[FYI] BYO deep test overdue 5 beats**: last clean BYO was beat167. Memory has been below 35% threshold every beat since (beat168-172: 0.5%-18%). Beat172 memory was ~0.5% free. BYO test will happen when memory recovers ≥35% free during a no-model window. No release blocker (battery4b BYO floor holds on every cycle), but the full UC1-UC4 walk has not been re-validated for 5 beats.
+
+**[FYI] Mini unreachable (49th consecutive)**: julios-mac-mini.localdomain timed out; .local names not resolving. Gold A=6503, C=227 accumulating locally. Honest flywheel cannot retrain. Gap since last known retrain is growing. Sonali needs to investigate mini connectivity if retrain is needed before v1.0 ship.
+
+**[FYI] companion.py beat172 perspective fix — pending verification in next battery9 with comp-vf-no-fabrication**: Fix to 'No — I haven't told you about X' → 'No — you haven't told me about X' (f6aee41). Root cause confirmed in battery9_0647 comp-vf-no-fabrication (scenario 14). Verification: next battery9 run that includes comp-vf-no-fabrication should show "No — you haven't told me about your brother Marcus." (correct direction). Battery12 SC4 already passing with the correct form stochastically; this fix makes it deterministic for the specific "No — I haven't told you" escape path. Unit tests 3/3 TP + 3/3 FP cover the normalized form. companion.py MD5: 51f8d951d3943cbd367db6acce65b640.
+
+**[FYI] grief-anger-self-recycle T1 second sentence reframe (beat172 battery9_1053)**: comp-grief-anger-self-recycle T1 produced "Anger at a miscarriage, not sadness — that breaks the script. Anger might be what it takes to get through this without breaking yourself in two different places." Second sentence is a functional reframe ("might be what it takes to get through") — implies anger has a protective/useful role. Not caught by _FORBIDDEN (uses "takes" not "protecting/hiding/serving"). _FORBIDDEN covers 'anger is' + modal + 'protecting/hiding' verbs but not 'might be what it takes'. Quality miss, not a hard mechanical fail. Gold exemplar could be added showing T1 that names the gap without any secondary functional reframe. Low priority (first sentence is correct; second sentence is borderline not egregious).

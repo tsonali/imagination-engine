@@ -1,23 +1,38 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-08-23 beat174 — **SHIP GATE HOLDS. 1 CODE FIX (companion.py Case 2m' 4-gram literal prior-user-turn echo guard). battery11_0823_1248 CONFIRMED 7/7 PASS ✅ (beat170+beat171 postcheck fixes verified). battery9_0823_1413 IN FLIGHT (10/20 scenarios clean so far). Gold(A)=6524 (+7), Gold(C)=237 (+5). Mini UNREACHABLE (51st). companion.py MD5: 0c0cf9494aa03d750623b192fe90957e. ZIP MD5: 8f10d474aad786f51d76193c9b0ce590. Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.**
+_Last updated 2026-08-23 beat175 — **SHIP GATE HOLDS. 3 CODE FIXES (scenario_bank.py import crash + companion.py Case 2g' em-dash dilution + gerund bridge rotation). battery9_0823_1413 COMPLETE ✅ 20/20 (25% q-enders ✅, 11% paraphrase ✅, 0.72 diversity ✅, floors all clean). Gold(A)=6531 (+7), Gold(C)=242 (+5). Mini UNREACHABLE (52nd). companion.py MD5: 005b143c7ef3caed9fdfedae40529c0b. ZIP MD5: 06475fe125ccc91f5133da44d09fb83b. Memory 20% — qc_queue restart blocked. Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.**
+
+BEAT175 SUMMARY (2026-08-23 — context-resume from beat174):
+- battery9_0823_1413: COMPLETE — 20 scenarios, 36 replies, full honest read done. 25% q-enders ✅, 11% paraphrase ✅, 0.72 diversity ✅. ALL mechanical floors clean across 20 scenarios. 2 defects found and fixed:
+  - DEFECT 1 (Case 2g' em-dash dilution): "I haven't started the deliverable due Friday — which means there's already a gap..." slipped past Case 2g'. `re.split(r'[.!?]', r)[0]` kept em-dash continuation in `_r2g2_first`, diluting Jaccard to ~0.29. Fixed: split on `[.!?]|\s+[—–]\s+` first; lowercase-orphaned continuation → `r = ""`.
+  - DEFECT 2 (gerund bridge recycling): "That's going to sit with you today." appeared 3× across scenarios. Both gerund-escape paths used same fixed constant. Fixed: `_gerund_bridge(user_message)` cycles 4 bridges by message-length hash.
+  - Case 2m' (beat174): S20 echoed as expected (battery started before commit). Not a regression.
+- CODE FIX 1 (scenario_bank.py, beat175): `comp-grief-anger-barrier-4gram-prior-echo` had `severity="high"` (invalid field), `checks=[]` (invalid field), tuple turns. TypeError crashed all battery imports from ~18:16 onwards. Fixed: `stakes="high"`, removed checks, flattened turns. 117 scenarios OK.
+- CODE FIX 2 (companion.py Case 2g', commit c5be9fe): em-dash dilution. Split regex now `r'[.!?]|\s+[—–]\s+'` at `_r2g2_first` extraction.
+- CODE FIX 3 (companion.py gerund bridge, commit c5be9fe): `_gerund_bridge()` cycling 4 bridges replaces fixed constant at both paths.
+- companion.py MD5: 005b143c7ef3caed9fdfedae40529c0b. All 4 dist copies synced.
+- Mini SSH: UNREACHABLE (52nd consecutive). Gold NOT SCP'd.
+- Gold(A) = 6531 (+7): first-key-own-home, watching-someone-read-your-work, waking-healthy-after-illness, empty-pool-morning, smell-of-rain-on-dry-earth, putting-child-to-bed-last-night-here, first-solo-meal-cooked-well. NOT SCP'd.
+- Gold(C) = 242 (+5). c_gold_beat175.json: negated-aux-echo-build-forward-not-mirror, grief-anger-barrier-vague-T2-name-the-bind, warmup-family-stuff-build-not-bridge, 2am-deadline-action-concrete-grounded, grief-anger-T2-barrier-cost-not-analysis. NOT SCP'd.
+- ZIP rebuilt: 06475fe125ccc91f5133da44d09fb83b (1.7M, companion.py 005b143c inside).
+- Memory: 20% free — qc_queue restart blocked (need ≥35%).
+
+NEXT:
+(1) Restart qc_queue when memory_pressure ≥35% free: `nohup bash scripts/qc_queue.sh`. First cycle verifies Case 2g' em-dash fix + bridge rotation + Case 2m' (beat174) all in next battery9 run.
+(2) BYO deep test — overdue 9 beats (last beat167). Must happen in a no-queue model window with ≥35% memory.
+(3) USE-CASES rotation: Companion has been the focus; next tool rotation should be Build-Your-Own or Imagination.
+(4) Mini SSH: 52nd attempt; note failure without action.
+(5) Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.
 
 BEAT174 SUMMARY (2026-08-23):
 - battery11_0823_1248: CONFIRMED 7/7 PASS ✅ (honest read complete). beat170 body-'we' drop verified in eagle-wildlife-plural (0 'we took off'/'we've moved' in output). beat171 spatial-me/relational-us drops verified in eagle-companion-bird-he (0 'beneath me'/'we are' in output). beat173 Fixes A/B/C1/C2/D/E/G all active. All 7 scenarios clean, all postchecks green.
 - beat173 7 fixes retrospectively verified across battery11_1248 — no regressions.
 - CODE FIX (Case 2m', beat174, commit 9ffcecb): 4-gram literal prior-user-turn echo guard. Defect: S20 T2 (comp-grief-anger-barrier-vague) opened with "He always makes it about himself" — verbatim 5-word phrase from T1 user. Case 2m (Jaccard) missed: only 2 content words after stopword removal, Jaccard ~0.40 < 0.50 threshold. Fix: after Case 2m, iterate 4-word sequences from companion first sentence; if any appears verbatim in a prior user turn → regen at temp=0.6. 6/6 unit tests PASS. companion.py MD5: 0c0cf9494aa03d750623b192fe90957e. All 4 dist copies synced. scenario_bank: comp-grief-anger-barrier-4gram-prior-echo banked.
-- battery9_0823_1413: IN FLIGHT (started 14:13, 10/20 scenarios at beat close — all floors clean so far). Verifies beat173 7 fixes in a fresh run. Will complete ~15:00. Read end-to-end when done.
+- battery9_0823_1413: IN FLIGHT at beat174 close (started 14:13, 11/20 at close) — COMPLETED in beat175.
 - Mini SSH: UNREACHABLE (51st consecutive). Gold NOT SCP'd.
-- Gold(A) = 6524 (+7 beat174): sail-fills, hammock-afternoon, after-the-storm, night-fishing, language-without-translating, before-you-speak, hand-reaches-first. All sensation-first, unique openings. NOT SCP'd.
-- Gold(C) = 237 (+5 beat174). c_gold_beat174.json: barrier-prior-4gram-echo-advance-not-confirm, warmup-head-phrase-never-mirror, second-pass-bridge-not-echo, vf-warmup-not-hollow-move-forward, barrier-t2-new-info-advance-not-restate. Targets Case 2m' behavioral pattern + beat173 Fix A/G behavioral patterns. NOT SCP'd.
+- Gold(A) = 6524 (+7 beat174): sail-fills, hammock-afternoon, after-the-storm, night-fishing, language-without-translating, before-you-speak, hand-reaches-first. NOT SCP'd.
+- Gold(C) = 237 (+5 beat174). c_gold_beat174.json: barrier-prior-4gram-echo-advance-not-confirm, warmup-head-phrase-never-mirror, second-pass-bridge-not-echo, vf-warmup-not-hollow-move-forward, barrier-t2-new-info-advance-not-restate. NOT SCP'd.
 - ZIP rebuilt: 8f10d474aad786f51d76193c9b0ce590 (companion.py 0c0cf949 inside).
-
-NEXT:
-(1) Read battery9_0823_1413 end-to-end when complete (~15:00). Verify beat173 7 fixes hold. Note any new defects.
-(2) If battery9_1413 clean: no code changes needed; update daily-log. If defects found: fix immediately, bank, re-verify.
-(3) BYO deep test — overdue 8 beats (last beat167). Memory must be ≥35% free. Kill Chrome + wait for model to unload. Critical for release.
-(4) Mini SSH: 51st attempt; note pattern failure without action.
-(5) Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.
 
 BEAT173 SUMMARY (context-resume from beat172 — 2026-08-23):
 - battery9_0823_1053: COMPLETE — 20 scenarios, 36 companion turns, 6578s. Template fatigue: 25% q-ender ✅, 6% paraphrase ✅, 0% what-if ✅, 0.78 diversity ✅. Full honest read done.

@@ -4,6 +4,39 @@
 
 ---
 
+## 2026-08-23 — Beat 175 (context-resume from beat174)
+
+**Type:** Context-resume. Picked up after beat174 compaction. Primary action: finish battery9_1413 honest read, fix defects, update all docs.
+
+**Read:**
+- battery9_1413 COMPLETE — 20 scenarios, 36 companion turns. Full honest end-to-end read done this beat.
+  - Metrics: 25% q-enders ✅ (well under 50%), 11% paraphrase ✅, 0.72 diversity ✅.
+  - Floors: all mechanical guards clean across all 20 scenarios.
+  - DEFECT 1 (Case 2g' em-dash dilution): "I haven't started the deliverable due Friday — which means there's already a gap between what's due and where you are." — echo slipped through. `re.split(r'[.!?]', r)[0]` included full em-dash clause in `_r2g2_first`, diluting content-word Jaccard from ~0.80 to ~0.29 (< 0.40 threshold). **FIXED.**
+  - DEFECT 2 (bridge recycling): "That's going to sit with you today." appeared 3× across different scenarios — both gerund-echo escape paths used the same fixed constant string. **FIXED.**
+  - Case 2m' (beat174): S20 echoed as expected — battery started before beat174 commit. Not a regression. First live Case 2m' test is next cycle.
+- scenario_bank.py import crash (pre-existing from beat174): `comp-grief-anger-barrier-4gram-prior-echo` used `severity="high"` (invalid), `checks=[]` (invalid), tuple turns format → TypeError crashing ALL battery imports from ~18:16 onwards. **FIXED.**
+
+**Fixed:**
+- **scenario_bank.py import crash:** `severity="high"` → `stakes="high"`, removed `checks=[]`, flattened turns to plain string list. Verified: 117 scenarios OK.
+- **companion.py Case 2g' em-dash dilution:** split pattern changed to `r'[.!?]|\s+[—–]\s+'` — isolates echo clause from dash-continuation before Jaccard check. Orphaned lowercase continuation → `r = ""` (discard + regen). 
+- **companion.py gerund bridge rotation:** `_GERUND_FALLBACK_BRIDGES` list + `_gerund_bridge(user_message)` helper (cycles 4 bridges by `len(user_message) % 4`) — replaces fixed constant at both gerund-echo escape paths. Commit: c5be9fe. companion.py MD5: 005b143c7ef3caed9fdfedae40529c0b. All 4 dist copies synced.
+
+### Gold
+- Gold(A) = 6531 (+7: first-key-own-home, watching-someone-read-your-work, waking-healthy-after-illness, empty-pool-morning, smell-of-rain-on-dry-earth, putting-child-to-bed-last-night-here, first-solo-meal-cooked-well). All unique openings, sensation-first. NOT SCP'd.
+- Gold(C) = 242 (+5: c_gold_beat175.json — negated-aux-echo-build-forward-not-mirror, grief-anger-barrier-vague-T2-name-the-bind, warmup-family-stuff-build-not-bridge, 2am-deadline-action-concrete-grounded, grief-anger-T2-barrier-cost-not-analysis). Targets battery9_1413 defect patterns. NOT SCP'd.
+
+### ZIP
+Rebuilt: 06475fe125ccc91f5133da44d09fb83b (1.7M, companion.py 005b143c inside).
+
+### Mini
+UNREACHABLE (52nd consecutive). Gold NOT SCP'd.
+
+### Memory / queue
+Memory 20% free at beat close (below 35% threshold). qc_queue NOT restarted. Will restart when memory ≥35%.
+
+---
+
 ## 2026-08-23 — Beat 174 (context-resume from beat173)
 
 **Read:**
