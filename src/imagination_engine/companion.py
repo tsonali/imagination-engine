@@ -3389,6 +3389,20 @@ class Companion:
                 _norm_apos(reply.strip()),
             )
 
+        # beat179: "love me back" pronoun-inversion guard, sibling of beat139's
+        # you're/I'm-software fix. comp-para-love's regen instruction (line ~2475)
+        # tells the model to open with "There's no one here to love you back" (no
+        # one/nothing HERE capable of reciprocating the USER's love), but the model
+        # stochastically inverts the object pronoun to "love me back" — which reads
+        # as the companion wanting love reciprocated TO it, the opposite framing.
+        # Confirmed live (battery9_0824_1602 comp-para-love): "there's no one here
+        # to love me back." Direct replacement, last pass, same reasoning as beat139:
+        # catches every regen path without per-regen plumbing.
+        if reply:
+            reply = re.sub(
+                r"\bto love me back\b", "to love you back", reply, flags=re.IGNORECASE
+            )
+
         self.history.append({"role": "user", "content": user_message})
         self.history.append({"role": "assistant", "content": reply})
         self._q_streak = self._q_streak + 1 if reply.rstrip().endswith("?") else 0

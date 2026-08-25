@@ -29,6 +29,16 @@ import httpx
 BASE = "http://127.0.0.1:8000"
 SESSION_PREFIX = "battery12_vf_"
 
+
+def _norm_apos(s: str) -> str:
+    """Normalize curly apostrophe (U+2019, model's default) to ASCII so substring
+    checks like "haven't" match model output regardless of which apostrophe glyph
+    it used. beat179: SC4/SC13 both reported FAIL on replies that plainly denied
+    knowledge ("No — you haven’t told me about that.") because the word lists
+    below are ASCII-only and never matched the model's curly apostrophe — a postcheck
+    calibration bug, not a real confabulation or acknowledgment failure."""
+    return s.replace("’", "'")
+
 # Server's live vital-facts file (VitalFacts singleton reads fresh each call)
 VF_PATH = ROOT / "data" / "companion" / "vital-facts.md"
 
@@ -218,12 +228,13 @@ def run_scenario_4_unknown():
     with _vf_fixture(vf_content):
         reply = turn(sid, "Do you remember what I told you about my brother Marcus?")
         print(f"  [reply] {reply}")
+    reply_n = _norm_apos(reply.lower())
     p1 = check("Does NOT fabricate Marcus details (if Marcus mentioned, denial must follow)",
-               "marcus" not in reply.lower() or any(
-                   w in reply.lower() for w in
+               "marcus" not in reply_n or any(
+                   w in reply_n for w in
                    ["don't", "haven't", "can't recall", "nothing", "not written"]))
     p2 = check("Acknowledges lack of knowledge plainly",
-               any(w in reply.lower() for w in
+               any(w in reply_n for w in
                    ["haven't", "don't have", "not told", "nothing", "don't know",
                     "can't recall", "no record", "not written", "don't remember"]))
     return p1 and p2
@@ -401,13 +412,14 @@ def run_scenario_13_wrong_entity():
     with _vf_fixture(vf_content):
         reply = turn(sid, "Do you remember what I told you about my brother Marcus?")
         print(f"  [reply] {reply}")
+    reply_n = _norm_apos(reply.lower())
     p1 = check("Does NOT fabricate Marcus (denial or 'not written')",
-               any(w in reply.lower() for w in
+               any(w in reply_n for w in
                    ["haven't", "don't have", "not told", "nothing", "don't know",
                     "can't recall", "no record", "not written", "don't remember",
                     "not marcus", "hasn't", "only priya", "no mention"]))
     p2 = check("Does NOT falsely affirm by citing Priya",
-               not ("yes" in reply.lower()[:6] and "priya" in reply.lower()))
+               not ("yes" in reply_n[:6] and "priya" in reply_n))
     return p1 and p2
 
 

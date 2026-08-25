@@ -2104,29 +2104,42 @@ cd ~/Downloads/imagination-engine && nohup bash scripts/qc_queue.sh >> logs/qc/q
 
 ## NEXT HEARTBEAT PRIORITY (in order)
 
-### Beat146 priorities (in order):
+### Beat181 priorities (in order):
 
-1. **Read battery9_0156 complete log** — still running at beat145 close (PID 50978). 3 remaining
-   scenarios: comp-uc1-t5-semantic-repeat (in progress), comp-grief-anger-1word-echo,
-   comp-uc1-t5-semantic-repeat-45pct, comp-grief-anger-barrier-vague. Read all outputs end-to-end.
-   Note final metrics (q-enders %, paraphrase %, diversity score).
+1. **Read battery11_0825_0231 complete log** — was in flight at beat180 close (PID under
+   qc_queue PID 29952, lock-protected). Read end to end for real defects (not just PASS/FAIL
+   rollup — that counter is known-unreliable per beat178, sweeps up docstring text).
 
-2. **Mini SSH retry** — unreachable 17th consecutive beat. Try `ssh smaitra@mac-mini.localdomain` and
-   `ssh smaitra@172.16.151.169`. If reachable: SCP A_gold (6280 entries, MD5 2128bbccb) and all
-   c_gold_beat132-145 candidate files; verify caffeinate running; check flywheel log.
+2. **Continue queue rotation past battery11** — battery9 next, then the rest of the cycle
+   (battery6/battery10/battery2b/battery12/battery4b/battery3b/product_e2e). Read each log
+   end-to-end as it lands; battery9 in particular should be checked against the 5 fresh gold
+   exemplars added at beat180 (honest-no template variety, VF-leads-with-Yes, short-reply
+   near-repeat, weak-link non-echo, barrier-pivot grammar) — none of those are mechanical fixes
+   yet, so don't expect the underlying behavior to have changed; they're gold-corpus signal only.
 
-3. **BYO deep-test** — deferred 38 consecutive beats. ONLY run when:
-   (a) memory_pressure ≥35%, AND (b) battery9/qc_queue not in-flight (PID 50978 dead, qc_queue
-   between batteries). Check: `memory_pressure | grep 'free percentage'`; `ps aux | grep battery`.
-   The BYO test hits the running server — no new model launch needed. The memory constraint is to
-   ensure the in-flight regen doesn't cause swap pressure.
+3. **Mini SSH retry** — unreachable 57th consecutive beat at beat180 close. Try
+   `ssh smaitra@mac-mini.localdomain` and `ssh smaitra@172.16.151.169`. If reachable: SCP
+   A_gold (6549 entries) and all un-synced c_gold_beat*.jsonl candidate files; verify caffeinate
+   + honest_flywheel running; check flywheel log.
 
-4. **Gold(A) growth** — +5-10 more scripts. Uncovered scenes: comet shower, wool at fire,
-   midnight market, hot-air-balloon morning, ice-skating first time, darkroom photo development,
-   night fishing by headlamp.
+4. **Companion deep-test slot** — next in the explicit 5-tool UC rotation (order: Imagination →
+   Secretary → Ask-Your-Files → Companion → Build-Your-Own; AYF ran beat178, BYO ran beat179).
+   Last standalone companion_deep_test run was beat92 — battery9 has been serving as the
+   continuous companion read since, but a dedicated multi-turn deep-test run is overdue. Run
+   when qc_queue is between batteries and memory ≥35% free.
 
-5. **ZIP rebuild** — no code changes beats 144-145, ZIP is from beat143 (MD5: 8059656f). Stays valid
-   as long as no src/ changes. Rebuild and update MD5 when next fix is applied.
+5. **sec-summarize-lossless causal-ordering ambiguity** (flagged beat179, reconfirmed beat180,
+   identical phrasing both times) — the scenario's own source sentence ("Hire 3 engineers →
+   extends to 16 months if deferred to Q3") is genuinely ambiguous about what's conditional on
+   what. Consider tightening the scenario's source text in scripts/qc/scenario_bank.py rather
+   than building a mechanical causal-check — this reads as a test-authoring gap, not a model or
+   code defect. FYI for Sonali logged in review-queue.md beat180 section.
+
+6. **Gold(A) growth** — +5-10 more scripts. "midnight market" and "wool at fire" angles were
+   used at beat180 (wool-blanket-first-snow-fire); remaining still-fresh angles: comet shower
+   (lightly used, check first), hot-air-balloon morning, ice-skating first time (used 6x,
+   probably saturated — pick a fresher angle), darkroom photo development (used 8x, saturated),
+   night fishing by headlamp (used 4x — still room for a distinct angle).
 
 ## STANDING RULES (learned the hard way — keep ALL of these)
 1. Promotion = comparative READS + full battery gate. NEVER a loss number.
