@@ -64,7 +64,7 @@ from imagination_engine.postcheck import (degeneration_report, drop_collapsed_pa
                                           repair_short_phrase_repeats,
                                           drop_adjacent_duplicates, drop_tail_duplicates,
                                           fix_possessive_pronouns, fix_your_contraction,
-                                          fix_copula_youre_alone,
+                                          fix_copula_youre_alone, fix_predicative_your,
                                           fix_subject_pronouns, fix_object_pronouns,
                                           strip_back_instruction_leaks,
                                           strip_active_body_chair_refs,
@@ -631,6 +631,9 @@ def _generate_settling(engine: Engine, transcript: list[dict], emit) -> str:
     if pronoun_fixed:
         log.warning('[settling] %d possessive-pronoun adjective error(s) fixed (hers→her/yours→your)',
                     pronoun_fixed)
+    body, predicative_your_fixed = fix_predicative_your(body)
+    if predicative_your_fixed:
+        log.warning('[settling] %d predicative your→yours error(s) fixed', predicative_your_fixed)
     body, contraction_fixed = fix_your_contraction(body)
     if contraction_fixed:
         log.warning('[settling] %d your→you\'re contraction error(s) fixed', contraction_fixed)
@@ -1182,6 +1185,9 @@ def generate_session(
     if pronoun_fixed:
         log.warning('[v6] %d possessive-pronoun adjective error(s) fixed (hers→her/yours→your)',
                     pronoun_fixed)
+    full, predicative_your_fixed = fix_predicative_your(full)
+    if predicative_your_fixed:
+        log.warning('[v6] %d predicative your→yours error(s) fixed', predicative_your_fixed)
     full, contraction_fixed = fix_your_contraction(full)
     if contraction_fixed:
         log.warning('[v6] %d your→you\'re contraction error(s) fixed', contraction_fixed)
@@ -1351,6 +1357,13 @@ def generate_session(
             "the other bird",          # "the other bird must be traveling" — implied companion
             "the other eagle",         # variant with named species
             "other's call",            # "The other's call fades" — acoustic companion (ASCII apostrophe)
+            # beat178 (2026-08-24): two new escape forms found in battery11_0824_1434 honest
+            # read. "your presence was different now that someone has gone away" (implied
+            # departed companion) and "someone has started campfire as first step toward
+            # settling for evening meal and shelter" (hallucinated human bystander below the
+            # eagle — a new escape class distinct from eagle companions).
+            "someone has gone away",   # "someone has gone away" — implied departed companion
+            "someone has started",     # "someone has started campfire" — hallucinated human below
         ))
         if anon_companion_dropped:
             log.warning('[v6] %d anonymous-companion sentence(s) dropped (you/we both in solo eagle active-body)',

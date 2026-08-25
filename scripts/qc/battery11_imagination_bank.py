@@ -212,7 +212,15 @@ for sc in scenarios:
                 # Found in battery11_0823_0259 imag-eagle-wildlife-plural honest read.
                 r'|\bthe\s+other\s+bird\b'
                 r'|\bthe\s+other\s+eagle\b'
-                r"|\bother['']\s*s\s+call\b",
+                r"|\bother['']\s*s\s+call\b"
+                # beat178 (2026-08-24): battery11_0824_1434 honest read, 35/35 mechanical PASS
+                # but two new escapes found: "your presence was different now that someone has
+                # gone away" (implied departed companion, imag-eagle-wildlife-plural) and
+                # "someone has started campfire as first step toward settling for evening meal
+                # and shelter" (hallucinated human bystander, imag-eagle-golden-eagle-wildlife —
+                # a new escape class: a human character, not another eagle).
+                r'|\bsomeone\s+has\s+gone\s+away\b'
+                r'|\bsomeone\s+has\s+started\b',
                 lower, _re.IGNORECASE
             ))
             # beat153: Chair-body reminder in eagle script (not just opening).

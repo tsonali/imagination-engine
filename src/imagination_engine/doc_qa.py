@@ -17,6 +17,7 @@ persistent "associate over my work files"). Local-first; nothing leaves the devi
 from __future__ import annotations
 
 import logging
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -122,6 +123,29 @@ class DocQA:
         ):
             chunks.append(piece)
         answer = "".join(chunks).strip()
+        # beat178: strip a spurious trailing bare refusal appended AFTER a real answer.
+        # Found in ayf_deep UC5 (single-part question): "As of April 2, Ben completed
+        # the compliance review. Now in legal hold.\nThat isn't in your files." — the
+        # model fully answered, then tacked on a generic, subject-less "That isn't in
+        # your files." for no reason. This is distinct from the MANDATORY MULTI-PART
+        # RULE's legitimate "[named part] isn't in your files" clause (e.g. "Who the
+        # landlord is isn't in your files."), which names a specific missing part and
+        # must be preserved. Only strip when the trailing sentence is the BARE generic
+        # form (that/this/it — no named subject) and an earlier sentence already has
+        # real content, so a true full refusal (nothing else in the answer) is untouched.
+        _bare_trailing_refusal = re.compile(
+            r"(?:(?<=[.\n])|^)\s*(?:that|this|it)\s+isn'?t\s+in\s+your\s+files\.?\s*$",
+            re.IGNORECASE,
+        )
+        _m_trail = _bare_trailing_refusal.search(answer)
+        if _m_trail and _m_trail.start() > 0:
+            _before = answer[:_m_trail.start()].strip()
+            if len(_before.split()) >= 3:
+                log.warning(
+                    "doc_qa: stripped spurious trailing bare refusal after real answer "
+                    "(beat178): %r", answer[_m_trail.start():]
+                )
+                answer = _before
         # If the model refused despite having context, retry once with an explicit
         # vocabulary-bridge reminder. Fires on any form of the refusal string
         # ("isn't in your files" OR "not in your files") so the retry catches both

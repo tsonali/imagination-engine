@@ -554,6 +554,14 @@ _FORBIDDEN = [
     # Pattern: "does it feel like [optional the] [feeling noun]" followed within 30 chars
     # by "protects?" (singular or plural present-tense protect).
     r"\bdoes it feel like (?:the )?(?:anger|angry|sadness|grief|anxiety|anxious|fear|fearful|shame|guilt|guilty|frustration|frustrated|rage|hurt|pain|painful)\b.{0,30}protects?\b",
+    # therapy-reframe FUNCTIONAL-USE form (beat176): battery9_1053 comp-grief-anger-
+    # self-recycle T1 produced "Anger at a miscarriage, not sadness — that breaks the
+    # script. Anger might be what it takes to get through this without breaking yourself
+    # in two different places." The second sentence assigns anger a protective/useful
+    # function ("what it takes to get through") without using protecting/hiding/guarding —
+    # same forbidden reframe (feeling exists FOR a purpose) in different words. Prior
+    # patterns only covered protecting/hiding/guarding/covering verb forms.
+    r"\b(?:anger|angry|sadness|grief|anxiety|anxious|fear|fearful|shame|shameful|guilt|guilty|frustration|frustrated|rage|hurt|pain|painful)\b(?:\s+\w+){0,3}\s+(?:might|could|may|is|are|was|were)\s+(?:\w+\s+)?(?:be\s+)?what (?:it takes|you need|'?s needed|is needed)\b",
     # helplessness opener: companion admitting it doesn't know what to do mirrors the
     # user's helplessness and gives nothing. beat99: comp-grief-anger-barrier-vague T2
     # regen produced "I don't know what to do when he makes it about him." — mirrors
@@ -3362,6 +3370,24 @@ class Companion:
         if reply:
             reply = re.sub(r',\s+(?:and|but|or)\s{2,}(?=[A-Z])', '. ', reply)
             reply = re.sub(r'  +', ' ', reply)
+
+        # beat178: "No — I haven't told you [about X]" perspective escape, final pass.
+        # Root cause (battery9_0824_1602 comp-past-query): the beat172 normalizer at
+        # line ~2671 fires mid-function, but several regen guards further down (echo-strip,
+        # semantic-repeat, self-correction) can replace `reply` with fresh model output
+        # AFTER beat172 already ran — reintroducing the inverted "I haven't told you"
+        # phrasing with nothing left downstream to catch it. Verified live: "Did we talk
+        # about this before?" -> "No — I haven't told you about this specific thing
+        # before." survived to the final reply despite the beat172 fix existing.
+        # Fix (same pattern as beat139's software-pronoun guard): run the normalizer
+        # again, unconditionally, as the last string transform before history/return so
+        # no regen path further up can outrun it.
+        if reply:
+            reply = re.sub(
+                r"^(No\s*[—\-]\s*)[Ii]\s+haven'?t\s+told\s+you\b",
+                r"\1you haven't told me",
+                _norm_apos(reply.strip()),
+            )
 
         self.history.append({"role": "user", "content": user_message})
         self.history.append({"role": "assistant", "content": reply})

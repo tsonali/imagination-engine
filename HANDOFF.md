@@ -1,6 +1,27 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-08-23 beat175 — **SHIP GATE HOLDS. 3 CODE FIXES (scenario_bank.py import crash + companion.py Case 2g' em-dash dilution + gerund bridge rotation). battery9_0823_1413 COMPLETE ✅ 20/20 (25% q-enders ✅, 11% paraphrase ✅, 0.72 diversity ✅, floors all clean). Gold(A)=6531 (+7), Gold(C)=242 (+5). Mini UNREACHABLE (52nd). companion.py MD5: 005b143c7ef3caed9fdfedae40529c0b. ZIP MD5: 06475fe125ccc91f5133da44d09fb83b. Memory 20% — qc_queue restart blocked. Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.**
+_Last updated 2026-08-24 beat178 — **SHIP GATE HOLDS. 5 CODE FIXES across all 3 tools whose batteries had FAIL lines this cycle (Imagination postcheck.py ×3, Companion companion.py, AYF doc_qa.py). AYF deep test run for the first time in the use-case rotation (18/18 mechanical PASS, 1 real defect found+fixed). Also found: the queue.log PASS/FAIL rollup itself is unreliable — verified two batteries whose reported FAIL counts didn't match a real read of the transcript. Gold(A)=6544, Gold(C)=235 unchanged (focus was defect-fixing, not corpus growth). Mini UNREACHABLE (55th). postcheck.py MD5: 4135cbd660ecec2b05bd77c9a84091c2. generator.py MD5: 66d797a56622ebdcdb76814a6a8a7657. companion.py MD5: 0c09e5d3ba52cea9c3c05f2b50688b99. doc_qa.py MD5: 2e5671981571925f175e4bb93adc13c2. ZIP MD5: 457c0e6695fb36f46a90e3bea3425e17. Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.**
+
+BEAT178 SUMMARY (2026-08-24 — context-resume from beat177):
+- Read battery11_0824_1434 (imagination), battery9_0824_1602 (companion), battery10_0824_1745 (secretary) end-to-end via 3 parallel background agents (protects heartbeat context budget on ~250KB of combined log text). All three queue.log-reported FAIL counts turned out to be misleading — see review-queue.md beat178 entry on the rollup-counting bug.
+- FIX 1 (postcheck.py): narrator "I stopped talking" self-reference leak in imag-embodiment-eagle — extended `_NARRATOR_POSS`.
+- FIX 2 (postcheck.py, new `fix_predicative_your()`): recurring "is/was your [end-of-clause]" bug (should be "yours") found twice in one battery11 run. Wired into both generator.py postprocessing paths.
+- FIX 3 (postcheck.py + generator.py + battery11_imagination_bank.py, 3-way parity): 2 new eagle anon-companion escapes — "someone has gone away" and "someone has started" (new escape class: hallucinated human bystander, not another eagle).
+- FIX 4 (companion.py): comp-past-query's beat172 perspective fix ("No — I haven't told you" -> "No — you haven't told me") is correct in isolation but multiple regen guards downstream of it can overwrite `reply` before return, silently reintroducing the bug. Re-applied as an unconditional final pass right before `history.append()`, same pattern as beat139's software-pronoun guard.
+- FIX 5 (doc_qa.py): AYF UC5 — model answered correctly then appended a spurious, self-contradicting bare "That isn't in your files." The retry-trigger's broad substring check risked misfiring on legitimate multi-part answers too (UC3-style "[X] isn't in your files" clauses). Fix strips only a trailing BARE (no named subject) refusal that follows real content.
+- Ran AYF deep test (ayf_deep_0805.py) for the first time this rotation — 18/18 mechanical PASS; found FIX 5 above on the honest read.
+- 4 more real, unfixed defects logged to review-queue.md for a future beat: Companion "love me back" pronoun inversion (para-love), comp-vf-sister-memory missing required "Yes" prefix, Case 2g' word-count floor 1-word gap, "You're already the weak link" recurrence (confirmed NOT a stale-build issue — dist MD5s matched source). Plus 3 Secretary defects (debug-string leak, vague commitment passing a substring check, inverted causal relationship between two correctly-preserved numbers) — Secretary hasn't been in the fix scope for several beats; queued for its next use-case rotation turn.
+- Gold(A)=6544, Gold(C)=235 — unchanged this beat (all effort went to defect-hunting/fixing across 3 tools with FAIL lines; no new gold written).
+- Mini SSH: UNREACHABLE (55th consecutive).
+- ZIP rebuilt 3 times this beat as fixes landed; final MD5 457c0e6695fb36f46a90e3bea3425e17.
+
+NEXT:
+(1) Verify all 5 beat178 fixes land clean in the next battery9/battery11 cycle (currently in flight, PID 17128).
+(2) Secretary defects from this beat (debug-string leak, vague-commitment check, inverted-causality summarize bug) — next time Secretary comes up in the use-case rotation, fix these three.
+(3) Companion's 4 still-open regex/threshold gaps (see review-queue.md beat178) — candidates for the next companion.py fix pass.
+(4) BYO deep test — check how overdue; last confirmed clean run was beat167.
+(5) Mini SSH: 55th consecutive failure; note without action unless Sonali investigates connectivity.
+(6) Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.
 
 BEAT175 SUMMARY (2026-08-23 — context-resume from beat174):
 - battery9_0823_1413: COMPLETE — 20 scenarios, 36 replies, full honest read done. 25% q-enders ✅, 11% paraphrase ✅, 0.72 diversity ✅. ALL mechanical floors clean across 20 scenarios. 2 defects found and fixed:

@@ -457,7 +457,14 @@ _NARRATOR_POSS = re.compile(
     # Grief-pet dog-POV leak (beat70): model puts listener in animal's body and refers
     # to the human as "your handler" / "your owner" — immediate perspective failure.
     r"|\byour\s+(?:handler|owner|master)\b"
-    r"|\bmy\s+(?:handler|owner|master)\b",
+    r"|\bmy\s+(?:handler|owner|master)\b"
+    # beat178 (2026-08-24): narrator claims to be a speaking presence that paused —
+    # "exactly how it was when I stopped talking" (battery11_0824_1434 imag-embodiment-
+    # eagle honest read). The existing "I + verb" list (reach/keep/feel/sit/take/hold/
+    # said/step/walk/stand/watch/start/call/move) doesn't cover narration-of-narration
+    # verbs. Direct violation of instrument-not-companion: the narrator has no body and
+    # does not "stop talking" as an event inside the scene.
+    r"|\bI\s+(?:stop|stopped|talk|talked|talking|speak|spoke|speaking|narrate|narrated|narrating)\b",
     re.IGNORECASE,
 )
 
@@ -640,6 +647,40 @@ def fix_copula_youre_alone(text: str) -> tuple[str, int]:
         lambda m: f"{m.group(1)} yours {m.group(2)}", text
     )
     return result, n
+
+
+# beat178: the reverse of fix_possessive_pronouns' "yours NOUN" -> "your NOUN" fix.
+# Found twice in one battery11 run (imag-eagle-wildlife-plural, imag-eagle-companion-
+# bird-he 0824_1434): the model uses attributive "your" where the standalone
+# predicative "yours" belongs — "The sky is your for as far as it goes", "it was
+# your on its way to being gone", "is your entirely — transferred from...". Only
+# fires when "your" is followed by a closing punctuation mark or one of a small set
+# of adverbs/prepositions that never introduce a noun phrase, so legitimate
+# attributive uses ("is your wing", "was your turn") are untouched.
+_PREDICATIVE_YOUR_RE = re.compile(
+    r"\b(is|was|are|were|be|become|becomes|became)\s+your\b"
+    r"(?=\s*(?:[.,!?;]|—|$|\s+(?:entirely|completely|now|here|still|again|"
+    r"too|for|on|at|in|to|by|with|from)\b)"
+    r")",
+    re.IGNORECASE,
+)
+
+
+def fix_predicative_your(text: str) -> tuple[str, int]:
+    """'is/was your [end-of-clause]' -> 'is/was yours [end-of-clause]'.
+
+    Reverse-direction sibling of fix_possessive_pronouns: catches attributive
+    "your" used where the standalone possessive "yours" is grammatically required.
+    """
+    fixed = 0
+
+    def _replace(m: "re.Match") -> str:
+        nonlocal fixed
+        fixed += 1
+        return f"{m.group(1)} yours"
+
+    result = _PREDICATIVE_YOUR_RE.sub(_replace, text)
+    return result, fixed
 
 
 # beat152: mid-word token fusion — n376 occasionally fuses a contraction stub with the
@@ -916,7 +957,18 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     # Both imply a companion eagle and slipped all prior guards (no species name, no pronoun).
     r'|\bthe\s+other\s+bird\b'          # "the other bird must be traveling"
     r'|\bthe\s+other\s+eagle\b'         # variant with named species
-    r"|\bother[’']\s*s\s+call\b",  # "other's call" — both ASCII + Unicode apostrophe
+    r"|\bother[’']\s*s\s+call\b"   # "other's call" — both ASCII + Unicode apostrophe
+    # beat178 (2026-08-24): two new escape forms found in battery11_0824_1434 honest
+    # read. (1) imag-eagle-wildlife-plural: "your presence was different now that
+    # someone has gone away" — implies an unnamed companion departed; no prior guard
+    # covers "someone" at all (all prior fixes target named/pronoun/acoustic animal
+    # companions, not a generic human/animal "someone"). (2) imag-eagle-golden-eagle-
+    # wildlife: "someone has started campfire as first step toward settling for
+    # evening meal and shelter" — a hallucinated HUMAN character with agency below the
+    # eagle; a new escape class distinct from eagle-companion (no prior filter targets
+    # human bystanders at all). Both use "someone has" as the tell.
+    r'|\bsomeone\s+has\s+gone\s+away\b'  # "someone has gone away"
+    r'|\bsomeone\s+has\s+started\b',     # "someone has started [a fire/campfire]"
     re.IGNORECASE,
 )
 

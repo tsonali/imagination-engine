@@ -9404,3 +9404,29 @@ Imagination deep test is the in-flight battery11 run (per established practice, 
 
 ### Running
 qc_queue running (PID 6482, lock-protected). battery11 in flight. Next beat should read battery11's results end-to-end and continue the rotation with Ask-Your-Files deep test once the model is free.
+
+---
+## 2026-08-24 (beat178) — 4 code fixes across Imagination/Companion/AYF; AYF deep test run
+
+### Read (end-to-end, via 3 parallel background agents to protect context)
+- **battery11_0824_1434** (imagination, queue.log said "41 PASS/7 FAIL"): real mechanical result was 35/35 PASS — the FAIL count appears to be the queue.log rollup sweeping up historical regression-note text embedded in scenario_bank.py's own docstrings, not live results. Honest read found real defects mechanical checks missed (see Fixed below) plus several open items logged but not fixed this beat (back-half semantic decay, intimacy chair-bleed, broken fragments from drop-filters, missing return-to-room closing beats, "particular" word overuse).
+- **battery9_0824_1602** (companion, "18 PASS/13 FAIL"): confirmed real defects — inverted "No — I haven't told you" phrasing surviving despite an existing beat172 fix, "love me back" pronoun inversion, comp-vf-sister-memory missing required "Yes" prefix, Case 2g' word-count floor gap, "You're already the weak link" recurrence (checked for stale-build drift — ruled out, all 4 dist copies matched source MD5, so it's a genuine remaining regex/threshold gap), "What does it feel like..." question-ender template fatigue across scenarios. Question-ender rate independently reconfirmed at 17% (6/36).
+- **battery10_0824_1745** (secretary, "3 PASS/2 FAIL"): log actually contains zero explicit FAIL lines — every case says "floors: clean." Real defects found on reading anyway: sec-custody-email has a leaked internal debug string (`secretary[reply]: stub output — body regen attempt 1`) plus an ambiguous run-on sentence; sec-condolence-close gives a vague non-committal reassurance that satisfies a substring check without being specific; sec-summarize-lossless has a logically-inverted causal relationship between two correctly-preserved numbers. None fixed this beat (Secretary is not in today's fix scope — logged to review-queue for a future beat's Secretary rotation).
+
+### Fixed
+1. **postcheck.py — narrator "I stopped talking" self-reference leak** (imag-embodiment-eagle): "Your body is positioned now exactly how it was when I stopped talking" — direct instrument-not-companion violation. Extended `_NARRATOR_POSS` with stop/talk/speak/narrate verb forms.
+2. **postcheck.py — new `fix_predicative_your()`**, wired into both generator.py postprocessing paths: "The sky is your for as far as it goes" / "is your entirely, transferred from..." — attributive "your" used where standalone "yours" belongs (reverse of the existing hers/yours/ours->her/your/our fix). Found twice in one battery11 run. Deliberately excludes "only"/"alone" from the trigger list after both false-positived in testing ("your only companion", "your alone time").
+3. **postcheck.py + generator.py + battery11_imagination_bank.py (3-way parity)** — 2 new eagle anon-companion escapes: "someone has gone away" and "someone has started" (the second is a new escape *class* — a hallucinated human character below the eagle, not another eagle: "someone has started campfire as first step toward settling for evening meal and shelter").
+4. **companion.py — comp-past-query perspective fix, final-pass hardening**: the beat172 fix (normalizes "No — I haven't told you" -> "No — you haven't told me") is correct in isolation but runs mid-function; traced that ~15 regen touchpoints exist between it and the return, several of which can overwrite `reply` with fresh model output that reintroduces the bug. Re-applied the same normalizer unconditionally as the very last string transform before `history.append()`/return, matching beat139's software-pronoun guard which already runs last for exactly this reason.
+5. **doc_qa.py — AYF UC5 spurious trailing refusal**: model correctly answered a single-part dated-status question then appended a self-contradicting bare "That isn't in your files." The existing retry-trigger's raw substring check for "isn't in your files" is broad enough to also risk misfiring on legitimate multi-part answers (e.g. UC3's "Who the landlord is isn't in your files."). Fix strips only a trailing BARE generic refusal (no named subject) that follows ≥3 words of real content, leaving named-subject partial-answer clauses and true full refusals untouched.
+
+All 5 fixes unit-tested standalone (6/6, 5/5, 4/4 across the three files) before landing since no dedicated pytest harness exists for these specific regexes. `scripts/test_postcheck.py` (existing suite) reconfirmed ALL PASS after the postcheck.py changes. `scenario_bank.py` loads cleanly (117 scenarios). All 4 dist copies + ZIP rebuilt after every file change (final ZIP MD5: 457c0e6695fb36f46a90e3bea3425e17).
+
+### Use-case rotation
+**Ask-Your-Files deep test run this beat** (ayf_deep_0805.py) — 18/18 mechanically PASS, 1 real defect found+fixed (see doc_qa.py fix above). Paused qc_queue for the run (model-free window right after battery4b finished), relaunched cleanly afterward (lock-protected per beat177's fix). Next in rotation: Companion (last deep-tested beat92; battery9 continues to be the primary companion read every cycle).
+
+### Mini
+UNREACHABLE (55th consecutive). Gold(A)=6544, Gold(C)=235 unchanged this beat — focus was defect-hunting/fixing across all 3 tools with FAIL lines, not corpus growth.
+
+### Running
+qc_queue relaunched (PID 17128, lock-protected), memory 83% free. Next beat should verify all 5 fixes land clean in the next battery9/battery11/battery10 cycle, and continue the use-case rotation.
