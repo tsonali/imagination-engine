@@ -9461,3 +9461,28 @@ UNREACHABLE (57th consecutive).
 
 ### Running
 qc_queue running (PID 29952, lock-protected), battery11_imagination_bank in flight as of beat close (started 02:31:45, memory correctly dropped to 17% free — single model process confirmed, no double-launch). Next beat should read that battery11 result end-to-end, then continue down the queue (battery9 next) and pick up the Companion deep-test slot in the UC rotation when the model is free.
+
+---
+## 2026-08-25 (beat181) — 1 code fix (eagle escape); process incident during defect-hunting (contained, no crash)
+
+### Read
+- **battery11_0825_0231** (the run in flight at beat180 close), read end to end by a background agent — 7/7 scenarios, full transcripts + postcheck blocks, not just the rollup. One new mechanically-fixable defect found (see Fixed). Known/already-logged, confirmed recurring, not touched: back-half semantic-loop decay (imag-mri/imag-calm-settle/imag-intimacy), "particular"/"specific" crutch-phrase overuse, and a broken/orphaned fragment in imag-intimacy matching the documented no-mechanical-fix-yet incoherence class from beat179.
+
+### Fixed
+- **postcheck.py + generator.py + battery11_imagination_bank.py (3-way parity)** — new eagle anon-companion escape: `imag-eagle-companion-bird-he` passed all 6 eagle postchecks with "a pair soaring low... not alone in the sky this morning... Eagles that have been on patrol before your arrived will wait for food at lower altitudes now" — companion-eagle implied with no species name, no pronoun, new surface phrasing (same escape family as beat84/134/178). `_EAGLE_ANON_COMPANION_PATTERN` extended with the three phrases; incidentally also removes the "your arrived" pronoun-grammar corruption riding in the same clause. New TP/FP block in `scripts/test_postcheck.py` (4 TP, 3 FP), all green. Committed 62a8fb2. Dist copies synced (also caught and fixed a stale `dist/hearth` mirror of `battery11_imagination_bank.py` missing beat178's fix while there).
+
+### Process incident (contained — full detail in review-queue.md beat181)
+The agent doing the read-and-fix above was told to verify `battery11_imagination_bank.py` with `py_compile` only and never launch the model. It instead briefly executed the file as a live battery while "verifying," colliding with qc_queue's own legitimate in-flight `battery11_0825_0620` run. It caught this within seconds and killed its own process, but `queue.log` shows the queue's real battery11 run was SIGKILLed (exit 137) at 06:39:24 — 2/7 scenarios captured before the kill. Same failure class as beat177/178 (two model processes at once), this time from a delegated agent rather than the heartbeat/launchd race. Verified immediately after: exactly one model process running (qc_queue's own next battery, freshly started), memory recovering normally, lock intact, queue self-healed with no manual intervention. Net cost: one incomplete battery11 pass, which the queue will simply re-run. Lesson banked in review-queue.md: future delegated agents must verify QC scripts with `py_compile`/`ast.parse` only, never by running or importing them in a way that can trigger module-level execution.
+
+### Gold
+- **Gold(A) +6** → 6555: comet-shower-desert-night, hot-air-balloon-dawn-launch, engine-turns-over-after-months, standing-ovation-unexpected, kid-witty-remark-dinner-table, old-note-in-coat-pocket. Targeted beat180's freshest under-used angles (comet, hot-air-balloon) plus four genuinely new angles. All openings checked unique against the last 40+ entries. NOT SCP'd (mini unreachable).
+- Gold(C): no growth this beat (focus was defect-fixing + the process incident).
+
+### Use-case rotation
+Companion deep-test (next in rotation, last standalone run beat92) not run this beat — memory stayed below the 35%-free launch-safety gate for the whole beat (qc_queue's battery11→battery9 cycle plus the process incident occupied the single model slot continuously).
+
+### Mini
+UNREACHABLE (58th consecutive). Tried both the hostname alias and a direct IP fallback this beat — same result, no change.
+
+### Running
+qc_queue running (PID 29952, lock-protected), battery9_engagement in flight as of beat close (started 06:41:30, single model process confirmed). Next beat should read battery9 end to end, continue the queue rotation (battery11 will re-run the scenarios lost to the beat181 collision), retry the mini, and take the Companion deep-test slot when a model-free window opens.

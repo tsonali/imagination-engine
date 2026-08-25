@@ -1,6 +1,14 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-08-24 beat178 — **SHIP GATE HOLDS. 5 CODE FIXES across all 3 tools whose batteries had FAIL lines this cycle (Imagination postcheck.py ×3, Companion companion.py, AYF doc_qa.py). AYF deep test run for the first time in the use-case rotation (18/18 mechanical PASS, 1 real defect found+fixed). Also found: the queue.log PASS/FAIL rollup itself is unreliable — verified two batteries whose reported FAIL counts didn't match a real read of the transcript. Gold(A)=6544, Gold(C)=235 unchanged (focus was defect-fixing, not corpus growth). Mini UNREACHABLE (55th). postcheck.py MD5: 4135cbd660ecec2b05bd77c9a84091c2. generator.py MD5: 66d797a56622ebdcdb76814a6a8a7657. companion.py MD5: 0c09e5d3ba52cea9c3c05f2b50688b99. doc_qa.py MD5: 2e5671981571925f175e4bb93adc13c2. ZIP MD5: 457c0e6695fb36f46a90e3bea3425e17. Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.**
+_Last updated 2026-08-25 beat181 — **SHIP GATE HOLDS. 1 CODE FIX (eagle "a pair soaring / not alone in the sky / on patrol" anon-companion escape, found reading battery11_0825_0231 end to end). PROCESS INCIDENT (contained, no crash): a defect-fixing background agent accidentally executed battery11_imagination_bank.py live while verifying its own fix — never launch/import a QC battery script to "check it imports," py_compile/ast.parse only — colliding with qc_queue's own in-flight battery11_0825_0620 run; the queue's run was SIGKILLed at 2/7 scenarios (exit 137), no crash, no ghost process, queue self-healed onto battery9 unattended within 2 minutes. Gold(A)=6555 (+6), Gold(C)=240 unchanged this beat. Mini UNREACHABLE (58th — tried hostname alias + direct IP). Beats 179-180 (not previously logged here — see daily-log.md/review-queue.md): battery12 curly-apostrophe fix verified holding, companion "love me back" pronoun fix, BYO deep test clean, qc_queue found dead twice more (both self-inflicted pause-and-forget, both fixed by relaunch, no data loss). postcheck.py MD5: da5a5774f398e3f58a3644c981856f65. generator.py MD5: cfda4229453d459dc31fe81032a74a56. companion.py MD5: 104994c4882d1eb1438ecef4c2b31b05. battery11_imagination_bank.py MD5: fb77e62e0fb086f678f0391ce528fc2d. ZIP MD5: 618e4d0f33f500a4928cf564bd0d7ac0. Sonali: push v1.0 tag (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.**
+
+BEAT181 SUMMARY (2026-08-25):
+- Read battery11_0825_0231 end-to-end via background agent. Found + fixed one new eagle anon-companion escape (see fix above). All other quality misses confirmed as known, already-logged model-floor issues (back-half decay, "particular"/"specific" crutch phrases, intimacy incoherence fragment) — not touched.
+- Process incident: same agent, while trying to verify battery11_imagination_bank.py "imports cleanly," accidentally ran it live instead of using py_compile, colliding with qc_queue's own legitimate battery11 run and getting it SIGKILLed 2/7 scenarios in. Caught immediately, no lasting damage — verified single clean model process, normal memory recovery, queue self-healed to battery9 with no manual fix needed. Full incident + lesson logged in review-queue.md beat181 (future agents: py_compile/ast.parse only, never run/import a battery script directly).
+- Gold(A)=6549→6555 (+6): comet-shower-desert-night, hot-air-balloon-dawn-launch, engine-turns-over-after-months, standing-ovation-unexpected, kid-witty-remark-dinner-table, old-note-in-coat-pocket — targeted beat180's freshest under-used angles plus new material. NOT SCP'd (mini unreachable). No Gold(C) growth this beat.
+- Mini: UNREACHABLE (58th consecutive) — tried both `smaitra@mac-mini.localdomain` and direct IP `172.16.151.169`; both failed (DNS resolution + connection timeout respectively).
+- Companion deep-test (next in UC rotation, last standalone beat92) deferred again — memory stayed below the 35%-free gate the entire beat (qc_queue's own battery11→battery9 cycle plus the process incident occupied the single model slot).
+- ZIP rebuilt via scripts/package.sh after the code fix (MD5 above). Git commit 62a8fb2.
 
 BEAT178 SUMMARY (2026-08-24 — context-resume from beat177):
 - Read battery11_0824_1434 (imagination), battery9_0824_1602 (companion), battery10_0824_1745 (secretary) end-to-end via 3 parallel background agents (protects heartbeat context budget on ~250KB of combined log text). All three queue.log-reported FAIL counts turned out to be misleading — see review-queue.md beat178 entry on the rollup-counting bug.
@@ -2104,42 +2112,53 @@ cd ~/Downloads/imagination-engine && nohup bash scripts/qc_queue.sh >> logs/qc/q
 
 ## NEXT HEARTBEAT PRIORITY (in order)
 
-### Beat181 priorities (in order):
+### Beat182 priorities (in order):
 
-1. **Read battery11_0825_0231 complete log** — was in flight at beat180 close (PID under
-   qc_queue PID 29952, lock-protected). Read end to end for real defects (not just PASS/FAIL
-   rollup — that counter is known-unreliable per beat178, sweeps up docstring text).
+1. **Read battery9_0825_0641 complete log** (in flight at beat181 close, PID under qc_queue
+   PID 29952) end to end for real defects — not just the rollup (known-unreliable since beat178).
 
-2. **Continue queue rotation past battery11** — battery9 next, then the rest of the cycle
-   (battery6/battery10/battery2b/battery12/battery4b/battery3b/product_e2e). Read each log
-   end-to-end as it lands; battery9 in particular should be checked against the 5 fresh gold
-   exemplars added at beat180 (honest-no template variety, VF-leads-with-Yes, short-reply
-   near-repeat, weak-link non-echo, barrier-pivot grammar) — none of those are mechanical fixes
-   yet, so don't expect the underlying behavior to have changed; they're gold-corpus signal only.
+2. **Continue queue rotation** — after battery9, the queue re-runs battery11 (the beat181
+   process incident killed battery11_0825_0620 at 2/7 scenarios; the queue will pick it up
+   again on its own — first priority when it lands is confirming the beat181 eagle fix
+   ("a pair soaring"/"not alone in the sky"/"on patrol") holds clean), then the rest of the
+   cycle (battery6/battery10/battery2b/battery12/battery4b/battery3b/product_e2e). Read each
+   log end-to-end as it lands.
 
-3. **Mini SSH retry** — unreachable 57th consecutive beat at beat180 close. Try
-   `ssh smaitra@mac-mini.localdomain` and `ssh smaitra@172.16.151.169`. If reachable: SCP
-   A_gold (6549 entries) and all un-synced c_gold_beat*.jsonl candidate files; verify caffeinate
-   + honest_flywheel running; check flywheel log.
+3. **Mini SSH retry** — unreachable 58th consecutive beat at beat181 close (tried both the
+   hostname alias and direct IP `172.16.151.169`, both failed). Try again fresh. If reachable:
+   SCP A_gold (6555 entries) and all un-synced c_gold_beat*.jsonl candidate files; verify
+   caffeinate + honest_flywheel running; check flywheel log.
 
 4. **Companion deep-test slot** — next in the explicit 5-tool UC rotation (order: Imagination →
    Secretary → Ask-Your-Files → Companion → Build-Your-Own; AYF ran beat178, BYO ran beat179).
-   Last standalone companion_deep_test run was beat92 — battery9 has been serving as the
-   continuous companion read since, but a dedicated multi-turn deep-test run is overdue. Run
-   when qc_queue is between batteries and memory ≥35% free.
+   Last standalone companion_deep_test run was beat92 — deferred again at beat181 (memory
+   stayed below 35% free the whole beat). Run as soon as qc_queue is between batteries and
+   memory ≥35% free; this is now overdue two beats running, prioritize the window.
 
-5. **sec-summarize-lossless causal-ordering ambiguity** (flagged beat179, reconfirmed beat180,
-   identical phrasing both times) — the scenario's own source sentence ("Hire 3 engineers →
-   extends to 16 months if deferred to Q3") is genuinely ambiguous about what's conditional on
-   what. Consider tightening the scenario's source text in scripts/qc/scenario_bank.py rather
-   than building a mechanical causal-check — this reads as a test-authoring gap, not a model or
-   code defect. FYI for Sonali logged in review-queue.md beat180 section.
+5. **IMPORTANT process lesson from beat181** — when delegating QC-code verification to a
+   background agent, be explicit that "does this script import/parse cleanly" means
+   `py_compile.compile(path, doraise=True)` or `ast.parse()` ONLY. Never let an agent run or
+   import a battery script directly (even for a quick sanity check) — module-level code in
+   these files launches a live model generation, and a second concurrent model process is
+   exactly the failure class that caused the 07-12 kernel panic. Beat181's incident was caught
+   and self-healed with no lasting damage, but don't rely on luck a third time.
 
-6. **Gold(A) growth** — +5-10 more scripts. "midnight market" and "wool at fire" angles were
-   used at beat180 (wool-blanket-first-snow-fire); remaining still-fresh angles: comet shower
-   (lightly used, check first), hot-air-balloon morning, ice-skating first time (used 6x,
-   probably saturated — pick a fresher angle), darkroom photo development (used 8x, saturated),
-   night fishing by headlamp (used 4x — still room for a distinct angle).
+6. **sec-summarize-lossless causal-ordering ambiguity** (flagged beat179, reconfirmed beat180,
+   not re-checked beat181 — queue didn't reach battery10 again) — the scenario's own source
+   sentence ("Hire 3 engineers → extends to 16 months if deferred to Q3") is genuinely
+   ambiguous about what's conditional on what. Consider tightening the scenario's source text
+   in scripts/qc/scenario_bank.py rather than building a mechanical causal-check — this reads
+   as a test-authoring gap, not a model or code defect. FYI for Sonali logged in
+   review-queue.md beat180 section.
+
+7. **Gold(A) growth** — +5-10 more scripts. Beat181 used comet-shower and hot-air-balloon
+   (both previously under-used); remaining still-fresh angle from beat180's assessment:
+   night fishing by headlamp (used 4x — still room for a distinct angle). darkroom photo
+   development (8x) and ice-skating first time (6x) are likely saturated — pick fresher
+   angles first.
+
+8. **Gold(C) growth** — no companion gold added at beat181 (focus was defect-fixing + the
+   process incident); resume normal per-beat growth against standing companion gaps.
 
 ## STANDING RULES (learned the hard way — keep ALL of these)
 1. Promotion = comparative READS + full battery gate. NEVER a loss number.
