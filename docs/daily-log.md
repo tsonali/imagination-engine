@@ -9486,3 +9486,60 @@ UNREACHABLE (58th consecutive). Tried both the hostname alias and a direct IP fa
 
 ### Running
 qc_queue running (PID 29952, lock-protected), battery9_engagement in flight as of beat close (started 06:41:30, single model process confirmed). Next beat should read battery9 end to end, continue the queue rotation (battery11 will re-run the scenarios lost to the beat181 collision), retry the mini, and take the Companion deep-test slot when a model-free window opens.
+
+## 2026-08-25 (beat182) — 2 companion.py code fixes (VF-affirmative-missing-YES, Case 2g' 6-word floor); 8 batteries read end-to-end, all clean
+
+### Read
+- **battery12_vital_facts_0917** (13/13 PASS), **battery4b_floor_0933** (both re-probes + within-sitting memory correct), **battery3b_ask_retest_0936** (5/5 bridge/citation), **product_e2e_test_0939** (all 5 tools respond correctly, model loads clean), **battery6_crosscut_0832** (all pages 200, offline tripwire clean, 413 on oversized input), **battery10_registers_0836** (all 10 Secretary scenarios clean, lossless-number floor holds), **battery2b_honesty_0847** (all 4 re-probes clean), **battery9_engagement_0641** (20 scenarios/36 replies, full transcripts not just rollup) — all read end to end. Template-fatigue metrics healthy: 22% question-enders, 0% paraphrase, 0.78 diversity. Full detail + the two live defect confirmations in review-queue.md beat182.
+
+### Fixed
+- **companion.py: VF-affirmative-missing-YES guard** — comp-vf-sister-memory confirmed live in battery9_0641: `"Your sister Priya lives in Austin."` (correct fact, missing required leading "Yes"). Flagged at beat178/180 with a gold exemplar but no mechanical guard until now. New guard fires when a memory probe + `_vf_covers_query`=True + reply >3 words + doesn't already start Yes/No → prepends `"Yes — "`. Placed between the existing THIN-VF-reply guard and SC13-CROSS-ENTITY guard so it doesn't double-fire or collide with either.
+- **companion.py: Case 2g' negation-echo floor lowered 7→6 words** — closes the exact 1-word gap review-queue confirmed at beat178/180 (`"I haven't started the Friday deliverable"`, 6 words, previously exempt).
+- companion.py MD5: `46ba3cfd2f3bb3b21c0610f4d3c5307f` (src + all 3 dist copies synced). Verified with `py_compile` only (per beat181's lesson — never run/import a live module to check it). ZIP rebuilt: `f66633f7840f487f633dcae4be31140a`.
+
+### Not fixed (logged as FYI)
+- **comp-past-query volunteers an unrelated VF fact on a fully vague probe** (`"Did we talk about this before?"` → `"No — I remember Priya lives in Austin."`, no antecedent for "this"). New surface form not caught by any existing PAST-QUERY regex (all of which require a `"you/I haven't"` opener). Confirmed this beat's new VF-affirmative guard does not interact with it (`_vf_covers_query` correctly returns False on a message with no relationship word or proper noun). Wants a second confirmed instance + its own FP pass before writing a guard.
+- "Weak link" paraphrase-recurrence and barrier-pivot grammatical incoherence — still open, still no safe mechanical pattern identified; 2 new gold exemplars added this beat (see below) instead of a rushed fix.
+
+### Gold
+- **Gold(A) +7** → 6562: library-book-decades-overdue, childhood-kitchen-smell-after-years, goalkeeper-penalty-save-decisive, attic-box-old-letters-found, foal-first-wobbly-steps, 3am-gas-station-solo-road-trip, leaving-house-for-last-time. Each checked against corpus term-frequency before writing (0 prior hits on the core theme). NOT SCP'd (mini unreachable).
+- **Gold(C) +4 candidates** (c_gold_beat182.jsonl, 237 candidate files total) — 2 target the still-open weak-link/incoherence gaps, 2 document this beat's 2 fixed behaviors for a future retrain.
+
+### Use-case rotation
+Companion deep-test still not run — memory stayed at ~5% free the entire beat (battery11_0950 occupied the single model slot for its full run) — never crossed the 35% launch-safety gate. Last standalone `companion_deep_test` remains beat92.
+
+### Mini
+UNREACHABLE (59th consecutive). Same DNS failure shape as recent beats.
+
+### Running
+qc_queue running (PID 29952, lock-protected). battery11_imagination_bank (started 09:50) in flight at beat close — first cycle with beat181's eagle fix AND this beat's 2 companion.py fixes all live together. Next beat should read it end to end as the priority (verifies 3 fixes at once), then continue the rotation and take the Companion deep-test slot when memory clears 35%.
+
+## 2026-08-25 (beat183) — 5 code fixes (1 regression fix + 3 imagination-side + 1 gitignore); full post-beat182 cycle read
+
+### Read
+battery11_0825_0950 (imagination, via background agent), battery9_0825_1103 (companion, via background agent), battery6_1247/battery10_1251/battery2b_1300/battery12_1325/battery4b_1342/battery3b_1345/product_e2e_1348 (read directly). All mechanically clean except the items below; sec-shorter-x3's standing stochastic word-count floor recurred (already extensively logged across many prior beats, no action needed).
+
+### Fixed
+- **companion.py: THIN-VF-REPLY mechanical fallback** — a real regression, not just an untested fix. `comp-vf-sister-memory` replied bare `"Yes."` in battery9_1103, the exact beat118 defect. Root cause: the guard's single regen attempt had no fallback if the regen also came back thin. New `_vf_matching_line()` + `_vf_fact_sentence()` helpers build the reply directly from the matching vital-facts bullet line as a last resort — "Yes — your sister Priya lives in Austin, two kids." — guaranteed independent of model behavior, same pattern as utility.py's BOTTOM LINE fallback. Unit-tested directly.
+- **postcheck.py `fix_predicative_your`**: "been" was missing entirely from the copula alternation (oversight — "has always been your too" never matched); added, plus tolerance for one intervening adverb ("has always been uniquely your between you both") which is now captured and preserved rather than silently dropped; "between" added to the non-noun-introducing follow-set.
+- **postcheck.py new `fix_intimacy_object_pronoun_escapes()`**: 6 literal patterns for "your"/"theirs" misused as a verb/preposition object (distinct from the predicative-your family) — "in your all the time", "into your as", "guide(s) your around", "tell(s) your what", "between theirs together" — all found in one imag-intimacy script. FP-checked against 4 legitimate attributive uses; none touched.
+- **postcheck.py + generator.py + battery11_imagination_bank.py (3-way parity)**: new eagle anon-companion escape "words between birds" (imag-eagle-companion-bird-he), same family as beat122/158/169/178/181.
+- **.gitignore**: `data/*.sqlite` only matched top-level files; broadened to `data/**/*.sqlite` after finding two nested per-user DBs untracked instead of ignored (data/companion/companion.sqlite, data/db/companion.sqlite) — closed before anything leaked into a commit.
+- All fixes verified with py_compile (all 4 touched files) + direct unit tests of the new/changed pure functions against the real transcript quotes (no battery/model execution, per beat181's lesson). companion.py MD5: e4a9f5836839866ce6960b2dc357c21d; postcheck.py MD5: ee4f83ac21bbe19f099652759227432b; generator.py MD5: 4b1f02987dacae584ce7f7a15fba54ed. All synced to dist copies. ZIP rebuilt: ef6a89c4a909b017784b10bc404e8621.
+
+### Not fixed (logged as FYI)
+- imag-embodiment-eagle "an animal tracking something across the aspen-covered landscape... makes your own instincts react" — unnamed generic ground wildlife, ambiguous vs. the background-wildlife-is-fine rule. First instance; wants a second before treating as a real escape class.
+- comp-past-query's beat182 FYI did not recur in battery9_1103 (clean this run) — still just one instance total.
+- Case 2g' 6-word floor (beat182 FIX2) remains unverified either way — no negation-echo scenario fired this run.
+
+### Gold
+Gold(A) +7 → 6569: passport-stamp-returning-home-after-years-abroad, childhood-bike-found-in-garage-decades-later, cold-ocean-plunge-first-swim-of-summer, scaffolding-comes-down-building-you-designed, reunion-with-childhood-best-friend-after-decades, first-successful-sourdough-loaf-pulled-from-oven, old-voicemail-from-someone-who-passed-still-saved. Checked against corpus term-frequency before writing. NOT SCP'd (mini unreachable).
+
+### Use-case rotation
+Companion deep-test still not run — battery11_1359 (started before this beat's fixes landed) held the model slot at ~9% free memory the whole beat.
+
+### Mini
+UNREACHABLE (60th consecutive). Same DNS failure shape.
+
+### Running
+qc_queue running. battery11_imagination_bank (started 13:59, before this beat's fixes landed) in flight at beat close — the cycle AFTER it is the real verification point for all 3 imagination-side fixes; priority read for next beat. Next battery9/battery12 cycle is the verification point for the THIN-VF-REPLY fallback and Case 2g'.

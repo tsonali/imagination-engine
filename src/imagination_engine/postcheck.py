@@ -658,9 +658,9 @@ def fix_copula_youre_alone(text: str) -> tuple[str, int]:
 # of adverbs/prepositions that never introduce a noun phrase, so legitimate
 # attributive uses ("is your wing", "was your turn") are untouched.
 _PREDICATIVE_YOUR_RE = re.compile(
-    r"\b(is|was|are|were|be|become|becomes|became)\s+your\b"
+    r"\b(is|was|are|were|be|been|become|becomes|became)\s+((?:\w+ly\s+)?)your\b"
     r"(?=\s*(?:[.,!?;]|—|$|\s+(?:entirely|completely|now|here|still|again|"
-    r"too|for|on|at|in|to|by|with|from)\b)"
+    r"too|for|on|at|in|to|by|with|from|between)\b)"
     r")",
     re.IGNORECASE,
 )
@@ -671,16 +671,56 @@ def fix_predicative_your(text: str) -> tuple[str, int]:
 
     Reverse-direction sibling of fix_possessive_pronouns: catches attributive
     "your" used where the standalone possessive "yours" is grammatically required.
+    beat183: "been" added to the copula list ("has always been your too" — "been"
+    was missing entirely, an oversight since it's as much a copula form as "is/was");
+    an optional single adverb ("uniquely", "always") is now allowed between the
+    copula and "your" (found in battery11_0825_0950 imag-intimacy: "has always been
+    uniquely your between you both") — captured in group(2) and preserved in the
+    output rather than dropped. "between" added to the non-noun-introducing follow
+    set for the same script's "your between you both" (a noun can't immediately
+    follow "between" + a pronoun like "you both", so this is safe).
     """
     fixed = 0
 
     def _replace(m: "re.Match") -> str:
         nonlocal fixed
         fixed += 1
-        return f"{m.group(1)} yours"
+        return f"{m.group(1)} {m.group(2)}yours"
 
     result = _PREDICATIVE_YOUR_RE.sub(_replace, text)
     return result, fixed
+
+
+# beat183 (2026-08-25): battery11_0825_0950 imag-intimacy honest read — four new
+# object-pronoun escapes distinct from fix_predicative_your's copula pattern (these
+# are "your"/"theirs" standing in for "you"/"them" as the object of a preposition or
+# verb, not a standalone possessive): "Her hand stays in your all the time now",
+# "finds its way back into your as she leads you", "Her hands guide your around
+# hers", "she tells your what is in the drink", "existed properly just between
+# theirs together". Narrow, literal-phrase patterns (same style as the eagle
+# anon-companion escape list) rather than a general grammar rule, since each is a
+# single observed instance and a broad prep/verb+pronoun regex risks false-firing
+# on legitimate attributive uses ("in your hands", "tells your story").
+_INTIMACY_OBJECT_PRONOUN_SUBS = (
+    (re.compile(r"\bin\s+your\s+all\s+the\s+time\b", re.IGNORECASE), "in yours all the time"),
+    (re.compile(r"\binto\s+your\s+as\b", re.IGNORECASE), "into yours as"),
+    (re.compile(r"\bleaves\s+your\s+long\s+enough\b", re.IGNORECASE), "leaves yours long enough"),
+    (re.compile(r"\bguides\s+your\s+around\b", re.IGNORECASE), "guides you around"),
+    (re.compile(r"\bguide\s+your\s+around\b", re.IGNORECASE), "guide you around"),
+    (re.compile(r"\btells\s+your\s+what\b", re.IGNORECASE), "tells you what"),
+    (re.compile(r"\btell\s+your\s+what\b", re.IGNORECASE), "tell you what"),
+    (re.compile(r"\bbetween\s+theirs\s+together\b", re.IGNORECASE), "between them together"),
+)
+
+
+def fix_intimacy_object_pronoun_escapes(text: str) -> tuple[str, int]:
+    """Fix the beat183 batch of "your"/"theirs" used as a verb/preposition object
+    where "you"/"yours"/"them" is grammatically required (see docstring above)."""
+    fixed = 0
+    for pattern, replacement in _INTIMACY_OBJECT_PRONOUN_SUBS:
+        text, n = pattern.subn(replacement, text)
+        fixed += n
+    return text, fixed
 
 
 # beat152: mid-word token fusion — n376 occasionally fuses a contraction stub with the
@@ -979,7 +1019,13 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     # "your arrived" subject-pronoun grammar corruption riding along in the same sentence.
     r'|\ba\s+pair\s+soaring\b'          # "a pair soaring low over what looks like a stream"
     r'|\bnot\s+alone\s+in\s+the\s+sky\b'  # "these are not alone in the sky this morning"
-    r'|\beagles?\s+that\s+have\s+been\s+on\s+patrol\b',  # "Eagles that have been on patrol"
+    r'|\beagles?\s+that\s+have\s+been\s+on\s+patrol\b'  # "Eagles that have been on patrol"
+    # beat183 (2026-08-25): battery11_0825_0950 honest read, imag-eagle-companion-bird-he —
+    # passed all 6 eagle postchecks but closed with "it feels like something new without
+    # needing words between birds" — plural "birds" implies a second bird sharing this
+    # unspoken understanding, same family as beat122's "without need for words" phrasing
+    # but with the explicit plural noun this time, which no prior guard's wording covers.
+    r'|\bwords\s+between\s+birds\b',    # "without needing words between birds"
     re.IGNORECASE,
 )
 

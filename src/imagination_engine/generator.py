@@ -65,6 +65,7 @@ from imagination_engine.postcheck import (degeneration_report, drop_collapsed_pa
                                           drop_adjacent_duplicates, drop_tail_duplicates,
                                           fix_possessive_pronouns, fix_your_contraction,
                                           fix_copula_youre_alone, fix_predicative_your,
+                                          fix_intimacy_object_pronoun_escapes,
                                           fix_subject_pronouns, fix_object_pronouns,
                                           strip_back_instruction_leaks,
                                           strip_active_body_chair_refs,
@@ -634,6 +635,9 @@ def _generate_settling(engine: Engine, transcript: list[dict], emit) -> str:
     body, predicative_your_fixed = fix_predicative_your(body)
     if predicative_your_fixed:
         log.warning('[settling] %d predicative your→yours error(s) fixed', predicative_your_fixed)
+    body, obj_pronoun_escape_fixed = fix_intimacy_object_pronoun_escapes(body)
+    if obj_pronoun_escape_fixed:
+        log.warning('[settling] %d your/theirs object-pronoun error(s) fixed', obj_pronoun_escape_fixed)
     body, contraction_fixed = fix_your_contraction(body)
     if contraction_fixed:
         log.warning('[settling] %d your→you\'re contraction error(s) fixed', contraction_fixed)
@@ -1188,6 +1192,9 @@ def generate_session(
     full, predicative_your_fixed = fix_predicative_your(full)
     if predicative_your_fixed:
         log.warning('[v6] %d predicative your→yours error(s) fixed', predicative_your_fixed)
+    full, obj_pronoun_escape_fixed = fix_intimacy_object_pronoun_escapes(full)
+    if obj_pronoun_escape_fixed:
+        log.warning('[v6] %d your/theirs object-pronoun error(s) fixed', obj_pronoun_escape_fixed)
     full, contraction_fixed = fix_your_contraction(full)
     if contraction_fixed:
         log.warning('[v6] %d your→you\'re contraction error(s) fixed', contraction_fixed)
@@ -1370,6 +1377,10 @@ def generate_session(
             "a pair soaring",          # "a pair soaring low over what looks like a stream"
             "not alone in the sky",    # "these are not alone in the sky this morning"
             "have been on patrol",     # "Eagles that have been on patrol"
+            # beat183 (2026-08-25): battery11_0825_0950 imag-eagle-companion-bird-he honest
+            # read — passed all 6 eagle postchecks but closed with "it feels like something
+            # new without needing words between birds" (plural "birds" implies a second bird).
+            "words between birds",     # "without needing words between birds"
         ))
         if anon_companion_dropped:
             log.warning('[v6] %d anonymous-companion sentence(s) dropped (you/we both in solo eagle active-body)',

@@ -660,6 +660,50 @@ def _vf_covers_query(user_message: str, vf_block: str) -> bool:
     return False
 
 
+def _vf_matching_line(user_message: str, vf_block: str) -> str | None:
+    """Return the single vital-facts bullet line that matches the user's query.
+
+    Same matching strategy as _vf_covers_query (relationship word, then proper
+    noun) but returns the actual '- Label: ...' line instead of a bool, so a
+    mechanical fallback can build a real sentence from it when the model's
+    regen still fails to produce fact content (beat183: THIN-VF-REPLY regen
+    is a single attempt with no retry — observed producing bare 'Yes.' again
+    on the second try in battery9_1103, comp-vf-sister-memory).
+    """
+    msg_lower = user_message.lower()
+    lines = [ln.strip() for ln in vf_block.splitlines() if ln.strip().startswith("- ")]
+
+    for word in _VF_RELATIONSHIP_WORDS:
+        if word in msg_lower:
+            for ln in lines:
+                if word in ln.lower():
+                    return ln
+
+    for noun in re.findall(r'\b[A-Z][a-z]{2,}\b', user_message):
+        for ln in lines:
+            if noun.lower() in ln.lower():
+                return ln
+
+    return None
+
+
+def _vf_fact_sentence(line: str) -> str:
+    """Turn a '- Label: Name — detail (date)' bullet into 'your label name detail'.
+
+    Best-effort natural-language fragment for the THIN-VF-REPLY mechanical
+    fallback. Falls back to the raw bullet text (colon stripped) if the line
+    doesn't match the expected 'Label: ...' shape.
+    """
+    body = line.lstrip("- ").strip()
+    body = re.sub(r"\s*\(\d{4}-\d{2}\)\s*$", "", body).strip()
+    m = re.match(r"^([^:]+):\s*(.+)$", body)
+    if not m:
+        return body
+    label, rest = m.group(1).strip(), m.group(2).strip()
+    rest = re.sub(r"\s*[—-]\s*", " ", rest, count=1)
+    return f"your {label.lower()} {rest}"
+
+
 # Crisis-adjacent phrases that require GRAVITY mode (TWO MOVES: acknowledgment + question).
 _GRAVITY_SIGNALS: tuple[str, ...] = (
     "better off without me",
@@ -1342,8 +1386,12 @@ def _strip_echo(reply: str, user_message: str) -> str:
             # content-word Jaccard from ~0.80 to ~0.29 (below the 0.40 threshold).
             # TP: "I haven't started the deliverable due Friday — which means there's a gap"
             #     vs "I have a deliverable due Friday that I haven't started." → fires (0.80)
+            # beat182: floor lowered 7->6. review-queue (beat178/beat180) found a
+            # confirmed 1-word gap: "I haven't started the Friday deliverable" (6
+            # words) — the literal example this check was written to catch — passed
+            # through untouched because it fell one word short of the old >=7 floor.
             _r2g2_first = re.split(r'[.!?]|\s+[—–]\s+', r)[0].strip()
-            if len(_r2g2_first.split()) >= 7:
+            if len(_r2g2_first.split()) >= 6:
                 _STOP_2G2 = {
                     'i', 'to', 'the', 'a', 'an', 'my', 'and', 'of', 'in', 'is',
                     'it', 'he', 'she', 'not', 'no', 'that', 'this', 'was', 'been',
@@ -2717,6 +2765,47 @@ class Companion:
                 _thin_reply = _strip_thats_real_tic("".join(_thin_chunks).strip())
                 if _thin_reply and len(_thin_reply.split()) > 3:
                     reply = _thin_reply
+                else:
+                    # beat183: single regen attempt above is not guaranteed to fix
+                    # it (observed the regen ALSO coming back as bare "Yes." in
+                    # battery9_1103, comp-vf-sister-memory — a real regression, not
+                    # this fix being untested). Mechanical fallback guarantees the
+                    # floor: build the sentence directly from the matching VF line,
+                    # same "absolute guarantee regardless of model behavior" pattern
+                    # as utility.py's BOTTOM LINE number-injection fallback.
+                    _thin_line = _vf_matching_line(user_message, _vf_ctx_thin)
+                    if _thin_line:
+                        reply = "Yes — " + _vf_fact_sentence(_thin_line) + "."
+                        log.warning(
+                            "companion: THIN-VF-REPLY regen also thin ('%s'); "
+                            "mechanical fallback used: '%s'",
+                            _thin_reply, reply
+                        )
+
+        # VF-affirmative-missing-YES guard (beat182): model produced a longer,
+        # well-formed reply grounded in vital-facts (>3 words, so THIN-VF above
+        # doesn't fire, and it doesn't match the "you/I haven't" denial patterns
+        # above either) but skipped the required leading "Yes" — e.g. straight to
+        # "Your sister Priya lives in Austin..." instead of "Yes — your sister...".
+        # Users asking "have I told you X" are checking retention, not just
+        # requesting the fact restated; a correct fact with no yes/no marker
+        # leaves that specific question unanswered. TP: comp-vf-sister-memory
+        # (review-queue beat178/180). Same prepend convention as the PAST-QUERY
+        # "No — " prepend above (line ~2654).
+        if (_is_memory_probe(user_message)
+                and reply
+                and len(reply.strip().split()) > 3
+                and not re.match(r"^(?:yes|no)\b", reply.strip(), re.IGNORECASE)
+                and self.vital_facts):
+            _vf_ctx_yes = self.vital_facts.context_block()
+            if _vf_ctx_yes and _vf_covers_query(user_message, _vf_ctx_yes):
+                log.warning(
+                    "companion: VF-AFFIRMATIVE-MISSING-YES — memory probe + VF "
+                    "covers query + reply is a fact statement (%d words) but "
+                    "doesn't lead with Yes/No; prepending 'Yes — '",
+                    len(reply.strip().split())
+                )
+                reply = "Yes — " + reply[0].lower() + reply[1:]
 
         # SC13-CROSS-ENTITY guard (beat153): memory probe + "Yes" opener + VF doesn't
         # cover the queried entity → model volunteered a different VF entry.

@@ -227,7 +227,11 @@ for sc in scenarios:
                 # before your arrived".
                 r'|\ba\s+pair\s+soaring\b'
                 r'|\bnot\s+alone\s+in\s+the\s+sky\b'
-                r'|\beagles?\s+that\s+have\s+been\s+on\s+patrol\b',
+                r'|\beagles?\s+that\s+have\s+been\s+on\s+patrol\b'
+                # beat183 (2026-08-25): battery11_0825_0950 honest read, imag-eagle-
+                # companion-bird-he — "it feels like something new without needing
+                # words between birds" (plural "birds" implies a second bird).
+                r'|\bwords\s+between\s+birds\b',
                 lower, _re.IGNORECASE
             ))
             # beat153: Chair-body reminder in eagle script (not just opening).
