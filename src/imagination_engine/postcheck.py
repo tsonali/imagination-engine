@@ -968,7 +968,18 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     # eagle; a new escape class distinct from eagle-companion (no prior filter targets
     # human bystanders at all). Both use "someone has" as the tell.
     r'|\bsomeone\s+has\s+gone\s+away\b'  # "someone has gone away"
-    r'|\bsomeone\s+has\s+started\b',     # "someone has started [a fire/campfire]"
+    r'|\bsomeone\s+has\s+started\b'      # "someone has started [a fire/campfire]"
+    # beat181 (2026-08-25): battery11_0825_0231 honest read, imag-eagle-companion-bird-he —
+    # script passed ALL 6 eagle postchecks but contained "You turn your head slightly to see
+    # a pair soaring low over what looks like a stream or valley — something about their
+    # flight tells you these are not alone in the sky this morning. Eagles that have been
+    # on patrol before your arrived will wait for food at lower altitudes now..." — a
+    # two-sentence companion-eagle assertion using no named species, no pronoun, and no
+    # prior acoustic/formation phrasing. Dropping these sentences also removes the
+    # "your arrived" subject-pronoun grammar corruption riding along in the same sentence.
+    r'|\ba\s+pair\s+soaring\b'          # "a pair soaring low over what looks like a stream"
+    r'|\bnot\s+alone\s+in\s+the\s+sky\b'  # "these are not alone in the sky this morning"
+    r'|\beagles?\s+that\s+have\s+been\s+on\s+patrol\b',  # "Eagles that have been on patrol"
     re.IGNORECASE,
 )
 

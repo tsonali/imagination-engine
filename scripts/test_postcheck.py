@@ -11,7 +11,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from imagination_engine.postcheck import (
-    find_degeneration_start, trim_degenerate_tail, degeneration_report)
+    find_degeneration_start, trim_degenerate_tail, degeneration_report,
+    drop_hallucinated_he_eagle)
 
 CLEAN_OPENING = """\
 Lie back on your bed and allow yourself to sink down beneath the weight of a cool sheet against you. Your eyelids flutter softly as they close, shielding out light for now. The only noise is raindrops pelleting steadily against tin roofing — each tap easing into a gentle rhythm that swallows up racing thoughts about work.
@@ -67,6 +68,29 @@ check("report sane", rep["degenerate"] and 0.3 < rep["lost_fraction"] < 0.9)
 print("trim on already-clean text is a no-op:")
 t2, did2 = trim_degenerate_tail(CLEAN_OPENING)
 check("no-op", not did2 and t2 == CLEAN_OPENING)
+
+print("beat181 eagle anon-companion escape (drop_hallucinated_he_eagle):")
+# True positives — the exact/near escape found in battery11_0825_0231 imag-eagle-
+# companion-bird-he (slipped past all 6 eagle postchecks that run).
+TP_181 = [
+    "You turn your head slightly to see a pair soaring low over what looks like a stream.",
+    "Something about their flight tells you these are not alone in the sky this morning.",
+    "Eagles that have been on patrol before you arrived will wait for food at lower altitudes now.",
+    "Eagles that have been on patrol circle below without you.",
+]
+for s in TP_181:
+    cleaned, dropped = drop_hallucinated_he_eagle(s)
+    check(f"TP dropped: {s[:50]!r}...", dropped == 1 and cleaned == "")
+
+# False positives — plausible solo-eagle sentences that must survive untouched.
+FP_181 = [
+    "You are entirely alone up here, the sky belonging only to you.",
+    "The ranger's truck idles on patrol far below, tiny against the valley floor.",
+    "You soar past a pairing of clouds low on the horizon.",
+]
+for s in FP_181:
+    cleaned, dropped = drop_hallucinated_he_eagle(s)
+    check(f"FP kept: {s[:50]!r}...", dropped == 0 and cleaned == s)
 
 print(f"\n{'ALL PASS' if fails == 0 else f'{fails} FAILURES'}", flush=True)
 sys.exit(1 if fails else 0)

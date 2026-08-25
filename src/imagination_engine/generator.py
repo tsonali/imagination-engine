@@ -1364,6 +1364,12 @@ def generate_session(
             # eagle — a new escape class distinct from eagle companions).
             "someone has gone away",   # "someone has gone away" — implied departed companion
             "someone has started",     # "someone has started campfire" — hallucinated human below
+            # beat181 (2026-08-25): battery11_0825_0231 imag-eagle-companion-bird-he honest
+            # read — "a pair soaring low ... not alone in the sky ... Eagles that have been
+            # on patrol before your arrived" slipped past all 6 eagle postchecks.
+            "a pair soaring",          # "a pair soaring low over what looks like a stream"
+            "not alone in the sky",    # "these are not alone in the sky this morning"
+            "have been on patrol",     # "Eagles that have been on patrol"
         ))
         if anon_companion_dropped:
             log.warning('[v6] %d anonymous-companion sentence(s) dropped (you/we both in solo eagle active-body)',

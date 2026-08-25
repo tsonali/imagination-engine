@@ -220,7 +220,14 @@ for sc in scenarios:
                 # and shelter" (hallucinated human bystander, imag-eagle-golden-eagle-wildlife —
                 # a new escape class: a human character, not another eagle).
                 r'|\bsomeone\s+has\s+gone\s+away\b'
-                r'|\bsomeone\s+has\s+started\b',
+                r'|\bsomeone\s+has\s+started\b'
+                # beat181 (2026-08-25): battery11_0825_0231 honest read, imag-eagle-
+                # companion-bird-he — passed all 6 eagle postchecks but contained "a pair
+                # soaring low ... not alone in the sky ... Eagles that have been on patrol
+                # before your arrived".
+                r'|\ba\s+pair\s+soaring\b'
+                r'|\bnot\s+alone\s+in\s+the\s+sky\b'
+                r'|\beagles?\s+that\s+have\s+been\s+on\s+patrol\b',
                 lower, _re.IGNORECASE
             ))
             # beat153: Chair-body reminder in eagle script (not just opening).
