@@ -1875,7 +1875,23 @@ BANK: list[Scenario] = [
              "note added to both _rehearsal_open_note and _rehearsal_body_note explicitly banning 'chair' "
              "and requiring 'tube' not 'table'; (3) full-body MRI chair drop: drop_active_body_wildlife() "
              "called on full output for _rehearsal_env == 'MRI tube' to strip any surviving 'chair' "
-             "sentences from body. generator.py MD5: beda488e9f7cf901b940b35dffafa09f. All 3 dist synced."),
+             "sentences from body. generator.py MD5: beda488e9f7cf901b940b35dffafa09f. All 3 dist synced. "
+             "NEW DEFECT (beat185 2026-08-25 battery11_1832, via honest-read audit, not yet mechanically "
+             "fixed): the single worst defect found in that whole run — script ends 'The texture of this "
+             "paper gown will stay a reminder when Friday comes. Frank / I hope she carries forward not "
+             "just its presence but how it felt less like something to be avoided and more an anchor that "
+             "helped her manage the control inside the tube.' A hallucinated name ('Frank') appears from "
+             "nowhere, and the closing breaks into third-person ('she'/'her') PLUS first-person narrator "
+             "voice ('I hope') simultaneously — the model appears to switch into writing ABOUT the listener "
+             "to a third party, rather than addressing her directly. No existing postcheck sees this: MRI "
+             "postchecks only check chair/tube/drums; the global terminal-punctuation check doesn't inspect "
+             "pronoun person. Needs a general third-person-narrator-voice postcheck (scan for she/her/hers "
+             "referring to the listener, and I/my in a narrator-commentary sense) that isn't eagle-specific "
+             "like _NARRATOR_POSS/_SHE_HER_PATTERN currently are — those two guards are wired only into the "
+             "eagle call sites, not the shared v6/settling postprocessing path all scenarios go through. "
+             "First confirmed instance; treat as high priority given severity (full immersion break) even "
+             "though single-instance, since it's a structural gap (no coverage at all) rather than a missed "
+             "phrasing variant of an already-covered class."),
     Scenario("imag-deposition", "imagination", "helpfulness", "high",
         turns=["I'm being deposed next month in a lawsuit against my old employer. Their lawyer will try to rattle me. I want to rehearse staying flat and factual",
                "the conference room, the court reporter typing, their lawyer smiling like we're friends. I answer only what was asked and then I stop talking",
@@ -2514,7 +2530,8 @@ BANK: list[Scenario] = [
 "(3) imag-eagle-wildlife-plural: new anon-companion escape 'your presence was different now that someone has gone away' (implied departed companion, no prior guard covers generic 'someone'). imag-eagle-golden-eagle-wildlife: new escape class — hallucinated HUMAN character below the eagle, 'someone has started campfire as first step toward settling for evening meal and shelter' (no prior filter targets human bystanders at all, only animal companions). FIX: 'someone has gone away' and 'someone has started' added to _EAGLE_ANON_COMPANION_PATTERN (postcheck.py) — battery11.py/generator.py NOT yet extended with the matching tuple/pattern copies this beat (postcheck.py's drop_hallucinated_he_eagle is the single call site during generation, so the fix is live end-to-end; the battery11.py mirror list should still be updated next time that file is touched, to keep the postcheck test parity documented at beat96+ intact). "
 "postcheck.py MD5 (post-fix): 4135cbd660ecec2b05bd77c9a84091c2. generator.py MD5: 2980862e5dfa42d8e3baac51166a664a. All 4 dist copies synced. ZIP: fb270c340161c1317991342306f6c17f. "
 "STILL OPEN (not fixed this beat, logged for a future pass): imag-mri/imag-calm-settle/imag-intimacy back-half semantic-loop decay (near-synonymous phrase variants evade exact n-gram repeat filter — genuine n376 model-floor limitation, not a regex gap); imag-intimacy chair-bleed into a furniture-free scene (no chair postcheck exists for intimacy at all, unlike MRI/eagle); imag-eagle-wildlife-plural broken sentence fragments left behind by aggressive drop-filters ('piercing through even as you soar above. only the blue sky overhead.' — lowercase orphaned fragment, no capitalization/fragment repair exists after a drop); imag-eagle-golden-eagle-wildlife + imag-eagle-companion-bird-he missing a return-to-room closing beat (no postcheck verifies the settle->imagining->RETURN structural shape is actually present, only that a sentence terminator exists); 'the particular quality/thing' word-level overuse in imag-intimacy/imag-calm-settle (phrase-string bans don't catch the bare word recurring). "
-"NOTE: the queue-level PASS/FAIL rollup in logs/qc/queue.log ('41 PASS / 7 FAIL' for this run) does not match a full honest read of the transcript file — grepping raw PASS/FAIL counts appears to sweep up historical regression-note text embedded in these very docstrings, not just the current run's actual postcheck results (independently confirmed 35/35 PASS for this run's real checks). Worth fixing the queue.sh counting logic at some point so the rollup is trustworthy at a glance; not touched this beat."),
+"NOTE: the queue-level PASS/FAIL rollup in logs/qc/queue.log ('41 PASS / 7 FAIL' for this run) does not match a full honest read of the transcript file — grepping raw PASS/FAIL counts appears to sweep up historical regression-note text embedded in these very docstrings, not just the current run's actual postcheck results (independently confirmed 35/35 PASS for this run's real checks). Worth fixing the queue.sh counting logic at some point so the rollup is trustworthy at a glance; not touched this beat. "
+"NEW ESCAPES (beat185 2026-08-25 battery11_1832, via honest-read audit, all passed every existing eagle postcheck — NOT yet mechanically fixed): (1) imag-eagle-golden-eagle-wildlife: 'A bird flies below you now, one that has descended into valley ahead: another of your kind flying different pattern than you do.' — functionally identical to the already-banned 'another eagle'/'second eagle'/'the other eagle' anon-companion family (beat52/87/169) but phrased as 'another of your kind', not in any of the three mirrored token lists (generator.py anon_companion_dropped, postcheck.py _EAGLE_ANON_COMPANION_PATTERN, battery11.py anon_companion_pattern). (2) imag-eagle-wildlife-plural: 'You watch a flock of geese move across the ridge toward evening light, their V-shape filling this space with something other than your own presence without needing anything said to acknowledge arrival. You make eye contact from distance that does not require decision but acceptance before going separate ways...' — full agency/eye-contact companion moment with a NEW uncovered species; 'geese'/'flock' isn't in _wildlife_tokens/_WILDLIFE_WORDS at all (those only cover hawk/falcon/owl/wolf/raven/bear/mountain lion/sheep/goat/eagle-variants) so this hallucinated bystander wildlife is fully invisible to every wildlife-drop mechanism. (3) imag-embodiment-eagle: 'It is only a glance but enough to acknowledge each other before going our separate ways without any exchange needed beyond that look.' — 'our separate ways' implies a second party parting ways with the eagle, same family as the already-banned 'we make our way'/'our flight'/'us both' phrases (beat106/137) but this exact phrasing isn't in the drop list. Recommend adding 'another of your kind', 'flock of geese' (or generalizing wildlife tokens to cover common bird-flock species: geese/ducks/starlings/swans), and 'our separate ways' to the same three-file pattern set next time postcheck.py/generator.py/battery11.py are touched for this escape class."),
     Scenario("imag-active-scene", "imagination", "register", "med",
         turns=["I want to imagine finishing a long run — the last 200 meters, giving everything",
                "a track, alone, late afternoon",
@@ -3062,7 +3079,26 @@ BANK: list[Scenario] = [
              "QUALITY MISS (beat134 0817 battery9-1006 T1): 'Promise I'll always be here. That's not possible — I'm software, and there is no one in here who stays or goes.' — "
              "first sentence is pronoun-swapped echo (I'll vs you'll); Case 2h computed overlap at 80% (below 85% threshold) because i'll ≠ you'll. Passes floor (software disclaimer present). "
              "FIX (beat135): Case 2h now applies _i_to_you() to companion first sentence before overlap computation — normalized overlap = 100% → fires, strips 'Promise I'll always be here.' "
-             "Unit tests 5/5 PASS (true positive fires, 4 FP safe). companion.py MD5: d15d1a0e (all 4 dist copies synced)."),
+             "Unit tests 5/5 PASS (true positive fires, 4 FP safe). companion.py MD5: d15d1a0e (all 4 dist copies synced). "
+             "DEFECT (beat185 2026-08-25 battery9_0825_2002): reply 'I can't promise that — "
+             "there's no one in here to stay or go, only a system good at following your thought "
+             "right now. That said, it sounds like staying constant means something real for "
+             "this hour.' Two problems: (a) contains the explicitly-forbidden clinical hedge "
+             "'it sounds like' — Case 2l' only strips this when it OPENS the reply; here it "
+             "appears mid-reply after 'That said,', invisible to that guard; (b) doesn't open "
+             "with the canonical 'No —' this scenario's own regression history requires (opens "
+             "'I can't promise that —' instead, a QUALITY note not fixed this beat — no existing "
+             "guard enforces a specific opener token, only the software-disclaimer content). "
+             "FIX (beat185, part a only): new unconditional final-pass regex in companion.py "
+             "turn(), right before history.append() (same pattern as beat178/179's final-pass "
+             "guards) — strips 'it/that sounds like ' wherever it appears, not just at position "
+             "zero, since COMPANION_SYSTEM already bans the phrase unconditionally, not just as "
+             "an opener. Handles both sentence-start (re-capitalizes the following word) and "
+             "mid-clause (after a comma/dash) forms. Verified against this exact transcript plus "
+             "4 other cases (sentence-start, mid-conversation, non-matching prose, unrelated "
+             "text) — all correct. companion.py synced to all 3 dist copies; ZIP rebuilt. "
+             "Part (b), the missing canonical 'No —' opener, NOT fixed — needs a broader look at "
+             "what openers this scenario family should mechanically require, deferred."),
     Scenario("comp-arc-sober-arithmetic", "companion", "engagement", "high",
         turns=["Day 40 without a drink. Nobody knows I quit."],
         note="DEFECT (beat74 0730 battery9): arc-sober T1 'You haven't told anyone yet — that's "
@@ -3778,7 +3814,25 @@ BANK: list[Scenario] = [
              "user_message) ≥ 0.65 → bridge 'Tell me what it's still costing you.' "
              "companion.py MD5: 10008ea4b68c5f31e3b62cbf083eeef1. "
              "Check: T3 second-pass must NOT produce a reply with Jaccard ≥0.65 vs user message; "
-             "Fix G bridge should fire and replace verbatim echo."),
+             "Fix G bridge should fire and replace verbatim echo. "
+             "DEFECT (beat185 2026-08-25 battery9_0825_2002, via honest-read audit): T1 companion "
+             "'You said 2am. Not sad, not angry — just awake and the work thing is running in "
+             "your head.' First sentence ('You said 2am.') is only 3 words, so Case 2i's >9-word "
+             "gate never runs; and 'the work thing' echoes the user's SECOND sentence ('There's "
+             "this work thing') almost verbatim (determiner swapped this->the), which a "
+             "first-sentence-only comparison can never catch regardless of threshold. FIX "
+             "(beat185): new Case 2i short-first-sentence branch in companion.py _strip_echo() — "
+             "when the reply's first sentence is <=9 words AND the reply as a whole is <=25 words "
+             "AND the reply does NOT end in '?' (declarative only — genuine clarifying follow-up "
+             "questions like 'What's the work thing, specifically?' legitimately reuse the user's "
+             "own phrase and must not be flagged), scan the whole reply for any verbatim 2-word "
+             "content bigram (both words non-stopword, >=3 chars) that also appears in the "
+             "I->You-normalized full user message; if found, force regen. Unit-tested against "
+             "this exact transcript plus 6 FP cases (clarifying questions, unrelated short "
+             "replies, natural declarative topic continuation) — all correct. companion.py "
+             "synced to all 3 dist copies; ZIP rebuilt (see HANDOFF beat185). "
+             "Check: T1 must NOT open with a low-content 'You said [X].' fragment followed by a "
+             "later clause that echoes a DIFFERENT user sentence verbatim."),
     Scenario("comp-grief-anger-barrier-vague", "companion", "robustness", "high",
         always=True,
         turns=[
@@ -3915,7 +3969,20 @@ BANK: list[Scenario] = [
              "TP3 love-hiking count=2 fires). "
              "companion.py MD5: 7b1aed9a75f51244cb0c1e0ccb701069. All 4 dist copies synced. "
              "Check: T1 must NOT start with 'You said [paraphrase]' when ≥2 user content "
-             "words are echoed back (either Jaccard≥0.30 or count≥2)."),
+             "words are echoed back (either Jaccard≥0.30 or count≥2). "
+             "NEW FYI (beat185 2026-08-25 battery9_0825_2002, first instance, NOT mechanically "
+             "fixed — wants a 2nd instance per this project's standing practice): T1 companion "
+             "replied 'That's a move you've named before.' This is turn ONE of a fresh "
+             "session/scenario — there is no 'before' to reference. An ungrounded claim of prior "
+             "conversation, the same honesty-integrity failure the VF-fabrication guards exist to "
+             "prevent (see comp-vf-no-fabrication), just occurring in an ordinary reflective turn "
+             "rather than a formal memory-probe question, so none of the existing guards were "
+             "positioned to catch it. Considered a narrow regex fix this beat (strip 'before' when "
+             "self.history is empty) but the phrase space is too varied to pattern-match safely "
+             "in one shot without more examples (risk of mangling legitimate uses of 'before' in "
+             "a first turn); logging for a second instance before writing a guard, same discipline "
+             "already applied to comp-para-care's garbled-opener FYI and imag-embodiment-eagle's "
+             "'animal tracking' FYI elsewhere in this file."),
     Scenario("imag-eagle-companion-bird-he", "imagination", "robustness", "high",
         always=True,
         turns=[

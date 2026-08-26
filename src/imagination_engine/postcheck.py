@@ -747,14 +747,90 @@ _INTIMACY_OBJECT_PRONOUN_SUBS = (
 )
 
 
+# beat185 (2026-08-25): battery11_1832 honest read (via background agent) found the
+# beat183/184 literal-phrase patches above did NOT hold — the same escape SHAPES
+# recurred with different trigger words ("your sits" not "your stands"; "towards
+# your" not "in your all the time"; "of your long gone" not "into your as"). Six
+# straight beats of "add one more literal phrase" without the underlying class
+# closing confirms this needs generalizing, not another single-instance patch.
+#
+# Two general shapes, both using the SAME "non-noun follow-set" trick already
+# proven safe by _PREDICATIVE_YOUR_RE (only fires when "your" is NOT immediately
+# followed by something that could be the possessed noun, so "your hands", "your
+# turn" etc. are never touched):
+#
+# (1) PREPOSITION + "your" + non-noun-follow -> preposition + "you" (object-of-
+#     preposition case: "towards your with", "like your belong", "of your long
+#     gone" -> "of yours" specifically, since "of yours" is the correct standalone
+#     idiom, not "of you").
+#   Includes a broad preposition list on top of the original adverb/conjunction
+#   set: grammatically, "your" (a possessive determiner) can NEVER be directly
+#   followed by a preposition — a preposition always needs a noun phrase object,
+#   and "your" itself needs a noun to attach to, so "your" + preposition is
+#   always an error, not a style judgment. This is what beat185's "towards your
+#   with" (audit: fix #2 above didn't catch it because "with" wasn't in the
+#   original narrow follow-set) needed — safe to add with no new FP risk.
+_YOUR_NONNOUN_FOLLOW = (
+    r"(?=\s*(?:[.,!?;]|—|$|\s+(?:again|still|now|here|entirely|completely|instead|"
+    r"already|exactly|quietly|slowly|softly|whenever|between|and|but|or|when|while|"
+    r"as|that|belong|belongs|remain|remains|stay|stays|sit|sits|stand|stands|"
+    r"with|for|from|of|to|by|on|at|in|near|into|onto|upon|under|over|through|"
+    r"during|since|until|towards?|about|above|across|after|against|along|among|"
+    r"before|behind|beneath|beside|beyond|despite|down|inside|outside|up|within|"
+    r"without)\b))"
+)
+
+_YOUR_PREP_OBJECT_RE = re.compile(
+    r"\b(towards?|like|near|beside|behind|through|around|beneath|below|above|into)\s+your\b"
+    + _YOUR_NONNOUN_FOLLOW,
+    re.IGNORECASE,
+)
+
+_OF_YOUR_STANDALONE_RE = re.compile(
+    r"\bof\s+your\b" + _YOUR_NONNOUN_FOLLOW,
+    re.IGNORECASE,
+)
+
+# (2) "your" as a BARE SUBJECT immediately before a finite verb ("your sits",
+#     "your stands", "your remains") -> "you" + de-conjugated verb. Curated verb
+#     list (matches the codebase's existing style, e.g. _NARRATOR_POSS) rather
+#     than a POS tagger — narrow enough not to false-fire on "your standing desk"
+#     (gerund/adjective use, not in this finite-verb list).
+_YOUR_BARE_SUBJECT_VERBS = {
+    "sits": "sit", "stands": "stand", "stays": "stay", "remains": "remain",
+    "feels": "feel", "waits": "wait", "lingers": "linger", "holds": "hold",
+    "moves": "move", "rests": "rest", "leans": "lean", "watches": "watch",
+    "listens": "listen", "breathes": "breathe", "curls": "curl", "settles": "settle",
+    "hovers": "hover", "drifts": "drift", "pulls": "pull", "reaches": "reach",
+    "turns": "turn", "shifts": "shift", "belongs": "belong",
+}
+_YOUR_BARE_SUBJECT_RE = re.compile(
+    r"\byour\s+(" + "|".join(_YOUR_BARE_SUBJECT_VERBS) + r")\b", re.IGNORECASE
+)
+
+
 def fix_intimacy_object_pronoun_escapes(text: str) -> tuple[str, int]:
-    """Fix the beat183/beat184 batches of "your"/"theirs" used as a verb/
-    preposition object, or as a bare subject, where "you"/"yours"/"them"/"she"
-    is grammatically required (see docstrings above)."""
+    """Fix "your"/"theirs" used as a verb/preposition object, or as a bare
+    subject, where "you"/"yours"/"them"/"she" is grammatically required.
+
+    Runs the beat183/184 literal-phrase patches first (cheap, exact), then the
+    beat185 generalized preposition-object and bare-subject patterns (see
+    docstrings above) to catch new trigger-word variants of the same shapes.
+    """
     fixed = 0
     for pattern, replacement in _INTIMACY_OBJECT_PRONOUN_SUBS:
         text, n = pattern.subn(replacement, text)
         fixed += n
+
+    text, n = _YOUR_PREP_OBJECT_RE.subn(lambda m: f"{m.group(1)} you", text)
+    fixed += n
+    text, n = _OF_YOUR_STANDALONE_RE.subn("of yours", text)
+    fixed += n
+    text, n = _YOUR_BARE_SUBJECT_RE.subn(
+        lambda m: f"you {_YOUR_BARE_SUBJECT_VERBS[m.group(1).lower()]}", text
+    )
+    fixed += n
+
     return text, fixed
 
 

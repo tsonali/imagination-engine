@@ -1530,6 +1530,52 @@ def _strip_echo(reply: str, user_message: str) -> str:
                             and len(_u_content_2i & _r_content_2i) / len(_u_content_2i) >= 0.80):
                         _after_2i2 = r[len(_r_first_2i):].lstrip(" .!?\n-—")
                         r = _after_2i2 if (len(_after_2i2.split()) > 3) else ""
+            elif len(r.split()) <= 25 and not r.rstrip().endswith("?"):
+                # Case 2i short-first-sentence extension (beat185): the >9-word
+                # gate above exists so Case 2i doesn't regen on ordinary short
+                # acknowledgments, but that also blinded it to a restatement
+                # sitting in a LATER sentence of the same (still-short) reply
+                # — sometimes echoing a LATER user sentence too, which the
+                # first-sentence-only _u_you_2i comparison can never catch.
+                # Aggregate word-overlap ratios don't generalize here either:
+                # once one user sentence is paraphrased and only the other is
+                # echoed, the ratio dilutes below any safe threshold — but the
+                # echoed NOUN PHRASE itself survives verbatim even across a
+                # determiner swap ("this work thing" -> "the work thing"), so
+                # a literal 2-gram check is the right granularity, not 3.
+                # Found in battery9_0825_2002 comp-uc1-t5-semantic-repeat-45pct
+                # T1: user "It's 2am and I cannot sleep. There's this work
+                # thing." -> companion "You said 2am. Not sad, not angry —
+                # just awake and the work thing is running in your head."
+                # First sentence ("You said 2am.") is 3 words, so the >9-word
+                # branch above never runs; "work thing" echoes the user's
+                # SECOND sentence verbatim (only the determiner differs).
+                # FP guard: a 2-gram is loose enough to also match genuine
+                # clarifying follow-ups that legitimately reuse the user's own
+                # phrase ("What's the work thing, specifically?") — those are
+                # useful, not hollow, so this whole branch is gated to
+                # DECLARATIVE replies only (skipped when r ends in "?", see
+                # the elif condition above).
+                _STOP_2I_SHORT = frozenset({
+                    'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+                    'have', 'has', 'had', 'do', 'does', 'did', 'and', 'or', 'but', 'so',
+                    'for', 'in', 'on', 'at', 'to', 'of', 'by', 'with', 'from', 'as',
+                    'into', 'that', 'this', 'these', 'those', 'it', "it's", 'i', 'my', 'you',
+                    'your', 'me', 'we', 'our', 'if', 'not', 'just', 'too', 'also',
+                    'still', 'then', 'about', 'up', 'out', 'there', 'when', 'what',
+                    'who', 'which', 'than', 'no', 'nor', 'yet', 'can', 'could', 'will',
+                    'would', 'should', 'may', 'might', 'shall',
+                })
+                _u_you_full_2i = _norm(_i_to_you(u)).lower()
+                _r_words_2i_short = _norm(r).lower().split()
+                for _ki2i in range(len(_r_words_2i_short) - 1):
+                    _gram2_2i = _r_words_2i_short[_ki2i:_ki2i + 2]
+                    _clean2_2i = [re.sub(r"[^a-z']", "", _w2i) for _w2i in _gram2_2i]
+                    if (all(len(_w2i) >= 3 for _w2i in _clean2_2i)
+                            and all(_w2i not in _STOP_2I_SHORT for _w2i in _clean2_2i)
+                            and ' '.join(_gram2_2i) in _u_you_full_2i):
+                        r = ""  # verbatim content 2-gram echo of a later user sentence -> regen
+                        break
 
     # Case 2j: Gerund-opener echo (beat94).
     # Catches: user "I snapped at my kid" → companion "Snapping at your kid over nothing..."
@@ -3538,6 +3584,37 @@ class Companion:
         if reply:
             reply = re.sub(
                 r"\bto love me back\b", "to love you back", reply, flags=re.IGNORECASE
+            )
+
+        # beat185: "it/that sounds like" MID-REPLY safety net. COMPANION_SYSTEM
+        # bans this phrase everywhere ("These import unearned depth" — lines
+        # ~259-260, ~303), and Case 2l' already strips it when it OPENS the
+        # reply — but battery9_0825_2002 comp-para-stay-deletion-echo found it
+        # surviving mid-reply, after a "That said," transition: "I can't
+        # promise that... That said, it sounds like staying constant means
+        # something real for this hour." Case 2l' never sees this because it
+        # only matches at position zero. Since the prompt bans the phrase
+        # unconditionally (not just as an opener), a plain removal anywhere is
+        # a safe generalization, not a guess — this is the same "belt and
+        # suspenders" unconditional-final-pass pattern as the two guards above.
+        # Re-capitalizes the following word if the phrase started a sentence.
+        if reply:
+            def _strip_sounds_like(m: "re.Match") -> str:
+                lead, word = m.group(1), m.group(2)
+                if lead == "" or lead.endswith((". ", "! ", "? ")):
+                    word = word[:1].upper() + word[1:]
+                return lead + word
+
+            reply = re.sub(
+                r"(^|[.!?]\s+)(?:it|that)\s+sounds\s+like\s+(\w+)",
+                _strip_sounds_like,
+                reply,
+                flags=re.IGNORECASE,
+            )
+            # Mid-clause form (after a comma/dash, not a fresh sentence):
+            # "That said, it sounds like staying constant..." -> "That said, staying constant..."
+            reply = re.sub(
+                r"(?<=[,—-]\s)(?:it|that)\s+sounds\s+like\s+", "", reply, flags=re.IGNORECASE
             )
 
         self.history.append({"role": "user", "content": user_message})
