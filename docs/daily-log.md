@@ -9543,3 +9543,40 @@ UNREACHABLE (60th consecutive). Same DNS failure shape.
 
 ### Running
 qc_queue running. battery11_imagination_bank (started 13:59, before this beat's fixes landed) in flight at beat close — the cycle AFTER it is the real verification point for all 3 imagination-side fixes; priority read for next beat. Next battery9/battery12 cycle is the verification point for the THIN-VF-REPLY fallback and Case 2g'.
+
+## 2026-08-25 (beat184) — 6 code fixes (2 imagination pronoun/narrator, 1 imagination trailing-word, 2 companion echo-guard, 1 companion typo); gold(A) data-quality bug found+fixed; both priority verification logs found NOT fully clean
+
+### Read
+- **battery11_0825_1359** (imagination, beat183's verification point) and **battery9_0825_1524** (companion, beat183's verification point), both via background agents reading end to end (not just rollup counts); **battery12_vital_facts_1759** read directly (13/13 PASS clean).
+- Neither priority verification came back fully clean: beat183's `fix_intimacy_object_pronoun_escapes` did not fully hold (new escapes in imag-intimacy, distinct from the 6 already-fixed patterns); the THIN-VF-REPLY fallback and Case 2g' floor remain formally unverified this beat too (trigger conditions didn't fire — comp-vf-sister-memory succeeded on its own without needing the fallback).
+
+### Fixed
+- **postcheck.py `fix_predicative_your`**: "whenever" added to the trailing-word set — imag-eagle-wildlife-plural: "It is your whenever you feel heavy in other ways" (should be "yours").
+- **postcheck.py `fix_intimacy_object_pronoun_escapes`**: 4 new literal patterns from this run's imag-intimacy script, including a new class not previously seen — "your" used as a bare SUBJECT pronoun (not just object): "your stands still holding onto" → "you stand still holding onto"; "before your come to reach out for her...as her turn toward you" → "before you come...as she turns toward you" (subject-pronoun fix + verb conjugation); plus "holds your without looking up" → "holds you..." and "used theirs for something else" → "used hers for something else".
+- **postcheck.py `_NARRATOR_POSS`**: eagle scripts leaking genuine first-person narrator voice past the existing verb allowlist — found 5 separate instances in one imag-eagle-golden-eagle-wildlife script ("I rose", "I have", "I don't know", "we look", "catch our eye", "takes me back", "ahead of me"), none caught by any existing check.
+- **companion.py Case 2f**: short-reply echo threshold lowered 0.80→0.65. Root cause identical to beat166's fix to the separate second-pass short-echo guard (anger/angry lemma mismatch), but beat166 never touched this primary first-pass guard — "Anger for days." (comp-grief-anger-1word-echo) was accepted on the very first pass, never even reaching the second-pass fallback that was supposedly already fixed. A real coverage gap in the earlier fix, not just an untested path.
+- **companion.py Case 2i**: extended with a user-content-recall direction (mirrors beat162b's Case 2h extension) — catches full restatements padded with content-free framing words ("The work thing is...") that dilute symmetric Jaccard below the 0.65 threshold while still echoing 100% of the user's content words. Found in comp-uc1-t5-semantic-repeat T2.
+- **companion.py, unconditional final pass**: "week link" → "weak link" homophone typo normalizer (comp-uc1-t5-semantic-repeat T3: "your boss's week link").
+- All 6 fixes verified with py_compile + direct unit tests against the exact defect strings, plus explicit false-positive checks on legitimate usage — no model launch, no battery execution (beat181's lesson). companion.py + postcheck.py synced to all 3 dist copies; ZIP rebuilt via `scripts/package.sh`. Committed (1de9cd7).
+
+### Data quality (not a battery-log defect — found during routine gold-corpus work)
+- **hearth-corpus A_gold.jsonl contamination**: while checking term-frequency before writing new gold entries, found 8 recent gold(A) entries (beats 175, 176, 180, 182, 183) contained the literal crutch phrase "the particular way" / "a particular X" — the exact phrase generation-time FORBIDDEN PHRASES (beat88) bans in model output. The training data itself was teaching the model the defect the project mechanically suppresses at generation time. Fixed via targeted text substitution on all 7 non-idiomatic instances; the 1 legitimate idiom ("nothing in particular", beat176) was left untouched. Verified no instance of the crutch phrase remains in any of the 7 fixed entries.
+
+### Not fixed (logged as FYI)
+- **comp-para-care garbled opener** (new, first instance): regen produced "Do not feel like I care about you." before the correct honest answer. No clear pattern to regex against yet; wants a second instance per this project's standing practice.
+- **comp-uc1-t5 weak-link agent-inversion** (new, logical-content issue not mechanically fixable): companion misattributed the boss's judgment as the user's own self-belief. Gold(C) exemplar added; needs family-C retrain, not a regex.
+- **imag-embodiment-eagle "an animal tracking..."** (beat183 FYI) and **comp-past-query vague-probe volunteering unrelated VF fact** (beat182 FYI): neither recurred/was tested this beat; both still at 1 confirmed instance, still watching.
+
+### Gold
+- **Gold(A) +6** → 6575 (plus 7 existing entries cleaned of the crutch phrase, net text-only edit, no ID change): street-musician-crowd-gathers, power-comes-back-on-during-storm, dog-recognizes-you-after-long-trip, fitting-into-old-wedding-dress-decades-later, fireflies-first-summer-evening-with-new-baby, catching-foul-ball-at-game. All term-frequency-checked (0 prior hits) before writing, deliberately avoiding "particular"/"specific".
+- **Gold(C) +5** → 238 candidates (c_gold_beat184.jsonl): 2 target this beat's new companion defects (weak-link agent-inversion, full-restatement-with-framing); 1 targets the comp-para-care garbled-opener FYI; 2 target standing heartbeat-instruction categories (playful register with no deflating question; redirect drops therapy frame instantly, using a plain factual redirect rather than another emotional topic).
+- NOT SCP'd (mini unreachable).
+
+### Use-case rotation
+Companion deep-test still not run. This is now 90+ consecutive beats since the last standalone run (beat92) — see the structural flag in HANDOFF.md: qc_queue runs continuously with no natural idle gap, so the "wait for 35%-free memory" condition essentially never occurs in practice. Flagged for a Sonali decision (fold a lightweight slice into the queue rotation vs. continue waiting) rather than re-logged as a routine miss.
+
+### Mini
+UNREACHABLE (61st consecutive). Hostname alias fails DNS; direct IP times out; ARP shows the mac-mini.localdomain entry present but "(incomplete)" — host not answering on the network at all (asleep or off), same shape as recent beats.
+
+### Running
+qc_queue running (PID 29952). battery11_imagination_bank (started 18:32, log queue_0825_1832) in flight at beat close, ~8 min after this beat's fixes were committed — memory was at ~0.06% free (3685 pages) when checked, consistent with the queue's continuous single-model-slot occupation. Priority for next beat: read the battery11 cycle AFTER this one (the reliable verification point for beat184's imagination fixes), and the next battery9 cycle for the companion fixes.
