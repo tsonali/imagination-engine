@@ -464,7 +464,21 @@ _NARRATOR_POSS = re.compile(
     # said/step/walk/stand/watch/start/call/move) doesn't cover narration-of-narration
     # verbs. Direct violation of instrument-not-companion: the narrator has no body and
     # does not "stop talking" as an event inside the scene.
-    r"|\bI\s+(?:stop|stopped|talk|talked|talking|speak|spoke|speaking|narrate|narrated|narrating)\b",
+    r"|\bI\s+(?:stop|stopped|talk|talked|talking|speak|spoke|speaking|narrate|narrated|narrating)\b"
+    # beat184 (2026-08-25): battery11_0825_1359 imag-eagle-golden-eagle-wildlife
+    # honest read — real narrator first-person leaks survived despite the
+    # existing "I + verb" allowlist: "all there was left for me after I rose up
+    # here", "while I still have this one ahead of me", "catch our eye when we
+    # look", "takes me back to something I don't know about yet", "I don't know
+    # if we'll ever see it again". Root cause: the "I + verb" list only covered
+    # a fixed set of physical-action verbs; "rose/rise", "have", "know"/"don't
+    # know" were never added, and the "we + verb" list had no "look" entry or
+    # a phrase-level catch for "catch our eye"/"takes me back".
+    r"|\bI\s+(?:rose|rise|risen|rising|have|had|know|knew|don'?t\s+know|didn'?t\s+know)\b"
+    r"|\bwe\s+(?:look|looked)\b"
+    r"|\bcatch\s+our\s+eye\b"
+    r"|\btakes?\s+me\s+back\b"
+    r"|\bahead\s+of\s+me\b",
     re.IGNORECASE,
 )
 
@@ -660,7 +674,7 @@ def fix_copula_youre_alone(text: str) -> tuple[str, int]:
 _PREDICATIVE_YOUR_RE = re.compile(
     r"\b(is|was|are|were|be|been|become|becomes|became)\s+((?:\w+ly\s+)?)your\b"
     r"(?=\s*(?:[.,!?;]|—|$|\s+(?:entirely|completely|now|here|still|again|"
-    r"too|for|on|at|in|to|by|with|from|between)\b)"
+    r"too|for|on|at|in|to|by|with|from|between|whenever)\b)"
     r")",
     re.IGNORECASE,
 )
@@ -679,6 +693,11 @@ def fix_predicative_your(text: str) -> tuple[str, int]:
     output rather than dropped. "between" added to the non-noun-introducing follow
     set for the same script's "your between you both" (a noun can't immediately
     follow "between" + a pronoun like "you both", so this is safe).
+    beat184: "whenever" added to the follow set — battery11_0825_1359
+    imag-eagle-wildlife-plural: "It is your whenever you feel heavy in other
+    ways" (should be "yours"). "whenever" always opens a subordinate clause,
+    never introduces a possessable noun, so this is safe the same way
+    "between" was.
     """
     fixed = 0
 
@@ -710,12 +729,28 @@ _INTIMACY_OBJECT_PRONOUN_SUBS = (
     (re.compile(r"\btells\s+your\s+what\b", re.IGNORECASE), "tells you what"),
     (re.compile(r"\btell\s+your\s+what\b", re.IGNORECASE), "tell you what"),
     (re.compile(r"\bbetween\s+theirs\s+together\b", re.IGNORECASE), "between them together"),
+    # beat184 (2026-08-25): battery11_0825_1359 imag-intimacy honest read — the
+    # beat183 patterns above did not cover this run's escapes, confirming the
+    # fix needed a second pass. Four new literal instances, same rationale
+    # (narrow literal phrases, not a general grammar rule, to avoid false-
+    # firing on legitimate attributive "your"/"her" uses):
+    (re.compile(r"\bholds\s+your\s+without\s+looking\s+up\b", re.IGNORECASE), "holds you without looking up"),
+    (re.compile(r"\byour\s+stands\s+still\s+holding\s+onto\b", re.IGNORECASE), "you stand still holding onto"),
+    (
+        re.compile(
+            r"\bbefore\s+your\s+come\s+to\s+reach\s+out\s+for\s+her\s+the\s+exact\s+same\s+moment\s+as\s+her\s+turn\s+toward\s+you\s+instead\b",
+            re.IGNORECASE,
+        ),
+        "before you come to reach out for her the exact same moment as she turns toward you instead",
+    ),
+    (re.compile(r"\bshe\s+has\s+already\s+used\s+theirs\s+for\s+something\s+else\b", re.IGNORECASE), "she has already used hers for something else"),
 )
 
 
 def fix_intimacy_object_pronoun_escapes(text: str) -> tuple[str, int]:
-    """Fix the beat183 batch of "your"/"theirs" used as a verb/preposition object
-    where "you"/"yours"/"them" is grammatically required (see docstring above)."""
+    """Fix the beat183/beat184 batches of "your"/"theirs" used as a verb/
+    preposition object, or as a bare subject, where "you"/"yours"/"them"/"she"
+    is grammatically required (see docstrings above)."""
     fixed = 0
     for pattern, replacement in _INTIMACY_OBJECT_PRONOUN_SUBS:
         text, n = pattern.subn(replacement, text)

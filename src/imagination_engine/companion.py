@@ -1300,6 +1300,17 @@ def _strip_echo(reply: str, user_message: str) -> str:
     # "We told the kids last night.") where subject/object roles swap so Cases 1-7
     # don't fire. If final reply is \u22645 words, not a CONFIRM_LANDS phrase, and
     # \u226580% of its words appear in the user's first sentence \u2192 echo variant \u2192 "".
+    # beat184: threshold lowered 0.80->0.65. Root cause identical to beat166's fix
+    # to the SEPARATE second-pass short-echo guard: word-form lemma mismatches
+    # ("anger" noun vs "angry" adjective) drop exact-set-intersection ratio below
+    # 0.80 even though the reply is functionally a pure echo. Confirmed live in
+    # battery9_0825_1524 comp-grief-anger-1word-echo: user "I've been angry for
+    # days. Angry." -> companion "Anger for days." accepted on the FIRST pass
+    # (never reached second-pass at all) because Case 2f's ratio was {for,days}/3
+    # = 0.667 < 0.80. Case 2f is the primary/first-line guard; beat166 only
+    # patched the second-pass fallback, leaving this exact gap in the
+    # first-pass guard it was meant to backstop. 0.65 already FP-vetted at
+    # beat166 for the same word-set shape; extending here.
     if r and u:
         _r2f = re.findall(r"[a-z']+", _qasc(r.lower()))
         _u1_2f = re.findall(r"[a-z']+", _qasc(re.split(r'[.!?]', u)[0].lower()))
@@ -1307,7 +1318,7 @@ def _strip_echo(reply: str, user_message: str) -> str:
         if (_r2f and len(_r2f) <= 5
                 and r.strip().rstrip('.!?').lower() not in _lands_norm
                 and _u1_2f
-                and len(set(_r2f) & set(_u1_2f)) / len(_r2f) >= 0.80):
+                and len(set(_r2f) & set(_u1_2f)) / len(_r2f) >= 0.65):
             r = ""
 
     # Case 2g: Companion opens by narrating user's situation IN USER'S FIRST-PERSON VOICE.
@@ -1491,6 +1502,34 @@ def _strip_echo(reply: str, user_message: str) -> str:
                 if _jaccard_words(_u_you_2i, _r_for_jaccard_2i) >= 0.65:
                     _after_2i = r[len(_r_first_2i):].lstrip(" .!?\n-—")
                     r = _after_2i if (len(_after_2i.split()) > 3) else ""
+                else:
+                    # Case 2i extension (beat184): user-content-recall direction,
+                    # same philosophy as Case 2h's beat162b extension. A full
+                    # restatement can add content-free framing words ("The work
+                    # thing is...") that dilute symmetric Jaccard below 0.65 while
+                    # still echoing 100% of the user's content words unchanged.
+                    # Found in battery9_0825_1524 comp-uc1-t5-semantic-repeat T2:
+                    # user "I have a deliverable due Friday that I haven't
+                    # started." -> companion "The work thing is the deliverable
+                    # due Friday that you haven't started." Symmetric Jaccard 0.54
+                    # (below 0.65, missed by the check above) but the reply
+                    # contains 100% of the user's content words verbatim.
+                    _SWRDS_2I = frozenset({
+                        'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+                        'have', 'has', 'had', 'do', 'does', 'did', 'and', 'or', 'but', 'so',
+                        'for', 'in', 'on', 'at', 'to', 'of', 'by', 'with', 'from', 'as',
+                        'into', 'that', 'this', 'these', 'those', 'it', 'i', 'my', 'you',
+                        'your', 'me', 'we', 'our', 'if', 'not', 'just', 'too', 'also',
+                        'still', 'then', 'about', 'up', 'out', 'there', 'when', 'what',
+                        'who', 'which', 'than', 'no', 'nor', 'yet', 'can', 'could', 'will',
+                        'would', 'should', 'may', 'might', 'shall',
+                    })
+                    _u_content_2i = set(re.findall(r"[a-z']+", _norm(_u_you_2i).lower())) - _SWRDS_2I
+                    _r_content_2i = set(re.findall(r"[a-z']+", _norm(_r_for_jaccard_2i).lower())) - _SWRDS_2I
+                    if (_u_content_2i
+                            and len(_u_content_2i & _r_content_2i) / len(_u_content_2i) >= 0.80):
+                        _after_2i2 = r[len(_r_first_2i):].lstrip(" .!?\n-—")
+                        r = _after_2i2 if (len(_after_2i2.split()) > 3) else ""
 
     # Case 2j: Gerund-opener echo (beat94).
     # Catches: user "I snapped at my kid" → companion "Snapping at your kid over nothing..."
@@ -3435,6 +3474,15 @@ class Companion:
         # runs last so it catches all regen paths without needing per-regen plumbing.
         if reply:
             reply = re.sub(r"\byou(?:'re|\s+are)\s+software\b", "I'm software", reply, flags=re.IGNORECASE)
+
+        # beat184: "week link" homophone typo for "weak link". Found in
+        # battery9_0825_1524 comp-uc1-t5-semantic-repeat T3: "your boss's week
+        # link" — the small model occasionally spells the idiom "weak link" as
+        # "week link" (phonetic slip). There is no legitimate sense of "week
+        # link" in this domain, so an unconditional literal substitution is
+        # safe. Runs last, same pattern as the beat139 software-pronoun guard.
+        if reply:
+            reply = re.sub(r"\bweek link\b", "weak link", reply, flags=re.IGNORECASE)
 
         # beat151: Companion-turn truncation guard. When the model hits max_tokens
         # mid-sentence a reply like "...once as a real deadline and again in you" is
