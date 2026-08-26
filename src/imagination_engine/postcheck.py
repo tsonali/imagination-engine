@@ -744,6 +744,16 @@ _INTIMACY_OBJECT_PRONOUN_SUBS = (
         "before you come to reach out for her the exact same moment as she turns toward you instead",
     ),
     (re.compile(r"\bshe\s+has\s+already\s+used\s+theirs\s+for\s+something\s+else\b", re.IGNORECASE), "she has already used hers for something else"),
+    # beat186: battery11_2235 honest read — 2 more instances of the still-open
+    # "your"+ADJECTIVE-follow shape (beat185's audit item #5, deferred because a
+    # general adjective-follow rule looked unsafe off one example: "beneath your
+    # long shadow" is legitimate "your" + adjective + NOUN, so naively adding
+    # "long"/"close" to the shared _YOUR_NONNOUN_FOLLOW single-word lookahead
+    # (used by _YOUR_PREP_OBJECT_RE too) would wrongly fire on that and similar
+    # real attributive uses. Literal-phrase patches again, same discipline as
+    # beat183/184, until enough instances justify a safe 2-word-lookahead rule.
+    (re.compile(r"\breleases\s+your\s+long\s+enough\b", re.IGNORECASE), "releases you long enough"),
+    (re.compile(r"\bof\s+your\s+close\s+around\b", re.IGNORECASE), "of yours close around"),
 )
 
 
@@ -1136,7 +1146,25 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     # needing words between birds" — plural "birds" implies a second bird sharing this
     # unspoken understanding, same family as beat122's "without need for words" phrasing
     # but with the explicit plural noun this time, which no prior guard's wording covers.
-    r'|\bwords\s+between\s+birds\b',    # "without needing words between birds"
+    r'|\bwords\s+between\s+birds\b'     # "without needing words between birds"
+    # beat186 (2026-08-26): battery11_2235 honest read, imag-embodiment-eagle —
+    # 3rd occurrence of the beat178 human-bystander hallucination class (a
+    # hallucinated human figure on the ground below the eagle), with entirely new
+    # phrasing that beat178's two "someone has..." patterns don't cover: "there is
+    # a figure below by what looks like a small fire near that loghouse or lodge
+    # — someone sitting on their knees...", "Your eyes try to focus before you
+    # realize it's not a hiker" (invents "hiker" as a candidate identity even
+    # while negating it), "someone has been walking near the smoke... a human
+    # presence beneath everything else at work on some task". Recurring across 3
+    # separate beats (178, and twice in this run) confirms the model has a
+    # standing tendency to populate the ground below eagle scripts with an
+    # unnamed human — same underlying defect class as the anon-companion-bird
+    # escapes above, just a different invented entity.
+    r'|\ba\s+figure\s+below\b'          # "there is a figure below"
+    r'|\bsomeone\s+sitting\b'           # "someone sitting on their knees"
+    r'|\bnot\s+a\s+hiker\b'             # "before you realize it's not a hiker"
+    r'|\bsomeone\s+has\s+been\s+walking\b'  # "someone has been walking near the smoke"
+    r'|\bhuman\s+presence\b',           # "a human presence beneath everything else"
     re.IGNORECASE,
 )
 

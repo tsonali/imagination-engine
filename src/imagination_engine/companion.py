@@ -939,6 +939,71 @@ def _strip_chat_format_bleed(reply: str) -> str:
     return reply[m.end():].strip() if m else reply
 
 
+_STOP_BIGRAM_ECHO = frozenset({
+    'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+    'have', 'has', 'had', 'do', 'does', 'did', 'and', 'or', 'but', 'so',
+    'for', 'in', 'on', 'at', 'to', 'of', 'by', 'with', 'from', 'as',
+    'into', 'that', 'this', 'these', 'those', 'it', "it's", 'i', 'my', 'you',
+    'your', 'me', 'we', 'our', 'if', 'not', 'just', 'too', 'also',
+    'still', 'then', 'about', 'up', 'out', 'there', 'when', 'what',
+    'who', 'which', 'than', 'no', 'nor', 'yet', 'can', 'could', 'will',
+    'would', 'should', 'may', 'might', 'shall',
+})
+
+
+def _i_to_you(s: str) -> str:
+    """Normalize first-person I-refs and We-refs to second-person for echo detection."""
+    s = re.sub(r"\bI'm\b", "you're", s, flags=re.IGNORECASE)
+    s = re.sub(r"\bI've\b", "you've", s, flags=re.IGNORECASE)
+    s = re.sub(r"\bI'd\b", "you'd", s, flags=re.IGNORECASE)
+    s = re.sub(r"\bI'll\b", "you'll", s, flags=re.IGNORECASE)
+    s = re.sub(r'\bI\b', 'You', s)
+    s = re.sub(r'\bmy\b', 'your', s, flags=re.IGNORECASE)
+    s = re.sub(r'\bme\b', 'you', s, flags=re.IGNORECASE)
+    s = re.sub(r'\bmine\b', 'yours', s, flags=re.IGNORECASE)
+    s = re.sub(r'\bam\b', 'are', s, flags=re.IGNORECASE)
+    s = re.sub(r'\bwas\b', 'were', s, flags=re.IGNORECASE)
+    s = re.sub(r"\bwe're\b", "you're", s, flags=re.IGNORECASE)
+    s = re.sub(r"\bwe've\b", "you've", s, flags=re.IGNORECASE)
+    s = re.sub(r"\bwe'd\b", "you'd", s, flags=re.IGNORECASE)
+    s = re.sub(r"\bwe'll\b", "you'll", s, flags=re.IGNORECASE)
+    s = re.sub(r'\bwe\b', 'you', s, flags=re.IGNORECASE)
+    s = re.sub(r'\bour\b', 'your', s, flags=re.IGNORECASE)
+    s = re.sub(r'\bus\b', 'you', s, flags=re.IGNORECASE)
+    return s
+
+
+def _bigram_content_echo(reply: str, user_message: str) -> bool:
+    """True if `reply` contains a verbatim >=2-content-word bigram shared with the
+    I->You normalized user_message (both lowercased, comma/semicolon/colon-stripped).
+
+    Extracted at beat186 so both call sites share one implementation instead of
+    drifting apart: Case 2i's short-first-sentence extension inside _strip_echo()
+    (beat185), and turn()'s second-pass forced-response guard (beat186) — the
+    second-pass path deliberately skips _strip_echo() by design ("blank reply is
+    worse than mild echo"), which meant the exact defect Case 2i's extension was
+    built to catch ("this work thing" -> "The work thing is...") still reached
+    the user whenever BOTH the first attempt and the no-echo regen also echoed,
+    forcing the reply down the unguarded second-pass path. The full-reply Jaccard
+    guard already on the second-pass path (beat173 Fix G) doesn't catch it either
+    — one echoed noun phrase surrounded by otherwise-unrelated words dilutes
+    Jaccard below any safe threshold; a literal bigram is the right granularity,
+    same reasoning as beat185's original fix.
+    """
+    def _n(s: str) -> str:
+        return re.sub(r"[,;:]", "", s).lower()
+    u_you_full = _n(_i_to_you(user_message))
+    r_words = _n(reply).split()
+    for k in range(len(r_words) - 1):
+        gram2 = r_words[k:k + 2]
+        clean2 = [re.sub(r"[^a-z']", "", w) for w in gram2]
+        if (all(len(w) >= 3 for w in clean2)
+                and all(w not in _STOP_BIGRAM_ECHO for w in clean2)
+                and ' '.join(gram2) in u_you_full):
+            return True
+    return False
+
+
 def _strip_echo(reply: str, user_message: str) -> str:
     """Drop verbatim or near-verbatim echoes of the user's message from a reply.
 
@@ -1039,26 +1104,8 @@ def _strip_echo(reply: str, user_message: str) -> str:
                             break
                     if fi >= len(norm_map):
                         r = r[ri:].lstrip(" \n.-—")
-    def _i_to_you(s: str) -> str:
-        """Normalize first-person I-refs and We-refs to second-person for echo detection."""
-        s = re.sub(r"\bI'm\b", "you're", s, flags=re.IGNORECASE)
-        s = re.sub(r"\bI've\b", "you've", s, flags=re.IGNORECASE)
-        s = re.sub(r"\bI'd\b", "you'd", s, flags=re.IGNORECASE)
-        s = re.sub(r"\bI'll\b", "you'll", s, flags=re.IGNORECASE)
-        s = re.sub(r'\bI\b', 'You', s)
-        s = re.sub(r'\bmy\b', 'your', s, flags=re.IGNORECASE)
-        s = re.sub(r'\bme\b', 'you', s, flags=re.IGNORECASE)
-        s = re.sub(r'\bmine\b', 'yours', s, flags=re.IGNORECASE)
-        s = re.sub(r'\bam\b', 'are', s, flags=re.IGNORECASE)
-        s = re.sub(r'\bwas\b', 'were', s, flags=re.IGNORECASE)
-        s = re.sub(r"\bwe're\b", "you're", s, flags=re.IGNORECASE)
-        s = re.sub(r"\bwe've\b", "you've", s, flags=re.IGNORECASE)
-        s = re.sub(r"\bwe'd\b", "you'd", s, flags=re.IGNORECASE)
-        s = re.sub(r"\bwe'll\b", "you'll", s, flags=re.IGNORECASE)
-        s = re.sub(r'\bwe\b', 'you', s, flags=re.IGNORECASE)
-        s = re.sub(r'\bour\b', 'your', s, flags=re.IGNORECASE)
-        s = re.sub(r'\bus\b', 'you', s, flags=re.IGNORECASE)
-        return s
+    # _i_to_you and _bigram_content_echo promoted to module level at beat186
+    # (see above _strip_echo) so the second-pass guard in turn() can share them.
 
     # 2c. I→You echo: companion transforms user's first-person statement to second-person.
     #     "I can't say this to my husband." → "You can't say this to your husband."
@@ -1556,26 +1603,12 @@ def _strip_echo(reply: str, user_message: str) -> str:
                 # useful, not hollow, so this whole branch is gated to
                 # DECLARATIVE replies only (skipped when r ends in "?", see
                 # the elif condition above).
-                _STOP_2I_SHORT = frozenset({
-                    'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
-                    'have', 'has', 'had', 'do', 'does', 'did', 'and', 'or', 'but', 'so',
-                    'for', 'in', 'on', 'at', 'to', 'of', 'by', 'with', 'from', 'as',
-                    'into', 'that', 'this', 'these', 'those', 'it', "it's", 'i', 'my', 'you',
-                    'your', 'me', 'we', 'our', 'if', 'not', 'just', 'too', 'also',
-                    'still', 'then', 'about', 'up', 'out', 'there', 'when', 'what',
-                    'who', 'which', 'than', 'no', 'nor', 'yet', 'can', 'could', 'will',
-                    'would', 'should', 'may', 'might', 'shall',
-                })
-                _u_you_full_2i = _norm(_i_to_you(u)).lower()
-                _r_words_2i_short = _norm(r).lower().split()
-                for _ki2i in range(len(_r_words_2i_short) - 1):
-                    _gram2_2i = _r_words_2i_short[_ki2i:_ki2i + 2]
-                    _clean2_2i = [re.sub(r"[^a-z']", "", _w2i) for _w2i in _gram2_2i]
-                    if (all(len(_w2i) >= 3 for _w2i in _clean2_2i)
-                            and all(_w2i not in _STOP_2I_SHORT for _w2i in _clean2_2i)
-                            and ' '.join(_gram2_2i) in _u_you_full_2i):
-                        r = ""  # verbatim content 2-gram echo of a later user sentence -> regen
-                        break
+                # beat186: delegates to the module-level _bigram_content_echo(),
+                # shared with turn()'s second-pass guard (same check, same stopword
+                # list — previously duplicated inline here, which is exactly how
+                # the second-pass path ended up without it in the first place).
+                if _bigram_content_echo(r, u):
+                    r = ""  # verbatim content 2-gram echo of a later user sentence -> regen
 
     # Case 2j: Gerund-opener echo (beat94).
     # Catches: user "I snapped at my kid" → companion "Snapping at your kid over nothing..."
@@ -1974,8 +2007,10 @@ class Companion:
                 "AFFIRM every fact written there. "
                 "FORBIDDEN: Do NOT say 'I don't have that', 'you haven't told me', or "
                 "'I don't know' for anything that IS written in the vital-facts block. "
-                "If they ask what you remember: NAME each fact from the block — "
-                "e.g. 'Your sister Priya lives in Austin. You're a product lead at Hearth.' "
+                "If they ask what you remember: NAME each fact from the block, using "
+                "the exact names and details written there and nothing else. If the "
+                "block contains only ONE fact, state only that one fact — do NOT add "
+                "a second invented fact to round it out. "
                 "Do NOT deflect. Do NOT redirect to the current topic. State the facts."
             )
         else:
@@ -2141,7 +2176,10 @@ class Companion:
             r"^(?:that[‘’]?s|it[‘’]?s|this is)\s+(?:been\s+)?(?:(?:the|a|all|just)\s+)*"
             r"(?:whole\s+)?(?:thing|this|script|story|situation|picture|deal"
             r"|conversation|world|topic|thread)"
-            r"(?:\s+(?:in\s+itself|of\s+\w+(?:\s+\w+){0,4}))?"
+            # beat186: "for [verb-phrase]" added alongside "of [verb-phrase]" — battery9_0004
+            # comp-grief-anger-barrier-pivot T2 "That's the whole script for staying quiet."
+            # used "for" where beat155's fix only covered "of" ("of staying quiet").
+            r"(?:\s+(?:in\s+itself|(?:of|for)\s+\w+(?:\s+\w+){0,4}))?"
             r"\s*[.!?]?\s*$",
             re.IGNORECASE,
         )
@@ -2497,6 +2535,23 @@ class Companion:
                                 _spg_jacc,
                             )
                             reply = "Tell me what it's still costing you."
+                # beat186: second-pass bigram-echo guard. Fix G above (full-reply
+                # Jaccard) misses a single echoed noun phrase diluted by an
+                # otherwise-unrelated reply — e.g. "The work thing is keeping you
+                # awake at 2am." from "...There's this work thing." (Jaccard ~0.19,
+                # well under Fix G's 0.65 floor) — the exact shape Case 2i's
+                # beat185 bigram extension was built to catch inside _strip_echo(),
+                # which this second-pass path deliberately skips by design. Reuses
+                # the same shared check (declarative-only, same as beat185's FP
+                # gate for clarifying questions).
+                if (reply and not reply.rstrip().endswith("?")
+                        and len(reply.split()) <= 25
+                        and _bigram_content_echo(reply, user_message)):
+                    log.warning(
+                        "companion: second-pass bigram-echo ('%s') — applying bridge",
+                        reply[:60],
+                    )
+                    reply = "Tell me more about what's been on your mind."
 
         flagged = _check_forbidden(reply)
         if flagged:

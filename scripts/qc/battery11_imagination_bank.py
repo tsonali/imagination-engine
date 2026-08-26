@@ -231,7 +231,17 @@ for sc in scenarios:
                 # beat183 (2026-08-25): battery11_0825_0950 honest read, imag-eagle-
                 # companion-bird-he — "it feels like something new without needing
                 # words between birds" (plural "birds" implies a second bird).
-                r'|\bwords\s+between\s+birds\b',
+                r'|\bwords\s+between\s+birds\b'
+                # beat186 (2026-08-26): battery11_2235 honest read, imag-embodiment-
+                # eagle — 3rd occurrence of the beat178 human-bystander class, new
+                # phrasing: "there is a figure below... someone sitting on their
+                # knees", "before you realize it's not a hiker", "someone has been
+                # walking near the smoke... a human presence beneath everything else".
+                r'|\ba\s+figure\s+below\b'
+                r'|\bsomeone\s+sitting\b'
+                r'|\bnot\s+a\s+hiker\b'
+                r'|\bsomeone\s+has\s+been\s+walking\b'
+                r'|\bhuman\s+presence\b',
                 lower, _re.IGNORECASE
             ))
             # beat153: Chair-body reminder in eagle script (not just opening).

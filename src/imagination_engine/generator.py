@@ -1381,6 +1381,16 @@ def generate_session(
             # read — passed all 6 eagle postchecks but closed with "it feels like something
             # new without needing words between birds" (plural "birds" implies a second bird).
             "words between birds",     # "without needing words between birds"
+            # beat186 (2026-08-26): battery11_2235 honest read, imag-embodiment-eagle —
+            # 3rd occurrence of the beat178 human-bystander class, new phrasing: "there
+            # is a figure below by what looks like a small fire... someone sitting on
+            # their knees", "before you realize it's not a hiker", "someone has been
+            # walking near the smoke... a human presence beneath everything else".
+            "a figure below",          # "there is a figure below"
+            "someone sitting",         # "someone sitting on their knees"
+            "not a hiker",             # "before you realize it's not a hiker"
+            "someone has been walking",  # "someone has been walking near the smoke"
+            "human presence",          # "a human presence beneath everything else"
         ))
         if anon_companion_dropped:
             log.warning('[v6] %d anonymous-companion sentence(s) dropped (you/we both in solo eagle active-body)',
