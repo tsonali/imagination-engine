@@ -241,7 +241,15 @@ for sc in scenarios:
                 r'|\bsomeone\s+sitting\b'
                 r'|\bnot\s+a\s+hiker\b'
                 r'|\bsomeone\s+has\s+been\s+walking\b'
-                r'|\bhuman\s+presence\b',
+                r'|\bhuman\s+presence\b'
+                # beat187 (2026-08-26): battery11_0826_0355 honest read, imag-eagle-
+                # wildlife-plural — 4th occurrence of the human-bystander class, new
+                # scenario, 5 new phrasings.
+                r'|\bwants?\s+to\s+be\s+seen\b'
+                r'|\brock\s+climber\b'
+                r'|\bhumans?\s+come\s+into\s+(?:your\s+)?vision\b'
+                r'|\bplaced\s+by\s+(?:someone|humans?)\b'
+                r'|\bpeople\s+would\s+have\s+been\s+walking\b',
                 lower, _re.IGNORECASE
             ))
             # beat153: Chair-body reminder in eagle script (not just opening).

@@ -1391,6 +1391,17 @@ def generate_session(
             "not a hiker",             # "before you realize it's not a hiker"
             "someone has been walking",  # "someone has been walking near the smoke"
             "human presence",          # "a human presence beneath everything else"
+            # beat187 (2026-08-26): battery11_0826_0355 honest read, imag-eagle-
+            # wildlife-plural — 4th occurrence of the human-bystander class, new
+            # scenario, 5 new phrasings: "wants to be seen", "a lone rock climber",
+            # "humans come into your vision", "placed by humans"/"placed by someone",
+            # "the people would have been walking".
+            "wants to be seen",        # "someone from below who wants to be seen"
+            "rock climber",            # "a lone rock climber against the stone face"
+            "humans come into",        # "humans come into your vision briefly"
+            "placed by humans",        # "it's not natural, placed by humans"
+            "placed by someone",       # "it has been placed by someone from below"
+            "people would have been walking",  # "the people would have been walking"
         ))
         if anon_companion_dropped:
             log.warning('[v6] %d anonymous-companion sentence(s) dropped (you/we both in solo eagle active-body)',

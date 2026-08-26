@@ -754,6 +754,19 @@ _INTIMACY_OBJECT_PRONOUN_SUBS = (
     # beat183/184, until enough instances justify a safe 2-word-lookahead rule.
     (re.compile(r"\breleases\s+your\s+long\s+enough\b", re.IGNORECASE), "releases you long enough"),
     (re.compile(r"\bof\s+your\s+close\s+around\b", re.IGNORECASE), "of yours close around"),
+    # beat187 (2026-08-26): battery11_0826_0355 honest read, imag-intimacy — a
+    # THIRD grammatical shape of the your/yours escape family, distinct from both
+    # fix_predicative_your's copula+your pattern and _YOUR_PREP_OBJECT_RE's
+    # preposition+your pattern. Here "your" is the DIRECT OBJECT of a transitive
+    # verb ("finds") and is itself followed by a preposition ("without"): "Her
+    # hand finds your without a word — it's warm from whatever heat she was
+    # holding onto before." Context (a hand finding another hand, "warm from...
+    # holding onto") makes clear the correct target is the standalone possessive
+    # "yours" (her hand finds your hand -> finds yours), not "you". Literal patch
+    # for this single instance, same discipline as the other narrow phrase
+    # patches above — a general verb-governed-"your" rule isn't attempted off one
+    # example, same reasoning beat185/186 documented for the adjective-follow gap.
+    (re.compile(r"\bfinds\s+your\s+without\s+a\s+word\b", re.IGNORECASE), "finds yours without a word"),
 )
 
 
@@ -903,6 +916,25 @@ _INSTRUCTION_PREFIX_PATTERNS = [
     re.compile(r"Hard Cut Into The Scene:\s*", re.IGNORECASE),
 ]
 
+# Meta/tool-call text hallucination (beat187, imag-mri battery11_0826_0920): the model
+# generated "...light-filled breathsDataExchange completed. User requested an example
+# now fully compiled by following supplied rules. You are inside the tube..." — a
+# fragment resembling internal tool-call/system text, fused directly onto the end of a
+# legitimate word with no space ("breaths" + "DataExchange"). This is a distinct
+# hallucination class from both fix_word_fusions() (which only splits contraction+
+# capital fusions like "doesnYou") and the BACK_PROMPT echoes below (which are
+# sentence-level, not word-fused) — same family as the "TTS output device" /
+# "text-to-speech" technical-environment hallucinations already in
+# _BACK_LEAK_PATTERNS, just glued onto the preceding word instead of standing alone.
+# A literal substitution is safe (zero legitimate use for this exact phrase in a
+# guided-imagination script) and reconnects the real word with proper punctuation
+# instead of dropping the whole run-on sentence it's fused into.
+_META_TEXT_LEAK_RE = re.compile(
+    r"([a-z]{3,})DataExchange completed\.\s*"
+    r"User requested an example now fully compiled by following supplied rules\.\s*",
+    re.IGNORECASE,
+)
+
 
 def strip_back_instruction_leaks(text: str) -> tuple[str, int]:
     """Remove sentences that contain literal BACK_PROMPT instruction fragments.
@@ -912,13 +944,19 @@ def strip_back_instruction_leaks(text: str) -> tuple[str, int]:
     This strips sentences containing known leak patterns.
     Returns (cleaned_text, n_sentences_removed).
     """
+    # Meta/tool-call text hallucination fused onto a real word (beat187): reconnect
+    # the real word with a period and drop the leaked span entirely, before sentence
+    # splitting (splitting first would bundle this into one giant run-on sentence and
+    # lose the legitimate clause it's fused onto).
+    text, meta_removed = _META_TEXT_LEAK_RE.subn(r"\1. ", text)
+
     # First strip instruction prefixes that precede real content (keep the content).
     for pat in _INSTRUCTION_PREFIX_PATTERNS:
         text = pat.sub("", text)
 
     sentences = re.split(r"(?<=[\.\!\?])\s+", text.strip())
     kept = []
-    removed = 0
+    removed = meta_removed
     for s in sentences:
         if any(pat.search(s) for pat in _BACK_LEAK_PATTERNS):
             removed += 1
@@ -1164,7 +1202,28 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     r'|\bsomeone\s+sitting\b'           # "someone sitting on their knees"
     r'|\bnot\s+a\s+hiker\b'             # "before you realize it's not a hiker"
     r'|\bsomeone\s+has\s+been\s+walking\b'  # "someone has been walking near the smoke"
-    r'|\bhuman\s+presence\b',           # "a human presence beneath everything else"
+    r'|\bhuman\s+presence\b'            # "a human presence beneath everything else"
+    # beat187 (2026-08-26): battery11_0826_0355 honest read, imag-eagle-wildlife-
+    # plural — 4th occurrence of the beat178 human-bystander hallucination class,
+    # NEW scenario (previous 3 occurrences were imag-eagle-wildlife-plural beat178,
+    # imag-embodiment-eagle beat186 x2) and 5 new phrasings none of the beat178/186
+    # patterns cover: "it has been placed by someone from below who wants to be
+    # seen", "a lone rock climber against the stone face far too small and distant
+    # to make out details", "you've been here enough times before landing or
+    # takeoff that humans come into your vision briefly sometimes", "it's not
+    # natural, placed by humans who want to stand out even here high above
+    # everything down there below them", "You know the people would have been
+    # walking near rock over smaller ground before now but can't see any more
+    # details". All 6 eagle postchecks (including the beat186 patterns above)
+    # passed this script clean — confirms the underlying model tendency to
+    # populate ground-level human bystanders below eagle scripts is not closing
+    # via literal-phrase patching, but a 4th single-beat batch is still the
+    # established practice pending a broader generalization decision.
+    r'|\bwants?\s+to\s+be\s+seen\b'     # "someone from below who wants to be seen"
+    r'|\brock\s+climber\b'              # "a lone rock climber against the stone face"
+    r'|\bhumans?\s+come\s+into\s+(?:your\s+)?vision\b'  # "humans come into your vision"
+    r'|\bplaced\s+by\s+(?:someone|humans?)\b'  # "placed by someone from below" / "placed by humans"
+    r'|\bpeople\s+would\s+have\s+been\s+walking\b',  # "the people would have been walking"
     re.IGNORECASE,
 )
 

@@ -52,6 +52,7 @@ QUEUE=(
   scripts/qc/battery11_imagination_bank.py
   scripts/qc/battery9_engagement.py
   scripts/qc/companion_deep_test.py
+  scripts/qc/byo_deep_test.py
   scripts/qc/battery6_crosscut.py
   scripts/qc/battery10_registers.py
   scripts/qc/battery2b_honesty.py

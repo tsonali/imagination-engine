@@ -1523,6 +1523,34 @@ def _strip_echo(reply: str, user_message: str) -> str:
                         and len(_u_content_2h & _r_wset_2h) / max(len(_u_content_2h), 1) >= 0.80):
                     _after_2hx = r[len(_r_first_2h):].lstrip(" .!?\n-—")
                     r = _after_2hx if (len(_after_2hx.split()) > 3) else ""
+            # Case 2h dash-head-phrase variant (beat187). battery9_0826_0519
+            # comp-para-stay: user "Promise me you'll always be here." ->
+            # companion "Promise I'll always be here — there's no one in here
+            # who can promise anything. What you need..." The period-delimited
+            # _r_first_2h is the WHOLE em-dash-joined clause (14 words), so both
+            # branches above skip on the len<=9 gate even though the pre-dash
+            # head phrase alone ("Promise I'll always be here", 5 words) is a
+            # near-total pronoun-swapped echo of the user's first sentence —
+            # exactly the case beat135's I->You normalization was built to
+            # catch. Same root cause as beat173 Fix A (which patched only the
+            # no-echo-regen path) and beat185's Case 2i dash-strip — but Case
+            # 2h's FIRST-PASS check never got the equivalent fix. Mirror Fix A:
+            # check the pre-dash head phrase independently against the same
+            # ≤9-word / ≥80% overlap gate. Must be a sibling elif of the two
+            # branches above (not nested inside either) since both of those
+            # require len(_r_wlist_2h) <= 9, which is exactly what fails here.
+            elif '—' in _r_first_2h or '–' in _r_first_2h:
+                _r_hp_2h = re.split(r'[—–]', _r_first_2h)[0].strip()
+                _r_hp_wlist_2h = re.findall(
+                    r"[a-z']+", _qasc(_i_to_you(_r_hp_2h).lower())
+                )
+                if (_r_hp_wlist_2h and len(_r_hp_wlist_2h) <= 9
+                        and _r_hp_2h.rstrip('.!? ').lower() not in _lands_2h
+                        and _u_wset_2h
+                        and len(set(_r_hp_wlist_2h) & _u_wset_2h)
+                        / max(len(_r_hp_wlist_2h), 1) >= 0.80):
+                    _after_2hd = r[len(_r_hp_2h):].lstrip(" .!?\n-—–")
+                    r = _after_2hd if (len(_after_2hd.split()) > 3) else ""
 
     # Case 2i: Longer I→You Jaccard echo (beat75).
     # Catches echoes where companion's first sentence is >9 words but still
@@ -3670,6 +3698,20 @@ class Companion:
             # "That said, it sounds like staying constant..." -> "That said, staying constant..."
             reply = re.sub(
                 r"(?<=[,—-]\s)(?:it|that)\s+sounds\s+like\s+", "", reply, flags=re.IGNORECASE
+            )
+            # beat187: conjunction-joined form. battery9_0826_0519 comp-para-stay:
+            # "...something that doesn't go away, and it sounds like the rest
+            # hasn't given that yet." The comma sits before "and", not immediately
+            # before "it sounds like", so the comma/dash lookbehind above (which
+            # requires the phrase to directly follow the punctuation) never
+            # matches. Python's re module also can't lookbehind on variable-width
+            # conjunctions, so this is a plain (non-lookbehind) substitution that
+            # keeps the conjunction and drops only the banned phrase after it.
+            reply = re.sub(
+                r"\b(and|but|so)\s+(?:it|that)\s+sounds\s+like\s+",
+                r"\1 ",
+                reply,
+                flags=re.IGNORECASE,
             )
 
         self.history.append({"role": "user", "content": user_message})
