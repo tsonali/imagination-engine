@@ -249,7 +249,14 @@ for sc in scenarios:
                 r'|\brock\s+climber\b'
                 r'|\bhumans?\s+come\s+into\s+(?:your\s+)?vision\b'
                 r'|\bplaced\s+by\s+(?:someone|humans?)\b'
-                r'|\bpeople\s+would\s+have\s+been\s+walking\b',
+                r'|\bpeople\s+would\s+have\s+been\s+walking\b'
+                # beat188 (battery11_0826_0920 honest read): acoustic anon-
+                # companion escape — "the cry from above is answered by
+                # another... draws birds towards it"; "the cry from below
+                # returns then".
+                r'|\banswered\s+by\s+another\b'
+                r'|\bdraws\s+birds\s+towards\b'
+                r'|\bcry\s+from\s+(?:above|below)\s+returns\b',
                 lower, _re.IGNORECASE
             ))
             # beat153: Chair-body reminder in eagle script (not just opening).

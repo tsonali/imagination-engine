@@ -948,6 +948,20 @@ class Assistant:
                 if day not in text_lower and day in out.lower():
                     out = re.sub(r'\b' + day + r'\b', '[day]', out, flags=re.IGNORECASE)
                     log.info("secretary[draft]: replaced invented day '%s' with [day]", day)
+        # Post-check for draft/reply: preposition typo "at a [profession]" where
+        # "as a [profession]" is grammatically required (beat188,
+        # battery10_0826_1357 sec-eulogy: brief "Frank, 71, machinist for 40
+        # years" -> draft "He worked for forty years at a machinist" instead of
+        # "as a machinist"). Zero legitimate sense of "worked at a machinist"
+        # exists (a machinist is a job title, not a place), so this is a safe
+        # unconditional literal fix, same discipline as companion.py's "week
+        # link" -> "weak link" homophone fix.
+        if task_key in ("draft", "reply"):
+            out = re.sub(
+                r'\bworked\s+(?:for\s+[\w\s]+?\s+)?at\s+a\s+machinist\b',
+                lambda m: m.group(0).replace(" at a ", " as a "),
+                out, flags=re.IGNORECASE,
+            )
         return UtilityResult(task=task_key, output=out)
 
 

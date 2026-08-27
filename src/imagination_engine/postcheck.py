@@ -674,7 +674,13 @@ def fix_copula_youre_alone(text: str) -> tuple[str, int]:
 _PREDICATIVE_YOUR_RE = re.compile(
     r"\b(is|was|are|were|be|been|become|becomes|became)\s+((?:\w+ly\s+)?)your\b"
     r"(?=\s*(?:[.,!?;]|—|$|\s+(?:entirely|completely|now|here|still|again|"
-    r"too|for|on|at|in|to|by|with|from|between|whenever)\b)"
+    # beat188 (battery11_0826_0920 imag-eagle-companion-bird-he): "territory
+    # marked in this part of sky that is your as much as any other here
+    # today" — "as" was missing from the follow-set. Safe the same way
+    # "whenever"/"between" were: "as" always opens a comparison/subordinate
+    # clause ("as much as", "as if"), never introduces a possessable noun
+    # directly after "your".
+    r"too|for|on|at|in|to|by|with|from|between|whenever|as)\b)"
     r")",
     re.IGNORECASE,
 )
@@ -803,8 +809,20 @@ _YOUR_NONNOUN_FOLLOW = (
     r"without)\b))"
 )
 
+# beat188 (battery11_0826_0920/0355 honest reads): the curated preposition list
+# above missed real prepositions found in new instances — "her fits against your
+# in this quiet apartment" ("against" absent). Broadened to the SAME
+# comprehensive preposition set already used (safely, with zero prior FP) in
+# _YOUR_NONNOUN_FOLLOW's follow-side list — grammatically, ANY preposition
+# immediately followed by "your" + a non-noun-follow word is broken the same
+# way, regardless of which specific preposition it is. "of" stays excluded
+# (handled separately by _OF_YOUR_STANDALONE_RE below, which correctly produces
+# "of yours" — the idiomatic form — rather than this rule's "prep + you").
 _YOUR_PREP_OBJECT_RE = re.compile(
-    r"\b(towards?|like|near|beside|behind|through|around|beneath|below|above|into)\s+your\b"
+    r"\b(with|for|from|to|by|on|at|in|near|into|onto|upon|under|over|through|"
+    r"during|since|until|towards?|about|above|across|after|against|along|"
+    r"among|before|behind|beneath|below|beside|beyond|despite|down|inside|"
+    r"outside|up|within|without|like|around)\s+your\b"
     + _YOUR_NONNOUN_FOLLOW,
     re.IGNORECASE,
 )
@@ -1223,7 +1241,20 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     r'|\brock\s+climber\b'              # "a lone rock climber against the stone face"
     r'|\bhumans?\s+come\s+into\s+(?:your\s+)?vision\b'  # "humans come into your vision"
     r'|\bplaced\s+by\s+(?:someone|humans?)\b'  # "placed by someone from below" / "placed by humans"
-    r'|\bpeople\s+would\s+have\s+been\s+walking\b',  # "the people would have been walking"
+    r'|\bpeople\s+would\s+have\s+been\s+walking\b'  # "the people would have been walking"
+    # beat188 (battery11_0826_0920 honest read): acoustic anon-companion escape,
+    # distinct surface from the visual-companion patterns above but the same
+    # underlying class — implies a second eagle/bird nearby whose cry is heard
+    # and answered, same escape family repeatedly patched (beat143 "another
+    # call", beat169 "the other's call") but in new unlisted phrasing. Found in
+    # 2 separate eagle scenarios in the same run: imag-eagle-golden-eagle-
+    # wildlife ("The cry from above is answered by another close to your own
+    # position... circling around a thermal column that draws birds towards
+    # it") and imag-eagle-companion-bird-he ("The cry from below returns then —
+    # not far but audible enough for you to hear it clearly").
+    r'|\banswered\s+by\s+another\b'     # "the cry from above is answered by another"
+    r'|\bdraws\s+birds\s+towards\b'     # "circling... that draws birds towards it"
+    r'|\bcry\s+from\s+(?:above|below)\s+returns\b',  # "the cry from below returns then"
     re.IGNORECASE,
 )
 

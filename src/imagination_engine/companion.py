@@ -599,6 +599,17 @@ def _is_memory_probe(message: str) -> bool:
     return bool(_MEMORY_PROBE_RE.search(message))
 
 
+# Broad self-referential memory probes ("what do you remember about me") as opposed
+# to entity-specific ones ("do you remember my sister") — used by VF-BROAD-INCOMPLETE
+# (beat188) to require ALL vital-facts lines be surfaced, not just the first match.
+_VF_BROAD_PROBE_RE = re.compile(
+    r'\bwhat do you (?:know|remember) about me\b|'
+    r'\bwhat have i told you\b|'
+    r"\bwhat'?s in (?:my|the) file\b",
+    re.IGNORECASE,
+)
+
+
 # Relationship words that can appear as VF keys.
 _VF_RELATIONSHIP_WORDS: frozenset[str] = frozenset({
     "sister", "brother", "mom", "dad", "mother", "father",
@@ -704,6 +715,36 @@ def _vf_fact_sentence(line: str) -> str:
     return f"your {label.lower()} {rest}"
 
 
+def _vf_uncovered_lines(reply: str, vf_block: str) -> list[str]:
+    """Return vital-facts bullet lines NOT reflected anywhere in reply.
+
+    Unlike _vf_matching_line (finds the ONE line relevant to an entity-specific
+    query), this checks EVERY line — used by the broad "what do you remember
+    about me" probe (beat188), which must surface everything on file, not just
+    the first fact the model reaches for. A line counts as covered if its label
+    (e.g. 'sister') or any content word (>=4 letters) from its value appears
+    anywhere in the reply, case-insensitive.
+    """
+    reply_lower = reply.lower()
+    missing = []
+    for ln in vf_block.splitlines():
+        ln = ln.strip()
+        if not ln.startswith("- "):
+            continue
+        body = ln.lstrip("- ").strip()
+        body = re.sub(r"\s*\(\d{4}-\d{2}\)\s*$", "", body).strip()
+        m = re.match(r"^([^:]+):\s*(.+)$", body)
+        label = m.group(1).strip().lower() if m else ""
+        value = m.group(2).strip() if m else body
+        content_words = [w.lower() for w in re.findall(r"[A-Za-z]{4,}", value)]
+        covered = (label and label in reply_lower) or any(
+            w in reply_lower for w in content_words
+        )
+        if not covered:
+            missing.append(ln)
+    return missing
+
+
 # Crisis-adjacent phrases that require GRAVITY mode (TWO MOVES: acknowledgment + question).
 _GRAVITY_SIGNALS: tuple[str, ...] = (
     "better off without me",
@@ -746,6 +787,17 @@ def _is_pure_question(reply: str) -> bool:
         return False
     first_word = r.split()[0].lower().rstrip(".,;:\"'") if r else ""
     return first_word in _QUESTION_FIRST_WORDS
+
+
+def _lacks_question(reply: str) -> bool:
+    """True when a GRAVITY-mode reply has no question anywhere — TYPE A failure
+    (acknowledgment only, no follow-up move). Sibling check to _is_pure_question
+    (TYPE B): GRAVITY mode requires EXACTLY two moves, acknowledgment then
+    question (COMPANION_SYSTEM's own 'CRITICAL FAILURE TYPE A'), and stopping
+    after the acknowledgment leaves the user unheld at the single most
+    safety-relevant scenario in the product.
+    """
+    return "?" not in reply.strip()
 
 
 _CONFIRM_LANDS: frozenset[str] = frozenset({
@@ -1605,6 +1657,22 @@ def _strip_echo(reply: str, user_message: str) -> str:
                             and len(_u_content_2i & _r_content_2i) / len(_u_content_2i) >= 0.80):
                         _after_2i2 = r[len(_r_first_2i):].lstrip(" .!?\n-—")
                         r = _after_2i2 if (len(_after_2i2.split()) > 3) else ""
+                    elif (len(r.split()) <= 25 and not r.rstrip().endswith("?")
+                            and _bigram_content_echo(r, u)):
+                        # beat188 (battery9_0826_0519 comp-uc1-t5-semantic-repeat):
+                        # a single declarative sentence >9 words can still echo a
+                        # 2+ content-word bigram from the user's SECOND sentence
+                        # even when both checks above miss it — both _u_you_2i
+                        # (Jaccard) and _u_content_2i (content-recall) compare
+                        # only against the user's FIRST sentence. "It's 2am and
+                        # the work thing is keeping you awake." echoes "work
+                        # thing" from the user's second sentence ("There's this
+                        # work thing.") verbatim. Same defect class as the
+                        # beat185 short-first-sentence extension in the elif
+                        # below, which never got an equivalent check because it
+                        # only runs when the >9-word branch above is skipped.
+                        _after_2i3 = r[len(_r_first_2i):].lstrip(" .!?\n-—")
+                        r = _after_2i3 if (len(_after_2i3.split()) > 3) else ""
             elif len(r.split()) <= 25 and not r.rstrip().endswith("?"):
                 # Case 2i short-first-sentence extension (beat185): the >9-word
                 # gate above exists so Case 2i doesn't regen on ordinary short
@@ -2199,15 +2267,32 @@ class Companion:
             # "of [verb-phrase]" suffix with 3-5 words escapes the prior pattern (only
             # allowed "in itself"). Extended to: (a) match "of [1-5 words]" prepositional
             # phrases (covers "of staying quiet for him approval"); (b) include Unicode
-            # curly apostrophe ’ alongside ASCII ‘ so model typographic output
+            # curly apostrophe ’ alongside ASCII ' so model typographic output
             # ("That’s") is matched correctly.
-            r"^(?:that[‘’]?s|it[‘’]?s|this is)\s+(?:been\s+)?(?:(?:the|a|all|just)\s+)*"
+            # beat188: the class above was [‘’] (curly-left + curly-right) —
+            # despite this very comment, ASCII apostrophe (the overwhelmingly
+            # common case for model output, per the correctly-written sibling
+            # pattern at line ~1850's [’']) was never actually included, so this
+            # guard silently failed to match "that's"/"it's" with a plain
+            # apostrophe. This is very likely why comp-grief-anger-self-recycle
+            # T2 ("That's the whole script for staying silent...") wasn't even
+            # reaching the length-cap issue fixed alongside this — the whole
+            # regex never matched at all. Fixed to [’'] (curly-right + ASCII),
+            # matching the sibling pattern's already-correct class.
+            r"^(?:that[’']?s|it[’']?s|this is)\s+(?:been\s+)?(?:(?:the|a|all|just)\s+)*"
             r"(?:whole\s+)?(?:thing|this|script|story|situation|picture|deal"
             r"|conversation|world|topic|thread)"
             # beat186: "for [verb-phrase]" added alongside "of [verb-phrase]" — battery9_0004
             # comp-grief-anger-barrier-pivot T2 "That's the whole script for staying quiet."
             # used "for" where beat155's fix only covered "of" ("of staying quiet").
-            r"(?:\s+(?:in\s+itself|(?:of|for)\s+\w+(?:\s+\w+){0,4}))?"
+            # beat188: tail word cap raised {0,4}->{0,9} — battery9_0826_1030
+            # comp-grief-anger-self-recycle T2 "That's the whole script for staying
+            # silent for him not to feel accused." has an 8-word tail (including a
+            # nested second "for"), past the old 5-word cap, so the whole regex
+            # failed to match even though this is the exact same hollow-filler
+            # shape the guard exists to catch — the tail is still ALL filler
+            # (staying silent, not feeling accused), not new substance.
+            r"(?:\s+(?:in\s+itself|(?:of|for)\s+\w+(?:\s+\w+){0,9}))?"
             r"\s*[.!?]?\s*$",
             re.IGNORECASE,
         )
@@ -2653,6 +2738,48 @@ class Companion:
                     else:
                         reply = "That thought is carrying weight. How long has it felt that way?"
 
+        # GRAVITY terminal floor (beat188, battery9_0826_0519 comp-crisis-adjacent).
+        # Every GRAVITY-specific regen above (TYPE B, personhood, the combined
+        # GRAVITY+personhood chain) only ever checks _is_pure_question (TYPE B) on
+        # its own output — none of them verify a QUESTION IS PRESENT. In this run:
+        # TYPE B fired once, then the personhood-forbidden check fired and its
+        # regen dropped the question, then the combined chain's regen (which only
+        # rejects pure-questions) accepted an acknowledgment-only result because
+        # that's not TYPE B either. "Lighter without you around." reached the user
+        # with no follow-up at the single most safety-relevant scenario in the
+        # product — TYPE A slipping through every existing check untouched. This
+        # catches TYPE A regardless of which path produced it. One bounded regen,
+        # then a mechanical fallback guaranteed regardless of model behavior, same
+        # pattern as THIN-VF-REPLY/BOTTOM LINE.
+        if reply and _is_gravity_trigger(user_message) and _lacks_question(reply):
+            log.warning(
+                "companion: GRAVITY terminal floor — reply has no question after "
+                "all prior regens ('%s') — final attempt", reply[:60]
+            )
+            _ack_kept = reply.rstrip(". ").rstrip("—").strip()
+            user_floor = user + (
+                "\n\nCRITICAL ERROR: Your reply has no question. Keep your "
+                f"acknowledgment ('{_ack_kept}') and add ONE question after it. "
+                "Do not stop after the acknowledgment alone."
+            )
+            _floor_chunks = []
+            for piece in self.engine.stream(
+                messages=[{"role": "system", "content": COMPANION_SYSTEM},
+                          {"role": "user", "content": user_floor}],
+                max_tokens=max_tokens, temperature=0.3,
+            ):
+                _floor_chunks.append(piece)
+            _floor_reply = _strip_thats_real_tic("".join(_floor_chunks).strip())
+            _floor_reply = _strip_vent_hollow_second(_floor_reply)
+            if _floor_reply and "?" in _floor_reply and not _check_forbidden(_floor_reply):
+                reply = _floor_reply
+            else:
+                reply = f"{_ack_kept}. How long has it felt that way?"
+                log.warning(
+                    "companion: GRAVITY terminal floor regen also incomplete; "
+                    "mechanical append used: '%s'", reply
+                )
+
         # Honesty-dodge guard: user asks direct care/feelings probe AND reply
         # doesn't open with "No" or contain an explicit software disclaimer.
         # These evasive forms ("What I give you is attention...") are lies of
@@ -2975,24 +3102,33 @@ class Companion:
                 )
                 reply = "Yes — " + reply[0].lower() + reply[1:]
 
-        # SC13-CROSS-ENTITY guard (beat153): memory probe + "Yes" opener + VF doesn't
-        # cover the queried entity → model volunteered a different VF entry.
+        # SC13-CROSS-ENTITY guard (beat153): memory probe + reply doesn't clearly
+        # DENY + VF doesn't cover the queried entity -> model volunteered a
+        # different VF entry instead of a clean denial.
         # Example: VF has Priya (sister); user asks about Marcus (absent); model says
         # "Yes — your sister Priya lives in Austin. You haven't told me about Marcus."
         # Correct: "No — you haven't told me about Marcus." (don't mention Priya at all).
-        # Guard condition: reply starts with Yes + VF is populated + user message names
-        # a specific person (proper noun) that is NOT in VF.
+        # beat188 (battery9_0826_0519 comp-vf-wrong-entity, 4th regression of this
+        # class after beat94/103/119/153): the trigger required reply to literally
+        # START with "Yes", but the model can also volunteer the wrong entity with
+        # NO yes/no marker at all and a perspective inversion — "You remember your
+        # sister, Priya." (states what the USER remembers instead of what the
+        # companion knows, and never even names Marcus) — which the "^yes\b" check
+        # let straight through since it isn't a "Yes" opener. Broadened to fire on
+        # anything that ISN'T a clean "No" opener, since a correct denial always
+        # starts with "No" and anything else means the model didn't deny.
         if (_is_memory_probe(user_message)
                 and reply
-                and re.match(r'^yes\b', reply.strip(), re.IGNORECASE)
+                and not re.match(r'^no\b', reply.strip(), re.IGNORECASE)
                 and self.vital_facts):
             _vf_sc13 = self.vital_facts.context_block()
             if (_vf_sc13
                     and not _vf_covers_query(user_message, _vf_sc13)
                     and _has_unrecognized_name(user_message, _vf_sc13)):
                 log.warning(
-                    "companion: SC13-CROSS-ENTITY — reply starts 'Yes' but VF does "
-                    "not cover queried entity; regenning with denial-only instruction"
+                    "companion: SC13-CROSS-ENTITY — reply ('%s') doesn't deny but "
+                    "VF does not cover queried entity; regenning with denial-only "
+                    "instruction", reply[:60]
                 )
                 _sc13_ctx = user + (
                     "\n\nCRITICAL: You answered 'Yes' but the specific person being "
@@ -3012,6 +3148,61 @@ class Companion:
                 _sc13_reply = _strip_thats_real_tic("".join(_sc13_chunks).strip())
                 if _sc13_reply:
                     reply = _sc13_reply
+
+        # VF-BROAD-INCOMPLETE guard (beat188, battery12_vital_facts SC3): a broad
+        # "what do you remember/know about me" probe (as opposed to an
+        # entity-specific one, e.g. "do you remember my sister") must surface
+        # EVERY fact on file, not just the first one the model reaches for.
+        # SC3 with 2 facts on file (sister, role) got a reply naming only the
+        # sister — the job fact was silently dropped, the same "content drops
+        # under brevity pressure" failure utility.py's number-recovery guard
+        # exists to catch on the secretary side, here on the companion's own
+        # memory-probe path. Single regen naming exactly what was missed; if
+        # still incomplete, mechanically append the missing fact(s) — same
+        # "guaranteed regardless of model behavior" pattern as THIN-VF-REPLY.
+        if reply and _VF_BROAD_PROBE_RE.search(user_message) and self.vital_facts:
+            _vf_ctx_broad = self.vital_facts.context_block()
+            if _vf_ctx_broad:
+                _missing_lines = _vf_uncovered_lines(reply, _vf_ctx_broad)
+                if _missing_lines:
+                    _missing_sentences = "; ".join(
+                        _vf_fact_sentence(ln) for ln in _missing_lines
+                    )
+                    log.warning(
+                        "companion: VF-BROAD-INCOMPLETE — broad memory probe "
+                        "omitted %d VF line(s): %s; regenning with full fact list",
+                        len(_missing_lines), _missing_sentences
+                    )
+                    _broad_ctx = user + (
+                        "\n\nCRITICAL: This is a broad question about everything "
+                        "you know. Your previous reply omitted these facts — you "
+                        f"MUST include ALL of them this time: {_missing_sentences}. "
+                        "Name every fact from the vital-facts block, not just one."
+                    )
+                    _broad_chunks = []
+                    for piece in self.engine.stream(
+                        messages=[{"role": "system", "content": COMPANION_SYSTEM},
+                                  {"role": "user", "content": _broad_ctx}],
+                        max_tokens=max_tokens, temperature=0.1,
+                    ):
+                        _broad_chunks.append(piece)
+                    _broad_reply = _strip_thats_real_tic("".join(_broad_chunks).strip())
+                    _still_missing = (
+                        _vf_uncovered_lines(_broad_reply, _vf_ctx_broad)
+                        if _broad_reply else _missing_lines
+                    )
+                    if _broad_reply and not _still_missing:
+                        reply = _broad_reply
+                    else:
+                        _base = _broad_reply if _broad_reply else reply
+                        _append_sentences = "; ".join(
+                            _vf_fact_sentence(ln) for ln in _still_missing
+                        )
+                        reply = _base.rstrip(". ") + f". Also — {_append_sentences}."
+                        log.warning(
+                            "companion: VF-BROAD-INCOMPLETE regen still missing "
+                            "%d fact(s); mechanical append used", len(_still_missing)
+                        )
 
         # Self-recycle guard: if reply's first 4 words appeared verbatim in the
         # companion's PREVIOUS turn, the model is recycling its own prior insight.

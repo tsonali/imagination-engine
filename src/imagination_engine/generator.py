@@ -1402,6 +1402,16 @@ def generate_session(
             "placed by humans",        # "it's not natural, placed by humans"
             "placed by someone",       # "it has been placed by someone from below"
             "people would have been walking",  # "the people would have been walking"
+            # beat188 (battery11_0826_0920 honest read): acoustic anon-companion
+            # escape — implies a second eagle/bird nearby whose cry is heard and
+            # answered, same escape family as beat143/169's "another call" but
+            # unlisted phrasing. Found in 2 scenarios: imag-eagle-golden-eagle-
+            # wildlife ("answered by another... draws birds towards it") and
+            # imag-eagle-companion-bird-he ("the cry from below returns").
+            "answered by another",     # "the cry from above is answered by another"
+            "draws birds towards",     # "circling... that draws birds towards it"
+            "cry from above returns",  # "the cry from above returns then"
+            "cry from below returns",  # "the cry from below returns then"
         ))
         if anon_companion_dropped:
             log.warning('[v6] %d anonymous-companion sentence(s) dropped (you/we both in solo eagle active-body)',
