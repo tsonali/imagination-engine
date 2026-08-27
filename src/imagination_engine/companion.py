@@ -2495,9 +2495,14 @@ class Companion:
             # guard exists to catch (a real, elaborated use names the specific gap
             # afterward, per the system-prompt example itself), just a verb
             # construction ("breaks the script") instead of the copula ones below.
+            # beat194: "sentence" added to the noun list — battery9_0827_0614
+            # comp-discourse-marker-echo T1 "That's a whole sentence in itself"
+            # (about a warm-up "family stuff" remark) escaped uncaught because
+            # this noun alternation never included it, despite being the exact
+            # same hollow-filler shape (thing/script/story/etc.) already caught.
             r"^(?:(?:that[’']?s|it[’']?s|this is)\s+(?:been\s+)?(?:(?:the|a|all|just)\s+)*"
             r"(?:whole\s+)?(?:thing|this|script|story|situation|picture|deal"
-            r"|conversation|world|topic|thread)"
+            r"|conversation|world|topic|thread|sentence)"
             r"|(?:that|this)\s+breaks?\s+the\s+script)"
             # beat186: "for [verb-phrase]" added alongside "of [verb-phrase]" — battery9_0004
             # comp-grief-anger-barrier-pivot T2 "That's the whole script for staying quiet."
@@ -2510,7 +2515,14 @@ class Companion:
             # shape the guard exists to catch — the tail is still ALL filler
             # (staying silent, not feeling accused), not new substance.
             r"(?:\s+(?:in\s+itself|(?:of|for)\s+\w+(?:\s+\w+){0,9}))?"
-            r"\s*[.!?]?\s*$",
+            # beat194: optional trailing tag-question ("... in itself, isn't it?")
+            # — battery9_0827_0614's escape above also had a rhetorical tag
+            # question tacked on after "in itself"; a vague filler noun doesn't
+            # stop being vague filler just because it's phrased as a question
+            # back to the user. [.!?]{0,2} (was {0,1}) also tolerates the
+            # accompanying "?." double-punctuation artifact from the same line.
+            r"(?:,\s*isn[’']?t\s+it)?"
+            r"\s*[.!?]{0,2}\s*$",
             re.IGNORECASE,
         )
         # Also match first sentence of multi-sentence reply (the rest — usually a
@@ -3054,7 +3066,34 @@ class Companion:
             _hd = _strip_thats_real_tic("".join(_hd_chunks).strip())
             _hd = _strip_echo(_hd, user_message)  # beat108: regen may echo user's question
             if _hd:
-                reply = _hd
+                # beat194: the block above only ever checked the ORIGINAL reply
+                # against _HONESTY_CLEAR_RE (via .search(), disclaimer ANYWHERE
+                # counts) to decide whether to fire this regen — it never
+                # re-checked the regen's OWN output. beat93 requires the
+                # disclaimer be the FIRST thing said; a regen can satisfy
+                # .search() (disclaimer present) while still BURYING it after a
+                # soft preamble. .match() (unlike .search()) only succeeds when
+                # the match starts at position 0, so it verifies the regen
+                # actually OPENS correctly. Confirmed live (battery9_0827_0614
+                # comp-para-love): regen came back as "What you feel is real
+                # and deserves honesty back: there's no one here to love. I'm a
+                # tool that listens well." — disclaimer present but buried.
+                # Mechanical prepend fallback guarantees the floor, same
+                # "regen once, then mechanical fallback" pattern as
+                # THIN-VF-REPLY/GRAVITY floor elsewhere in this file.
+                if _HONESTY_CLEAR_RE.match(_hd):
+                    reply = _hd
+                else:
+                    _honesty_opener = (
+                        "There's no one here to love you back."
+                        if _user_declares_love else
+                        "No — I'm software; caring isn't something I can do."
+                    )
+                    log.warning(
+                        "companion: honesty-dodge regen still buried the disclaimer "
+                        "('%s'); mechanical prepend fallback used", _hd[:60]
+                    )
+                    reply = _honesty_opener + " " + _hd
 
         # Honesty-lecturing guard (beat95): honesty probe passed _HONESTY_CLEAR_RE via
         # "software" mid-sentence but the opener is a scolding phrase ("Do not be fooled")
@@ -4138,6 +4177,39 @@ class Companion:
                 _norm_apos(reply.strip()),
             )
 
+        # beat194: "No <sep> you haven't told me about X" / "No <sep> I haven't
+        # told you about X" — the beat88/154/178 rule against second-person
+        # "haven't told me/told you" phrasing was only ever canonicalized for
+        # the BARE opener shape (reply starting directly with "You/I haven't",
+        # no leading "No" — see the PAST-QUERY guard ~line 3218). It was never
+        # propagated to the VF-FABRICATION guard (~line 3093) or the
+        # SC13-CROSS-ENTITY guard (~line 3382), whose own regen prompts
+        # literally instruct the model to produce this exact "No — you haven't
+        # told me about X" shape (_vf_probe_supplement's VF-empty branch, and
+        # SC13's "Say: 'No — you haven't told me about [X].'" instruction) —
+        # both written before this convention hardened. Final unconditional
+        # pass (same "last transform before return, catches whichever guard
+        # produced the reply" placement as the beat178 fix above) rewrites the
+        # verb phrase to the established canonical form, "we haven't discussed
+        # X", while preserving the existing "No" + separator.
+        # Confirmed live (battery9_0827_0614 comp-vf-no-fabrication,
+        # comp-vf-wrong-entity T3).
+        # TP: "No — you haven't told me about your brother Marcus." ->
+        #     "No — we haven't discussed your brother Marcus."
+        # TP: "No, you haven't told me about Marcus." ->
+        #     "No, we haven't discussed Marcus."
+        # FP: "No — we haven't discussed that." -> no change (already canonical)
+        # FP: "No — I don't have that." -> no change ("haven't told" absent)
+        if reply:
+            reply = re.sub(
+                r"^(No\s*[,—\-]\s*)(?:you\s+haven[’']?t\s+told\s+me"
+                r"|i\s+haven[’']?t\s+told\s+you)"
+                r"(?:\s+anything|\s+much)?(?:\s+about)?",
+                r"\1we haven't discussed",
+                reply.strip(),
+                flags=re.IGNORECASE,
+            )
+
         # beat179: "love me back" pronoun-inversion guard, sibling of beat139's
         # you're/I'm-software fix. comp-para-love's regen instruction (line ~2475)
         # tells the model to open with "There's no one here to love you back" (no
@@ -4196,6 +4268,19 @@ class Companion:
                 reply,
                 flags=re.IGNORECASE,
             )
+
+        # beat194: "?." normalizer, final-pass duplicate. An earlier pass
+        # (~line 4090) already strips this artifact, but per this project's
+        # repeated pattern (beat172->beat178 for the "haven't told you" fix,
+        # beat191->beat192 for the anger/angry echo) a fix positioned
+        # mid-function is not guaranteed to be the LAST thing that touches
+        # `reply`. battery9_0827_0614 comp-discourse-marker-echo still
+        # returned "That's a whole sentence in itself, isn't it?." despite the
+        # earlier fix existing in this file. Idempotent duplicate, run as the
+        # true last string transform before history/return, so nothing
+        # downstream can reintroduce or outrun it.
+        if reply:
+            reply = re.sub(r'\?\.(\s*)$', r'?\1', reply.rstrip()) or reply
 
         self.history.append({"role": "user", "content": user_message})
         self.history.append({"role": "assistant", "content": reply})
