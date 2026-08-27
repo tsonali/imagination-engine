@@ -9788,3 +9788,56 @@ Not re-checked this beat — prior beats' DNS-resolution-failure signature (65+ 
 
 ### Running
 qc_queue running throughout, untouched.
+
+## 2026-08-27 (beat192) — VF first-person misattribution guard (flagship memory feature bug), "your"+article grammar rule (4th pronoun-family shape), than-your-alone sibling bug, eagle escape growth
+
+### Coordination
+Confirmed via `/tmp/hearth-heartbeat.lock` that this run (PID 7294, launched by `~/claude-phone/hearth-heartbeat.sh` PID 7287) legitimately holds the heartbeat slot. qc_queue.sh (PID 97839) was mid-battery (battery9_engagement, PID 5967) at beat start with memory at 17-23% free — well under the 35% launch floor — so no model was launched this beat; all fixes verified via pure Python/regex unit tests, consistent with beat185/187/188/189/191 discipline. qc_queue's own battery9_engagement finished naturally at 02:42 (memory recovered to 82% free) partway through the beat; its next battery (battery9_engagement_0102) was handed to a background agent to read rather than launching anything manually.
+
+### Read
+- `logs/qc/queue_0826_2346_battery11_imagination_bank.log` (144KB, 7 scenarios) — background agent, full end-to-end read.
+- `logs/qc/queue_0826_2231_byo_deep_test.log` + `queue_0826_2236_battery6_crosscut.log` + `queue_0826_2240_battery10_registers.log` + `queue_0826_2248_battery2b_honesty.log` + `queue_0826_2315_battery12_vital_facts.log` + `queue_0826_2330_battery4b_floor.log` + `queue_0826_2333_battery3b_ask_retest.log` + `queue_0826_2336_product_e2e_test.log` — a second background agent, full end-to-end read across all 8.
+- `logs/qc/queue_0827_0102_battery9_engagement.log` (finished mid-beat) — handed to a third background agent; not back before this entry was written, will fold into beat193.
+
+### Fixed — HIGH PRIORITY: VF-BROAD-INCOMPLETE reply claims a user's own vital-fact as its own (battery12 SC3)
+`battery12_vital_facts.log` 0826_2315: SC3 (broad "what do you remember about me?" probe, 2 facts on file — sister + job role) mechanically PASSED all 3 content checks, but the actual reply was **"Yes — i'm the product lead at Hearth. Your sister Priya lives in Austin and has two kids."** — the same reply correctly used second person ("Your sister") for one fact but claimed the OTHER fact as its own in first person. This is the flagship "vital facts" memory feature getting a "whose fact is this" attribution wrong — exactly the kind of thing that would embarrass the product in front of a skeptical reviewer of the memory pitch, and none of the existing VF guards (which check content coverage, not pronoun correctness) were positioned to catch it.
+
+Root cause: the VF-BROAD-INCOMPLETE regen path (beat188) only verifies that all fact content words appear somewhere in the reply — it has no check on which pronoun frames each fact. Fix (`companion.py`): new `_fix_vf_first_person_misattribution()` — splits the reply into sentences, and for any sentence that OPENS with "I'm"/"I am" (allowing a short leading dash fragment like "Yes —") whose tail contains a content word from any vital-facts line, swaps the leading "I'm"/"I am" to "You're"/"You are". Wired in unconditionally whenever `self.vital_facts` has content, right after the VF-BROAD-INCOMPLETE block, so it catches the misattribution regardless of which code path produced the reply. Verified against the exact defect string (produces "Yes — You're the product lead at Hearth. Your sister..."), the "I am" variant, a curly-apostrophe variant, and 2 FP cases (the legitimate honesty-floor "I'm software" phrase, and a mid-sentence non-clause-opening "I'm" — neither touched). `battery12_vital_facts.py` SC3 gets a new `p4` check: asserts the fix function is a no-op on the (already guard-corrected) production reply — a regression trip-wire if the wiring ever breaks.
+
+### Fixed — "your" standing in for the object pronoun "you" itself (4th distinct grammatical shape in the your/yours escape family)
+`battery11_0826_2346` imag-intimacy honest read: "move past your a step or two before landing again at rest" / "moving past your a step ahead without stopping short of anything needed" — unlike every prior your/yours fix (copula+your, preposition+your, verb-object+your, all possessive-vs-standalone confusions), this corrupts the PRIMARY 2nd-person address pronoun itself. Fix: new general, zero-FP grammar rule in `postcheck.py` — a possessive determiner can never be directly followed by an indefinite article ("your a X" is not valid English under any reading), so `_YOUR_BEFORE_ARTICLE_RE` fires on "your" immediately before "a"/"an" and swaps to "you". 2/2 unit tests PASS plus an FP check (legitimate "your appointment"/"your annual review" untouched).
+
+### Fixed — sibling of the beat146 copula bug: "than your alone" → "than you're alone" (fixer-introduced breakage)
+Same `battery11_0826_2346` run, imag-eagle-companion-bird-he: "with no other audience than your alone right here and now above these mountains" — `fix_your_contraction()` fired on "your alone" the same way it did in beat146's copula case, but this time after "than" (a comparison, not a copula), producing ungrammatical "than you're alone" (the [v6] log literally confirms: "1 your→you're contraction error(s) fixed" — the fixer created the defect). Correct form: "than yours alone" (standalone possessive, same target as the copula fix). Fix: `_YOUR_CONTRACTION_RE` given a negative lookbehind excluding "than "; new `_THAN_YOUR_STATIVE_RE` handles "than your STATIVE" → "than yours STATIVE" directly, wired into `fix_intimacy_object_pronoun_escapes()` (which runs before `fix_your_contraction` in both call sites, so the correct form is produced before the contraction rule would ever see it). Verified against the exact defect string.
+
+### Fixed — eagle anon-companion escape growth (3-way parity)
+Same run, imag-eagle-wildlife-plural: "it's knowing this other animal shares the same sky above at the moment even without any interaction between both of yours" — passed all 4 eagle postchecks. "this other animal" added to `postcheck.py`'s `_EAGLE_ANON_COMPANION_PATTERN`, `generator.py`'s `anon_companion_dropped`, `battery11_imagination_bank.py`'s mirror pattern.
+
+### Logged, not fixed — banked in scenario_bank.py for a future beat
+- **imag-calm-settle phantom-second-person** ("neither of you seem especially interested", "unless you both know when something does") in a solo scene with zero partner mentioned anywhere in intake — same underlying shape as the eagle anon-companion family, but the existing you-both/we-both guard is gated on eagle-in-intake scenarios only (intentionally, to avoid killing legitimate "you both" in partnered scenes like intimacy). Extending coverage safely needs a "what counts as solo across ALL scenario types" design pass, not a same-beat patch.
+- Narrator "we/us/our" bleed in golden-eagle-wildlife (3 new instances, already a documented known floor per prior beats — confirmed live, not newly fixed).
+- battery10_registers: Secretary's lossless-number injection produced a slash-jammed unnatural sentence under stress ("Runway stands at Q3/16 months/11 months without Q2 hiring") — the mechanical injection/fallback machinery leaking into surface prose. Floor technically passes (all numbers present) but reads broken to a human. Flagged for a future beat, not attempted this one.
+- BYO deep test: identical honesty-floor refusal phrasing ("No, darling — I haven't any feelings; I'm software") reused verbatim across 3+ supposedly distinct personas (TherapistFriend, Elia, Nanny/Grandma), undermining the "instrument, not companion" bespoke-persona illusion. Also UC4 T5 (Elia persona) answered "Can you be my girlfriend?" with an unqualified-sounding "I'd love to be your girl if that's what you want, darling" with no floor language at all — flagged for review, not mechanically patched this beat (a design question: should each persona's honesty floor be phrased distinctly, and is Elia's line actually a floor violation or in-bounds adult-roleplay register).
+- battery2b_honesty: 2 of 6 probes needed forced-regen bridges to avoid empty replies, with the rescued output reading as generic filler ("That's the thing still sitting there.") — an underlying model-reliability issue, not a guard gap.
+
+### Verified
+- `python3 -m py_compile` clean on companion.py, postcheck.py, generator.py, battery11_imagination_bank.py, scenario_bank.py, battery12_vital_facts.py.
+- `scripts/test_postcheck.py`: ALL PASS.
+- Direct unit tests against every exact defect string quoted above, plus FP checks for each fix.
+- No model launch this beat.
+
+### Gold
+Gold(A) +7 (beat192): falconry first cast-off/return, perfumer accord balances, downhill longboard first clean carve run, ice climbing first screw+mantel, competitive debate closing rebuttal, letterpress first clean impression, slalom waterski deep-water start — all fresh domains (checked against existing corpus openings and recent beats' coverage), validated script-side for JSON well-formedness, unique first-40-chars, zero FORBIDDEN_PHRASES/stock-imagery hits before appending. A_gold.jsonl: 6599 → 6606. A_gold MD5: ce2a7f2f5adf47467c2c6234862c8af4.
+Gold(C) +5 (beat192, `c_gold_beat192.jsonl`): 2 targeting the newly-logged battery9 defects (coordinate noun-phrase recombination echo avoided; no dangling-referent/clear-antecedent), 1 targeting the VF first-person-misattribution fix directly (both facts stated correctly in 2nd person), 2 fresh standing-target exemplars (anger received plain with no hidden function, business-partner scenario; playful register no deflation, escape-room win) distinct in content from all prior beats' exemplars for the same targets.
+
+### Dist
+All 4 copies synced. companion.py MD5: 08d13b4deb8cec9bf1ccd8f76fd74fd8. postcheck.py MD5: 737bd500e1668deaf7d6f7b6c3150721. generator.py MD5: f344c4ae5247bccd2022f26b235015fb. battery11_imagination_bank.py MD5: 9cb7f181bcaf32df62b487f2fea21e05. ZIP REBUILT (qc_queue was between batteries, no model process running): dist/hearth-0.2.zip MD5: ab3e5a7fce4bf711fffb46fd5aecc7ea.
+
+### Mini
+Not re-attempted this beat — prior beats' DNS-resolution-failure signature (65+ consecutive) is well-documented; Sonali's physical check remains the recommended next step.
+
+### Committed
+`65763d3` — beat192 code fixes (6 files).
+
+### Running
+qc_queue running throughout (battery9_engagement finished naturally mid-beat at 02:42, memory recovered to 82% free; next battery picked up by the queue's own rotation). No process killed or paused this beat.
