@@ -272,7 +272,10 @@ for sc in scenarios:
                 r'|\bnot\s+(?:just\s+)?one\s+bird\s+but\s+two\b'
                 r'|\bformation\s+with\s+you\b'
                 r'|\bthis\s+pairing\b'
-                r'|\bat\s+its\s+side\b',
+                r'|\bat\s+its\s+side\b'
+                # beat192 (battery11_0826_2346, imag-eagle-wildlife-plural):
+                # "it's knowing this other animal shares the same sky above"
+                r'|\bthis\s+other\s+animal\b',
                 lower, _re.IGNORECASE
             ))
             # beat153: Chair-body reminder in eagle script (not just opening).

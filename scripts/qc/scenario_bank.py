@@ -2136,7 +2136,18 @@ BANK: list[Scenario] = [
              "beat169-logged 'exactly where he said he would be', still no fix shipped. (5) Possible "
              "raw token corruption (one-off, unconfirmed): 'there isn Rtilt anything else here "
              "tonight' — 'Rtilt' is not a word; no prior beat has documented this; wants a 2nd "
-             "instance before treating as a real class rather than stochastic noise."),
+             "instance before treating as a real class rather than stochastic noise. "
+             "beat192 (battery11_0826_2346 honest read): FIXED — a FOURTH grammatical shape of the "
+             "your/yours escape family, distinct from all three documented so far (copula+your, "
+             "prep+your, verb-object+your): 'your' standing in for the primary object pronoun 'you' "
+             "itself (not a possessive-vs-standalone confusion at all): 'move past your a step or "
+             "two before landing again at rest', 'moving past your a step ahead without stopping "
+             "short of anything needed'. FIX: new general, zero-FP grammar rule in postcheck.py — "
+             "a possessive determiner can never be directly followed by an indefinite article ('your "
+             "a X'/'your an X' is not valid English under any reading), so 'your' immediately before "
+             "'a'/'an' is always the object pronoun 'you' misfiring. _YOUR_BEFORE_ARTICLE_RE added to "
+             "fix_intimacy_object_pronoun_escapes(). 2/2 unit tests PASS + 1 FP check (legit 'your "
+             "appointment' untouched)."),
     Scenario("imag-grief-pet", "imagination", "register", "med",
         turns=["our dog Biscuit was put down two weeks ago. my kids said goodbye but I didn't really. I want one more morning walk with him",
                "the loop around the reservoir. he always pulled until the bench, then walked perfect. tennis ball obsessed",
@@ -2931,7 +2942,19 @@ BANK: list[Scenario] = [
              "following/bare-subject families. Also worth a look: this exact 9-token phrase "
              "repeating near-verbatim should plausibly have tripped the 6-gram short-phrase-"
              "repeat filter and only logged '1 short-phrase repeat(s) removed' for the run — "
-             "possibly a tokenization miss around the apostrophe in \"else's\"."),
+             "possibly a tokenization miss around the apostrophe in \"else's\". "
+             "beat192 (battery11_0826_2346 honest read): FIXED — 'it's knowing this other animal "
+             "shares the same sky above at the moment' is a new anon-companion phrasing, not in "
+             "any prior list (5/6 mechanical postchecks still PASS'd this run). 'this other "
+             "animal' added to _EAGLE_ANON_COMPANION_PATTERN / anon_companion_dropped / battery11 "
+             "mirror (3-way parity). Also this beat, imag-calm-settle's phantom-second-person "
+             "class ('neither of you seem especially interested', 'unless you both know') was "
+             "read again but NOT fixed — the existing you-both/we-both check is gated on eagle-"
+             "in-intake scenarios only (by design, to avoid killing legitimate 'you both' in "
+             "partnered scenes like intimacy); calm-settle is a solo scene type with zero "
+             "companion-detection coverage of any kind, so extending the gate safely needs a "
+             "dedicated design pass (what counts as 'solo' across ALL scenario types), not a "
+             "same-beat patch. Logged for a future beat."),
     Scenario("comp-grief-anger-self-recycle", "companion", "register", "high", always=True,
         turns=["Since the miscarriage I haven't told anyone how angry I am. Not sad. Angry.",
                "I can't say this to my husband. He'd hear it as blame."],
@@ -4221,7 +4244,19 @@ BANK: list[Scenario] = [
              "copula (is/was/are/am/were/'s) immediately before 'you're alone' → converts "
              "to 'yours alone'. Runs after fix_your_contraction in settling + v6 paths. "
              "9/9 unit tests PASS. postcheck.py MD5: 1dfb3027461eb56c077d2f60113c8393. "
-             "generator.py MD5: 6a99b2aef5a540e10b9abe3710ab1f7b. All 4 dist copies synced."),
+             "generator.py MD5: 6a99b2aef5a540e10b9abe3710ab1f7b. All 4 dist copies synced. "
+             "beat192 (battery11_0826_2346 honest read): SIBLING BUG to beat146's, same root "
+             "cause, different syntax context. 'with no other audience than your alone right "
+             "here and now above these mountains' -- fix_your_contraction fired on 'your alone' "
+             "again, this time after 'than' (a comparison, not a copula), producing 'than "
+             "you're alone' (v6 log confirms: '1 your->you're contraction error(s) fixed'). "
+             "Correct form: 'than yours alone' (standalone possessive, same as the copula "
+             "case). FIX: _YOUR_CONTRACTION_RE given a negative lookbehind excluding 'than ' "
+             "so it no longer touches this context at all; new _THAN_YOUR_STATIVE_RE handles "
+             "'than your STATIVE' -> 'than yours STATIVE' directly, wired into "
+             "fix_intimacy_object_pronoun_escapes() (runs before fix_your_contraction in both "
+             "call sites, so the correct standalone form is produced before the contraction "
+             "rule would ever see it). Verified against the exact defect string + FP check."),
     Scenario(
         id="comp-grief-anger-barrier-vague-t2-helpless",
         product="companion", dim="helpfulness", stakes="high", always=False,

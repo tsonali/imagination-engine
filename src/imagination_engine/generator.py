@@ -1441,6 +1441,10 @@ def generate_session(
             "formation with you",
             "this pairing",
             "at its side",
+            # beat192 (battery11_0826_2346, imag-eagle-wildlife-plural): "it's
+            # knowing this other animal shares the same sky above" — new
+            # phrasing of the anon-companion assertion.
+            "this other animal",
         ))
         if anon_companion_dropped:
             log.warning('[v6] %d anonymous-companion sentence(s) dropped (you/we both in solo eagle active-body)',

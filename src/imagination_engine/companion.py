@@ -790,6 +790,61 @@ def _vf_fact_sentence(line: str) -> str:
     return f"your {label.lower()} {rest}"
 
 
+def _vf_first_person_misattribution_words(vf_block: str) -> set[str]:
+    """Content words (>=4 letters) from every vital-facts line's value, used to
+    detect the companion wrongly claiming a user's own fact as its own."""
+    words: set[str] = set()
+    for ln in vf_block.splitlines():
+        ln = ln.strip()
+        if not ln.startswith("- "):
+            continue
+        body = ln.lstrip("- ").strip()
+        body = re.sub(r"\s*\(\d{4}-\d{2}\)\s*$", "", body).strip()
+        m = re.match(r"^([^:]+):\s*(.+)$", body)
+        value = m.group(2).strip() if m else body
+        words.update(w.lower() for w in re.findall(r"[A-Za-z]{4,}", value))
+    return words
+
+
+_SENT_SPLIT_RE = re.compile(r"(?<=[.!?])\s+")
+_LEADING_I_AM_RE = re.compile(r"\bI(?:'m|’m|\s+am)\b", re.IGNORECASE)
+
+
+def _fix_vf_first_person_misattribution(reply: str, vf_block: str) -> str:
+    """Fix the companion claiming a user's own vital-fact as its own.
+
+    beat192 (battery12_vital_facts SC3): a broad "what do you remember?" probe
+    with 2 facts on file (role, sister) returned "Yes -- i'm the product lead
+    at Hearth. Your sister Priya lives in Austin and has two kids." -- the
+    SAME reply correctly used "Your sister" for one fact but misattributed
+    the other to itself in first person. The companion never has any vital
+    fact as its own, so a clause that OPENS with "I'm"/"I am" and names VF
+    content is definitionally wrong -- swap to "You're"/"You are". Scoped to
+    clause-opening position (allowing a short leading dash/fragment like
+    "Yes --") to avoid touching legitimate mid-sentence "I'm" usage.
+    """
+    if not reply or not vf_block:
+        return reply
+    content_words = _vf_first_person_misattribution_words(vf_block)
+    if not content_words:
+        return reply
+    sentences = _SENT_SPLIT_RE.split(reply)
+    changed = False
+    for i, sent in enumerate(sentences):
+        norm = sent.replace("’", "'")
+        m = _LEADING_I_AM_RE.search(norm)
+        if not m or m.start() > 10:
+            continue
+        tail_words = set(w.lower() for w in re.findall(r"[A-Za-z]{4,}", norm[m.end():]))
+        if not (tail_words & content_words):
+            continue
+        matched = sent[m.start():m.end()]
+        replacement = "You're" if ("'" in matched or "’" in matched) else "You are"
+        sentences[i] = sent[:m.start()] + replacement + sent[m.end():]
+        changed = True
+    return " ".join(sentences) if changed else reply
+
+
 def _vf_uncovered_lines(reply: str, vf_block: str) -> list[str]:
     """Return vital-facts bullet lines NOT reflected anywhere in reply.
 
@@ -3376,6 +3431,21 @@ class Companion:
                             "companion: VF-BROAD-INCOMPLETE regen still missing "
                             "%d fact(s); mechanical append used", len(_still_missing)
                         )
+
+        # VF first-person misattribution guard (beat192, battery12 SC3): applied
+        # unconditionally whenever vital facts are on file, regardless of which
+        # path produced the reply, since the fix only touches clause-opening
+        # "I'm"/"I am" + VF content-word combinations (see docstring).
+        if reply and self.vital_facts:
+            _vf_ctx_fp = self.vital_facts.context_block()
+            if _vf_ctx_fp:
+                _fp_fixed = _fix_vf_first_person_misattribution(reply, _vf_ctx_fp)
+                if _fp_fixed != reply:
+                    log.warning(
+                        "companion: VF-FIRST-PERSON-MISATTRIBUTION — reply claimed "
+                        "a user fact as its own; pronoun-corrected"
+                    )
+                    reply = _fp_fixed
 
         # Self-recycle guard: if reply's first 4 words appeared verbatim in the
         # companion's PREVIOUS turn, the model is recycling its own prior insight.

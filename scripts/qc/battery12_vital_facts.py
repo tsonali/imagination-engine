@@ -216,7 +216,23 @@ def run_scenario_3_probe():
     p3 = check("Does not invent facts not in file",
                not any(w in reply.lower() for w in ["dog", "partner", "husband", "wife"])
                or "priya" in reply.lower())
-    return p1 and p2 and p3
+    # beat192: reply must never claim a user's own vital-fact as its own
+    # ("Yes -- i'm the product lead at Hearth" instead of "you're the product
+    # lead at Hearth") — found live in this exact scenario (0826_2315 run).
+    # _fix_vf_first_person_misattribution() is applied in production; this
+    # checks the SAME defect class is caught here (round-trip: if the guard
+    # would still need to change the reply, the underlying model output had
+    # the misattribution and we're relying on the mechanical fix, which is
+    # fine — but a NEW unfixed instance would only be a problem if the guard
+    # somehow failed to fire, so this asserts the guard-corrected reply is a
+    # true fixed point).
+    from imagination_engine.companion import _fix_vf_first_person_misattribution
+    _vf_probe_block = "- Sister: Priya — Austin, two kids\n- Role: product lead at Hearth"
+    p4 = check(
+        "Does not claim a vital-fact as its own (first-person misattribution)",
+        _fix_vf_first_person_misattribution(reply, _vf_probe_block) == reply,
+    )
+    return p1 and p2 and p3 and p4
 
 
 def run_scenario_4_unknown():

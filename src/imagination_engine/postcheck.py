@@ -655,9 +655,26 @@ def fix_standalone_her(text: str) -> tuple[str, int]:
 
 # "your STATIVE" → "you're STATIVE": model confuses possessive with contraction.
 # Only fires for words that cannot be possessed (cannot say "your alone space" etc.).
+# beat192: excludes "than your STATIVE" (negative lookbehind) — that's a
+# comparison ("no other audience than your alone"), not a contraction context;
+# routed instead through _THAN_YOUR_STATIVE_RE below to "than yours STATIVE",
+# since firing this rule there produced broken "than you're alone" output
+# (battery11_0826_2346 imag-eagle-companion-bird-he, "[v6] 1 your→you're
+# contraction error(s) fixed" — the fixer itself introduced the defect).
 _YOUR_CONTRACTION_RE = re.compile(
-    r"\byour\s+(alone|here|there|gone|done|lost|found|safe|free|ready|okay|ok|fine)\b"
+    r"(?<!than\s)\byour\s+(alone|here|there|gone|done|lost|found|safe|free|ready|okay|ok|fine)\b"
     r"(?!\s+(?:time|space|room|day|moment|self|work|years|hours|life|world|journey|path))",
+    re.IGNORECASE,
+)
+
+# beat192 (battery11_0826_2346 imag-eagle-companion-bird-he honest read): "with
+# no other audience than your alone right here and now" got wrongly fixed by
+# _YOUR_CONTRACTION_RE into "than you're alone" (ungrammatical — "than you are
+# alone" isn't the intended meaning). "than your STATIVE" is a standalone-
+# possessive context like _PREDICATIVE_YOUR_RE's copula pattern, not a
+# contraction one — the correct target is "than yours STATIVE".
+_THAN_YOUR_STATIVE_RE = re.compile(
+    r"\bthan\s+your\s+(alone|here|there|gone|done|lost|found|safe|free|ready|okay|ok|fine)\b",
     re.IGNORECASE,
 )
 
@@ -886,6 +903,17 @@ _YOUR_BARE_SUBJECT_RE = re.compile(
     r"\byour\s+(" + "|".join(_YOUR_BARE_SUBJECT_VERBS) + r")\b", re.IGNORECASE
 )
 
+# beat192 (battery11_0826_2346 imag-intimacy honest read): "move past your a
+# step or two before landing" / "moving past your a step ahead without
+# stopping" — "your" standing in for the object pronoun "you", corrupting the
+# core 2nd-person address itself (distinct from every prior your/yours family,
+# which all involve a possessive-vs-standalone confusion, not the primary
+# "you" pronoun). General, zero-FP grammar rule: a possessive determiner can
+# NEVER be directly followed by an indefinite article ("your a X" / "your an
+# X" is not valid English in any reading) — so "your" immediately before
+# "a"/"an" is always the object pronoun "you" misfiring as "your".
+_YOUR_BEFORE_ARTICLE_RE = re.compile(r"\byour\b(?=\s+an?\b)", re.IGNORECASE)
+
 
 def fix_intimacy_object_pronoun_escapes(text: str) -> tuple[str, int]:
     """Fix "your"/"theirs" used as a verb/preposition object, or as a bare
@@ -907,6 +935,10 @@ def fix_intimacy_object_pronoun_escapes(text: str) -> tuple[str, int]:
     text, n = _YOUR_BARE_SUBJECT_RE.subn(
         lambda m: f"you {_YOUR_BARE_SUBJECT_VERBS[m.group(1).lower()]}", text
     )
+    fixed += n
+    text, n = _YOUR_BEFORE_ARTICLE_RE.subn("you", text)
+    fixed += n
+    text, n = _THAN_YOUR_STATIVE_RE.subn(lambda m: f"than yours {m.group(1)}", text)
     fixed += n
 
     return text, fixed
@@ -1310,7 +1342,11 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     r'|\bnot\s+(?:just\s+)?one\s+bird\s+but\s+two\b'  # "not just one bird but two"
     r'|\bformation\s+with\s+you\b'      # "dropping back into formation with you"
     r'|\bthis\s+pairing\b'              # "something about this pairing that feels natural"
-    r'|\bat\s+its\s+side\b',            # "formation with you at its side once more"
+    r'|\bat\s+its\s+side\b'             # "formation with you at its side once more"
+    # beat192 (battery11_0826_2346, imag-eagle-wildlife-plural): "it's knowing
+    # this other animal shares the same sky above at the moment" — a new
+    # phrasing of the anon-companion assertion, not in any prior list.
+    r'|\bthis\s+other\s+animal\b',      # "knowing this other animal shares the same sky"
     re.IGNORECASE,
 )
 
