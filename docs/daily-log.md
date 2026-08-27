@@ -9694,3 +9694,29 @@ Not re-checked this beat (no new information since beat187's DNS-level failure f
 
 ### Running
 qc_queue running (relaunched after the test_companion.py pause), memory recovered to 80% free.
+
+## 2026-08-26 (beat189) — bare "goat" wildlife escape, 3 new intimacy pronoun-shape fixes, eagle acknowledgment-between-birds phrasing
+
+### Read
+Delegated the honest end-to-end read of the newest unread battery11 log (queue_0826_1712_battery11_imagination_bank.log, 7 scenarios, 41 PASS/7 FAIL mechanical lines) to a background agent rather than reading the full 148KB transcript inline, with explicit instructions on what "already fixed" looks like so it wouldn't re-report known-patched classes. It came back with 2 genuinely new defect classes plus 1 known-family phrasing variant, and confirmed the rest of the run (imag-mri, imag-embodiment-eagle, imag-calm-settle, imag-eagle-companion-bird-he) clean modulo the long-documented back-half degeneration floor.
+
+### Fixed
+- **generator.py + battery11_imagination_bank.py (parity)**: bare "goat"/"goats" added to the ground-wildlife hallucination token list. imag-eagle-wildlife-plural: "a goat stands on some ledge in such a way as if its presence alone has made this place somewhere special. Its call reaches across mountains..." — fully agentive bystander animal; beat135 only covered "mountain goat"/"bighorn", not the bare species name.
+- **postcheck.py**: new `fix_standalone_her()` — the mirror-image of `fix_possessive_pronouns()`'s hers->her direction. "Look out over what used to be yours and her alone before everything changed." should be "yours and hers alone" (her used as a coordinated standalone possessive, not an attributive determiner). Scoped to "and/or her" + non-noun-follow (punctuation or a short adverb list) so ordinary "and her hand"/"or her voice" is never touched — verified with an explicit FP test.
+- **postcheck.py**: `_HER_SUBJECT_VERBS` extended with contracted auxiliaries (hadn't, wasn't, didn't, etc.). "...left as if waiting here where her hadn't been tonight before she came home..." wasn't caught because only bare "had" was in the finite-verb list, not "hadn't".
+- **postcheck.py**: "where" added to `_YOUR_NONNOUN_FOLLOW` — sibling of the already-present "when"/"while", which had "where" missing for no apparent reason. "You will carry forward with you her glass — cold against your where it was put down." -> "against you where it was put down."
+- **postcheck.py + generator.py + battery11_imagination_bank.py (3-way parity)**: "acknowledgment between birds" added to the eagle anon-companion family, alongside beat183's "words between birds" (same underlying class, different verb). imag-eagle-golden-eagle-wildlife: "acknowledgment between birds flying their respective paths".
+
+All 5 fixes verified with direct unit tests against the exact transcript quotes (including 2 explicit false-positive guard tests: "and her hand" untouched, "against your shoulder where" untouched), plus py_compile clean and test_postcheck.py ALL PASS. No model launch — qc_queue's own single battery11 process ran throughout untouched; all verification used pure string functions.
+
+### Gold
+None added this beat (fix-and-verify only).
+
+### Mini
+Still unreachable (65th+ consecutive), same DNS-resolution-failure signature.
+
+### Coordination
+Noticed 2 peer Claude sessions active on this machine (sonali-7c, started 6h ago; sonali-6a, started 54m ago) via ListAgents. Sent both a coordination check asking whether either is touching imagination-engine or its local model, to avoid two sessions independently stacking model processes (the known kernel-panic risk class). Awaiting replies; did not launch the model again after sending until hearing back (all beat189 fixes were verifiable without one).
+
+### Running
+qc_queue running throughout, uninterrupted. ZIP rebuilt (dist/hearth-0.2.zip).
