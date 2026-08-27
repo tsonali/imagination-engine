@@ -550,7 +550,12 @@ _HER_SUBJECT_VERBS = re.compile(
     r"entered|searched|passed|stopped|caught|looked|laced|"
     # Past tense additions (beat86)
     r"asked|had|gave|seemed|appeared|did|followed|watched|faced|"
-    r"used|called|felt|showed|opened|closed|pulled|pushed|placed)\b",
+    r"used|called|felt|showed|opened|closed|pulled|pushed|placed|"
+    # beat189 (battery11_0826_1712 imag-intimacy): "where her hadn't been" —
+    # subject "her" before a contracted auxiliary verb, a form the finite-verb
+    # list above didn't cover (only bare "had", not "hadn't").
+    r"hadn't|wasn't|weren't|didn't|doesn't|hasn't|haven't|isn't|aren't|"
+    r"wouldn't|couldn't|shouldn't|won't|can't)\b",
     re.IGNORECASE,
 )
 
@@ -618,6 +623,34 @@ def fix_possessive_pronouns(text: str) -> tuple[str, int]:
     text = re.sub(r"\byours\s+(\w+)", _replace_yours, text, flags=re.IGNORECASE)
     text = re.sub(r"\bours\s+(\w+)", _replace_ours, text, flags=re.IGNORECASE)
     return text, fixed
+
+
+# beat189 (battery11_0826_1712 imag-intimacy): "Look out over what used to be
+# yours and her alone before everything changed." — the mirror-image error of
+# fix_possessive_pronouns above: "her" used as a coordinated STANDALONE
+# possessive pronoun (needs "hers") instead of an attributive determiner. Scoped
+# to "and/or her" immediately followed by a non-noun word or clause boundary —
+# the same discipline as _YOUR_NONNOUN_FOLLOW — so ordinary "and her hand"/
+# "or her voice" (her + noun) is never touched.
+_HER_STANDALONE_RE = re.compile(
+    r"\b(and|or)\s+her(?=\s*(?:[.,!?;]|—|$|\s+(?:alone|now|still|again|too|only|"
+    r"instead)\b))",
+    re.IGNORECASE,
+)
+
+
+def fix_standalone_her(text: str) -> tuple[str, int]:
+    """Replace '(and|or) her' -> '(and|or) hers' when 'her' has no noun to
+    attach to (coordinated standalone possessive, e.g. 'yours and hers alone')."""
+    fixed = 0
+
+    def _replace(m: "re.Match") -> str:
+        nonlocal fixed
+        fixed += 1
+        return f"{m.group(1)} hers"
+
+    result = _HER_STANDALONE_RE.sub(_replace, text)
+    return result, fixed
 
 
 # "your STATIVE" → "you're STATIVE": model confuses possessive with contraction.
@@ -802,6 +835,10 @@ _INTIMACY_OBJECT_PRONOUN_SUBS = (
 _YOUR_NONNOUN_FOLLOW = (
     r"(?=\s*(?:[.,!?;]|—|$|\s+(?:again|still|now|here|entirely|completely|instead|"
     r"already|exactly|quietly|slowly|softly|whenever|between|and|but|or|when|while|"
+    # beat189 (battery11_0826_1712 imag-intimacy): "cold against your where it was
+    # put down" — "where" opens a relative clause the same way "when"/"while"
+    # already do, and was missing from this set despite its siblings being present.
+    r"where|"
     r"as|that|belong|belongs|remain|remains|stay|stays|sit|sits|stand|stands|"
     r"with|for|from|of|to|by|on|at|in|near|into|onto|upon|under|over|through|"
     r"during|since|until|towards?|about|above|across|after|against|along|among|"
@@ -1254,7 +1291,13 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     # not far but audible enough for you to hear it clearly").
     r'|\banswered\s+by\s+another\b'     # "the cry from above is answered by another"
     r'|\bdraws\s+birds\s+towards\b'     # "circling... that draws birds towards it"
-    r'|\bcry\s+from\s+(?:above|below)\s+returns\b',  # "the cry from below returns then"
+    r'|\bcry\s+from\s+(?:above|below)\s+returns\b'  # "the cry from below returns then"
+    # beat189 (battery11_0826_1712 honest read, imag-eagle-golden-eagle-wildlife):
+    # "acknowledgment between birds flying their respective paths" — plural "birds"
+    # sharing a mutual "acknowledgment" implies a second eagle, same family as
+    # beat183's "words between birds" but a distinct verb (acknowledgment, not
+    # words) that phrase's exact-string match doesn't cover.
+    r'|\backnowledgment\s+between\s+birds\b',  # "acknowledgment between birds flying..."
     re.IGNORECASE,
 )
 

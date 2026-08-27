@@ -63,7 +63,8 @@ from imagination_engine.postcheck import (degeneration_report, drop_collapsed_pa
                                           phrase_repeat_count, repair_phrase_repeats,
                                           repair_short_phrase_repeats,
                                           drop_adjacent_duplicates, drop_tail_duplicates,
-                                          fix_possessive_pronouns, fix_your_contraction,
+                                          fix_possessive_pronouns, fix_standalone_her,
+                                          fix_your_contraction,
                                           fix_copula_youre_alone, fix_predicative_your,
                                           fix_intimacy_object_pronoun_escapes,
                                           fix_subject_pronouns, fix_object_pronouns,
@@ -632,6 +633,9 @@ def _generate_settling(engine: Engine, transcript: list[dict], emit) -> str:
     if pronoun_fixed:
         log.warning('[settling] %d possessive-pronoun adjective error(s) fixed (hers→her/yours→your)',
                     pronoun_fixed)
+    body, standalone_her_fixed = fix_standalone_her(body)
+    if standalone_her_fixed:
+        log.warning('[settling] %d standalone-her→hers error(s) fixed', standalone_her_fixed)
     body, predicative_your_fixed = fix_predicative_your(body)
     if predicative_your_fixed:
         log.warning('[settling] %d predicative your→yours error(s) fixed', predicative_your_fixed)
@@ -1189,6 +1193,9 @@ def generate_session(
     if pronoun_fixed:
         log.warning('[v6] %d possessive-pronoun adjective error(s) fixed (hers→her/yours→your)',
                     pronoun_fixed)
+    full, standalone_her_fixed = fix_standalone_her(full)
+    if standalone_her_fixed:
+        log.warning('[v6] %d standalone-her→hers error(s) fixed', standalone_her_fixed)
     full, predicative_your_fixed = fix_predicative_your(full)
     if predicative_your_fixed:
         log.warning('[v6] %d predicative your→yours error(s) fixed', predicative_your_fixed)
@@ -1243,7 +1250,14 @@ def generate_session(
                              # imag-eagle-companion-bird-he: "a circling raptor...distant competitor
                              # or ally" used species name "raptor" (not hawk/falcon/etc.); named-token
                              # filter missed it because "raptor" was not in _wildlife_tokens.
-                             "raptor", "raptors")
+                             "raptor", "raptors",
+                             # beat189: bare "goat" escape — found in battery11_0826_1712
+                             # imag-eagle-wildlife-plural: "a goat stands on some ledge... its
+                             # presence alone has made this place somewhere special. Its call
+                             # reaches across mountains..." — fully agentive ground wildlife,
+                             # same class as beat135's mountain-sheep/bighorn fix, but the bare
+                             # species name (no "mountain"/"bighorn" qualifier) wasn't listed.
+                             "goat")
         # "the larger one" is eagle-scoped: in a solo eagle script it signals a companion bird;
         # in a running script it matches "the larger runner/tree/etc" → false positive.
         # beat87: caught in imag-eagle-wildlife-plural; fired 3 times in imag-active-scene (FP).
@@ -1412,6 +1426,10 @@ def generate_session(
             "draws birds towards",     # "circling... that draws birds towards it"
             "cry from above returns",  # "the cry from above returns then"
             "cry from below returns",  # "the cry from below returns then"
+            # beat189 (battery11_0826_1712): "acknowledgment between birds flying
+            # their respective paths" — same family as beat183's "words between
+            # birds", different verb.
+            "acknowledgment between birds",
         ))
         if anon_companion_dropped:
             log.warning('[v6] %d anonymous-companion sentence(s) dropped (you/we both in solo eagle active-body)',

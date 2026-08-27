@@ -116,7 +116,11 @@ for sc in scenarios:
                                # beat163: "raptor"/"raptors" escape found in battery11_2038
                                # imag-eagle-companion-bird-he: "a circling raptor" used the genus
                                # name rather than a specific species, slipping the token filter.
-                               "raptor", "raptors")
+                               "raptor", "raptors",
+                               # beat189: bare "goat" escape found in battery11_0826_1712
+                               # imag-eagle-wildlife-plural — same class as beat135's mountain-
+                               # goat/bighorn fix but without the qualifier.
+                               "goat", "goats")
             _WILDLIFE_ARTICLE = ("bear",)
             hallucinated_wildlife = (
                 any(re.search(r"\b" + re.escape(w) + r"\b", lower)
@@ -256,7 +260,11 @@ for sc in scenarios:
                 # returns then".
                 r'|\banswered\s+by\s+another\b'
                 r'|\bdraws\s+birds\s+towards\b'
-                r'|\bcry\s+from\s+(?:above|below)\s+returns\b',
+                r'|\bcry\s+from\s+(?:above|below)\s+returns\b'
+                # beat189 (battery11_0826_1712): "acknowledgment between birds
+                # flying their respective paths" — same family as the "words
+                # between birds" pattern above, different verb.
+                r'|\backnowledgment\s+between\s+birds\b',
                 lower, _re.IGNORECASE
             ))
             # beat153: Chair-body reminder in eagle script (not just opening).
