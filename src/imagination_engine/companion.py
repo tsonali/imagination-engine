@@ -1711,22 +1711,36 @@ def _strip_echo(reply: str, user_message: str) -> str:
             # Case 2h guards.
             _r_wset_2h_norm = {_EMOTION_LEMMA_MAP.get(w, w) for w in _r_wlist_2h}
             _u_wset_2h_norm = {_EMOTION_LEMMA_MAP.get(w, w) for w in _u_wset_2h}
+            # beat192: these 3 checks were an if/elif/elif chain, which meant the
+            # 3rd (dash-head-phrase) branch could only ever run when BOTH of the
+            # first two branches' OUTER gates were false — not when they were
+            # true but their NESTED overlap check simply failed to meet threshold.
+            # battery9_0827_0102 comp-grief-anger-1word-echo T1: "Anger for days
+            # -- what's it pointing to?" has _r_wlist_2h of 7 words (<=9), so
+            # branch 2's outer elif condition (len<=9 and not confirm-lands) was
+            # TRUE even though its nested content-recall ratio (0.33) missed --
+            # Python's elif chain stops at the first TRUE condition regardless of
+            # what happens inside it, so branch 3 (which WOULD have fired at 1.0
+            # overlap on the pre-dash "Anger for days" head phrase) never even
+            # ran. Restructured to independent `if not _case2h_fired` checks so
+            # each branch is tried until one actually strips something.
+            _case2h_fired = False
             if (len(_r_wlist_2h) <= 9
                     and _r_first_2h.rstrip('.!? ').lower() not in _lands_2h
                     and _u_wset_2h
                     and len(_r_wset_2h_norm & _u_wset_2h_norm) / max(len(_r_wlist_2h), 1) >= 0.80):
                 _after_2h = r[len(_r_first_2h):].lstrip(" .!?\n-—")
                 r = _after_2h if (len(_after_2h.split()) > 3) else ""
+                _case2h_fired = True
             # Case 2h extension (beat162b): user-content-recall direction.
             # Original 2h checks companion-recall (companion words ÷ companion length).
-            # This elif catches echoes where companion adds stopwords that dilute companion-
-            # recall below 80%, but ≥80% of user's CONTENT words are echoed back.
-            # TP: "Friday is due and you haven't started." — companion-recall 5/7=71%
-            #     (below threshold; 'is','and' are extras not in user sentence);
-            #     user-content-recall {friday,due,havent,started}=4/5=80% → fires.
-            # Only runs when original 2h check didn't fire (elif), so r and _r_first_2h
-            # are guaranteed to still be in sync.
-            elif len(_r_wlist_2h) <= 9 and _r_first_2h.rstrip('.!? ').lower() not in _lands_2h:
+            # This branch catches echoes where companion adds stopwords that dilute
+            # companion-recall below 80%, but ≥80% of user's CONTENT words are echoed
+            # back. TP: "Friday is due and you haven't started." — companion-recall
+            # 5/7=71% (below threshold; 'is','and' are extras not in user sentence);
+            # user-content-recall {friday,due,havent,started}=4/5=80% → fires.
+            # Only runs when the branch above didn't actually fire.
+            if not _case2h_fired and len(_r_wlist_2h) <= 9 and _r_first_2h.rstrip('.!? ').lower() not in _lands_2h:
                 _SWRDS_2H = frozenset({
                     'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
                     'have', 'has', 'had', 'do', 'does', 'did', 'and', 'or', 'but', 'so',
@@ -1743,6 +1757,7 @@ def _strip_echo(reply: str, user_message: str) -> str:
                         and len(_u_content_2h & _r_wset_2h) / max(len(_u_content_2h), 1) >= 0.80):
                     _after_2hx = r[len(_r_first_2h):].lstrip(" .!?\n-—")
                     r = _after_2hx if (len(_after_2hx.split()) > 3) else ""
+                    _case2h_fired = True
             # Case 2h dash-head-phrase variant (beat187). battery9_0826_0519
             # comp-para-stay: user "Promise me you'll always be here." ->
             # companion "Promise I'll always be here — there's no one in here
@@ -1756,18 +1771,39 @@ def _strip_echo(reply: str, user_message: str) -> str:
             # no-echo-regen path) and beat185's Case 2i dash-strip — but Case
             # 2h's FIRST-PASS check never got the equivalent fix. Mirror Fix A:
             # check the pre-dash head phrase independently against the same
-            # ≤9-word / ≥80% overlap gate. Must be a sibling elif of the two
-            # branches above (not nested inside either) since both of those
-            # require len(_r_wlist_2h) <= 9, which is exactly what fails here.
-            elif '—' in _r_first_2h or '–' in _r_first_2h:
+            # ≤9-word / ≥80% overlap gate. beat192: now a plain `if not
+            # _case2h_fired`, not an elif — see the beat192 note above the first
+            # branch for why the elif chain made this unreachable for any reply
+            # whose merged first-"sentence" was itself ≤9 words.
+            if not _case2h_fired and ('—' in _r_first_2h or '–' in _r_first_2h):
                 _r_hp_2h = re.split(r'[—–]', _r_first_2h)[0].strip()
                 _r_hp_wlist_2h = re.findall(
                     r"[a-z']+", _qasc(_i_to_you(_r_hp_2h).lower())
                 )
+                # beat192 (battery9_0827_0102 comp-grief-anger-1word-echo T1):
+                # "Anger for days -- what's it pointing to?" escaped THIS branch
+                # specifically -- a 4th distinct guard defeated by the anger/angry
+                # lemma mismatch beat191 already fixed, but only inside the main
+                # Case 2h branch above (line ~1712), not here. Root cause: this
+                # reply has no period before the dash (one long question-mark-
+                # terminated utterance), so _r_first_2h swallows the WHOLE reply
+                # including the question tail, which fails the two branches above
+                # on ratio dilution alone (3/7=0.43) before ever reaching this
+                # em-dash-split branch -- which then computed its OWN overlap
+                # from raw (non-lemma-normalized) word sets: {anger,for,days} vs
+                # {angry,for,days} = 2/3=0.67, still short of 0.80 purely from the
+                # same word-form mismatch. FIX: apply the same _EMOTION_LEMMA_MAP
+                # normalization used by the main branch to both sides here too --
+                # confirms beat191's own note that a 4th occurrence of this exact
+                # pair defeating a 4th guard means the underlying lemma-mismatch
+                # problem needed to be normalized everywhere Case 2h compares word
+                # sets, not patched branch-by-branch.
+                _r_hp_wset_2h_norm = {_EMOTION_LEMMA_MAP.get(w, w) for w in _r_hp_wlist_2h}
+                _u_wset_2h_norm_hp = {_EMOTION_LEMMA_MAP.get(w, w) for w in _u_wset_2h}
                 if (_r_hp_wlist_2h and len(_r_hp_wlist_2h) <= 9
                         and _r_hp_2h.rstrip('.!? ').lower() not in _lands_2h
                         and _u_wset_2h
-                        and len(set(_r_hp_wlist_2h) & _u_wset_2h)
+                        and len(_r_hp_wset_2h_norm & _u_wset_2h_norm_hp)
                         / max(len(_r_hp_wlist_2h), 1) >= 0.80):
                     _after_2hd = r[len(_r_hp_2h):].lstrip(" .!?\n-—–")
                     r = _after_2hd if (len(_after_2hd.split()) > 3) else ""
