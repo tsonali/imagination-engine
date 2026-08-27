@@ -9650,3 +9650,47 @@ UNREACHABLE, 63rd consecutive beat. `arp -a` now shows the mac-mini host entirel
 
 ### Running
 qc_queue healthy (PID 64491), memory recovered to 81% free at beat close, no battery in flight (between cycles). companion_deep_test is now in steady rotation per beat185's fix — next run is the priority verification point for this beat's Case 2i second-pass fix and the VF single-fact fix.
+
+## 2026-08-26 (beat187) — 3 more escape-family fixes + 4th eagle human-bystander batch; byo_deep_test starvation resolved (same fix beat185 applied to companion_deep_test)
+
+### Read
+battery9_0826_0519 (companion) and battery11_0826_0355 (imagination), both the priority verification points for beat186's fixes, read end to end.
+
+### Fixed
+- **companion.py Case 2h**: dash-head-phrase echo variant. `comp-para-stay` T1: user "Promise me you'll always be here." -> companion "Promise I'll always be here — there's no one in here who can promise anything..." The whole em-dash-joined clause is 14 words so the existing <=9-word gate skipped both branches even though the pre-dash head phrase alone ("Promise I'll always be here", 5 words) is a near-total pronoun-swapped echo. New sibling branch checks the pre-dash head phrase independently against the same <=9-word/>=80%-overlap gate.
+- **companion.py "it sounds like"**: conjunction-joined form ("...and it sounds like the rest hasn't given that yet.") wasn't caught by the existing comma/dash lookbehind guard (which requires the phrase to directly follow punctuation, and Python `re` can't lookbehind on variable-width conjunctions). Added a plain substitution that keeps the conjunction, drops only the banned phrase.
+- **postcheck.py**: 3rd grammatical shape of the your/yours escape family — "your" as a transitive verb's direct object followed by a preposition: "Her hand finds your without a word" -> "finds yours without a word" (context confirms possessive, not "you"). Literal patch, same discipline as beat183-186.
+- **postcheck.py + generator.py + battery11_imagination_bank.py (3-way parity)**: 5 new eagle human-bystander hallucination patterns — 4th occurrence of the beat178 class, new scenario (imag-eagle-wildlife-plural): "wants to be seen", "rock climber", "humans come into your vision", "placed by humans"/"placed by someone", "the people would have been walking".
+- **postcheck.py**: new meta/tool-call text hallucination class — model fused "...breathsDataExchange completed. User requested an example now fully compiled by following supplied rules..." directly onto a real word with no space, in an imag-mri script. Literal reconnect-and-strip fix (zero legitimate use for this exact phrase).
+- **qc_queue.sh**: added `scripts/qc/byo_deep_test.py` to the rotation — same starvation pattern beat185 fixed for companion_deep_test (Build-Your-Own had a written deep-test script since beat11 that was never wired into continuous coverage).
+All verified with py_compile + direct unit tests against exact transcript quotes, no model launch. companion.py/postcheck.py/generator.py synced to all 3 dist copies (MD5s: companion.py 97c875e5, postcheck.py d518c5a5, generator.py e9583a5c).
+
+### Gold
+- Gold(A) +7 -> 6592: interpreter-nails-the-joke-timing, slackline-first-clean-crossing, shortwave-signal-locks-in, adoption-papers-signed-courthouse-steps, backyard-telescope-saturns-rings-resolve, tattoo-bandage-off-first-look, barn-door-first-morning-as-owner.
+- Gold(C) +6 (c_gold_beat187.jsonl): anger-received-not-reframed-as-protective, drops-therapy-frame-on-redirect, plain-thing-when-asked-no-metaphor, playful-register-holds-no-deflating-question, warmth-threaded-through-honest-no, vital-facts-opener-retire-and-yield — all targeting the standing heartbeat-instruction companion-quality categories directly.
+- NOT SCP'd (mini unreachable).
+
+### Mini
+UNREACHABLE, 64th consecutive beat. `ssh mac-mini.localdomain` resolves via `~/.ssh/config` to `julios-mac-mini.local`, which now fails outright at the DNS level ("Could not resolve hostname") rather than the ARP-incomplete signature of recent beats — consistent with beat186's finding that the mini may no longer share a network with this laptop. Still needs Sonali's physical check.
+
+### Running
+qc_queue running.
+
+## 2026-08-26 (beat188) — recovered and landed an interrupted prior session's work: VF-BROAD-INCOMPLETE guard, GRAVITY terminal floor, SC13 denial broadening
+
+This beat opened to find beat187's commit (dc1ce2d) present but a full additional round of fixes sitting uncommitted in the working tree — a prior session had done the work (with beat188-numbered comments already in place) but was cut off before committing. Rather than discard or blindly commit, verified it properly: read the full diff against dc1ce2d, confirmed each fix's reasoning against its cited log source, ran py_compile on all 5 touched files, ran scripts/test_postcheck.py (ALL PASS), and attempted scripts/test_companion.py.
+
+### Near-miss caught
+scripts/test_companion.py loads the real model. qc_queue's battery9_engagement.py was mid-run at the time — running the test would have stacked two model processes, the exact 07-12 kernel-panic risk. Caught before launch (ps + memory_pressure check), paused qc_queue and killed the in-flight battery child first, ran the test cleanly (80%->18% free during the run, back to 80% after), then relaunched qc_queue. No panic, no stacked processes. test_companion.py's own gate (>=70% turns ending in a question) FAILed, but that gate predates beat22's deliberate fix (question-enders 83%->19%, to kill template fatigue) and contradicts the project's current, more nuanced design — treated as a stale test, not a regression; the actual guard behavior in the transcript (echo-strip, regen, forced second-pass) looked correct.
+
+### Also found and fixed
+`data/companion/vital-facts.md` — the REAL, live, user-editable memory file — was left mutated with test-fixture content (missing the "Role: product lead at Hearth" line, "Austin" reworded to "lives in Austin"). `battery12_vital_facts.py`'s `temp_vf_content()` context manager correctly saves/restores this file around tests, but the interrupted prior session appears to have died inside the `try` block before the `finally` restore ran. Restored the original content via `git checkout` before committing anything else — this was test pollution, not an intended edit, and was never staged.
+
+### Committed
+5 files (526f864): companion.py, generator.py, postcheck.py, utility.py, battery11_imagination_bank.py. Full defect list is in the beat188 commit message. Dist copies (dist/hearth, dist/imagination_engine, dist/imagination_engine/imagination_engine) synced from src/.
+
+### Mini
+Not re-checked this beat (no new information since beat187's DNS-level failure finding).
+
+### Running
+qc_queue running (relaunched after the test_companion.py pause), memory recovered to 80% free.
