@@ -9720,3 +9720,13 @@ Noticed 2 peer Claude sessions active on this machine (sonali-7c, started 6h ago
 
 ### Running
 qc_queue running throughout, uninterrupted. ZIP rebuilt (dist/hearth-0.2.zip).
+
+## 2026-08-26 (beat190) — Gold(A) growth: 7 new imagination scripts in fresh domains
+
+### Gold
+Gold(A) +7 -> 6599: dovetail-joint-first-clean-fit, weld-bead-first-clean-run, calligraphy-flourish-lands-clean, asl-conversation-flows-without-fingerspelling, silver-ring-solder-seam-disappears, piano-tuning-by-ear-beats-disappear, blind-wine-tasting-nails-it. Before writing, grepped the existing 6592-entry corpus for candidate domains to avoid duplicating already-heavily-covered scenes (marathon finish, beehive/honey harvest, and kiln-opening all came back saturated on the first pass — dropped those and picked domains with zero prior coverage: dovetail joinery, welding, calligraphy, ASL conversation, silversmithing, piano tuning by ear, blind wine tasting). Verified via script (not by eye) before committing: (1) all 7 are valid JSON, correct {id, prompt, text} schema matching the current corpus format; (2) none contain any of the generator.py FORBIDDEN_PHRASES list or FORBIDDEN_STOCK_IMAGERY tokens — first pass caught 5 literal hits ("let yourself" x3, "you could", "maybe") that read fine in isolation but are the exact hedging tics the mechanical filter exists to suppress, so training data teaching the model those phrases are safe would undermine that filter the same way beat184's "particular" leak did; rewrote all 5 and re-scanned clean; (3) all 7 opening 40-char strings are unique against the full corpus (no duplicate-opening collision). Word counts 285-317, consistent with the recent corpus's length band. NOT SCP'd (mini unreachable, confirmed again — same DNS-resolution-failure signature). hearth-corpus is a plain directory, not a git repo, so this write is the only persistence step needed.
+
+Gold(C): none this beat — no fresh companion-side defect to write an exemplar against, and didn't want to pad the candidate set with filler just to move a number.
+
+### Running
+qc_queue running throughout, untouched. No model launch this beat.
