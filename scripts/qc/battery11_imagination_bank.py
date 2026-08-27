@@ -264,7 +264,15 @@ for sc in scenarios:
                 # beat189 (battery11_0826_1712): "acknowledgment between birds
                 # flying their respective paths" — same family as the "words
                 # between birds" pattern above, different verb.
-                r'|\backnowledgment\s+between\s+birds\b',
+                r'|\backnowledgment\s+between\s+birds\b'
+                # beat191 (battery11_0826_1854): "not just one bird but two"
+                # (explicit second-bird count) and "dropping back into
+                # formation with you at its side... this pairing that feels
+                # natural" (full companion-flight moment, no species/pronoun).
+                r'|\bnot\s+(?:just\s+)?one\s+bird\s+but\s+two\b'
+                r'|\bformation\s+with\s+you\b'
+                r'|\bthis\s+pairing\b'
+                r'|\bat\s+its\s+side\b',
                 lower, _re.IGNORECASE
             ))
             # beat153: Chair-body reminder in eagle script (not just opening).

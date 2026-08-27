@@ -9730,3 +9730,61 @@ Gold(C): none this beat — no fresh companion-side defect to write an exemplar 
 
 ### Running
 qc_queue running throughout, untouched. No model launch this beat.
+
+## 2026-08-26 (beat191) — companion_deep_test self-contradicting memory answer (fixed), Case 2h anger/angry gap (3rd guard defeated), eagle pattern-list growth
+
+### Coordination
+Fresh session (sonali-4a) picking up the heartbeat while 2 peer sessions (sonali-7c, sonali-6a) were already active on this machine. Sent both a coordination check via SendMessage before touching anything model-related, per beat189's precedent and the standing 07-12 kernel-panic risk (never stack local-model processes). Confirmed via `/tmp/hearth-heartbeat.lock` (holding the launchd wrapper's PID) that this run legitimately holds the heartbeat slot rather than racing another instance. Did not receive peer replies before this beat's work was done; per the heartbeat's own "never block" rule, proceeded — all fixes this beat were verifiable via pure-function unit tests with no model launch, so there was no actual point of conflict.
+
+### Read
+- `logs/qc/queue_0826_2136_companion_deep_test.log` (small, 9.2KB) — read directly.
+- `logs/qc/queue_0826_1854_battery11_imagination_bank.log` (124KB, 7 scenarios) — delegated to a background agent with explicit instructions on what "already fixed" looks like, to avoid re-reporting known-patched defect families.
+- `logs/qc/queue_0826_2001_battery9_engagement.log` (108KB, ~20 scenarios) — same background-agent approach.
+
+### Fixed — HIGH PRIORITY: companion_deep_test UC2 T4 self-contradicting memory answer
+Seeded past-session summaries covered a job-decision topic explicitly (financial safety vs. meaning, partner supportive but worried about health insurance). User re-raised "the job stuff" at T2, then asked "Did we talk about this before?" at T4. Reply: "No — we haven't discussed the job specifics before. I know you're still leaning toward taking a risk for more meaning at this smaller startup, and that your partner is supportive but worried about health insurance." — a flat denial immediately followed by exactly the remembered detail it just denied having.
+
+Two root causes, both fixed in `companion.py`:
+1. The PAST-QUERY VF-yes-regen guard (the branch that correctly affirms when `vital_facts.md` covers a query) only ever checked `self.vital_facts` — it had no way to know `self._past` (cross-session summaries, a separate memory source populated by `CompanionMemory`) covers a query. New `_past_covers_query()` mirrors the existing `_vf_covers_query()` against `self._past` instead of the VF block; the guard now checks both sources.
+2. Even with fix 1, entity-less follow-ups like "did we talk about this before?" have no topic keyword in the query itself to match against — "this" is anaphoric to earlier turns. New `_pq_contradicting_trailer()`: after the denial-normalize branch produces its canonical "No — we haven't discussed X." opener, if the reply is exactly 2 sentences and the second sentence shares ≥2 real content words (stopword-filtered) with actual memory (VF + past summaries combined), that's proof the trailing sentence is genuine, not hallucinated — regen as a clean affirmation instead of keeping the self-contradicting form.
+
+Verified directly against the exact defect string plus 3 FP cases (single-sentence denial with no trailer; denial + generic non-overlapping hedge; denial + trailer sharing only 1 word with memory, below the 2-word floor) — all correct.
+
+### Fixed — Case 2h echo guard anger/angry lemma gap (3rd separate guard this exact pair has now defeated)
+battery9_0826_2001 comp-grief-anger-1word-echo T1: "Anger for days. What does it feel like when the anger is there?" — the identical anger/angry near-echo beat166 (second-pass path) and beat184 (Case 2f, whole-reply-≤5-words) already fixed twice, now escaping a THIRD guard (Case 2h, first-sentence-only) because a benign trailing question pushed the full reply to 13 words, clearing every word-count gate these guards use. Root cause: "anger" (noun) vs "angry" (adjective) fails exact word-set intersection even though the words are functionally the same content word. Rather than lower Case 2h's threshold broadly (would affect every other scenario it guards), added a narrow `_EMOTION_LEMMA_MAP = {"angry": "anger"}` applied only inside Case 2h's word-set comparison — zero blast radius outside this one recurring pair. Verified via `_strip_echo()` directly: the exact defect string now strips correctly; an unrelated sentence using "anger" with no echo relationship, and a short reply using "angry" with genuinely low overlap, both stay untouched.
+
+### Fixed — new "that's real" tic surface form
+battery9_0826_2001 comp-grief-anger-self-recycle T1: "Angry is what's real here. Anger at a miscarriage, not sadness — that breaks the script." — the forbidden template stamp restructured to dodge every existing pattern in `_strip_thats_real_tic()` (no em-dash, no literal "that's real" string). Added two new regexes (leading-sentence form + trailing-sentence form, since the actual defect had the tic as the LAST sentence, which the existing "followed by more content" pattern can't reach). Verified both forms strip correctly; a long legitimate sentence containing "is what is real to you" (not the 2-word-cap stamp shape) is left untouched.
+
+### Fixed — eagle anon-companion pattern growth (3-way parity)
+battery11_0826_1854 honest read (via background agent) found 4 new escape forms in 2 scenarios, none matching any covered phrase:
+- imag-eagle-wildlife-plural: "The distant call becomes a repeated pattern — not just one bird but two." (explicit second-bird count assertion).
+- imag-eagle-golden-eagle-wildlife: "It leads you for a while before dropping back into formation with you at its side once more... there is something about this pairing that feels natural." (full companion-flight moment, no named species/pronoun/prior phrase).
+
+Added `not just one bird but two`, `formation with you`, `this pairing`, `at its side` to `postcheck.py`'s `_EAGLE_ANON_COMPANION_PATTERN`, `generator.py`'s `anon_companion_dropped`, and `battery11_imagination_bank.py`'s mirror pattern. FP-checked: "At its highest point, the ridge falls away beneath you" does not match (requires the exact "at its side" phrase).
+
+### Logged, not fixed — banked in scenario_bank.py + here for a future beat
+- **imag-intimacy, worst script in the batch (battery11_0826_1854):** a genuinely new defect class — first-person "mine"/"me" leaking into the strictly 2nd-person address ("she looks up at me," "for mine own part" recurring 5+ times verbatim/near-verbatim in one script). Qualitatively different from the documented her/hers/your/yours gender-confusion family — this is a PERSON confusion, a direct violation of the instrument-not-companion architecture. Needs a dedicated check design, not a same-beat rush job alongside 4 other fix classes.
+- Spurious trailing apostrophes on bare possessives ("hers'", "yours'") — distinct from every prior hers/yours fix (all target adjective misuse "hers NOUN"; this is a bare/predicative form getting a stray apostrophe).
+- A new surface form of the verb+your+non-noun family ("her hand finds your across the kitchen island") confirming, as beat187's own note already flagged, that literal-tail patching of that family won't generalize.
+- A possible one-off raw token corruption ("there isn Rtilt anything else here tonight") — wants a 2nd instance before treating as real.
+- imag-calm-settle: a near-verbatim 9-token phrase ("not anyone else's version but your for right now") repeating twice ~200 words apart, a conjunction-preceding bare-"your" shape distinct from the currently-documented families; also flagged that this exact repeat should plausibly have tripped the 6-gram short-phrase-repeat filter and didn't (possible apostrophe-tokenization miss around "else's").
+- battery9_0826_2001: a coordinate noun-phrase recombination echo (companion pulls key nouns from BOTH of the user's sentences and recombines them, diluting every existing overlap threshold) — found 4 times in one log across 2 scenarios; no existing guard targets this shape.
+- battery9_0826_2001: 2 instances of grammatically-valid-but-referentially-empty output (a dangling "they" with no antecedent; a truncated-looking "Even though it isn't —" with the lead clause apparently dropped) — no guard in the codebase targets this class.
+
+All of the above added to `scripts/qc/scenario_bank.py` with exact quotes for whichever future beat picks them up.
+
+### Verified
+- `python3 -m py_compile` clean on companion.py, postcheck.py, generator.py, battery11_imagination_bank.py, scenario_bank.py.
+- `scripts/test_postcheck.py`: ALL PASS (confirms the new eagle patterns don't collide with the existing "pairing of clouds" FP guard).
+- Direct unit tests against every exact defect string quoted above, plus FP checks for each fix.
+- No model launch this beat — all fixes verified via pure Python/regex logic; qc_queue's own single process ran untouched throughout (companion_deep_test → byo_deep_test → battery6_crosscut → battery10_registers, confirmed via `logs/qc/queue.log`).
+
+### Dist
+All 4 copies synced (src + dist/imagination_engine + dist/imagination_engine/imagination_engine + dist/hearth/src/imagination_engine). companion.py MD5: 659008912c4dc1a062bccc2191624323. postcheck.py MD5: e6b0580d42de0d9ea7eceede0aee89ce. generator.py MD5: b25ece96f1167875f6470429ed5d0adc.
+
+### Mini
+Not re-checked this beat — prior beats' DNS-resolution-failure signature (65+ consecutive) is well-documented; no new information expected from a re-attempt without Sonali's physical check.
+
+### Running
+qc_queue running throughout, untouched.

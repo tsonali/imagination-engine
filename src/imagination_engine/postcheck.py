@@ -1297,7 +1297,20 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     # sharing a mutual "acknowledgment" implies a second eagle, same family as
     # beat183's "words between birds" but a distinct verb (acknowledgment, not
     # words) that phrase's exact-string match doesn't cover.
-    r'|\backnowledgment\s+between\s+birds\b',  # "acknowledgment between birds flying..."
+    r'|\backnowledgment\s+between\s+birds\b'  # "acknowledgment between birds flying..."
+    # beat191 (battery11_0826_1854 honest read): 3 new escape forms, 2 scenarios.
+    # (1) imag-eagle-wildlife-plural: "The distant call becomes a repeated pattern
+    # — not just one bird but two." — an explicit second-bird count assertion;
+    # none of the covered acoustic phrases ("call identical", "another call", "a
+    # second call", "the other bird") match this construction. (2) imag-eagle-
+    # golden-eagle-wildlife: "It leads you for a while before dropping back into
+    # formation with you at its side once more... there is something about this
+    # pairing that feels natural" — a full companion-flight moment using no named
+    # species, gendered pronoun, or any already-covered phrase.
+    r'|\bnot\s+(?:just\s+)?one\s+bird\s+but\s+two\b'  # "not just one bird but two"
+    r'|\bformation\s+with\s+you\b'      # "dropping back into formation with you"
+    r'|\bthis\s+pairing\b'              # "something about this pairing that feels natural"
+    r'|\bat\s+its\s+side\b',            # "formation with you at its side once more"
     re.IGNORECASE,
 )
 

@@ -671,6 +671,81 @@ def _vf_covers_query(user_message: str, vf_block: str) -> bool:
     return False
 
 
+# Adjective->noun lemma pairs that cause literal word-set mismatches in echo
+# guards despite being the same content word. Recurring in the comp-grief-anger
+# scenario family, where the user says "angry" and the companion (correctly,
+# stylistically) says "anger" — Case 2h's word-set overlap check treats these
+# as unrelated tokens without this normalization.
+_EMOTION_LEMMA_MAP: dict[str, str] = {"angry": "anger"}
+
+# Common function/filler words ≥4 chars, excluded from the beat191 PAST-QUERY
+# self-contradiction word-overlap check so generic phrasing ("your", "still",
+# "know", "just") doesn't itself count as evidence of a remembered fact.
+_PQ_CONTRADICTION_STOPWORDS: frozenset[str] = frozenset({
+    "your", "that", "this", "know", "still", "been", "were", "have",
+    "haven", "with", "about", "them", "they", "their", "just", "also",
+    "even", "only", "much", "more", "than", "then", "when", "what",
+    "from", "some", "being", "doing", "really", "does", "matter",
+    "right", "here", "there", "want", "need", "feel", "feels", "into",
+    "over", "back", "again", "something", "anything", "everything",
+})
+
+
+def _pq_contradicting_trailer(reply: str, past_summaries: list[str], vf_block: str) -> str | None:
+    """Return the trailing sentence if `reply` denies-then-affirms in the same
+    breath (beat191), else None.
+
+    A denial-shaped opener ("No — we haven't discussed X.") followed by a second
+    sentence that overlaps ≥2 real content words with actual memory (past-session
+    summaries or vital-facts) is never coherent — either nothing is known (the
+    denial should stand alone) or something IS known (should have affirmed, not
+    denied). Requires ≥2 overlapping content words (not 1) to keep the false-
+    positive rate low against ordinary hedge continuations.
+    """
+    sentences = re.split(r'(?<=[.!?])\s+', reply.strip(), maxsplit=1)
+    if len(sentences) != 2 or not sentences[1].strip():
+        return None
+    trailing_words = (
+        set(re.findall(r"[a-z]{4,}", sentences[1].lower())) - _PQ_CONTRADICTION_STOPWORDS
+    )
+    if not trailing_words:
+        return None
+    memory_lower = "\n".join(past_summaries).lower() + "\n" + vf_block.lower()
+    memory_words = set(re.findall(r"[a-z]{4,}", memory_lower))
+    if len(trailing_words & memory_words) >= 2:
+        return sentences[1]
+    return None
+
+
+def _past_covers_query(user_message: str, past_summaries: list[str]) -> bool:
+    """True when cross-session past-conversation summaries likely contain
+    information about the entity/topic the user is asking about.
+
+    Sibling of _vf_covers_query, same matching strategy, but against the
+    _past summary list instead of the vital-facts file. Needed because the
+    PAST-QUERY guard (beat88+) only ever checked VF coverage before deciding
+    a denial was correct — a query about a topic that lives in past-session
+    summaries (not vital-facts.md) would pass _vf_covers_query()==False and
+    get canonicalized to 'No — we haven't discussed X' even though the
+    running context already has real, on-topic past-summary content the
+    model could have (and often does) answer from correctly on the first try.
+    """
+    if not past_summaries:
+        return False
+    msg_lower = user_message.lower()
+    past_lower = "\n".join(past_summaries).lower()
+
+    for word in _VF_RELATIONSHIP_WORDS:
+        if word in msg_lower and word in past_lower:
+            return True
+
+    for noun in re.findall(r'\b[A-Z][a-z]{2,}\b', user_message):
+        if noun.lower() in past_lower:
+            return True
+
+    return False
+
+
 def _vf_matching_line(user_message: str, vf_block: str) -> str | None:
     """Return the single vital-facts bullet line that matches the user's query.
 
@@ -902,6 +977,32 @@ def _strip_thats_real_tic(reply: str) -> str:
     # After a sentence boundary, when followed by more content:
     cleaned = re.sub(
         r"(?<=\. )(\w+(?:\s+\w+)?)\s+is\s+real\.\s+(?=\w)",
+        "",
+        cleaned,
+        flags=re.IGNORECASE,
+    ).strip()
+    # beat191: "[1-2 words] is what's real here." — same forbidden stamp,
+    # restructured to dodge the plain "is real" tail (battery9_0826_2001,
+    # comp-grief-anger-self-recycle T1: "Angry is what's real here."). No
+    # em-dash, no literal "that's real" string — invisible to every prior
+    # variant above. Same 2-word cap + optional "here"/"right now" tail.
+    cleaned = re.sub(
+        r"^(\w+(?:\s+\w+)?)\s+is\s+what\Ws\s+real(?:\s+here|\s+right\s+now)?\.\s*",
+        "",
+        cleaned,
+        flags=re.IGNORECASE,
+    ).strip()
+    cleaned = re.sub(
+        r"(?<=\. )(\w+(?:\s+\w+)?)\s+is\s+what\Ws\s+real(?:\s+here|\s+right\s+now)?\.\s+(?=\w)",
+        "",
+        cleaned,
+        flags=re.IGNORECASE,
+    ).strip()
+    # Same tic as the TRAILING sentence (no content after it to require) — this
+    # is the exact shape found in battery9_0826_2001: the tic sentence was last,
+    # not mid-reply, so the "followed by \w" variant above never matches it.
+    cleaned = re.sub(
+        r"(?<=\. )(\w+(?:\s+\w+)?)\s+is\s+what\Ws\s+real(?:\s+here|\s+right\s+now)?\.\s*$",
         "",
         cleaned,
         flags=re.IGNORECASE,
@@ -1543,10 +1644,22 @@ def _strip_echo(reply: str, user_message: str) -> str:
             _r_wlist_2h = re.findall(r"[a-z']+", _qasc(_i_to_you(_r_first_2h).lower()))
             _u_wset_2h = set(re.findall(r"[a-z']+", _qasc(_u_first_2h.lower())))
             _lands_2h = {p.rstrip('.!? ').lower() for p in _CONFIRM_LANDS}
+            # beat191: lemma-normalize before overlap so adjective/noun word-form
+            # mismatches ("angry" vs "anger") don't hide an otherwise-exact echo.
+            # battery9_0826_2001 comp-grief-anger-1word-echo T1: user "I've been
+            # angry for days. Angry." -> companion "Anger for days. What does it
+            # feel like when the anger is there?" — first-sentence overlap was
+            # {for,days}/3=0.667, below the 0.80 floor, purely because of this one
+            # word-form mismatch; every other word matched exactly. Scoped to the
+            # single known-recurring pair (this scenario family only) rather than
+            # a broad threshold change, which would affect every other scenario
+            # Case 2h guards.
+            _r_wset_2h_norm = {_EMOTION_LEMMA_MAP.get(w, w) for w in _r_wlist_2h}
+            _u_wset_2h_norm = {_EMOTION_LEMMA_MAP.get(w, w) for w in _u_wset_2h}
             if (len(_r_wlist_2h) <= 9
                     and _r_first_2h.rstrip('.!? ').lower() not in _lands_2h
                     and _u_wset_2h
-                    and len(set(_r_wlist_2h) & _u_wset_2h) / max(len(_r_wlist_2h), 1) >= 0.80):
+                    and len(_r_wset_2h_norm & _u_wset_2h_norm) / max(len(_r_wlist_2h), 1) >= 0.80):
                 _after_2h = r[len(_r_first_2h):].lstrip(" .!?\n-—")
                 r = _after_2h if (len(_after_2h.split()) > 3) else ""
             # Case 2h extension (beat162b): user-content-recall direction.
@@ -2926,20 +3039,41 @@ class Companion:
                 and reply
                 and re.match(r"^(?:[Yy]ou haven'?t|[Ii] haven'?t)\b", reply.strip())):
             _vf_ctx = self.vital_facts.context_block() if self.vital_facts else ""
-            if _vf_ctx and _vf_covers_query(user_message, _vf_ctx):
-                # VF has content about the queried entity — model denial is wrong; regen YES
+            _vf_hit = bool(_vf_ctx) and _vf_covers_query(user_message, _vf_ctx)
+            # beat191: a query can be genuinely covered by cross-session past-conversation
+            # summaries (self._past) even when vital-facts.md has nothing on it — those are
+            # two separate memory sources. The guard used to treat "VF doesn't cover this"
+            # as proof the topic was never discussed, which canonicalized a correct model
+            # denial-shaped reply into an incorrect "No — we haven't discussed X" for topics
+            # that WERE covered by past summaries (companion_deep_test UC2 T4: job-decision
+            # topic, seeded in _past, got denied instead of affirmed).
+            _past_hit = (not _vf_hit) and _past_covers_query(user_message, self._past)
+            if _vf_hit or _past_hit:
+                # VF or past-summary content covers the queried entity — model denial is
+                # wrong; regen YES
                 log.warning(
-                    "companion: PAST-QUERY VF-yes regen — reply starts with 'you/I haven't' "
-                    "but VF has content covering the query (SC1); regenning with affirmation"
+                    "companion: PAST-QUERY %s-yes regen — reply starts with 'you/I haven't' "
+                    "but %s has content covering the query; regenning with affirmation",
+                    "VF" if _vf_hit else "past-summary",
+                    "VF (SC1)" if _vf_hit else "past conversations",
                 )
-                _vf_yes_ctx = (
-                    "\n\nCRITICAL: You just said something starting with 'you haven't' but "
-                    "the vital-facts block DOES have facts about this user. You must AFFIRM, "
-                    "not deny. Start with 'Yes — ' and state the specific fact from the "
-                    "vital-facts block. Example: 'Yes — your sister Priya lives in Austin "
-                    "and has two kids.' Do NOT say 'No' or 'you haven't' — those are wrong "
-                    "when the vital-facts file has the answer."
-                )
+                if _vf_hit:
+                    _vf_yes_ctx = (
+                        "\n\nCRITICAL: You just said something starting with 'you haven't' but "
+                        "the vital-facts block DOES have facts about this user. You must AFFIRM, "
+                        "not deny. Start with 'Yes — ' and state the specific fact from the "
+                        "vital-facts block. Example: 'Yes — your sister Priya lives in Austin "
+                        "and has two kids.' Do NOT say 'No' or 'you haven't' — those are wrong "
+                        "when the vital-facts file has the answer."
+                    )
+                else:
+                    _vf_yes_ctx = (
+                        "\n\nCRITICAL: You just said something starting with 'you haven't' but "
+                        "the FROM PAST CONVERSATIONS block above DOES cover this topic. You "
+                        "must AFFIRM, not deny. Start with 'Yes — ' and state the specific "
+                        "detail from that past-conversation summary. Do NOT say 'No' or 'you "
+                        "haven't' — those are wrong when past conversations already cover this."
+                    )
                 _pq_chunks = []
                 for piece in self.engine.stream(
                     messages=[{"role": "system", "content": COMPANION_SYSTEM},
@@ -2998,6 +3132,45 @@ class Companion:
                         log.warning(
                             "companion: PAST-QUERY second-person open corrected (prepended 'No — ')"
                         )
+
+                    # beat191: self-contradiction check. A denial ("No — we haven't
+                    # discussed X.") followed by a second sentence that states a
+                    # specific remembered detail is never coherent — either nothing
+                    # is actually known (denial should stand alone) or something IS
+                    # known (should have affirmed, not denied). companion_deep_test
+                    # UC2 T4 produced exactly this shape: "No — we haven't discussed
+                    # the job specifics before. I know you're still leaning toward
+                    # taking a risk..." — the trailing sentence is real, on-topic
+                    # content from _past, so the fix is a clean regen'd affirmation,
+                    # not a canonicalized-but-still-contradictory denial.
+                    _pq_vf_block = self.vital_facts.context_block() if self.vital_facts else ""
+                    _pq_trailer = _pq_contradicting_trailer(reply, self._past, _pq_vf_block)
+                    if _pq_trailer:
+                        log.warning(
+                            "companion: PAST-QUERY self-contradiction — denial "
+                            "followed by remembered detail ('%s') — regenning as "
+                            "clean affirmation", _pq_trailer[:60]
+                        )
+                        _pq_contra_ctx = user + (
+                            "\n\nCRITICAL: Your last attempt DENIED discussing this "
+                            "topic before, then immediately stated a specific "
+                            "remembered detail about it — that is self-contradictory. "
+                            "The context above (vital facts / past conversations) DOES "
+                            "have relevant detail, so the correct answer is an "
+                            "AFFIRMATION. Start with 'Yes — ' and state the specific "
+                            "fact plainly. Do NOT use the words 'No' or 'haven't "
+                            "discussed' anywhere in your reply."
+                        )
+                        _pq_contra_chunks = []
+                        for piece in self.engine.stream(
+                            messages=[{"role": "system", "content": COMPANION_SYSTEM},
+                                      {"role": "user", "content": _pq_contra_ctx}],
+                            max_tokens=max_tokens, temperature=0.1,
+                        ):
+                            _pq_contra_chunks.append(piece)
+                        _pq_contra = _strip_thats_real_tic("".join(_pq_contra_chunks).strip())
+                        if _pq_contra:
+                            reply = _pq_contra
 
         # beat172: "No — I haven't told you [about X]" perspective escape.
         # Root cause: the main PAST-QUERY guard (beat88+119) fires on replies that START with

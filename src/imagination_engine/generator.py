@@ -1430,6 +1430,17 @@ def generate_session(
             # their respective paths" — same family as beat183's "words between
             # birds", different verb.
             "acknowledgment between birds",
+            # beat191 (battery11_0826_1854): 3 new escape forms, 2 scenarios.
+            # (1) imag-eagle-wildlife-plural: "not just one bird but two" — an
+            # explicit second-bird count assertion, distinct construction from
+            # any covered acoustic phrase. (2) imag-eagle-golden-eagle-wildlife:
+            # "dropping back into formation with you at its side... this pairing
+            # that feels natural" — a full companion-flight moment with no named
+            # species, gendered pronoun, or any already-covered phrase.
+            "not just one bird but two",
+            "formation with you",
+            "this pairing",
+            "at its side",
         ))
         if anon_companion_dropped:
             log.warning('[v6] %d anonymous-companion sentence(s) dropped (you/we both in solo eagle active-body)',
