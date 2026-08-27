@@ -100,7 +100,18 @@ while true; do
     # the process can get stuck in CLOSE_WAIT when CloudFront drops a long-idle connection,
     # causing battery runs to hang silently mid-generation (observed beat38 battery11 0044).
     HF_HUB_OFFLINE=1 .venv/bin/python "$b" > "$log" 2>&1
-    say "$name exit $? ($(grep -c 'PASS' "$log" 2>/dev/null || echo 0) PASS / $(grep -c 'FAIL' "$log" 2>/dev/null || echo 0) FAIL lines)"
+    # beat193: raw `grep -c 'PASS'/'FAIL'` counted the SUBSTRING anywhere in the
+    # log, including inside the multi-line historical regression-note docstrings
+    # printed above each scenario (full of past "BEAT44 ... PASS" / "REGRESSION
+    # ... FAIL" narrative text) -- not this run's actual results. Confirmed on
+    # battery11_0827_0453: rollup said "41 PASS / 7 FAIL", full honest read said
+    # 35/35 real PASS, 0 real FAIL. Anchored on the leading-checkmark line format
+    # every battery script actually emits per-check ("  ✅ ..." / "  ❌ ...")
+    # instead -- verified against 4 fresh logs to match the honest-read result
+    # exactly, including 0/0 for batteries (battery10/2b) whose per-scenario
+    # marker is "floors: clean" rather than ✅/❌ (undercounts PASS there, but
+    # never fabricates a FAIL -- the failure mode that actually wastes beats).
+    say "$name exit $? ($(grep -cE '^\s*✅' "$log" 2>/dev/null || echo 0) PASS / $(grep -cE '^\s*❌' "$log" 2>/dev/null || echo 0) FAIL lines)"
     sleep 120  # let memory settle between model loads
   done
   # once per pass: watchdog the mini's flywheel (sshd has disk access; launchd

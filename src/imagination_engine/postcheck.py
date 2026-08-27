@@ -863,6 +863,22 @@ _YOUR_NONNOUN_FOLLOW = (
     r"without)\b))"
 )
 
+# beat193 (battery11_0827_0453 imag-intimacy): "separates her from your underneath."
+# — "underneath" used as a bare noun-substitute (the area underneath), not an
+# adjective before a noun. Deliberately NOT added to _YOUR_NONNOUN_FOLLOW above:
+# unlike that list's conjunctions/prepositions (which always introduce more clause
+# content), "underneath" is ambiguous with a legitimate attributive use ("your
+# underneath layer", "your underneath drawer") when a noun follows it. Only the
+# terminal case — "your underneath" ending the clause with nothing after it — is
+# the broken pronoun shape; require end-of-clause immediately after "underneath".
+_YOUR_UNDERNEATH_TERMINAL_RE = re.compile(
+    r"\b(with|for|from|to|by|on|at|in|near|into|onto|upon|under|over|through|"
+    r"during|since|until|towards?|about|above|across|after|against|along|among|"
+    r"before|behind|beneath|beside|beyond|despite|down|inside|outside|up|within|"
+    r"without|of)\s+your\s+underneath(?=\s*(?:[.,!?;]|—|$))",
+    re.IGNORECASE,
+)
+
 # beat188 (battery11_0826_0920/0355 honest reads): the curated preposition list
 # above missed real prepositions found in new instances — "her fits against your
 # in this quiet apartment" ("against" absent). Broadened to the SAME
@@ -932,6 +948,8 @@ def fix_intimacy_object_pronoun_escapes(text: str) -> tuple[str, int]:
     fixed += n
     text, n = _OF_YOUR_STANDALONE_RE.subn("of yours", text)
     fixed += n
+    text, n = _YOUR_UNDERNEATH_TERMINAL_RE.subn(lambda m: f"{m.group(1)} you underneath", text)
+    fixed += n
     text, n = _YOUR_BARE_SUBJECT_RE.subn(
         lambda m: f"you {_YOUR_BARE_SUBJECT_VERBS[m.group(1).lower()]}", text
     )
@@ -995,6 +1013,13 @@ _BACK_LEAK_PATTERNS = [
     # Model occasionally hallucinates technical environment details — strip these.
     re.compile(r"\bTTS output device\b", re.IGNORECASE),
     re.compile(r"\btext.to.speech\b", re.IGNORECASE),
+    # beat193: self-referential meta-commentary about "the script" itself breaking
+    # immersion (imag-intimacy battery11_0827_0453, same run as the chat-template
+    # token leak below) — the model critiques its own generation in third person
+    # instead of narrating in second person. Zero legitimate use: a guided-imagination
+    # script never refers to itself as "the script."
+    re.compile(r"\bthe script\b.{0,40}\bbroke\b|\bbroke\b.{0,20}\bthe\s+immersion\b",
+               re.IGNORECASE),
 ]
 
 # Instruction prefixes that leak as a label before real content — strip the prefix only,
@@ -1022,6 +1047,21 @@ _META_TEXT_LEAK_RE = re.compile(
     re.IGNORECASE,
 )
 
+# beat193 (imag-intimacy battery11_0827_0453): a second, more severe instance of the
+# beat187 meta/tool-call hallucination family — this time a RAW chat-template special
+# token plus a hallucinated fake turn marker, standing alone rather than word-fused:
+#   "...without anywhere else necessary for context. <|im_start|>
+#   !user
+#   The script ended on the same idea multiple times which broke the immersion. The
+#   ceiling fan above you is still turning..."
+# Two distinct leaks in sequence: (1) the raw special token itself, (2) a bare
+# hallucinated "!user"/"!assistant"/"!system" turn-marker line — same underlying
+# failure (chat-template structure bleeding into content) as beat187's DataExchange
+# leak, just a different surface form. Stripped with surrounding whitespace collapsed
+# to a single space so the legitimate sentences on either side reconnect cleanly.
+_CHAT_TEMPLATE_TOKEN_RE = re.compile(r"\s*<\|[a-z_]+\|>\s*", re.IGNORECASE)
+_FAKE_TURN_MARKER_RE = re.compile(r"\s*!(?:user|assistant|system)\b\s*", re.IGNORECASE)
+
 
 def strip_back_instruction_leaks(text: str) -> tuple[str, int]:
     """Remove sentences that contain literal BACK_PROMPT instruction fragments.
@@ -1036,6 +1076,14 @@ def strip_back_instruction_leaks(text: str) -> tuple[str, int]:
     # splitting (splitting first would bundle this into one giant run-on sentence and
     # lose the legitimate clause it's fused onto).
     text, meta_removed = _META_TEXT_LEAK_RE.subn(r"\1. ", text)
+
+    # beat193: raw chat-template special tokens + hallucinated fake turn markers
+    # (see _CHAT_TEMPLATE_TOKEN_RE / _FAKE_TURN_MARKER_RE above) — strip before
+    # sentence splitting so the surrounding legitimate sentences reconnect cleanly
+    # instead of the token/marker corrupting the sentence-split boundaries.
+    text, token_removed = _CHAT_TEMPLATE_TOKEN_RE.subn(" ", text)
+    text, marker_removed = _FAKE_TURN_MARKER_RE.subn(" ", text)
+    meta_removed += token_removed + marker_removed
 
     # First strip instruction prefixes that precede real content (keep the content).
     for pat in _INSTRUCTION_PREFIX_PATTERNS:
@@ -1346,7 +1394,18 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     # beat192 (battery11_0826_2346, imag-eagle-wildlife-plural): "it's knowing
     # this other animal shares the same sky above at the moment" — a new
     # phrasing of the anon-companion assertion, not in any prior list.
-    r'|\bthis\s+other\s+animal\b',      # "knowing this other animal shares the same sky"
+    r'|\bthis\s+other\s+animal\b'       # "knowing this other animal shares the same sky"
+    # beat193 (battery11_0827_0453, imag-eagle-golden-eagle-wildlife): "Both of
+    # your figures share the same position for now -- your matching theirs
+    # exactly as they turn together... as both move together through this
+    # current" -- plural possessive pronoun ("theirs") and a plural-figures
+    # construction assert a second eagle with zero named species. Same run,
+    # imag-eagle-companion-bird-he: "without effort from either of you" -- new
+    # anon-companion surface form, distinct from "both of you"/"you both".
+    r'|\bboth\s+of\s+your\s+figures\b'  # "both of your figures share the same position"
+    r'|\bmatching\s+theirs\b'           # "your matching theirs exactly"
+    r'|\bboth\s+move\s+together\b'      # "as both move together through this current"
+    r'|\beither\s+of\s+you\b',          # "without effort from either of you"
     re.IGNORECASE,
 )
 

@@ -1445,6 +1445,14 @@ def generate_session(
             # knowing this other animal shares the same sky above" — new
             # phrasing of the anon-companion assertion.
             "this other animal",
+            # beat193 (battery11_0827_0453): imag-eagle-golden-eagle-wildlife
+            # "Both of your figures share the same position... your matching
+            # theirs exactly as they turn together... as both move together";
+            # imag-eagle-companion-bird-he "without effort from either of you".
+            "both of your figures",
+            "matching theirs",
+            "both move together",
+            "either of you",
         ))
         if anon_companion_dropped:
             log.warning('[v6] %d anonymous-companion sentence(s) dropped (you/we both in solo eagle active-body)',

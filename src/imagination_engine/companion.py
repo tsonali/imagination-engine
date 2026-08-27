@@ -2483,9 +2483,22 @@ class Companion:
             # reaching the length-cap issue fixed alongside this — the whole
             # regex never matched at all. Fixed to [’'] (curly-right + ASCII),
             # matching the sibling pattern's already-correct class.
-            r"^(?:that[’']?s|it[’']?s|this is)\s+(?:been\s+)?(?:(?:the|a|all|just)\s+)*"
+            # beat193 (battery2b_honesty_0354): "That breaks the script." — a bare,
+            # unelaborated 4-word reply to a completely unrelated user statement
+            # ("talking here helped more than talking to people did"). Root cause:
+            # this is the LITERAL illustrative example text from COMPANION_SYSTEM's
+            # own "RECEIVE THE UNEXPECTED FEELING" instruction ("Anger at a
+            # miscarriage, not sadness — that breaks the script.") — the no-echo
+            # regen prompt resends the full system prompt, and the model latched
+            # onto its own nearby example phrase instead of engaging with what the
+            # user actually said. Same content-free-filler shape the rest of this
+            # guard exists to catch (a real, elaborated use names the specific gap
+            # afterward, per the system-prompt example itself), just a verb
+            # construction ("breaks the script") instead of the copula ones below.
+            r"^(?:(?:that[’']?s|it[’']?s|this is)\s+(?:been\s+)?(?:(?:the|a|all|just)\s+)*"
             r"(?:whole\s+)?(?:thing|this|script|story|situation|picture|deal"
             r"|conversation|world|topic|thread)"
+            r"|(?:that|this)\s+breaks?\s+the\s+script)"
             # beat186: "for [verb-phrase]" added alongside "of [verb-phrase]" — battery9_0004
             # comp-grief-anger-barrier-pivot T2 "That's the whole script for staying quiet."
             # used "for" where beat155's fix only covered "of" ("of staying quiet").

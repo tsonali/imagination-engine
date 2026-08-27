@@ -275,7 +275,14 @@ for sc in scenarios:
                 r'|\bat\s+its\s+side\b'
                 # beat192 (battery11_0826_2346, imag-eagle-wildlife-plural):
                 # "it's knowing this other animal shares the same sky above"
-                r'|\bthis\s+other\s+animal\b',
+                r'|\bthis\s+other\s+animal\b'
+                # beat193 (battery11_0827_0453): "both of your figures" /
+                # "matching theirs" / "both move together" (golden-eagle-
+                # wildlife) and "either of you" (companion-bird-he).
+                r'|\bboth\s+of\s+your\s+figures\b'
+                r'|\bmatching\s+theirs\b'
+                r'|\bboth\s+move\s+together\b'
+                r'|\beither\s+of\s+you\b',
                 lower, _re.IGNORECASE
             ))
             # beat153: Chair-body reminder in eagle script (not just opening).
