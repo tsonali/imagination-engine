@@ -267,7 +267,11 @@ class VitalFacts:
             return ""
         return (
             "----- WHAT I KNOW ABOUT YOU (from vital-facts.md — I know ONLY what is "
-            "written here; nothing more) -----\n"
+            "written here; nothing more. Facts under '## People' belong to the named "
+            "OTHER person (a sister, brother, friend, partner, etc.) — their details, "
+            "like a sibling's kids or job, are never the user's own; do not say 'your "
+            "kids' or otherwise attribute a listed person's facts to the user unless "
+            "the user themself is who the line describes) -----\n"
             + content
             + "\n----- END VITAL FACTS -----"
         )

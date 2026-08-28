@@ -289,7 +289,11 @@ for sc in scenarios:
                 # two of us" (companion-bird-he).
                 r'|\bsomeone\s+else\s+has\s+found\s+their\s+way\b'
                 r'|\bthe\s+two\s+of\s+you\b'
-                r'|\btwo\s+of\s+us\b',
+                r'|\btwo\s+of\s+us\b'
+                # beat197 (battery11_0828_0818, imag-embodiment-eagle): "The call
+                # of the distant eagle is still there" — acoustic anon-companion
+                # escape naming the species directly.
+                r'|\bdistant\s+eagle\b',
                 lower, _re.IGNORECASE
             ))
             # beat153: Chair-body reminder in eagle script (not just opening).

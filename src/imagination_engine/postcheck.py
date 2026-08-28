@@ -634,6 +634,37 @@ def fix_your_subject_pronoun(text: str) -> tuple[str, int]:
     return result, fixed
 
 
+# beat197 (battery11_0828_0818 honest read, 3 scenarios — imag-mri, imag-eagle-
+# wildlife-plural, imag-eagle-companion-bird-he): "toward you left hip",
+# "on you left wing tip", "with you left wing" — the mirror-image error of
+# _YOUR_SUBJECT_VERBS above: bare "you" used as an ATTRIBUTIVE determiner
+# (should be "your") immediately before "left"/"right" + a body-part noun.
+# Scoped to left/right + a curated body-part noun list — "left"/"right"
+# directly followed by a body-part noun is never the verb "to leave"/"to
+# right" (you don't "leave a hip" or "right a wing"), so this is safe by
+# construction, the same discipline as _YOUR_SUBJECT_VERBS' finite-verb list.
+_YOU_BEFORE_BODYPART_RE = re.compile(
+    r"\byou\s+(left|right)\s+(hip|wing(?:\s+tip)?|arm|leg|foot|feet|hand|"
+    r"shoulder|knee|side|ear|eye|wrist|ankle|elbow)\b",
+    re.IGNORECASE,
+)
+
+
+def fix_you_before_bodypart(text: str) -> tuple[str, int]:
+    """Replace 'you left/right BODYPART' -> 'your left/right BODYPART' when
+    'you' is incorrectly used as the attributive determiner ('you left hip'
+    -> 'your left hip')."""
+    fixed = 0
+
+    def _replace(m: "re.Match") -> str:
+        nonlocal fixed
+        fixed += 1
+        return f"your {m.group(1)} {m.group(2)}"
+
+    result = _YOU_BEFORE_BODYPART_RE.sub(_replace, text)
+    return result, fixed
+
+
 def fix_possessive_pronouns(text: str) -> tuple[str, int]:
     """Replace 'hers/yours/ours NOUN' → 'her/your/our NOUN'.
 
@@ -1487,7 +1518,13 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     # instrument-not-companion.
     r'|\bsomeone\s+else\s+has\s+found\s+their\s+way\b'  # "proof someone else has found their way"
     r'|\bthe\s+two\s+of\s+you\b'        # "distance closes between the two of you"
-    r'|\btwo\s+of\s+us\b',              # "nothing is said between two of us"
+    r'|\btwo\s+of\s+us\b'               # "nothing is said between two of us"
+    # beat197 (battery11_0828_0818, imag-embodiment-eagle): "The call of the
+    # distant eagle is still there... an announcement that whatever they're
+    # communicating about could be worth looking into" — acoustic anon-companion
+    # escape naming the species directly ("distant eagle"), a variant of
+    # beat153's "distant bird" that the species-specific noun slipped past.
+    r'|\bdistant\s+eagle\b',            # "the call of the distant eagle"
     re.IGNORECASE,
 )
 

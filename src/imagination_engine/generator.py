@@ -68,6 +68,7 @@ from imagination_engine.postcheck import (degeneration_report, drop_collapsed_pa
                                           fix_copula_youre_alone, fix_predicative_your,
                                           fix_intimacy_object_pronoun_escapes,
                                           fix_subject_pronouns, fix_your_subject_pronoun,
+                                          fix_you_before_bodypart,
                                           fix_object_pronouns,
                                           strip_back_instruction_leaks,
                                           strip_active_body_chair_refs,
@@ -655,6 +656,9 @@ def _generate_settling(engine: Engine, transcript: list[dict], emit) -> str:
     body, your_subj_fixed = fix_your_subject_pronoun(body)
     if your_subj_fixed:
         log.warning('[settling] %d subject-pronoun error(s) fixed (your→you before verb)', your_subj_fixed)
+    body, you_bodypart_fixed = fix_you_before_bodypart(body)
+    if you_bodypart_fixed:
+        log.warning('[settling] %d attributive-pronoun error(s) fixed (you→your before body part)', you_bodypart_fixed)
     body, obj_fixed = fix_object_pronouns(body)
     if obj_fixed:
         log.warning('[settling] %d object-pronoun error(s) fixed (she→her after preposition)', obj_fixed)
@@ -1218,6 +1222,9 @@ def generate_session(
     full, your_subj_fixed = fix_your_subject_pronoun(full)
     if your_subj_fixed:
         log.warning('[v6] %d subject-pronoun error(s) fixed (your→you before verb)', your_subj_fixed)
+    full, you_bodypart_fixed = fix_you_before_bodypart(full)
+    if you_bodypart_fixed:
+        log.warning('[v6] %d attributive-pronoun error(s) fixed (you→your before body part)', you_bodypart_fixed)
     full, obj_fixed = fix_object_pronouns(full)
     if obj_fixed:
         log.warning('[v6] %d object-pronoun error(s) fixed (she→her after preposition)', obj_fixed)
@@ -1467,6 +1474,10 @@ def generate_session(
             "someone else has found their way",
             "the two of you",
             "two of us",
+            # beat197 (battery11_0828_0818, imag-embodiment-eagle): "The call of
+            # the distant eagle is still there" — acoustic anon-companion escape
+            # naming the species directly (variant of the "distant bird" class).
+            "distant eagle",
         ))
         if anon_companion_dropped:
             log.warning('[v6] %d anonymous-companion sentence(s) dropped (you/we both in solo eagle active-body)',
