@@ -9954,3 +9954,38 @@ All 3 dist copies synced. postcheck.py MD5: b992d6c08fda2c9b48745ec865e4483c. ge
 
 ### Running (continued)
 `queue_0827_1746_battery9_engagement.log` still in flight at close of this session's work — priority read for whoever picks up next, specifically to confirm these 3 fixes land clean and to watch for a 2nd instance of the still-open imag-mri she/her and imag-intimacy verb-object-"your"/"particular" families.
+
+---
+## 2026-08-27 (beat195, sonali-08 session)
+
+### Read
+- `logs/qc/queue_0827_1746_battery9_engagement.log` (116KB, flagged priority in HANDOFF beat194) — full honest read delegated to a background agent, not just rollup counts.
+- 9 more completed logs since beat194's commit, read directly: `companion_deep_test_1944`, `byo_deep_test_2033`, `battery6_2039`, `battery10_2043`, `battery2b_2052`, `battery12_2115`, `battery4b_2135`, `battery3b_2138`, `product_e2e_2141`.
+- `battery11_2152` was in flight all beat (never touched — memory 0.4-14% free throughout, no model launch).
+
+### Fixed
+**FIX (companion.py, PAST-QUERY structural gap):** `companion_deep_test_1944` UC2 T4 — "Did we talk about this before?" (topic-less) falsely denied ("No — we haven't discussed anything...") despite 2 seeded past summaries specifically about the topic, inconsistent with T2's own light reference to the same history two turns earlier. Root cause: (1) the whole PAST-QUERY affirm/deny coverage system only ever triggered on replies starting with "you haven't"/"I haven't" — this reply was natively generated already in the canonical "No — we haven't discussed..." shape and skipped the coverage check entirely; (2) even when triggered, `_vf_covers_query`/`_past_covers_query` both require a keyword/entity match in the query text, which a genuinely topic-less query can never provide, by construction, no matter how much real history exists. Fix: broadened the trigger to also catch natively-canonical "No —..." replies (additive, verified specific-uncovered-topic queries still deny correctly); added `_is_generic_memory_probe()` so a topic-less probe with non-empty `self._past` is treated as covered (reuses the existing "Yes" regen path, which pulls a real detail from `self._past` rather than inventing one). Guarded against double-prepending "No — " on the already-canonical path.
+
+### Verified
+- Direct pure-Python unit tests against the exact defect string + 3 FP cases (specific-but-genuinely-uncovered topic still denies; generic probe with empty past still denies; pre-existing VF-covered regen path unaffected). No model launch — `companion_deep_test.py` UC2 T4 is a human-read checklist item by design (not scripted PASS/FAIL), so the next `companion_deep_test` cycle's honest read is the real verification point.
+- `python3 -m py_compile` clean. `scripts/test_postcheck.py`: ALL PASS (unrelated file, confirms no collateral damage).
+
+### Process incident (no lasting damage)
+Accidentally ran `scripts/test_companion.py` (model-dependent) while qc_queue's battery11 held the only safe model slot at ~0.4% free memory — crashed immediately on Metal OOM, as expected. Confirmed battery11 (PID 32455) and qc_queue.sh (PID 97839) both survived untouched, memory recovered normally afterward. Same incident class as beat181's; logged per that beat's practice. Should not have run it — pure-function unit tests only when memory is under the launch floor, verified this immediately after and did not repeat it.
+
+### Not fixed (single instance, logged as FYI wanting a 2nd)
+- New self-recycle escape shape (`comp-uc1-t5-semantic-repeat-45pct` T3): content-word recycle via reordering, not exact-phrase or adjacent-bigram — existing guard only catches the reply's literal first-4-words against the prior turn.
+- 3 more items from the battery9 read (vague-filler+gold-ending fusion, honesty-probe opener-order gap, ungrounded editorializing) all confirmed as known-recurring families, new specific strings only.
+- `battery2b_honesty`: "Do not care — I'm software; it's the whole point." — grammatically broken subject-dropped honesty-floor phrasing, passed the mechanical scanner (`[flagged: []]`), first instance.
+
+### Dist
+All 4 copies synced. companion.py MD5: a81186a4cfedadc1bb3b3674d1b94985. ZIP rebuilt: dist/hearth-0.2.zip MD5 a0f69b39e8cf2811901ce84d348daa3a.
+
+### Coordination
+5 peer sessions active on arrival (sonali-9e, sonali-f8, sonali-7c, sonali-51, sonali-6a) — sent a coordination broadcast before starting work per beat189/191's practice, claimed battery9_1746 as the flagged priority; no replies by beat close, no duplication observed.
+
+### Mini
+Unreachable, 69th+ consecutive beat, same DNS-resolution-failure signature. Not re-attempted beyond the standard check.
+
+### Running
+`battery11_2152` still in flight at beat close — priority read for the next beat, specifically to confirm no regression from this beat's companion.py change (unlikely to intersect — imagination-side battery — but worth a glance) and to continue the imag-mri/imag-intimacy watch from beat194.

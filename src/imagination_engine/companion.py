@@ -746,6 +746,35 @@ def _past_covers_query(user_message: str, past_summaries: list[str]) -> bool:
     return False
 
 
+def _is_generic_memory_probe(user_message: str) -> bool:
+    """True when a memory probe names no specific entity/topic at all
+    ('Did we talk about this before?') as opposed to an entity-specific one
+    ('did we talk about my sister?' / 'did we discuss Marcus?').
+
+    _vf_covers_query/_past_covers_query both work by matching a relationship
+    word or proper noun in the query against memory content — structurally,
+    a topic-less query can never match either, by construction, no matter how
+    much real session history exists. companion_deep_test UC2 T4 (beat195):
+    'Did we talk about this before?' with 2 real seeded past summaries about
+    the job decision got denied outright ('No — we haven't discussed
+    anything...') because there's no topic word in the question to check
+    coverage against. Used to special-case generic probes: if ANY past
+    session history exists, a bare denial to 'did we ever talk before' is
+    factually wrong regardless of topic, so it should be treated as covered.
+    """
+    msg_lower = user_message.lower()
+    if any(word in msg_lower for word in _VF_RELATIONSHIP_WORDS):
+        return False
+    # Skip the first word so an ordinary capitalized sentence-starter ('Did',
+    # 'What', 'Have') doesn't get mistaken for a proper noun.
+    words = user_message.split()
+    tail = " ".join(words[1:]) if len(words) > 1 else ""
+    for noun in re.findall(r'\b[A-Z][a-z]{4,}\b', tail):
+        if noun.lower() not in _SC13_COMMON_WORDS:
+            return False
+    return True
+
+
 def _vf_matching_line(user_message: str, vf_block: str) -> str | None:
     """Return the single vital-facts bullet line that matches the user's query.
 
@@ -3178,9 +3207,19 @@ class Companion:
         # beat94 fix: _vf_covers_query() checks if VF actually contains the queried entity.
         # beat119: extend to also catch "I haven't told you" (companion claims to be the
         # entity telling things TO the user — backwards perspective). Same VF-branching logic.
+        # beat195: also catch a reply the model generated natively in the fully
+        # canonical "No — we haven't discussed X" shape from the start (no "you/I
+        # haven't told" prefix to normalize) — the guard below previously only
+        # triggered on the pre-normalized shapes, so a native "No —..." denial
+        # never got coverage-checked at all, even when it was wrong.
+        _pq_native_no_re = re.compile(
+            r"^No\s*[—\-,]?\s*(?:we\s+)?haven'?t\s+discussed\b", re.IGNORECASE
+        )
+        _pq_already_canonical = bool(reply and _pq_native_no_re.match(reply.strip()))
         if (_is_memory_probe(user_message)
                 and reply
-                and re.match(r"^(?:[Yy]ou haven'?t|[Ii] haven'?t)\b", reply.strip())):
+                and (re.match(r"^(?:[Yy]ou haven'?t|[Ii] haven'?t)\b", reply.strip())
+                     or _pq_already_canonical)):
             _vf_ctx = self.vital_facts.context_block() if self.vital_facts else ""
             _vf_hit = bool(_vf_ctx) and _vf_covers_query(user_message, _vf_ctx)
             # beat191: a query can be genuinely covered by cross-session past-conversation
@@ -3191,6 +3230,19 @@ class Companion:
             # that WERE covered by past summaries (companion_deep_test UC2 T4: job-decision
             # topic, seeded in _past, got denied instead of affirmed).
             _past_hit = (not _vf_hit) and _past_covers_query(user_message, self._past)
+            # beat195: a truly generic probe ("did we talk about this before?") names no
+            # entity/topic at all, so _vf_covers_query/_past_covers_query can never detect
+            # coverage by construction (they both work by keyword match). If ANY past
+            # session history exists at all, a bare "No" is factually wrong for this
+            # shape of question regardless of topic — treat non-empty past as a hit.
+            if (not (_vf_hit or _past_hit) and self._past
+                    and _is_generic_memory_probe(user_message)):
+                _past_hit = True
+                log.warning(
+                    "companion: PAST-QUERY generic-probe-yes — topic-less memory "
+                    "probe ('%s') denied despite non-empty past-summary history; "
+                    "treating as hit", user_message[:60]
+                )
             if _vf_hit or _past_hit:
                 # VF or past-summary content covers the queried entity — model denial is
                 # wrong; regen YES
@@ -3231,7 +3283,14 @@ class Companion:
                 # VF empty, or VF has content but not about the queried entity → denial correct
                 # Normalize perspective: "I haven't told you" → strip and use canonical form
                 _pq_raw = reply.strip()
-                if re.match(r"^[Ii] haven'?t\b", _pq_raw):
+                if _pq_already_canonical:
+                    # beat195: reply was already generated in the canonical "No —
+                    # we haven't discussed X" shape from the start — nothing to
+                    # normalize. Falling through to the contradiction-trailer
+                    # check below is still correct; only skip re-prepending
+                    # "No — " a second time.
+                    pass
+                elif re.match(r"^[Ii] haven'?t\b", _pq_raw):
                     # First-person reversal — regen with correct second-person perspective
                     log.warning(
                         "companion: PAST-QUERY first-person reversal ('%s') — "
