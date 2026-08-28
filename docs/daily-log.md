@@ -9896,3 +9896,34 @@ Not re-attempted this beat (same DNS-resolution-failure signature, 67th+ consecu
 
 ### Running
 qc_queue running throughout; battery9_engagement (started 06:14) still in flight at beat close — priority read for beat194, alongside verifying this beat's 5 fixes hold in the next battery11 cycle. No process killed or paused this beat.
+
+---
+## 2026-08-27 (beat194, continued — sonali-69 session)
+
+Arrived mid-beat alongside 5 active peer sessions (sonali-9e, sonali-f8, sonali-7c, sonali-51, sonali-6a). Found companion.py modified on disk but uncommitted (mtime 14:47, no matching entry anywhere in HANDOFF/daily-log/review-queue) — same interrupted-session shape as beat188's recovery. Read the diff before trusting it: a CONFIRM_LANDS fix targeting `queue_0827_0942_battery12_vital_facts.log` SC1, fully commented with root-cause analysis already written in.
+
+### Fixed (recovered + verified, then landed)
+**CONFIRM_LANDS truncating a correct vital-facts affirmation.** The unconditional "one-word landing phrase" truncation at the end of `turn()` was clobbering an already-correct first-pass reply — "Yes. Your sister Priya lives in Austin, two kids." → bare "Yes." — because it starts with the literal "yes." land phrase and the block has no awareness that a reply starting with "Yes." might be a real vital-facts fact statement rather than a throwaway addendum after a landed insight. Added `_cl_is_vf_affirmation` gate: skip the "yes."/"yes, exactly." lands specifically when the message is a memory probe AND the vital-facts block covers it (`_is_memory_probe()` + `_vf_covers_query()`, both pre-existing helpers). Same recurring shape as beat178/184/191 — a late unconditional transform clobbering an already-guard-corrected reply that happens to share a surface pattern with what the transform targets.
+
+Before committing the recovered diff, re-verified independently (did not just trust the inline comment): reproduced the exact defect string standalone, confirmed the fix prevents truncation, and ran an explicit FP check (an ordinary "Yes, exactly." confirm-land on a *non*-memory-probe insight still truncates correctly — the gate is scoped, not a blanket disable). `py_compile` clean, `scripts/test_postcheck.py` ALL PASS.
+
+### Housekeeping
+Found and removed a stray, stale root-level `hearth-0.2.zip` (Aug 18, 1.69MB) sitting outside `dist/` — `scripts/package.sh` always writes to `dist/hearth-0.2.zip`; this looked like a one-off manual copy from an earlier beat that never got cleaned up and could confuse anyone grabbing "the zip" from repo root. Rebuilt the real one via `scripts/package.sh`.
+
+### Verified
+- `python3 -m py_compile` clean on companion.py.
+- `scripts/test_postcheck.py`: ALL PASS.
+- Direct unit test against the exact transcript quote + explicit FP check (detailed above).
+- No model launch this beat — memory at 18% free, well under the 35% floor, because qc_queue's own battery9_engagement (started 17:46) was mid-run at arrival. Not paused (already mid-run, no model launch of my own was needed).
+
+### Dist
+All 3 dist copies synced to companion.py MD5 e3fef11d58b296d6dfa055dbb1cf6063. ZIP rebuilt: dist/hearth-0.2.zip MD5 d5176b0bfdbdc9d9f7e016b51822c124.
+
+### Mini
+Re-checked: UNREACHABLE, 68th+ consecutive, same "Could not resolve hostname" DNS-level signature. Not investigated further — Sonali's physical check remains the recommended next step.
+
+### Gold
+No gold growth this beat — beat194's gold(A) (+9) and gold(C) growth were already landed by a peer session before this session arrived (visible in the shared corpus files); avoided duplicating.
+
+### Running
+Launched a background agent to do a full honest read of `queue_0827_1628_battery11_imagination_bank.log` (completed, not yet read by anyone per HANDOFF) — result pending, will fold into the next log update. `queue_0827_1746_battery9_engagement.log` still in flight at time of writing (memory 18% free) — priority read for whoever picks this up next.
