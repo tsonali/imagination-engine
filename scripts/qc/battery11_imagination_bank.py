@@ -293,7 +293,24 @@ for sc in scenarios:
                 # beat197 (battery11_0828_0818, imag-embodiment-eagle): "The call
                 # of the distant eagle is still there" — acoustic anon-companion
                 # escape naming the species directly.
-                r'|\bdistant\s+eagle\b',
+                r'|\bdistant\s+eagle\b'
+                # beat198 (battery11_1317, imag-eagle-wildlife-plural + imag-eagle-
+                # golden-eagle-wildlife): "You're both above the pine trees now"
+                # (contraction form of the already-banned "both of you"/"you both");
+                # "the flock" acting as an agentic guide for nearly the whole script
+                # ("flock leads with confidence... you follow close behind them",
+                # "the flock remains ahead", "a specific bird leads slightly ahead").
+                # Scoped to "flock LEADS/GUIDES you" / "you FOLLOW the flock" framing,
+                # not a blanket "flock" ban — A_gold.jsonl has a legitimate, unrelated
+                # murmuration-embodiment scenario type ("Your flock, your murder")
+                # with zero "you follow"/"flock leads" framing; verified 0 hits
+                # against the full gold corpus before adding (see postcheck.py).
+                r'|\byou[\x27’]re\s+both\b|\byou\s+are\s+both\b'
+                r'|\bflock\s+(?:leads?|guides?)\b'
+                r'|\byou\s+follow\s+(?:the\s+|this\s+)?flock\b'
+                r'|\bthe\s+flock\s+(?:remains\s+ahead|ahead\s+of\s+you)\b'
+                r'|\ba\s+specific\s+bird\s+leads\b'
+                r'|\bflock\s+ahead\b',
                 lower, _re.IGNORECASE
             ))
             # beat153: Chair-body reminder in eagle script (not just opening).

@@ -665,6 +665,49 @@ def fix_you_before_bodypart(text: str) -> tuple[str, int]:
     return result, fixed
 
 
+# beat198 (queue_0827_2152_battery11_imagination_bank.log honest read, imag-
+# intimacy): "not when they're alone in their own apartment" — the model
+# drifts from the product's strict 2nd-person address (user=you, companion=
+# she/her) into 3rd-person-plural "they/their" when describing the user and
+# her companion as a unit. This is a violation of the "instrument, not
+# companion" 2nd-person architecture (CLAUDE.md), not a style nit — escalated
+# across beat185/196/197 as "confirmed, needs a dedicated design pass" but
+# left unattempted each time because a blanket "they"/"their" ban would wrongly
+# strip legitimate 3rd-person-plural references elsewhere (background wildlife
+# pairs, body parts like "her eyes... they widen"). "they're/they are alone" is
+# narrow and safe: nothing except a human pair is ever described as "alone" in
+# this product's scripts (checked A_gold.jsonl + all _candidates gold files —
+# zero instances), so once a sentence contains that trigger, any "their"
+# elsewhere in THAT SAME SENTENCE is also the same drift and safe to correct
+# alongside it — scoping the "their" fix to the trigger sentence only (not
+# document-wide) keeps other legitimate "their" uses elsewhere in the script
+# (e.g. eagle "their nests") untouched.
+_THIRD_PERSON_ALONE_RE = re.compile(r"\bthey(?:'re|\s+are)\s+alone\b", re.IGNORECASE)
+_THEIR_RE = re.compile(r"\btheir\b", re.IGNORECASE)
+
+
+def fix_third_person_alone_drift(text: str) -> tuple[str, int]:
+    """Fix 'they're/they are alone' -> 'you're alone', and correct any
+    'their' elsewhere in the same sentence to 'your' (scoped to the
+    triggering sentence only, so other sentences' legitimate 'their' uses
+    are untouched).
+    """
+    sentences = re.split(r"(?<=[.!?])\s+", text.strip())
+    fixed = 0
+    out = []
+    for s in sentences:
+        m = _THIRD_PERSON_ALONE_RE.search(s)
+        if m:
+            replacement = "You're alone" if m.group(0)[0].isupper() else "you're alone"
+            new_s = _THIRD_PERSON_ALONE_RE.sub(replacement, s)
+            new_s = _THEIR_RE.sub("your", new_s)
+            if new_s != s:
+                fixed += 1
+            s = new_s
+        out.append(s)
+    return " ".join(out), fixed
+
+
 def fix_possessive_pronouns(text: str) -> tuple[str, int]:
     """Replace 'hers/yours/ours NOUN' → 'her/your/our NOUN'.
 
@@ -813,7 +856,14 @@ _PREDICATIVE_YOUR_RE = re.compile(
     # "whenever"/"between" were: "as" always opens a comparison/subordinate
     # clause ("as much as", "as if"), never introduces a possessable noun
     # directly after "your".
-    r"too|for|on|at|in|to|by|with|from|between|whenever|as)\b)"
+    # beat198 (battery11_1317 imag-intimacy honest read): "a reminder held after
+    # she has left again to do whatever is her today" — "today" wasn't in the
+    # follow-set (this instance is actually the her/hers sibling, see
+    # _PREDICATIVE_HER_RE below, but "today" is added here too since the same
+    # gap would apply to "is your today" and "today" can never introduce a
+    # possessable noun after "your" either — safe by the same reasoning as
+    # "whenever"/"between").
+    r"too|for|on|at|in|to|by|with|from|between|whenever|as|today)\b)"
     r")",
     re.IGNORECASE,
 )
@@ -846,6 +896,40 @@ def fix_predicative_your(text: str) -> tuple[str, int]:
         return f"{m.group(1)} {m.group(2)}yours"
 
     result = _PREDICATIVE_YOUR_RE.sub(_replace, text)
+    return result, fixed
+
+
+# beat198 (battery11_1317 imag-intimacy honest read): "a reminder held after
+# she has left again to do whatever is her today" — the her/hers sibling of
+# _PREDICATIVE_YOUR_RE/fix_predicative_your above (same copula+standalone-
+# possessive shape, opposite pronoun). Shares the same non-noun follow-set
+# reasoning: "her" directly followed by "today" (or a closing punctuation mark,
+# or any of the other listed non-noun words) can never be the attributive
+# determiner (nothing possessable follows), so the standalone possessive
+# "hers" is grammatically required.
+_PREDICATIVE_HER_RE = re.compile(
+    r"\b(is|was|are|were|be|been|become|becomes|became)\s+((?:\w+ly\s+)?)her\b"
+    r"(?=\s*(?:[.,!?;]|—|$|\s+(?:entirely|completely|now|here|still|again|"
+    r"too|for|on|at|in|to|by|with|from|between|whenever|as|today)\b)"
+    r")",
+    re.IGNORECASE,
+)
+
+
+def fix_predicative_her(text: str) -> tuple[str, int]:
+    """'is/was her [end-of-clause]' -> 'is/was hers [end-of-clause]'.
+
+    her/hers sibling of fix_predicative_your — same copula+standalone-
+    possessive shape, opposite pronoun.
+    """
+    fixed = 0
+
+    def _replace(m: "re.Match") -> str:
+        nonlocal fixed
+        fixed += 1
+        return f"{m.group(1)} {m.group(2)}hers"
+
+    result = _PREDICATIVE_HER_RE.sub(_replace, text)
     return result, fixed
 
 
@@ -906,6 +990,15 @@ _INTIMACY_OBJECT_PRONOUN_SUBS = (
     # patches above — a general verb-governed-"your" rule isn't attempted off one
     # example, same reasoning beat185/186 documented for the adjective-follow gap.
     (re.compile(r"\bfinds\s+your\s+without\s+a\s+word\b", re.IGNORECASE), "finds yours without a word"),
+    # beat198 (battery11_1317 imag-intimacy honest read): two more instances of
+    # the same beat187 shape ("your" as the direct object of a transitive verb,
+    # standing in for the standalone possessive "yours") — "Her feet now match
+    # your in pace behind you" and "hers is already reaching forward to meet
+    # your in this shared evening moment." Same discipline as beat187: literal
+    # patch for each instance, no general verb-governed-"your" rule attempted
+    # off two examples.
+    (re.compile(r"\bmatch\s+your\s+in\s+pace\b", re.IGNORECASE), "match yours in pace"),
+    (re.compile(r"\bmeet\s+your\s+in\s+this\s+shared\s+evening\s+moment\b", re.IGNORECASE), "meet yours in this shared evening moment"),
 )
 
 
@@ -997,6 +1090,13 @@ _YOUR_BARE_SUBJECT_VERBS = {
     "listens": "listen", "breathes": "breathe", "curls": "curl", "settles": "settle",
     "hovers": "hover", "drifts": "drift", "pulls": "pull", "reaches": "reach",
     "turns": "turn", "shifts": "shift", "belongs": "belong",
+    # beat198 (battery11_1317 imag-intimacy): "as your returns to wakefulness
+    # fully" — present-tense "returns" was missing (only past-tense "returned"
+    # was covered, in the separate _YOUR_SUBJECT_VERBS list used by
+    # fix_your_subject_pronoun). "your returns" can never be a legitimate noun
+    # phrase in this product's prose (the financial-noun sense of "returns"
+    # doesn't belong in guided-imagination scripts), so safe by construction.
+    "returns": "return",
 }
 _YOUR_BARE_SUBJECT_RE = re.compile(
     r"\byour\s+(" + "|".join(_YOUR_BARE_SUBJECT_VERBS) + r")\b", re.IGNORECASE
@@ -1524,7 +1624,31 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     # communicating about could be worth looking into" — acoustic anon-companion
     # escape naming the species directly ("distant eagle"), a variant of
     # beat153's "distant bird" that the species-specific noun slipped past.
-    r'|\bdistant\s+eagle\b',            # "the call of the distant eagle"
+    r'|\bdistant\s+eagle\b'             # "the call of the distant eagle"
+    # beat198 (background-agent honest read of queue_0828_1317_battery11_
+    # imagination_bank.log): imag-eagle-wildlife-plural: "You're both above the
+    # pine trees now" — a contraction form of the already-banned "both of you"/
+    # "you both" family (beat105), distinct word order the exact-phrase
+    # matchers above never covered. imag-eagle-golden-eagle-wildlife (same
+    # log): a severe, whole-script defect where "the flock" acts as an agentic
+    # guide for nearly the entire 2998-word session ("A flock of birds flies
+    # alongside you. They guide you...", "The flock remains ahead...", "A
+    # specific bird leads slightly ahead...", "The flock you follow moves
+    # slightly ahead...", "Flock leads with confidence... you follow close
+    # behind them"). Scoped narrowly to "flock LEADS/GUIDES you" / "you FOLLOW
+    # the flock" framing (an entity distinct from and directing "you") —
+    # NOT a blanket "flock" ban, because A_gold.jsonl has a legitimate,
+    # unrelated scenario type where the user's own body IS the flock/
+    # murmuration ("Your flock, your murder", "being the murmuration: not one
+    # bird") with zero "you follow"/"flock leads" framing; verified these 5
+    # patterns produce 0 hits against the full A-imagination gold corpus
+    # (including _candidates) before adding.
+    r'|\byou[\x27’]re\s+both\b|\byou\s+are\s+both\b'  # "you're both above the pine trees"
+    r'|\bflock\s+(?:leads?|guides?)\b'   # "flock leads with confidence"
+    r'|\byou\s+follow\s+(?:the\s+|this\s+)?flock\b'  # "you follow close behind" the flock
+    r'|\bthe\s+flock\s+(?:remains\s+ahead|ahead\s+of\s+you)\b'  # "the flock remains ahead"
+    r'|\ba\s+specific\s+bird\s+leads\b'  # "a specific bird leads slightly ahead"
+    r'|\bflock\s+ahead\b',               # "the flock ahead does"
     re.IGNORECASE,
 )
 
@@ -1577,6 +1701,46 @@ def drop_forbidden_stock_imagery(text: str, tokens: tuple) -> tuple[str, int]:
             dropped += 1
         else:
             kept.append(s)
+    return " ".join(kept), dropped
+
+
+# beat198: "particular"/"specific" crutch-phrase overuse — COMMON_POSTURE (the
+# prompt text shared by OPEN/BEAT/BODY/BACK_PROMPT) already explicitly bans
+# these as vague stand-ins ("the particular way she shifts her weight" instead
+# of naming the actual motion), added beat88. Two real gaps found beat196/197:
+# (1) the small local model ignores prompt bans reliably, same as every other
+# banned phrase in this file (see _NARRATOR_POSS's own comment) — a mechanical
+# backstop was simply never built for this one; observed as high as 15
+# occurrences of 'particular' + 15 of 'specific to' in a single 1456-word
+# script (queue_0802_1643, per scenario_bank.py's imag-eagle-golden-eagle-
+# wildlife notes). (2) SETTLING_PROMPT (used by imag-calm-settle) is built from
+# SETTLING_POSTURE, not COMMON_POSTURE, so the ban text isn't even present on
+# that path. A mechanical threshold-drop (same "keep first 2, drop 3rd+"
+# convention as repair_short_phrase_repeats' SHORT_REPEAT_THRESHOLD) fixes
+# both gaps at once regardless of which prompt path generated the script, and
+# is safe because the observed drops are low-content mood-repetition filler
+# sentences ("It feels like something specific to you right now.") — genuine
+# single or double uses of either word are left completely untouched.
+_CRUTCH_WORD_RE = re.compile(r"\b(?:particular|specific)\b", re.IGNORECASE)
+_CRUTCH_WORD_MAX_KEPT = 2
+
+
+def drop_crutch_word_overuse(text: str) -> tuple[str, int]:
+    """Drop sentences carrying the 3rd+ occurrence of 'particular'/'specific'
+    (counted together as one crutch-phrase class). Keeps the first 2
+    occurrences; drops whole sentences for any occurrence beyond that.
+    """
+    sentences = re.split(r"(?<=[\.\!\?])\s+", text.strip())
+    kept = []
+    dropped = 0
+    seen = 0
+    for s in sentences:
+        n_here = len(_CRUTCH_WORD_RE.findall(s))
+        if n_here and seen >= _CRUTCH_WORD_MAX_KEPT:
+            dropped += 1
+            continue
+        seen += n_here
+        kept.append(s)
     return " ".join(kept), dropped
 
 
