@@ -9927,3 +9927,30 @@ No gold growth this beat — beat194's gold(A) (+9) and gold(C) growth were alre
 
 ### Running
 Launched a background agent to do a full honest read of `queue_0827_1628_battery11_imagination_bank.log` (completed, not yet read by anyone per HANDOFF) — result pending, will fold into the next log update. `queue_0827_1746_battery9_engagement.log` still in flight at time of writing (memory 18% free) — priority read for whoever picks this up next.
+
+### Continued (beat194, sonali-69 session) — battery11_1628 background-agent read
+
+Background agent finished a full honest read of `queue_0827_1628_battery11_imagination_bank.log` (7 scenarios, not just the log's own rollup). Found 3 real defects across 3 scenarios; 4 scenarios genuinely clean.
+
+**FIX (postcheck.py `_BACK_LEAK_PATTERNS`):** new chair-bleed phrasing "the chair or ground supporting you" (imag-eagle-golden-eagle-wildlife) — a false PASS in the postcheck's own chair-body-reminder line. None of the ~8 existing "chair or X" literal patterns covered "ground". Added `\bchair or ground\b`.
+
+**FIX (postcheck.py `_NARRATOR_POSS`):** "the same spot where I started my flight" (imag-eagle-companion-bird-he) — first-person narrator leak. Root cause: the I+verb allowlist had bare present-tense "start" but not past-tense "started"; the trailing `\b` requires "start" to close as a complete word, so "started" never matched. Added "started" explicitly.
+
+**FIX (generator.py, structural gap closed):** MRI rehearsal scripts hallucinate a female companion with zero mechanical coverage — `"Her arms are along her sides now, as she shifts slightly deeper into this tube — becoming aware first of how it holds the slight cold against your skin..."` sandwiched between two purely 2nd-person sentences (imag-mri). The existing `drop_hallucinated_she_her()` call is gated on `_is_active_body`, which requires a motion keyword in the scene and is structurally False for MRI rehearsal (lying still in a tube is never "in motion"). This is the same structural gap beat185 logged for a different MRI instance (the "Frank" narrator-voice break) and left open as needing "careful design" — turned out to be a one-line gate extension once traced: `if _is_active_body or _rehearsal_env == "MRI tube":`, still behind the existing `_female_in_intake` transcript-wide safety check, so a legitimate female character named in intake (partner in the waiting room, etc.) still won't get stripped.
+
+### Verified (continued)
+- All 3 fixes verified with direct unit tests against the exact transcript quotes, plus explicit FP checks: a legitimate "chair or garden bench" phrase stays untouched by the new regex; "You start your flight up into a sky..." (2nd-person, present tense) stays untouched; a "reinstarted" word-boundary sanity check confirms no accidental substring match; `drop_hallucinated_she_her()` itself (unchanged) confirmed correct against the exact MRI quote once called — the fix was purely the call-site gate.
+- `python3 -m py_compile` clean on postcheck.py + generator.py. `scripts/test_postcheck.py`: ALL PASS. No `test_generator.py` exists to run against generator.py (confirmed before relying solely on the manual unit test above).
+- No model launch (memory 17% free at time of fix, qc_queue's battery9_engagement mid-run throughout — not paused).
+
+### Not fixed (confirmed recurrences, no new information)
+- imag-mri's she/her instance itself is a recurrence of the already-known family (beat185's "Frank"); only the code-path gap closing it is new.
+- imag-intimacy: "her eyes find your then" / "her voice reaching your from there" (verb+object "your" escape, same shape as beat187's literal-patched "finds your without a word" — confirms beat187's own prediction that the literal patch would not generalize) and heavy "particular" template fatigue (8+ uses, already logged beat88, still open).
+- imag-embodiment-eagle and imag-eagle-wildlife-plural: genuinely clean, no action.
+- imag-calm-settle: genuinely clean; minor formulaic back-half repetition already covered by the standing semantic-loop-decay note, not new.
+
+### Dist (continued)
+All 3 dist copies synced. postcheck.py MD5: b992d6c08fda2c9b48745ec865e4483c. generator.py MD5: db7929985ab1649b9d139945268b261a. ZIP rebuilt: dist/hearth-0.2.zip MD5 238efcc7549215f92e746df92d42f04c.
+
+### Running (continued)
+`queue_0827_1746_battery9_engagement.log` still in flight at close of this session's work — priority read for whoever picks up next, specifically to confirm these 3 fixes land clean and to watch for a 2nd instance of the still-open imag-mri she/her and imag-intimacy verb-object-"your"/"particular" families.
