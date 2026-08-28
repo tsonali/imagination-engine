@@ -9989,3 +9989,38 @@ Unreachable, 69th+ consecutive beat, same DNS-resolution-failure signature. Not 
 
 ### Running
 `battery11_2152` still in flight at beat close — priority read for the next beat, specifically to confirm no regression from this beat's companion.py change (unlikely to intersect — imagination-side battery — but worth a glance) and to continue the imag-mri/imag-intimacy watch from beat194.
+
+---
+## 2026-08-28 (beat196, sonali-da session)
+
+### Read
+4 large backlog logs (battery11_2152, battery11_0255, battery9_2305, battery9_0422) via 4 parallel background agents, each instructed to read full transcripts honestly rather than trust rollup counts. 7 smaller logs (byo_deep_test_0135, battery6_0141, battery10_0145, battery2b_0154, battery12_0221, battery4b_0239, battery3b_0242, product_e2e_0245) read directly — all mechanically clean (battery12 41/41, byo_deep_test 18/18 anchored PASS, no anchored FAIL lines anywhere, VERDICT PASS / floors clean on the rest).
+
+### Fixed
+1. **postcheck.py**: raw `_blank_` sentinel-token leak (imag-intimacy, battery11_0255) — new `_STRAY_SENTINEL_TOKEN_RE`, wired into `strip_back_instruction_leaks()`. Zero prior coverage; would have been spoken verbatim by TTS.
+2. **companion.py**: raw `(2026-07)` date tag from vital-facts.md echoed into a spoken reply (battery9_0422, comp-vf-wrong-entity T2) — unconditional final-pass strip, same pattern as the beat139/184 guards.
+3. **Recovered and landed a peer session's complete, verified, uncommitted battery11_2152 fixes** found already on disk (generator.py/scenario_bank.py/battery11_imagination_bank.py, dist already synced): `fix_your_subject_pronoun()` (5th your/yours escape shape) + 3 new eagle anon-companion phrasings ("the two of you", "two of us", "someone else has found their way"). Verified py_compile + test suite + scenario_bank import before landing rather than trusting the inline comments blind.
+
+All fixes verified via py_compile + `scripts/test_postcheck.py` (ALL PASS) + direct unit tests against exact defect strings + FP checks. No model launch (memory 8-13% free throughout, qc_queue's own companion_deep_test.py ran the whole beat). Dist synced, ZIP rebuilt. Committed 58b4207.
+
+### Not fixed (logged in review-queue.md, prioritized for next beat)
+- **[Highest priority]** VF fabrication ("without the kids around") + the date-tag leak both landed on the two designated fallback/safety-net paths (second-pass forced response, VF-affirmative regen) in the same scenario — worth asking whether fallback paths get systematically less scrutiny than the primary path.
+- 2nd→3rd-person narrator drift escalated from "wants a 2nd instance" (beat185, 1 hit) to "confirmed, needs dedicated design" (this beat, 15+ hits in a second scenario type) — zero mechanical coverage, violates the core 2nd-person architecture.
+- Crutch phrase ("particular"/"specific") ban confirmed not reaching eagle/MRI prompt paths (only intimacy's COMMON_POSTURE has it).
+- I→You paraphrase-echo compression gap — same user opener echoed in 2 sibling scenarios, one with zero guard engagement.
+- 5 lower-confidence single-instance items (self-recycle-survives-double-guard, garbled-Friday-output, "anger is what it means to X" tic recurring twice, hollow topic-mirror "Family is on your mind", eagle "us"-object leak, "other eagles"/"you are both" reordering escapes, "blanked" corruption).
+
+### Gold(A) +5
+sword-forge-blade-quench-temper-line, exoplanet-transit-signal-confirmed-real, whittling-first-finished-carving-after-failures, submarine-first-solo-periscope-watch, highline-first-clean-canyon-crossing. Term-frequency-checked, FORBIDDEN_PHRASES-checked. NOT SCP'd (mini unreachable).
+
+### Dist
+All 3 dist copies synced (companion.py, postcheck.py, generator.py already synced by peer). companion.py MD5: f00157fc5bbdcd14828fda3a38f350f3. postcheck.py MD5: 238007bcd0dc7f19731ae852cc9808e6. ZIP rebuilt: dist/hearth-0.2.zip MD5 68c993eb1399c8ef601c3851ea710cac.
+
+### Coordination
+5 peer sessions active on arrival (sonali-9e, sonali-f8, sonali-7c, sonali-51, sonali-6a) — sent a coordination broadcast before starting work; no replies by beat close. One peer had already independently fixed battery11_2152's findings and left them uncommitted on disk — landed together with this beat's own work in one commit rather than leaving it stranded.
+
+### Mini
+Unreachable, 70th+ consecutive beat, same DNS-resolution-failure signature. Not re-attempted beyond the standard check — Sonali's physical check remains the recommended next step.
+
+### Running
+qc_queue's `companion_deep_test.py` (PID 42731) still mid-run at beat close, ~23min elapsed — memory stayed 8-13% free the whole beat, no model launch attempted. Next beat should read its output plus whatever battery follows it in rotation.
