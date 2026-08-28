@@ -475,6 +475,12 @@ _NARRATOR_POSS = re.compile(
     # know" were never added, and the "we + verb" list had no "look" entry or
     # a phrase-level catch for "catch our eye"/"takes me back".
     r"|\bI\s+(?:rose|rise|risen|rising|have|had|know|knew|don'?t\s+know|didn'?t\s+know)\b"
+    # beat194 (imag-eagle-companion-bird-he, queue_0827_1628_battery11_imagination_bank.log,
+    # honest read): "the same spot where I started my flight up into a sky..." — "I started"
+    # escaped because only the bare present-tense "start" was in the verb list (line ~428),
+    # not the past-tense "started"; \b after the alternation requires "start" to be a
+    # complete word, so "started" never matched.
+    r"|\bI\s+started\b"
     r"|\bwe\s+(?:look|looked)\b"
     r"|\bcatch\s+our\s+eye\b"
     r"|\btakes?\s+me\s+back\b"
@@ -1008,6 +1014,13 @@ _BACK_LEAK_PATTERNS = [
     re.compile(r"\bchair or whatever\b", re.IGNORECASE),
     # BACK section leak variant: "the chair or floor under you" — couch-free form (beat73 battery11 imag-active-scene)
     re.compile(r"\bchair or floor\b", re.IGNORECASE),
+    # BACK section leak variant: "settled on whatever surface you are on right now: the
+    # chair or ground supporting you" — false PASS in postcheck's own chair-body-reminder
+    # line (beat194, queue_0827_1628_battery11_imagination_bank.log, imag-eagle-golden-
+    # eagle-wildlife). "or whatever surface you are on" (beat61, line above) matched the
+    # opening clause but not this trailing restatement; none of the prior "chair or X"
+    # literals cover "ground".
+    re.compile(r"\bchair or ground\b", re.IGNORECASE),
     # BACK section meta-commentary: "an imaginary run that was very real" — breaks immersion (beat68 battery11 imag-active-scene)
     re.compile(r"\bimaginary (?:run|session|experience|practice)\b", re.IGNORECASE),
     # Model occasionally hallucinates technical environment details — strip these.

@@ -1482,14 +1482,23 @@ def generate_session(
     # containing "she" or "hers" when _is_active_body and no female appears in transcript.
     # "her" alone excluded — too risky (postprocessors already produce "her voice" etc.
     # for the user's own items after fix_possessive_pronouns).
-    if _is_active_body:
+    #
+    # beat194 (imag-mri, queue_0827_1628_battery11_imagination_bank.log, honest read):
+    # "Her arms are along her sides now, as she shifts slightly deeper into this tube"
+    # — same hallucinated-companion family, but _is_active_body is False for MRI
+    # rehearsal (no motion keyword — lying still in a tube isn't "in motion"), so this
+    # filter never fired. Same structural gap beat185 logged for a different MRI
+    # instance ("Frank") and left open. MRI rehearsal is exactly as solo as an
+    # active-body scene — extending the gate to also cover it, still behind the same
+    # _female_in_intake safety check below.
+    if _is_active_body or _rehearsal_env == "MRI tube":
         _FEMALE_INTAKE_SIGNALS = (" she ", " her ", "woman", "girl", "wife",
                                    "girlfriend", "mother", "sister", "daughter")
         _female_in_intake = any(kw in f" {_transcript_text.lower()} " for kw in _FEMALE_INTAKE_SIGNALS)
         if not _female_in_intake:
             full, she_dropped = drop_hallucinated_she_her(full)
             if she_dropped:
-                log.warning('[v6] %d hallucinated-female sentence(s) dropped (she/hers in solo active-body)',
+                log.warning('[v6] %d hallucinated-female sentence(s) dropped (she/hers in solo active-body/MRI rehearsal)',
                             she_dropped)
     # Companion-bird male-pronoun filter (beat95): named-token filter catches species names
     # (hawk/falcon/etc.) but misses sentences where an unnamed companion bird is described
