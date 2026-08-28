@@ -10024,3 +10024,38 @@ Unreachable, 70th+ consecutive beat, same DNS-resolution-failure signature. Not 
 
 ### Running
 qc_queue's `companion_deep_test.py` (PID 42731) still mid-run at beat close, ~23min elapsed — memory stayed 8-13% free the whole beat, no model launch attempted. Next beat should read its output plus whatever battery follows it in rotation.
+
+---
+## 2026-08-28 (beat197, sonali-52 session)
+
+### Read
+6 small backlog logs (battery10_registers, battery2b_honesty, battery12_vital_facts, battery4b_floor, battery3b_ask_retest, product_e2e_test) read directly — all mechanically clean, no new defects. `queue_0828_0818_battery11_imagination_bank.log` (148KB, 7 scenarios) read via a background agent, honest full-transcript read (not just PASS counts).
+
+### Fixed
+1. **[HIGHEST PRIORITY, structural] vital_facts.py `context_block()`** — the beat196-flagged VF fabrication ("without the kids around" — misattributing the sister's kids to the user) traced to root cause: `context_block()`'s raw vital-facts content is unconditionally prepended to `_running_context()` on **every** turn (including the second-pass forced-response fallback path, since `ctx` feeds into `user` which feeds into `user_fwd`), but the only explicit grounding instruction telling the model that `## People` facts belong to a named OTHER person (not the user) — `_vf_probe_supplement()` — fires **only** on memory-probe turns (`_is_memory_probe()`). An ordinary conversational turn ("I've been thinking about family stuff lately") gets the raw block with zero attribution guardrail on any path, fallback or primary. Confirmed against the actual file (`data/companion/vital-facts.md`: `## People\n- Sister: Priya — Austin, two kids`) — the header "WHAT I KNOW ABOUT YOU" invites exactly this conflation. Fix: added a standing attribution rule directly into the `context_block()` header itself, so it's present on every turn via every path (same "closes every path at once" pattern as beat139's software-pronoun guard and beat196's own date-tag strip), rather than trying to extend the probe-only supplement to cover every regen/fallback branch individually. This directly answers beat196's open question ("do fallback paths get systematically less scrutiny?") — the real gap wasn't path-specific scrutiny, it was that the grounding instruction was scoped to probe-detection when the raw content injection was not.
+2. **postcheck.py / generator.py, new pronoun-grammar class**: bare "you" used as an attributive determiner before "left"/"right" + a body-part noun ("toward you left hip", "on you left wing tip", "with you left wing" — 3 instances, 3 different scenarios: imag-mri, imag-eagle-wildlife-plural, imag-eagle-companion-bird-he). Mirror-image of the existing `_YOUR_SUBJECT_VERBS`/`fix_your_subject_pronoun` family. New `_YOU_BEFORE_BODYPART_RE`/`fix_you_before_bodypart()`, scoped to a curated body-part noun list after left/right — safe by construction since "left"/"right" immediately followed by a body-part noun is never the verb "to leave"/"to right" in this product's prose. Wired into both generator.py call sites ([settling] and [v6]).
+3. **postcheck.py + generator.py + battery11_imagination_bank.py (3-way parity)**: new eagle acoustic anon-companion escape, "the call of the distant eagle" (imag-embodiment-eagle) — species named directly, a variant of beat153's "distant bird" class that the species-specific noun slipped past. Added `distant eagle` to `_EAGLE_ANON_COMPANION_PATTERN` (postcheck.py + battery11's independent duplicate regex) and to generator.py's substring tuple for `drop_active_body_wildlife`.
+
+All fixes verified via py_compile + `scripts/test_postcheck.py` (ALL PASS) + direct unit tests against the exact defect strings + explicit FP checks (fix #1: instruction text present, file content intact; fix #2: 3 TP strings fixed, 3 FP strings — "you left the room", "you right the boat", "you left your left hip" — correctly untouched; fix #3: TP match confirmed, "You are the eagle, alone" FP confirmed unmatched). No model launch — qc_queue's own `battery9_engagement` ran the entire beat (memory 8-27% free throughout, well under the 35% launch floor).
+
+### Not fixed (logged as FYI, single instance or lower confidence)
+- Raw truncated-artifact fragment ("isn " mid-sentence, imag-embodiment-eagle) — likely a byproduct of an aggressive drop-filter cutting mid-word; root filter not identified this beat, wants investigation before a general fix.
+- Severe back-half decay (imag-eagle-golden-eagle-wildlife, ~10+ near-duplicate paragraphs) — more pervasive than prior logged instances of the known decay class, no new mechanical angle attempted.
+- "particular"/"specific" crutch-phrase density confirmed again in imag-calm-settle (7+ instances/874 words) and imag-mri — reconfirms beat196's escalated finding that the COMMON_POSTURE ban doesn't reach these prompt-builder paths. Still wants the dedicated design pass beat196 asked for; not attempted this beat (scope larger than remaining time).
+- 2 minor decay/near-duplicate sentence pairs (imag-calm-settle, imag-intimacy) and 1 word-substitution typo ("they drum track" for "the drum track", imag-mri) — single instances, no class pattern yet.
+- **2nd→3rd-person narrator drift: zero instances found in this log's 7 scenarios.** Directly checked per beat196's escalation — this batch shows no recurrence, but one clean log doesn't retire a systemic finding confirmed at 15+ hits previously; still flagged as needing the dedicated design pass, just not urgent from this log specifically.
+
+### Gold
+No gold added this beat — full time went to the structural VF fix (root-cause tracing across `companion.py`/`vital_facts.py`) plus the 3 mechanical fixes and their dist sync. 6 peer sessions active and gold corpus already grew from 6618 (beat196's implied total) to 6627 during this beat — did not duplicate that work.
+
+### Dist
+All copies synced: vital_facts.py (2 dist copies + zip), postcheck.py/generator.py (3 dist copies each + zip), battery11_imagination_bank.py (1 dist copy + zip). vital_facts.py MD5: 14aa24c27afd1cfd9a2976335b70c29b. postcheck.py MD5: c9aec5e0fbbccdfbb57f0ab3772bf78d. generator.py MD5: 0ad4c74ee0377c1233eae37b4b451d35. battery11_imagination_bank.py MD5: 5f6ba82c7cbc77965ef84061b7d08e38. ZIP REBUILT: dist/hearth-0.2.zip MD5 f7811a8877963634c19a913dd52faa19 (each packaged file's MD5 verified to match its src counterpart after rebuild).
+
+### Coordination
+6 peer sessions active on arrival (sonali-c5, sonali-9e, sonali-f8, sonali-7c, sonali-51, sonali-6a). Did not duplicate: read a different log backlog slice (battery11_0818, not yet claimed), avoided gold-corpus growth already in progress.
+
+### Mini
+Not re-checked with a fresh signature — `ssh -o IdentitiesOnly=yes -o ConnectTimeout=8 smaitra@mac-mini.localdomain` resolves via `~/.ssh/config`'s `HostName julios-mac-mini.local` alias, which still fails DNS resolution. Same underlying signature as the 70+ prior consecutive failures (the alias itself hasn't changed) — not a new data point. Sonali's physical check remains the recommended next step.
+
+### Running
+qc_queue's `battery9_engagement.py` (PID 47108) still mid-run at beat close, ~70+ min elapsed, memory 8-27% free throughout — no model launch attempted this beat. Next beat should read its output when complete.
