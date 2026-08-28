@@ -4050,8 +4050,39 @@ class Companion:
         # CONFIRM_LANDS: one-word landing phrases must stand alone — strip any addendum.
         # "Good. Carry it somewhere quiet for a while." → "Good."
         # _drop_trailing_question only catches trailing questions; this catches statements.
+        #
+        # beat194 (battery12_vital_facts SC1, queue_0827_0942_battery12_vital_facts.log):
+        # this block is UNCONDITIONAL and sits as the LAST transform before
+        # history.append()/return — it has no awareness of WHY a reply starts with a
+        # landing word. "yes." is in _CONFIRM_LANDS (for "Yes, exactly." landing a
+        # confirmed insight), but a memory-probe answer that correctly affirms
+        # vital-facts content also starts with "Yes.". Confirmed root cause: the
+        # model's FIRST-PASS reply to "Have you heard anything I've told you about
+        # my sister?" was already correct — "Yes. Your sister Priya lives in Austin,
+        # two kids." — so none of the THIN-VF-REPLY / VF-AFFIRMATIVE-MISSING-YES
+        # guards above fired (nothing needed fixing). This block then silently
+        # truncated it to bare "Yes." because it starts with the literal "yes."
+        # land phrase, treating the fact sentence as a throwaway addendum. Same
+        # recurring shape as beat178/184/191: a late unconditional transform
+        # clobbers a correct (or already-guard-fixed) reply that happens to share
+        # a surface pattern with what the transform was built to catch. Repro'd
+        # standalone: feeding "Yes. Your sister Priya lives in Austin, two kids."
+        # as the model's first-pass output reproduced the exact bare "Yes." bug
+        # with zero engine regen calls, matching the log's total absence of any
+        # THIN-VF-REPLY/VF-AFFIRMATIVE-MISSING-YES warning for this scenario.
+        # Fix: don't apply the "yes."/"yes, exactly." lands when the reply is a
+        # memory-probe answer whose vital-facts block actually covers the query —
+        # that's a real fact statement, not a filler addendum.
+        _cl_vf_ctx = self.vital_facts.context_block() if self.vital_facts else ""
+        _cl_is_vf_affirmation = (
+            _is_memory_probe(user_message)
+            and bool(_cl_vf_ctx)
+            and _vf_covers_query(user_message, _cl_vf_ctx)
+        )
         _r = reply.strip()
         for _land in _CONFIRM_LANDS:
+            if _cl_is_vf_affirmation and _land in ("yes.", "yes, exactly."):
+                continue
             if _r.lower().startswith(_land) and _r.lower().strip() != _land:
                 reply = _r[:len(_land)]
                 break
