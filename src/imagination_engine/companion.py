@@ -4225,6 +4225,19 @@ class Companion:
         if reply:
             reply = re.sub(r"\bweek link\b", "weak link", reply, flags=re.IGNORECASE)
 
+        # beat196 (battery9_0828_0422 comp-vf-wrong-entity T2): model echoed a raw
+        # "(2026-07)" date tag from vital-facts.md verbatim into a spoken reply —
+        # "...has two kids (2026-07)." The tag exists in the file for the human
+        # editing it (data/companion/vital-facts.md's own header: "edit me freely"),
+        # never meant to be read aloud; _vf_fact_sentence() already strips this same
+        # pattern for its own mechanical-fallback path (line ~813), but the model can
+        # also see the raw vital_facts.context_block() directly in its prompt and
+        # echo the tag verbatim on any regen path — an unconditional strip closes
+        # every path at once instead of patching each one, same pattern as the
+        # beat139 software-pronoun guard and beat184 homophone fix above.
+        if reply:
+            reply = re.sub(r"\s*\(\d{4}-\d{2}\)", "", reply)
+
         # beat151: Companion-turn truncation guard. When the model hits max_tokens
         # mid-sentence a reply like "...once as a real deadline and again in you" is
         # returned verbatim with no sentence terminator. Trim to the last complete

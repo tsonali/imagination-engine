@@ -282,7 +282,14 @@ for sc in scenarios:
                 r'|\bboth\s+of\s+your\s+figures\b'
                 r'|\bmatching\s+theirs\b'
                 r'|\bboth\s+move\s+together\b'
-                r'|\beither\s+of\s+you\b',
+                r'|\beither\s+of\s+you\b'
+                # beat196 (battery11_2152): "proof someone else has found their
+                # way to these heights" (golden-eagle-wildlife); "distance
+                # closes between the two of you" / "nothing is said between
+                # two of us" (companion-bird-he).
+                r'|\bsomeone\s+else\s+has\s+found\s+their\s+way\b'
+                r'|\bthe\s+two\s+of\s+you\b'
+                r'|\btwo\s+of\s+us\b',
                 lower, _re.IGNORECASE
             ))
             # beat153: Chair-body reminder in eagle script (not just opening).

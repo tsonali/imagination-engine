@@ -453,7 +453,7 @@ _NARRATOR_POSS = re.compile(
     r"|\bfor\s+us\b"                   # "for us" narrator collective
     # beat171 (2026-08-23): narrator "us" forms beyond "both of us"/"for us" — "distance separates us",
     # "between us" etc. Found in imag-eagle-companion-bird-he 09:26 honest read.
-    r"|\b(?:separates?|between|around|with|near|beside|behind|above|below|joins?|unites?)\s+us\b"  # narrator "us" spatial/relational
+    r"|\b(?:separates?|between|around|with|near|beside|behind|above|below|beneath|joins?|unites?)\s+us\b"  # narrator "us" spatial/relational
     # Grief-pet dog-POV leak (beat70): model puts listener in animal's body and refers
     # to the human as "your handler" / "your owner" — immediate perspective failure.
     r"|\byour\s+(?:handler|owner|master)\b"
@@ -484,7 +484,16 @@ _NARRATOR_POSS = re.compile(
     r"|\bwe\s+(?:look|looked)\b"
     r"|\bcatch\s+our\s+eye\b"
     r"|\btakes?\s+me\s+back\b"
-    r"|\bahead\s+of\s+me\b",
+    r"|\bahead\s+of\s+me\b"
+    # beat196 (battery11_2152, imag-eagle-wildlife-plural honest read): "nothing
+    # else is stopping us from going wherever we choose next" — "we choose" is a
+    # narrator-plural decision-verb not in any prior "we + verb" list (the
+    # existing lists cover motion/state verbs but not decision verbs). Same
+    # sentence's "beneath us" (a different clause) was also missed — the
+    # spatial-"us" list above had "below" but not "beneath" (inconsistent with
+    # the "me" version of the same list, which already had "beneath"); fixed
+    # separately in that list.
+    r"|\bwe\s+(?:choose|chose)\b",
     re.IGNORECASE,
 )
 
@@ -585,6 +594,43 @@ def fix_subject_pronouns(text: str) -> tuple[str, int]:
         return f"{prefix}she {verb}"
 
     result = _HER_SUBJECT_VERBS.sub(_replace_her_subject, text)
+    return result, fixed
+
+
+# beat196 (battery11_2152 honest read, imag-intimacy): "your came later" —
+# "your" used as a SUBJECT pronoun (should be "you") immediately before a finite
+# verb, a 5th distinct grammatical shape of the your/yours escape family (prior
+# shapes: copula+your [fix_predicative_your], preposition+your object
+# [fix_intimacy_object_pronoun_escapes], your-before-article, your+contraction
+# [fix_your_contraction]). None of those fire here because "your" is neither
+# preceded by a copula/preposition nor followed by "alone"/an article — it is
+# the grammatical subject of the clause. Mirrors fix_subject_pronouns' her→she
+# pattern but for your→you; scoped to finite verb forms that can never
+# legitimately follow the determiner "your" (no such noun spellings exist), so
+# no risk of touching real attributive uses like "your hand"/"your voice".
+_YOUR_SUBJECT_VERBS = re.compile(
+    r"\byour\s+(came|arrived|went|left|stayed|waited|returned|walked|ran|stood|"
+    r"sat|moved|woke|slept|cried|laughed|smiled|nodded|paused|hesitated|"
+    r"wasn't|weren't|hadn't|didn't|doesn't|hasn't|haven't|isn't|aren't|"
+    r"wouldn't|couldn't|shouldn't|won't|can't)\b",
+    re.IGNORECASE,
+)
+
+
+def fix_your_subject_pronoun(text: str) -> tuple[str, int]:
+    """Replace 'your [verb]' → 'you [verb]' when 'your' is incorrectly used as
+    the subject of a finite verb ('your came later' → 'you came later').
+
+    Sibling of fix_subject_pronouns (her→she); same defect class, your→you.
+    """
+    fixed = 0
+
+    def _replace(m: "re.Match") -> str:
+        nonlocal fixed
+        fixed += 1
+        return f"you {m.group(1)}"
+
+    result = _YOUR_SUBJECT_VERBS.sub(_replace, text)
     return result, fixed
 
 
@@ -1075,6 +1121,16 @@ _META_TEXT_LEAK_RE = re.compile(
 _CHAT_TEMPLATE_TOKEN_RE = re.compile(r"\s*<\|[a-z_]+\|>\s*", re.IGNORECASE)
 _FAKE_TURN_MARKER_RE = re.compile(r"\s*!(?:user|assistant|system)\b\s*", re.IGNORECASE)
 
+# beat196 (imag-intimacy battery11_0828_0255): a severely decayed back-half script
+# ended with a bare "_blank_" — a raw internal-sentinel-style placeholder token, not
+# any word a guided-imagination script would ever legitimately contain (these scripts
+# are plain prose with zero markdown/code, so a standalone underscore-wrapped token is
+# unambiguous garbage). Same family as the chat-template-token/fake-turn-marker leaks
+# above (structural artifact bleeding into TTS-bound content) but a different surface
+# shape — a lone `_word_` sentinel rather than a special token or turn marker. Would be
+# read aloud verbatim by TTS; zero prior detection coverage anywhere in the pipeline.
+_STRAY_SENTINEL_TOKEN_RE = re.compile(r"\s*\b_[a-z][a-z0-9]*_\b\.?\s*", re.IGNORECASE)
+
 
 def strip_back_instruction_leaks(text: str) -> tuple[str, int]:
     """Remove sentences that contain literal BACK_PROMPT instruction fragments.
@@ -1096,7 +1152,8 @@ def strip_back_instruction_leaks(text: str) -> tuple[str, int]:
     # instead of the token/marker corrupting the sentence-split boundaries.
     text, token_removed = _CHAT_TEMPLATE_TOKEN_RE.subn(" ", text)
     text, marker_removed = _FAKE_TURN_MARKER_RE.subn(" ", text)
-    meta_removed += token_removed + marker_removed
+    text, sentinel_removed = _STRAY_SENTINEL_TOKEN_RE.subn(" ", text)
+    meta_removed += token_removed + marker_removed + sentinel_removed
 
     # First strip instruction prefixes that precede real content (keep the content).
     for pat in _INSTRUCTION_PREFIX_PATTERNS:
@@ -1418,7 +1475,19 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     r'|\bboth\s+of\s+your\s+figures\b'  # "both of your figures share the same position"
     r'|\bmatching\s+theirs\b'           # "your matching theirs exactly"
     r'|\bboth\s+move\s+together\b'      # "as both move together through this current"
-    r'|\beither\s+of\s+you\b',          # "without effort from either of you"
+    r'|\beither\s+of\s+you\b'           # "without effort from either of you"
+    # beat196 (battery11_2152, 3 new phrasings across 2 scenarios, all passed all
+    # 6 eagle postchecks): imag-eagle-golden-eagle-wildlife: "You can't be sure
+    # whether it is a greeting or just proof someone else has found their way to
+    # these heights." imag-eagle-companion-bird-he: "distance closes between the
+    # two of you moving through this wide-open blue" and "where air itself
+    # carries us forward... even when nothing is said between two of us right
+    # here above everything left behind below" — the most explicit instance yet
+    # of a narrator+listener duality claim in a product whose architecture is
+    # instrument-not-companion.
+    r'|\bsomeone\s+else\s+has\s+found\s+their\s+way\b'  # "proof someone else has found their way"
+    r'|\bthe\s+two\s+of\s+you\b'        # "distance closes between the two of you"
+    r'|\btwo\s+of\s+us\b',              # "nothing is said between two of us"
     re.IGNORECASE,
 )
 

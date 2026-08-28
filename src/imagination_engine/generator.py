@@ -67,7 +67,8 @@ from imagination_engine.postcheck import (degeneration_report, drop_collapsed_pa
                                           fix_your_contraction,
                                           fix_copula_youre_alone, fix_predicative_your,
                                           fix_intimacy_object_pronoun_escapes,
-                                          fix_subject_pronouns, fix_object_pronouns,
+                                          fix_subject_pronouns, fix_your_subject_pronoun,
+                                          fix_object_pronouns,
                                           strip_back_instruction_leaks,
                                           strip_active_body_chair_refs,
                                           strip_alert_calm_violations,
@@ -651,6 +652,9 @@ def _generate_settling(engine: Engine, transcript: list[dict], emit) -> str:
     body, subj_fixed = fix_subject_pronouns(body)
     if subj_fixed:
         log.warning('[settling] %d subject-pronoun error(s) fixed (her→she before verb)', subj_fixed)
+    body, your_subj_fixed = fix_your_subject_pronoun(body)
+    if your_subj_fixed:
+        log.warning('[settling] %d subject-pronoun error(s) fixed (your→you before verb)', your_subj_fixed)
     body, obj_fixed = fix_object_pronouns(body)
     if obj_fixed:
         log.warning('[settling] %d object-pronoun error(s) fixed (she→her after preposition)', obj_fixed)
@@ -1211,6 +1215,9 @@ def generate_session(
     full, subj_fixed = fix_subject_pronouns(full)
     if subj_fixed:
         log.warning('[v6] %d subject-pronoun error(s) fixed (her→she before verb)', subj_fixed)
+    full, your_subj_fixed = fix_your_subject_pronoun(full)
+    if your_subj_fixed:
+        log.warning('[v6] %d subject-pronoun error(s) fixed (your→you before verb)', your_subj_fixed)
     full, obj_fixed = fix_object_pronouns(full)
     if obj_fixed:
         log.warning('[v6] %d object-pronoun error(s) fixed (she→her after preposition)', obj_fixed)
@@ -1453,6 +1460,13 @@ def generate_session(
             "matching theirs",
             "both move together",
             "either of you",
+            # beat196 (battery11_2152, 3 new phrasings, 2 scenarios): imag-eagle-
+            # golden-eagle-wildlife "proof someone else has found their way to
+            # these heights"; imag-eagle-companion-bird-he "distance closes
+            # between the two of you" and "nothing is said between two of us".
+            "someone else has found their way",
+            "the two of you",
+            "two of us",
         ))
         if anon_companion_dropped:
             log.warning('[v6] %d anonymous-companion sentence(s) dropped (you/we both in solo eagle active-body)',
