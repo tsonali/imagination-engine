@@ -4677,3 +4677,17 @@ Still unreachable, same `julios-mac-mini.local` resolution-failure signature (77
 
 ### Running
 `battery12_vital_facts.py` (PID 94509, started 10:34) was in flight at beat close. Priority for next beat: confirm battery12 still passes 41/41 (or current count) with the new fixture isolation, and live-verify this beat's 6 fixes on their next natural battery9/battery2b/battery11 cycle.
+
+## beat204 (2026-08-29, sonali-c7) — FYI, no questions
+
+**2 narrator leak forms closed ("I mentioned" / "we will be").** `battery11_1139` imag-eagle-golden-eagle-wildlife honest read (background agent) found 16 real defects the mechanical rollup missed entirely. Fixed the 2 most narrowly-scoped: "I mentioned an end was near" (speech-act narrator leak, same family as beat178's "I stopped talking") and "toward where we will be next" (future-tense narrator-plural, new tense form for the existing "we + verb" lists). Both added to `_NARRATOR_POSS`; verified via direct repro + FP guard + `scripts/test_postcheck.py` ALL PASS. No model launch — memory 0.4-6% free the whole beat, qc_queue's `battery9_engagement.py` ran throughout.
+
+**Not fixed — worth a design pass if it recurs a 5th time:** `product_e2e_1128` confirmed the recurring clinical "what does it feel like when X" fallback stem firing a 4th time (3 prior instances logged beat203). It's model-floor, not a mechanical bug — no fixed string to regex against since X varies. 3 Gold(C) exemplars added targeting it from different angles. If a 5th instance shows up, this probably wants a generic "does this reply reference anything the user actually said" detector rather than another narrow patch.
+
+**Not fixed — architectural gaps restated, not new:** `imag-calm-settle` (zero companion-detection coverage) and the human-bystander hallucination class (evades every anon-companion regex via simile/indirection) both recurred again in `battery11_1139`, consistent with beat203's finding that these want dedicated design passes rather than literal patches.
+
+**Not fixed — quality nits for whoever's next on that tool:** BYO's `"Outta filler and into the point: reach out."` reads garbled (product_e2e_1128, no full context in that log — worth a look with the real persona prompt); Secretary's `"The calendar ended the week without us landing on any specific discipline for Monday."` is honest but stiffly personified (battery4b_1122) — neither is a floor violation.
+
+**Mini:** still unreachable, `julios-mac-mini.local` signature, 78th+ consecutive beat — no new data point, still worth Sonali's physical check per beat202's original flag.
+
+**Coordination:** 2 peer sessions active on arrival (sonali-f1, sonali-4d), broadcast sent claiming the post-beat203 backlog, no replies by close, no collision observed.

@@ -520,7 +520,18 @@ _NARRATOR_POSS = re.compile(
     # spatial-"us" list above had "below" but not "beneath" (inconsistent with
     # the "me" version of the same list, which already had "beneath"); fixed
     # separately in that list.
-    r"|\bwe\s+(?:choose|chose)\b",
+    r"|\bwe\s+(?:choose|chose)\b"
+    # beat204 (battery11_1139, imag-eagle-golden-eagle-wildlife honest read):
+    # "The quality of your breath remains steady as before when I mentioned an
+    # end was near." — "I mentioned" is a narrator-speech-act leak of the same
+    # family as beat178's "I stopped talking"/"I talked" list (line ~494), but
+    # "mention"/"mentioned" was never added to that verb set.
+    r"|\bI\s+(?:mention|mentioned|mentioning)\b"
+    # beat204 (same log, same script): "...they carry you slightly further down
+    # toward where we will be next." — narrator-plural future-tense "we will be"
+    # is a new tense form; the existing "we + verb" lists cover past/present
+    # motion and decision verbs but no future-modal "will be" construction.
+    r"|\bwe\s+will\s+be\b",
     re.IGNORECASE,
 )
 
