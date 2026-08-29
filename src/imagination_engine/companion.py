@@ -562,6 +562,14 @@ _FORBIDDEN = [
     # same forbidden reframe (feeling exists FOR a purpose) in different words. Prior
     # patterns only covered protecting/hiding/guarding/covering verb forms.
     r"\b(?:anger|angry|sadness|grief|anxiety|anxious|fear|fearful|shame|shameful|guilt|guilty|frustration|frustrated|rage|hurt|pain|painful)\b(?:\s+\w+){0,3}\s+(?:might|could|may|is|are|was|were)\s+(?:\w+\s+)?(?:be\s+)?what (?:it takes|you need|'?s needed|is needed)\b",
+    # therapy-reframe "A WAY TO PROTECT" form (beat202): battery9_0207
+    # comp-grief-anger-barrier-pivot T1 produced "Anger is a way to protect yourself
+    # from grief." — assigns the named feeling (anger) a protective function serving
+    # the OTHER, expected feeling (grief) — the same forbidden reframe as the
+    # hiding/protecting/guarding verb-form patterns above, but "a way to protect"
+    # (bare infinitive + noun-phrase filler) doesn't contain "protecting" so none of
+    # the -ing-based patterns fire. Covers "is/was/might be a way to protect".
+    r"\b(?:anger|angry|sadness|grief|anxiety|anxious|fear|fearful|shame|shameful|guilt|guilty|frustration|frustrated|rage|hurt|pain|painful)\b(?:\s+\w+){0,3}\s+(?:might|could|may|is|are|was|were)\s+(?:\w+\s+)?(?:be\s+)?a way to protect\b",
     # helplessness opener: companion admitting it doesn't know what to do mirrors the
     # user's helplessness and gives nothing. beat99: comp-grief-anger-barrier-vague T2
     # regen produced "I don't know what to do when he makes it about him." — mirrors
@@ -3304,12 +3312,25 @@ class Companion:
                         "when the vital-facts file has the answer."
                     )
                 else:
+                    # beat202: was "state the specific detail from that past-conversation
+                    # summary" with no summary text actually quoted in the instruction —
+                    # comp-past-query (a genuinely topic-less probe, self._past populated
+                    # only by unrelated earlier scenarios in the same battery run) answered
+                    # "Yes — your sister Priya lives in Austin and has two kids", pulling
+                    # from the always-present vital-facts block instead of any real past
+                    # summary. Quoting the actual summaries + an explicit vital-facts
+                    # exclusion removes the model's only route to that wrong source.
+                    _pq_past_text = "\n".join(f"- {s}" for s in self._past)
                     _vf_yes_ctx = (
                         "\n\nCRITICAL: You just said something starting with 'you haven't' but "
                         "the FROM PAST CONVERSATIONS block above DOES cover this topic. You "
-                        "must AFFIRM, not deny. Start with 'Yes — ' and state the specific "
-                        "detail from that past-conversation summary. Do NOT say 'No' or 'you "
-                        "haven't' — those are wrong when past conversations already cover this."
+                        "must AFFIRM, not deny. Start with 'Yes — ' and state a specific detail "
+                        "from ONE of these past-conversation summaries ONLY — do not use any "
+                        "other fact (including anything from a vital-facts/family/personal-"
+                        "details block) that isn't in the summaries below:\n"
+                        f"{_pq_past_text}\n"
+                        "Do NOT say 'No' or 'you haven't' — those are wrong when past "
+                        "conversations already cover this."
                     )
                 _pq_chunks = []
                 for piece in self.engine.stream(
