@@ -1721,13 +1721,19 @@ def drop_forbidden_stock_imagery(text: str, tokens: tuple) -> tuple[str, int]:
 # is safe because the observed drops are low-content mood-repetition filler
 # sentences ("It feels like something specific to you right now.") — genuine
 # single or double uses of either word are left completely untouched.
-_CRUTCH_WORD_RE = re.compile(r"\b(?:particular|specific)\b", re.IGNORECASE)
+_CRUTCH_WORD_RE = re.compile(
+    r"\b(?:particular(?:ly)?|specific(?:ally)?)\b", re.IGNORECASE
+)
 _CRUTCH_WORD_MAX_KEPT = 2
 
 
 def drop_crutch_word_overuse(text: str) -> tuple[str, int]:
     """Drop sentences carrying the 3rd+ occurrence of 'particular'/'specific'
-    (counted together as one crutch-phrase class). Keeps the first 2
+    (counted together as one crutch-phrase class, including the adverb forms
+    'particularly'/'specifically' -- beat200: battery11_1912 found
+    'specifically' surviving 12x in one script even after this function
+    dropped 25 other crutch sentences, because the original regex only
+    matched the bare adjective, not its adverb sibling). Keeps the first 2
     occurrences; drops whole sentences for any occurrence beyond that.
     """
     sentences = re.split(r"(?<=[\.\!\?])\s+", text.strip())

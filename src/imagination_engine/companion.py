@@ -636,12 +636,50 @@ def _has_unrecognized_name(user_message: str, vf_block: str) -> bool:
     Uses ≥5-char threshold ([A-Z][a-z]{4,}) to filter short common sentence-starters
     ('Tell', 'Have', 'Did', 'Can', 'What') while catching names like Marcus, Priya,
     Sarah, etc. Also filters against _SC13_COMMON_WORDS for any remaining false positives.
+
+    Matches against _vf_content_only (facts only, header/footer stripped) --
+    see that function's docstring for the beat200 header-pollution bug this
+    avoids; low real-world odds a name here would collide with a header word
+    like "Facts"/"Other"/"People", but the same discipline applies.
     """
-    vf_lower = vf_block.lower()
+    vf_lower = _vf_content_only(vf_block).lower()
     for noun in re.findall(r'\b[A-Z][a-z]{4,}\b', user_message):
         if noun.lower() not in _SC13_COMMON_WORDS and noun.lower() not in vf_lower:
             return True
     return False
+
+
+_VF_HEADER_RE = re.compile(
+    r"^-{3,}\s*WHAT I KNOW ABOUT YOU\b.*?-{3,}\s*\n", re.DOTALL
+)
+_VF_FOOTER_RE = re.compile(r"\n?-{3,}\s*END VITAL FACTS\s*-{3,}\s*$")
+
+
+def _vf_content_only(vf_block: str) -> str:
+    """Strip context_block()'s boilerplate header/footer, leaving only the
+    actual fact lines.
+
+    beat200 root-cause fix: the header (added beat197, vital_facts.py
+    context_block()) is a grounding instruction that illustratively lists
+    relationship words -- "belong to the named OTHER person (a sister,
+    brother, friend, partner, etc.)". _vf_covers_query()'s relationship-word
+    match used to scan the FULL context_block() output including this
+    header, so a query mentioning "brother" or "friend" or "partner" matched
+    the INSTRUCTION TEXT itself, not the user's actual facts -- meaning it
+    returned True for any relationship-word query as long as ANY vital fact
+    existed at all, regardless of whether that specific relation was ever on
+    file. Confirmed by direct repro: a VF file containing only a sister
+    entry made _vf_covers_query() return True for a query about a brother
+    named Marcus. This silently defeated both the PAST-QUERY affirmation
+    guard (which then wrongly affirmed the wrong entity) and the
+    SC13-CROSS-ENTITY guard (whose own trigger condition requires
+    _vf_covers_query() to return False to fire at all) -- the root cause
+    behind the comp-vf-wrong-entity family's repeated regressions across
+    beats 94/103/119/153/196/197/199.
+    """
+    text = _VF_HEADER_RE.sub("", vf_block, count=1)
+    text = _VF_FOOTER_RE.sub("", text, count=1)
+    return text
 
 
 def _vf_covers_query(user_message: str, vf_block: str) -> bool:
@@ -654,9 +692,13 @@ def _vf_covers_query(user_message: str, vf_block: str) -> bool:
     Strategy: extract relationship words + proper nouns from the user's message and
     check if any appear in VF (case-insensitive). If none match, the user is asking
     about something NOT in VF and the model's original denial should stand.
+
+    Matches only against the actual fact content (_vf_content_only), not the
+    header/footer boilerplate context_block() wraps it in -- see
+    _vf_content_only's docstring for the beat200 bug this avoids.
     """
     msg_lower = user_message.lower()
-    vf_lower = vf_block.lower()
+    vf_lower = _vf_content_only(vf_block).lower()
 
     # Check relationship words appearing in the user's question
     for word in _VF_RELATIONSHIP_WORDS:
