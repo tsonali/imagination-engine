@@ -549,7 +549,7 @@ class Assistant:
                 source_lines = [ln.strip() for ln in text.replace("\n", ". ").split(". ") if ln.strip()]
                 per_num = []
                 for n in missing:
-                    src_ctx = next((ln for ln in source_lines if n in ln), None)
+                    src_ctx = next((ln for ln in source_lines if _num_present(n, ln)), None)
                     if src_ctx:
                         # If a sibling number from the same source line is already in
                         # the current output, explicitly name the conflict: model must
@@ -623,7 +623,7 @@ class Assistant:
             for n in nums:
                 if _num_present(n, out):
                     continue
-                _src_ctx = next((ln for ln in _src_lines if n in ln), None)
+                _src_ctx = next((ln for ln in _src_lines if _num_present(n, ln)), None)
                 if not _src_ctx:
                     continue
                 sibs = [x for x in _extract_numbers(_src_ctx)
