@@ -4427,6 +4427,31 @@ class Companion:
         if reply:
             reply = re.sub(r'\?\.(\s*)$', r'?\1', reply.rstrip()) or reply
 
+        # beat201: ungrounded self-referential-history claim on turn one. The
+        # companion occasionally opens a fresh, history-empty turn with a claim
+        # about its own past utterances ("I haven't said this before, but
+        # anger is the part of you that can't be sad right now.") that has no
+        # basis — there is no prior turn in this conversation to reference.
+        # This is the 2nd confirmed instance (battery9_2039, comp-grief-anger-
+        # 1word-echo T1) after an earlier single-instance FYI, meeting this
+        # file's established "wants a 2nd instance before a mechanical guard"
+        # bar. Strip the ungrounded leading clause only, keep the substantive
+        # rest of the sentence. Scoped to the exact confirmed surface form
+        # (narrow literal fix, matching this file's convention — widen only if
+        # a new form surfaces). Gated on `not self.history` (this method's own
+        # turn-1 signal, same convention as the `if reply and self.history`
+        # prior-turn guards elsewhere in this file) so it never touches a
+        # later turn where the claim could legitimately be true.
+        if reply and not self.history:
+            _stripped = re.sub(
+                r"^I haven'?t said this before,?\s*(?:but\s+)?",
+                "",
+                reply,
+                flags=re.IGNORECASE,
+            )
+            if _stripped != reply and _stripped:
+                reply = _stripped[0].upper() + _stripped[1:]
+
         self.history.append({"role": "user", "content": user_message})
         self.history.append({"role": "assistant", "content": reply})
         self._q_streak = self._q_streak + 1 if reply.rstrip().endswith("?") else 0

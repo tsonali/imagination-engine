@@ -10162,3 +10162,37 @@ Unreachable — `ssh -o IdentitiesOnly=yes -o ConnectTimeout=8 smaitra@mac-mini.
 
 ### Running
 qc_queue's `companion_deep_test.py` (PID 70933, started 22:32) still running at beat close, memory 15% free — priority read for the next beat, specifically to verify the `_vf_covers_query` fix holds on a fresh comp-vf-wrong-entity / comp-past-query pass.
+
+---
+## 2026-08-29 (beat201) — dropped-apostrophe-t + mid-body instruction-leak fixes; battery11_0039 honest read
+
+### Coordination
+2 peer sessions active on arrival (sonali-f3, sonali-4d). Broadcast sent to both claiming the unread `queue_0829_0039_battery11_imagination_bank.log` (143KB, completed 02:05) plus the in-flight `queue_0829_0207_battery9_engagement.log`. No replies by beat close; no collision observed.
+
+### Read
+9 small/medium overnight logs checked directly (companion_deep_test_2232, byo_deep_test_2317, battery6_2323, battery10_2328, battery2b_2337, battery12_0003, battery4b_0019, battery3b_0022, product_e2e_0025) — all mechanically clean, no new defects (battery12 13/13, battery3b BRIDGE/BRIDGE2/CITATION/STALE/OWNER all PASS, byo_deep_test all 4 UCs held the floor). One large log (`queue_0829_0039_battery11_imagination_bank.log`, 7 imagination scenarios) read via a background agent doing a full honest transcript read — 6/7 scenarios had at least one defect beyond the file's own PASS markers. Full list in review-queue.md. `battery9_engagement.py` (PID 77761, started 02:07) still running at beat close — not read this beat, flagged as next beat's priority.
+
+### Fixed
+1. **`postcheck.py fix_dropped_apostrophe_t()`** — new fixer for a dropped-apostrophe-t contraction stub with a normal space already in place ("don know" → "don't know", "isn even" → "isn't even"), distinct from the existing `fix_word_fusions()` no-space-fusion case. Covers `isn/aren/wasn/weren/wouldn/couldn/shouldn/hasn/didn/doesn/hadn` unconditionally (zero legitimate standalone meaning — confirmed against A_gold.jsonl's actual prose text, not just a raw substring scan which falsely flagged JSON-escaped apostrophes and kebab-case id slugs before I corrected the check). "don" and "haven" excluded from the general rule (real standalone meanings: "don a coat", "safe haven") — "don" fixed only in the two exact forms already seen live ("don know"/"don need"). 10 direct repro cases (5 true positives, 5 FP guards including the "don your coat"/"safe haven" cases) all pass. Wired into generator.py's fix pipeline right after `fix_word_fusions`. `scripts/test_postcheck.py` ALL PASS. postcheck.py MD5: fec27164e99194abe54f7195f214f793 (pre-2nd-fix); see below for final MD5.
+2. **`postcheck.py` new `_BACK_LEAK_PATTERNS` entry** — mid-body meta-instruction leak found by the background agent's read of battery11_0039 imag-eagle-wildlife-plural: "Each paragraph should land a new moment or feeling — not just different detail but distinct emotion." — a paraphrase of generator.py line 411's own pacing instruction, surfacing as narrative content mid-script rather than end-of-script (where every existing `_BACK_LEAK_PATTERNS` entry fires). `strip_back_instruction_leaks()` already drops the whole containing sentence on any pattern match, so this needed only the new literal pattern, no new stripping logic. Direct repro confirms clean removal with neighboring sentences intact.
+
+Both fixes verified via `py_compile` + `scripts/test_postcheck.py` (ALL PASS) + direct repro against exact defect/FP strings, per this file's established verification convention. postcheck.py MD5 (final, both fixes): be24ead70dbb1c050571565f17dfd3cb. generator.py MD5: 9d5c3040388aa5902a4d8deba4b74caf. All 3 dist copies of both files synced (dist/imagination_engine/, dist/imagination_engine/imagination_engine/, dist/hearth/src/imagination_engine/).
+
+### Not fixed (logged in review-queue.md for follow-up)
+- battery11_0039: imag-eagle-companion-bird-he never delivers the requested flight action at all (high severity, no mechanical coverage — a content-fulfillment gap, not a phrase-pattern gap).
+- battery11_0039: imag-eagle-golden-eagle-wildlife — eagle's own shadow personified into a second flying entity (novel companion-hallucination vector, no named species/pronoun to catch).
+- battery11_0039: imag-intimacy chair-bleed (recurrence, open since beat178) + 2 new bare-subject-pronoun verb forms ("slide", "tilted").
+- battery11_0039: intake-turn formatting/listening defects (3 instances, 2 scenarios) — postchecks never inspect intake turns, only generated scripts. Standing coverage gap, reconfirmed.
+- battery11_0039: imag-calm-settle "chair or sofa" opening-line hedge + low-frequency "in its own particular way" repeat; imag-eagle-wildlife-plural "an acrobat's wind" incoherent metaphor repeated (evades n-gram filter via slight wording variance).
+
+### Gold
+Gold(A) +5 (6637→6642): solo-camping-first-night-alone-wilderness (377w), pocket-watch-restoration-first-tick (358w), silversmith-first-ring-polished (350w), darkroom-print-emerging-developer-tray (354w), kintsugi-repairing-broken-bowl-gold-seams (369w). All 5 fresh domains (checked term-frequency against corpus before writing — solo camping 0 hits, pocket watch/clock repair 0, silversmith 0, darkroom/developing film 0-2, kintsugi 0). Caught one of my own drafts' false-positive banned-phrase trip ("you couldn't" substring-matching "you could" — fixed the checker to use word-boundary regex, not the draft, which was actually clean) before appending. All unique ids, unique 40-char openings vs. full corpus, scanned against the live FORBIDDEN PHRASES + stock-imagery list. NOT SCP'd (mini unreachable, 75th+ consecutive beat).
+
+### Mini
+Unreachable — same DNS-resolution-failure signature (`julios-mac-mini.local` alias in `~/.ssh/config`), 75th+ consecutive beat. Not re-attempted beyond the standard check.
+
+### Running
+`battery9_engagement.py` (PID 77761, started 02:07) still running at beat close. Memory ~4% free at last check (well under the 35% launch floor) — no model launch attempted this beat; both fixes verified via pure-function repro instead. Priority for next beat: read this log in full once complete, specifically to confirm beat200's `_vf_covers_query` header-pollution fix holds on a fresh comp-vf-wrong-entity / comp-past-query pass.
+
+### Addendum — 3rd fix this beat
+3. **`companion.py turn()` — ungrounded self-referential-history claim on turn one, mechanical guard added (2nd-instance bar met per this project's convention).** beat200 logged "I haven't said this before, but..." (battery9_2039 comp-grief-anger-1word-echo T1, fresh turn-one exchange, `self.history` empty) as wanting a guard once a 2nd instance confirmed the pattern. Added a narrow final-pass strip gated on `not self.history` (true only on turn one, same signal convention as this file's other `if reply and self.history` prior-turn guards) that removes the specific leading clause and re-capitalizes the remainder. 4 direct repro cases pass incl. a negative control (turn 2+ with non-empty history left untouched even with identical wording). `scripts/test_companion.py`/`test_companion_memory.py` need live model inference — not run this beat (memory ~4% free, `battery9_engagement.py` running throughout); verified via direct repro only, matching this file's established convention for companion.py changes when a model launch isn't safe. companion.py MD5: f5f19194be8a3aeadf34f4de4b4b6c27 (all 3 dist copies synced). ZIP REBUILT again: dist/hearth-0.2.zip MD5 9c96e298c720669dd512ab8f919d0276.

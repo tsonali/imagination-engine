@@ -1165,6 +1165,41 @@ def fix_word_fusions(text: str) -> tuple[str, int]:
     return result, n
 
 
+# beat201 (review-queue, battery11_1912): a distinct dropped-contraction bug from
+# fix_word_fusions above — that one splits a lowercase+capital fusion with no space
+# ("doesnYou"). This one is a clean dropped-apostrophe-t with a normal space already
+# in place ("don know how much time has passed", "don need words to explain" —
+# imag-intimacy). TTS reads the bare stub as the literal word "don"/"isn"/etc.
+# Most of these stub words have zero legitimate standalone English meaning, so a
+# word-boundary fix (not followed by an apostrophe, which would mean the
+# contraction is already intact) is safe. Confirmed 0 legitimate bare uses of any
+# of these words in A_gold.jsonl's actual script/prompt text (only false hits were
+# JSON-escaped apostrophes and kebab-case id slugs, neither of which this runs on).
+# "don" and "haven" are deliberately excluded from the general list — both have a
+# real standalone meaning ("don a coat", "safe haven") that a blind word-boundary
+# fix would corrupt. Matching this file's established convention (narrow literal
+# fixes, widened only once a second real instance justifies it — see the your/yours
+# and particular/specific families elsewhere in this file), "don" is fixed only in
+# the two exact surface forms already confirmed in a live log.
+_DROPPED_APOSTROPHE_T_RE = re.compile(
+    r"\b(isn|aren|wasn|weren|wouldn|couldn|shouldn|hasn|didn|doesn|hadn)\b(?!['’]t)",
+    re.IGNORECASE,
+)
+_DON_KNOW_NEED_RE = re.compile(r"\bdon\b(?=\s+(?:know|need)\b)", re.IGNORECASE)
+
+
+def fix_dropped_apostrophe_t(text: str) -> tuple[str, int]:
+    """Restore a dropped apostrophe-t on negative-contraction stubs.
+
+    e.g. "don know how much time has passed" → "don't know how much time has
+    passed", "isn even halfway" → "isn't even halfway". Returns (cleaned_text,
+    n_fixes).
+    """
+    result, n1 = _DROPPED_APOSTROPHE_T_RE.subn(lambda m: m.group(1) + "'t", text)
+    result, n2 = _DON_KNOW_NEED_RE.subn("don't", result)
+    return result, n1 + n2
+
+
 _BACK_LEAK_PATTERNS = [
     re.compile(r"\bTwo sentences max\b", re.IGNORECASE),
     re.compile(r"^Open (?:your eyes )?when ready\b", re.IGNORECASE),
@@ -1209,6 +1244,15 @@ _BACK_LEAK_PATTERNS = [
     # instead of narrating in second person. Zero legitimate use: a guided-imagination
     # script never refers to itself as "the script."
     re.compile(r"\bthe script\b.{0,40}\bbroke\b|\bbroke\b.{0,20}\bthe\s+immersion\b",
+               re.IGNORECASE),
+    # beat201: mid-body meta-instruction leak, distinct from the end-of-script BACK
+    # leaks above — a paraphrase of the generator.py line-411 pacing instruction
+    # ("Each paragraph must advance: new moment, new sensation, new beat...")
+    # surfaced verbatim as narrative content mid-script (battery11_0039
+    # imag-eagle-wildlife-plural). Not the literal source string (the model
+    # paraphrased it), so this is a literal strip of the exact surfaced form, not
+    # a generalized instruction-leak detector.
+    re.compile(r"\bEach paragraph should land a new moment or feeling\b",
                re.IGNORECASE),
 ]
 

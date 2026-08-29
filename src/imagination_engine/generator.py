@@ -77,7 +77,8 @@ from imagination_engine.postcheck import (degeneration_report, drop_collapsed_pa
                                           strip_active_body_chair_refs,
                                           strip_alert_calm_violations,
                                           strip_bullet_lines,
-                                          fix_word_fusions)
+                                          fix_word_fusions,
+                                          fix_dropped_apostrophe_t)
 from imagination_engine.scene_bibles import get_bible
 from imagination_engine.structured import extract_array
 
@@ -1255,6 +1256,13 @@ def generate_session(
     if fusion_fixed:
         log.warning('[v6] %d mid-word token fusion(s) split (e.g. doesnYou → doesn You)',
                     fusion_fixed)
+    # beat201: restore a dropped apostrophe-t on negative-contraction stubs (e.g.
+    # "don know" → "don't know", "isn even" → "isn't even") — a plain-space dropped
+    # contraction, distinct from the no-space fusion case above.
+    full, apostrophe_t_fixed = fix_dropped_apostrophe_t(full)
+    if apostrophe_t_fixed:
+        log.warning('[v6] %d dropped apostrophe-t contraction(s) fixed (e.g. don know → don\'t know)',
+                    apostrophe_t_fixed)
     # Strip BACK_PROMPT instruction leaks: model occasionally echoes sub-instructions
     # ('Two sentences max.', 'Open your eyes when ready.') verbatim. Strip them.
     full, leak_removed = strip_back_instruction_leaks(full)
