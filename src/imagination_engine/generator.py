@@ -72,6 +72,8 @@ from imagination_engine.postcheck import (degeneration_report, drop_collapsed_pa
                                           fix_you_before_bodypart,
                                           fix_third_person_alone_drift,
                                           drop_crutch_word_overuse,
+                                          strip_inline_foreign_runs,
+                                          strip_specific_to_pronoun,
                                           fix_object_pronouns,
                                           strip_back_instruction_leaks,
                                           strip_active_body_chair_refs,
@@ -672,6 +674,12 @@ def _generate_settling(engine: Engine, transcript: list[dict], emit) -> str:
     body, crutch_dropped = drop_crutch_word_overuse(body)
     if crutch_dropped:
         log.warning('[settling] %d crutch-phrase overuse sentence(s) dropped (particular/specific)', crutch_dropped)
+    body, specific_to_dropped = strip_specific_to_pronoun(body)
+    if specific_to_dropped:
+        log.warning('[settling] %d "specific to her/him/you" phrase sentence(s) dropped', specific_to_dropped)
+    body, inline_foreign_dropped = strip_inline_foreign_runs(body)
+    if inline_foreign_dropped:
+        log.warning('[settling] %d inline foreign-language sentence(s) dropped', inline_foreign_dropped)
     body, obj_fixed = fix_object_pronouns(body)
     if obj_fixed:
         log.warning('[settling] %d object-pronoun error(s) fixed (she→her after preposition)', obj_fixed)
@@ -1247,6 +1255,12 @@ def generate_session(
     full, crutch_dropped = drop_crutch_word_overuse(full)
     if crutch_dropped:
         log.warning('[v6] %d crutch-phrase overuse sentence(s) dropped (particular/specific)', crutch_dropped)
+    full, specific_to_dropped = strip_specific_to_pronoun(full)
+    if specific_to_dropped:
+        log.warning('[v6] %d "specific to her/him/you" phrase sentence(s) dropped', specific_to_dropped)
+    full, inline_foreign_dropped = strip_inline_foreign_runs(full)
+    if inline_foreign_dropped:
+        log.warning('[v6] %d inline foreign-language sentence(s) dropped', inline_foreign_dropped)
     full, obj_fixed = fix_object_pronouns(full)
     if obj_fixed:
         log.warning('[v6] %d object-pronoun error(s) fixed (she→her after preposition)', obj_fixed)

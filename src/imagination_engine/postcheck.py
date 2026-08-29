@@ -205,6 +205,33 @@ def drop_foreign_paragraphs(text: str) -> tuple[str, int]:
     return out, len(bad)
 
 
+# beat203 (battery11_0550, imag-mri): a CJK leak spliced directly onto an
+# English word with no whitespace or line break -- "...resonating from deep
+# within this room需要两个部分，一部分从用户分类信息中获取..." -- survives
+# drop_foreign_paragraphs() untouched because that check works at LINE
+# granularity (>5% CJK density over the whole line); a short CJK splice inside
+# one long English paragraph never crosses that density threshold. This is a
+# TTS-critical defect (the CJK text would be read aloud verbatim). Scans at
+# SENTENCE granularity instead: any sentence containing 2+ CJK characters
+# anywhere in it is dropped whole, English lead-in included -- a model that
+# switches language mid-sentence has broken that sentence structurally, not
+# just inserted a foreign word, so partial extraction isn't attempted.
+def strip_inline_foreign_runs(text: str) -> tuple[str, int]:
+    """Drop sentences containing an inline CJK leak that drop_foreign_paragraphs
+    misses because the leak doesn't dominate its whole line. Returns
+    (cleaned_text, n_dropped)."""
+    sentences = re.split(r"(?<=[.!?。！？])\s*", text.strip())
+    kept = []
+    dropped = 0
+    for s in sentences:
+        if len(_CJK_RANGE.findall(s)) >= 2:
+            dropped += 1
+        else:
+            kept.append(s)
+    out = " ".join(s for s in kept if s.strip())
+    return out, dropped
+
+
 # --- non-adjacent verbatim repetition: the THIRD decay mode ------------------
 # Two separate checks:
 #   NGRAM=12: a 12-word verbatim shingle recurring in 2+ different paragraphs.
@@ -999,6 +1026,15 @@ _INTIMACY_OBJECT_PRONOUN_SUBS = (
     # off two examples.
     (re.compile(r"\bmatch\s+your\s+in\s+pace\b", re.IGNORECASE), "match yours in pace"),
     (re.compile(r"\bmeet\s+your\s+in\s+this\s+shared\s+evening\s+moment\b", re.IGNORECASE), "meet yours in this shared evening moment"),
+    # beat203 (battery11_0550 imag-intimacy honest read): two more instances of
+    # the beat187/198 shape at the script's own CLOSING lines -- the fixer ran
+    # this exact script (log claims "3 your/theirs object-pronoun error(s)
+    # fixed") but missed these two, the most prominent position in the output.
+    # "Her hand in your one final time" / "Her hand releases your finally" both
+    # need the standalone possessive ("yours") since "your" here is the direct/
+    # prepositional object standing in for "your hand".
+    (re.compile(r"\bin\s+your\s+one\s+final\s+time\b", re.IGNORECASE), "in yours one final time"),
+    (re.compile(r"\breleases\s+your\s+finally\b", re.IGNORECASE), "releases yours finally"),
 )
 
 
@@ -1791,6 +1827,38 @@ def drop_crutch_word_overuse(text: str) -> tuple[str, int]:
             continue
         seen += n_here
         kept.append(s)
+    return " ".join(kept), dropped
+
+
+# beat203 (battery11_0550, imag-intimacy): "Her laugh drifts in like music
+# specific to her." and "The specific tone in her laugh." both survived
+# drop_crutch_word_overuse() because that function keeps the first 2
+# occurrences of particular/specific by design (beat198/200: legitimate single
+# uses of the bare word must not be stripped). But generator.py:152 bans this
+# EXACT phrase shape outright ("specific to her/him/you/only to") as a named
+# lazy-descriptor pattern, not merely as overuse of the word "specific" -- the
+# ban is on the phrase, not the count. Unlike the general crutch-word cap,
+# this always strips regardless of how many prior occurrences were kept.
+_SPECIFIC_TO_PRONOUN_RE = re.compile(
+    r"\bspecific(?:ally)?\s+(?:to|only\s+to)\s+(?:her|him|you|them|only)\b",
+    re.IGNORECASE,
+)
+
+
+def strip_specific_to_pronoun(text: str) -> tuple[str, int]:
+    """Drop sentences containing the explicitly-banned "specific to her/him/
+    you/them" lazy-descriptor phrase (generator.py's named example of a lazy
+    stand-in for actually naming the concrete detail). Unconditional -- not
+    capped like drop_crutch_word_overuse, since the ban targets the phrase
+    itself, not general overuse of the word "specific"."""
+    sentences = re.split(r"(?<=[.!?])\s+", text.strip())
+    kept = []
+    dropped = 0
+    for s in sentences:
+        if _SPECIFIC_TO_PRONOUN_RE.search(s):
+            dropped += 1
+        else:
+            kept.append(s)
     return " ".join(kept), dropped
 
 

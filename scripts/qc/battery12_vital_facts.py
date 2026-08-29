@@ -58,17 +58,48 @@ def _get_tc():
 
 @contextlib.contextmanager
 def _vf_fixture(content: str):
-    """Temporarily write test content to the server's vital-facts.md."""
-    VF_PATH.parent.mkdir(parents=True, exist_ok=True)
-    original = VF_PATH.read_text(encoding="utf-8") if VF_PATH.exists() else None
-    try:
-        VF_PATH.write_text(content, encoding="utf-8")
-        yield
-    finally:
-        if original is not None:
-            VF_PATH.write_text(original, encoding="utf-8")
-        elif VF_PATH.exists():
-            VF_PATH.unlink()
+    """Point the in-process TestClient's VitalFacts singleton at an isolated
+    temp file for the duration of one test, instead of writing into the real
+    production vital-facts.md.
+
+    beat203: root-caused BOTH battery9_0711's and companion_deep_test_0854's
+    "product lead at Hearth" contamination to this fixture's old behavior --
+    it used to write test content directly into VF_PATH, the SAME file the
+    separately-running LIVE server (hit over real HTTP by battery9,
+    companion_deep_test, and every other concurrent QC battery) reads fresh on
+    every request. qc_queue.sh runs multiple batteries concurrently, so any
+    unrelated battery's turn landing inside this fixture's write-window picked
+    up battery12's synthetic VF content mid-test -- not a companion.py
+    hallucination at all, a cross-battery test-isolation bug: two independent
+    background-agent reads of two different logs converged on the exact same
+    literal fixture string ("product lead at Hearth") as the "fabricated"
+    fact, which is only possible if it leaked from a shared source, not model
+    drift in two unrelated runs.
+
+    Fix: never touch the shared production file. Monkeypatch an isolated
+    VitalFacts instance (backed by a temp file) into imagination_engine.server
+    and force _use_server off for the duration, so this fixture's own calls
+    are guaranteed to land on the in-process TestClient (which runs the exact
+    same route-handler code as the live server, just not over a socket) against
+    the temp file -- the real production vital-facts.md and the live separate
+    server process are completely untouched.
+    """
+    global _use_server
+    import imagination_engine.server as _srv
+    from imagination_engine.vital_facts import VitalFacts
+
+    with tempfile.TemporaryDirectory(prefix="battery12_vf_") as tmp_dir:
+        tmp_path = Path(tmp_dir) / "vital-facts.md"
+        tmp_path.write_text(content, encoding="utf-8")
+        original_vf = _srv._vital_facts
+        original_use_server = _use_server
+        _srv._vital_facts = VitalFacts(tmp_path)
+        _use_server = False
+        try:
+            yield
+        finally:
+            _srv._vital_facts = original_vf
+            _use_server = original_use_server
 
 
 def _sid(n: int) -> str:

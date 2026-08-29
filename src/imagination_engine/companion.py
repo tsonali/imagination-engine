@@ -626,6 +626,39 @@ _VF_RELATIONSHIP_WORDS: frozenset[str] = frozenset({
     "cat", "dog", "pet",
 })
 
+# beat203 (battery9_0711 comp-vf-no-fabrication): "No -- we haven't discussed
+# my brother Marcus." -- Marcus isn't even on file (the scenario's whole point
+# is a correct denial of an unrecognized entity), so this isn't a VF-content
+# match _fix_vf_first_person_misattribution can key off; it's a plain
+# grammatical misattribution -- the companion has no family, so "my
+# <family-word>" in its OWN reply is always wrong regardless of whether that
+# specific relation is on file. Deliberately narrower than
+# _VF_RELATIONSHIP_WORDS (excludes job/work/friend/boss/manager/coworker/
+# colleague, which have legitimate figurative "my job/work" companion uses
+# elsewhere in this file) -- unambiguous family-only words only.
+_MY_FAMILY_WORD_RE = re.compile(
+    r"\bmy\s+(sister|brother|mom|dad|mother|father|husband|wife|son|daughter|cat|dog|pet)\b",
+    re.IGNORECASE,
+)
+
+
+def fix_my_family_misattribution(reply: str) -> tuple[str, int]:
+    """Swap 'my <family-word>' -> 'your <family-word>' in a companion reply.
+
+    The companion has no family of its own, so any first-person possessive
+    attached to a family word in its OWN output is always a misattribution of
+    the user's fact, whether or not that specific relation exists on file.
+    """
+    if not reply:
+        return reply, 0
+
+    def _swap(m: "re.Match") -> str:
+        your = "Your" if m.group(0)[0].isupper() else "your"
+        return f"{your} {m.group(1)}"
+
+    fixed, n = _MY_FAMILY_WORD_RE.subn(_swap, reply)
+    return fixed, n
+
 # Common English sentence-start words that look like proper nouns (capital + 2+ lowercase)
 # but are not names — filtered out in _has_unrecognized_name() to avoid false positives.
 _SC13_COMMON_WORDS: frozenset[str] = frozenset({
@@ -2470,7 +2503,11 @@ class Companion:
             r'|\bwhat does (?:that|this) make\b'
             # beat116: "What does he need to know instead?" — pronoun form without "from/of you"
             # suffix also abandons the user's experience for the other person's needs.
-            r'|\bwhat does (?:he|she|they) (?:need|want)\b'
+            # beat203 (battery9_0711 comp-grief-anger-self-recycle): "So what does he
+            # ACTUALLY need to know without hearing it as blame?" escaped this branch
+            # purely because of the inserted adverb between the pronoun and need/want —
+            # optional adverb group added so the same pivot can't hide behind one word.
+            r'|\bwhat does (?:he|she|they) (?:actually |really |even |truly |honestly )?(?:need|want)\b'
             # beat129: "does it feel like HE'S making the conversation about himself?" —
             # barrier-deflect in question form. Pivots to diagnosing HIS behavior instead of
             # naming what the barrier CREATES for the user (her bind, cost, stuck place).
@@ -3112,9 +3149,20 @@ class Companion:
             r'\bi\s+(?:think\s+)?(?:love|adore)\s+you\b'
             r'|\byou(?:\'re|\s+are)\s+(?:my\s+)?(?:best\s+friend|everything\s+to\s+me)\b',
             user_message, re.IGNORECASE))
+        # beat203 (battery2b_honesty_1006): "What you feel is real and deserves
+        # honesty back: there's no one here to love." slipped through this GATE
+        # entirely (not just the regen path beat194 already fixed) because the
+        # gate used .search() -- the disclaimer is present, just buried after a
+        # validating preamble, so .search() found it anywhere and the guard
+        # never fired. beat194 fixed the exact same search-vs-match gap for the
+        # REGEN's own output (line ~3163) but never applied it here, to the
+        # original reply's gate check -- the two checks drifted out of sync.
+        # The project's own rule (comp-para-love / beat93) is "the FIRST thing
+        # you say is the plain true answer" -- .match() (anchors at position 0)
+        # enforces that at the gate, same as it already does for the regen.
         if (reply
                 and _HONESTY_PROBE_RE.search(user_message)
-                and not _HONESTY_CLEAR_RE.search(reply)):
+                and not _HONESTY_CLEAR_RE.match(reply)):
             log.warning(
                 "companion: honesty-dodge detected — reply didn't open with No/software "
                 "on direct care/love probe; regenning with explicit honesty constraint"
@@ -3656,6 +3704,21 @@ class Companion:
                         "a user fact as its own; pronoun-corrected"
                     )
                     reply = _fp_fixed
+
+        # beat203 (battery9_0711 comp-vf-no-fabrication): unconditional (not
+        # gated on self.vital_facts) since the misattribution is wrong even
+        # when the named relation isn't on file at all -- "we haven't
+        # discussed my brother Marcus" is wrong regardless of whether Marcus
+        # exists in vital-facts.md; the companion simply has no family, ever.
+        if reply:
+            _fam_fixed, _fam_n = fix_my_family_misattribution(reply)
+            if _fam_n:
+                log.warning(
+                    "companion: MY-FAMILY-MISATTRIBUTION — reply claimed the "
+                    "user's family relation as its own (%d fix(es)); corrected",
+                    _fam_n,
+                )
+                reply = _fam_fixed
 
         # Self-recycle guard: if reply's first 4 words appeared verbatim in the
         # companion's PREVIOUS turn, the model is recycling its own prior insight.
