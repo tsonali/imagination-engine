@@ -971,6 +971,32 @@ def fix_predicative_her(text: str) -> tuple[str, int]:
     return result, fixed
 
 
+# beat207 (queue_0829_2347_battery11_imagination_bank.log honest read, imag-
+# intimacy): "You hear herself say something to you as she walks over" — the
+# reflexive "herself" used where the object pronoun "her" is required (the
+# user hears HER say something, not hears her-hearing-herself). Scoped to
+# "hear(s/d) herself say" only, not a blanket herself->her ban: "she caught
+# herself" / "she surprised herself" are legitimate reflexive uses elsewhere
+# in this scenario type and must stay untouched.
+_REFLEXIVE_HER_OBJECT_RE = re.compile(
+    r"\bhear(s|d)?\s+herself\s+say\b", re.IGNORECASE
+)
+
+
+def fix_reflexive_her_object(text: str) -> tuple[str, int]:
+    """'hear(s/d) herself say' -> 'hear(s/d) her say' (object pronoun, not reflexive)."""
+    fixed = 0
+
+    def _replace(m: "re.Match") -> str:
+        nonlocal fixed
+        fixed += 1
+        suffix = m.group(1) or ""
+        return f"hear{suffix} her say"
+
+    result = _REFLEXIVE_HER_OBJECT_RE.sub(_replace, text)
+    return result, fixed
+
+
 # beat183 (2026-08-25): battery11_0825_0950 imag-intimacy honest read — four new
 # object-pronoun escapes distinct from fix_predicative_your's copula pattern (these
 # are "your"/"theirs" standing in for "you"/"them" as the object of a preposition or
@@ -1754,7 +1780,18 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     # companion-bird arc, explicit and unambiguous — no prior phrase in this
     # list matched it. Parity with generator.py + battery11_imagination_bank.py.
     r'|\bcompany\s+here\b'               # "there is company here"
-    r'|\bsomeone\s+whose\s+voice\b',     # "someone whose voice echoes back"
+    r'|\bsomeone\s+whose\s+voice\b'      # "someone whose voice echoes back"
+    # beat207 (queue_0829_2347_battery11_imagination_bank.log, background-agent
+    # honest read): imag-eagle-golden-eagle-wildlife — "The smaller bird passes
+    # in front, its wings spread wide as it matches altitude for a moment before
+    # passing on." — full visual companion-bird arc with agency, no named
+    # species. imag-eagle-companion-bird-he (same log) — "an answer to that cry
+    # exists too... not everything is lost if another hears the same sound as
+    # you today" — new acoustic-companion surface form. Parity with generator.py.
+    r'|\bthe\s+smaller\s+bird\b'         # "the smaller bird passes in front"
+    r'|\bmatches\s+altitude\b'           # "matches altitude for a moment"
+    r'|\banswer\s+to\s+that\s+cry\b'     # "an answer to that cry exists too"
+    r'|\banother\s+hears\s+the\s+same\s+sound\b',  # "if another hears the same sound"
     re.IGNORECASE,
 )
 

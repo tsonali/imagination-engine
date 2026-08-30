@@ -67,6 +67,7 @@ from imagination_engine.postcheck import (degeneration_report, drop_collapsed_pa
                                           fix_your_contraction,
                                           fix_copula_youre_alone, fix_predicative_your,
                                           fix_predicative_her,
+                                          fix_reflexive_her_object,
                                           fix_intimacy_object_pronoun_escapes,
                                           fix_subject_pronouns, fix_your_subject_pronoun,
                                           fix_you_before_bodypart,
@@ -650,6 +651,9 @@ def _generate_settling(engine: Engine, transcript: list[dict], emit) -> str:
     body, predicative_her_fixed = fix_predicative_her(body)
     if predicative_her_fixed:
         log.warning('[settling] %d predicative her→hers error(s) fixed', predicative_her_fixed)
+    body, reflexive_her_fixed = fix_reflexive_her_object(body)
+    if reflexive_her_fixed:
+        log.warning('[settling] %d reflexive herself→her error(s) fixed', reflexive_her_fixed)
     body, obj_pronoun_escape_fixed = fix_intimacy_object_pronoun_escapes(body)
     if obj_pronoun_escape_fixed:
         log.warning('[settling] %d your/theirs object-pronoun error(s) fixed', obj_pronoun_escape_fixed)
@@ -1231,6 +1235,9 @@ def generate_session(
     full, predicative_her_fixed = fix_predicative_her(full)
     if predicative_her_fixed:
         log.warning('[v6] %d predicative her→hers error(s) fixed', predicative_her_fixed)
+    full, reflexive_her_fixed = fix_reflexive_her_object(full)
+    if reflexive_her_fixed:
+        log.warning('[v6] %d reflexive herself→her error(s) fixed', reflexive_her_fixed)
     full, obj_pronoun_escape_fixed = fix_intimacy_object_pronoun_escapes(full)
     if obj_pronoun_escape_fixed:
         log.warning('[v6] %d your/theirs object-pronoun error(s) fixed', obj_pronoun_escape_fixed)
@@ -1530,6 +1537,22 @@ def generate_session(
             # here") — no prior phrase in this list matched it.
             "company here",
             "someone whose voice",
+            # beat207 (queue_0829_2347_battery11_imagination_bank.log, background-
+            # agent honest read): imag-eagle-golden-eagle-wildlife — "The smaller
+            # bird passes in front, its wings spread wide as it matches altitude
+            # for a moment before passing on." A full visual companion-bird arc
+            # with agency (passing in front, matching altitude) that mechanically
+            # PASSED both the hallucinated_wildlife token check (no named species)
+            # and every prior anon-companion phrase. imag-eagle-companion-bird-he
+            # (same log): "an answer to that cry exists too... not everything is
+            # lost if another hears the same sound as you today" — new acoustic-
+            # companion surface form (the responding-cry family beat143/169/188
+            # already covers "another call"/"other's call"/"answered by another",
+            # but not this construction).
+            "the smaller bird",
+            "matches altitude",
+            "answer to that cry",
+            "another hears the same sound",
         ))
         if anon_companion_dropped:
             log.warning('[v6] %d anonymous-companion sentence(s) dropped (you/we both in solo eagle active-body)',
@@ -1545,7 +1568,24 @@ def generate_session(
         _chair_body_kept = []
         _chair_body_dropped = 0
         for _s in _chair_body_sents:
-            if re.search(r'\byour\s+chair\b|\bin\s+(?:a\s+|the\s+)?chair\b|\bfrom\s+(?:your\s+)?chair\b', _s, re.IGNORECASE):
+            # beat207 (queue_0829_2347_battery11_imagination_bank.log): imag-eagle-
+            # golden-eagle-wildlife closing line "You notice what's under you —
+            # chair or bed or surface that holds you steady..." — bare "chair" in
+            # a generic furniture-enumeration list, matching none of the prior
+            # 3 patterns (all require "your chair" / "in a/the chair" / "from
+            # chair"). This is the same generic-furniture-reminder tell the
+            # active-body opening filter exists to catch, just in the closing.
+            # beat207 (same log, imag-eagle-wildlife-plural): "Let that warmth
+            # travel through your body right down into where you are seated
+            # here." — "seated" is on generator.py's own FORBIDDEN-THROUGHOUT
+            # list for active-body scenes (line ~831) but had no mechanical
+            # backstop (only literal "chair" was ever stripped). Eagle scripts
+            # never legitimately return the listener to a seated posture (no
+            # room-return close exists for this scenario class, unlike
+            # grief-pet's explicit "returns to the listening chair"), so this
+            # is safe as an unconditional full-script strip within the same
+            # eagle-scoped block as the chair check above.
+            if re.search(r'\byour\s+chair\b|\bin\s+(?:a\s+|the\s+)?chair\b|\bfrom\s+(?:your\s+)?chair\b|\bchair\s+or\s+(?:bed|surface)\b|\bseated\b', _s, re.IGNORECASE):
                 _chair_body_dropped += 1
             else:
                 _chair_body_kept.append(_s)

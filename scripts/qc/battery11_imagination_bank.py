@@ -319,7 +319,17 @@ for sc in scenarios:
                 # and unambiguous ("there is company here") — no prior phrase
                 # in this list matched it. Parity with generator.py's beat206 entry.
                 r'|\bcompany\s+here\b'
-                r'|\bsomeone\s+whose\s+voice\b',
+                r'|\bsomeone\s+whose\s+voice\b'
+                # beat207 (queue_0829_2347_battery11_imagination_bank.log honest
+                # read): golden-eagle-wildlife "the smaller bird passes in
+                # front... matches altitude" (visual companion, no named
+                # species) + companion-bird-he "answer to that cry exists
+                # too... another hears the same sound" (acoustic companion).
+                # Parity with generator.py + postcheck.py.
+                r'|\bthe\s+smaller\s+bird\b'
+                r'|\bmatches\s+altitude\b'
+                r'|\banswer\s+to\s+that\s+cry\b'
+                r'|\banother\s+hears\s+the\s+same\s+sound\b',
                 lower, _re.IGNORECASE
             ))
             # beat153: Chair-body reminder in eagle script (not just opening).
@@ -329,8 +339,15 @@ for sc in scenarios:
             # beat158: extended "in a chair" — battery11_0529 companion-bird-he generated
             # "You are not in a chair." (constraint-bleed from FORBIDDEN note). The prior
             # regex had (?:the\s+)? which matched "in the chair" / "in chair" but not "in a chair".
+            # beat207: bare "chair or bed or surface" furniture-enumeration in a
+            # closing line ("You notice what's under you — chair or bed or
+            # surface that holds you steady...") matched none of the 3 prior
+            # patterns. Parity with generator.py.
+            # beat207: "seated" ("...where you are seated here") added — on
+            # generator.py's own FORBIDDEN-THROUGHOUT list for active-body
+            # scenes but had no mechanical check at all. Parity with generator.py.
             chair_body = bool(_re.search(
-                r'\byour\s+chair\b|\bin\s+(?:a\s+|the\s+)?chair\b|\bfrom\s+(?:your\s+)?chair\b',
+                r'\byour\s+chair\b|\bin\s+(?:a\s+|the\s+)?chair\b|\bfrom\s+(?:your\s+)?chair\b|\bchair\s+or\s+(?:bed|surface)\b|\bseated\b',
                 lower, _re.IGNORECASE
             ))
             # beat165 (2026-08-22): "her" object/possessive pronoun as companion signal.
