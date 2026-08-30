@@ -4558,8 +4558,13 @@ class Companion:
             )
             # Mid-clause form (after a comma/dash, not a fresh sentence):
             # "That said, it sounds like staying constant..." -> "That said, staying constant..."
+            # beat209 (battery9_0703 comp-para-love honest read): "What you told me is
+            # real and deserves honesty back: it sounds like this hour matters..." — the
+            # phrase followed a COLON, not a comma/dash, so the lookbehind below never
+            # matched. Added ":" to the punctuation class (same reasoning: any punctuation
+            # mark directly preceding the phrase means it's mid-clause, not sentence-start).
             reply = re.sub(
-                r"(?<=[,—-]\s)(?:it|that)\s+sounds\s+like\s+", "", reply, flags=re.IGNORECASE
+                r"(?<=[,:—-]\s)(?:it|that)\s+sounds\s+like\s+", "", reply, flags=re.IGNORECASE
             )
             # beat187: conjunction-joined form. battery9_0826_0519 comp-para-stay:
             # "...something that doesn't go away, and it sounds like the rest

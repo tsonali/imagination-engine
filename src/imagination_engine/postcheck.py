@@ -901,10 +901,45 @@ _PREDICATIVE_YOUR_RE = re.compile(
     # gap would apply to "is your today" and "today" can never introduce a
     # possessable noun after "your" either — safe by the same reasoning as
     # "whenever"/"between").
-    r"too|for|on|at|in|to|by|with|from|between|whenever|as|today)\b)"
+    # beat209 (battery11_0541 imag-eagle-wildlife-plural honest read): "respect for
+    # the territory that's your above all else down below" — "above" wasn't in the
+    # follow-set, same non-noun-introducing reasoning as "on"/"at"/"in": "above"
+    # always opens a comparison/prepositional clause ("above all else", "above the
+    # rest"), never introduces a possessable noun directly after "your".
+    r"too|for|on|at|in|to|by|with|from|between|whenever|as|today|above)\b)"
     r")",
     re.IGNORECASE,
 )
+
+# beat209: same instance above used the contraction "that's your" rather than the
+# spelled-out copula "that is your" — _PREDICATIVE_YOUR_RE's copula alternation
+# (is/was/are/were/be/been/become/becomes/became) never matches "'s", so this exact
+# transcript string didn't match _PREDICATIVE_YOUR_RE even after adding "above."
+# Narrow, separate regex for the 's-contraction case (its own function rather than
+# folding into _PREDICATIVE_YOUR_RE's group numbering, which the _replace callback
+# above depends on staying fixed) — same follow-set/reasoning, applies only when a
+# word character immediately precedes 's (so it can't match a standalone "'s" token).
+_PREDICATIVE_YOUR_CONTRACTION_RE = re.compile(
+    r"(?<=\w)'s\s+your\b"
+    r"(?=\s*(?:[.,!?;]|—|$|\s+(?:entirely|completely|now|here|still|again|"
+    r"too|for|on|at|in|to|by|with|from|between|whenever|as|today|above)\b)"
+    r")",
+    re.IGNORECASE,
+)
+
+
+def fix_predicative_your_contraction(text: str) -> tuple[str, int]:
+    """"'s your [end-of-clause]" -> "'s yours [end-of-clause]" (contraction sibling
+    of fix_predicative_your — same shape, "is"/"was"/etc. contracted to 's)."""
+    fixed = 0
+
+    def _replace(m: "re.Match") -> str:
+        nonlocal fixed
+        fixed += 1
+        return m.group(0)[: -len("your")] + "yours"
+
+    result = _PREDICATIVE_YOUR_CONTRACTION_RE.sub(_replace, text)
+    return result, fixed
 
 
 def fix_predicative_your(text: str) -> tuple[str, int]:
