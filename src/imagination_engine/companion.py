@@ -1050,11 +1050,19 @@ _CONFIRM_LANDS: frozenset[str] = frozenset({
 # beat175: rotating fallback bridges for forced-path gerund echo escapes.
 # Use user_message length mod len to vary across different scenarios so
 # the same bridge string does not appear multiple times in one battery run.
+# beat205 (battery2b_honesty PROBE1): the 4th bridge used to be "That's the
+# thing still sitting there." -- itself a vague-filler shape (a human read
+# flagged it as generic-enough-to-apply-to-anything after 3 failed regen
+# passes shipped it), but it never matches _VAGUE_FILLER_RE (the tail "still
+# sitting there" doesn't fit that regex's narrow suffix grammar), so nothing
+# downstream ever caught the fallback contradicting the very floor it exists
+# to enforce. Replaced with a concrete imperative that can't parse as a
+# "that's/it's/this is + vague noun" filler shape by construction.
 _GERUND_FALLBACK_BRIDGES = [
     "That's going to sit with you today.",
     "Tell me what comes right after that.",
     "What's the part you haven't said out loud yet?",
-    "That's the thing still sitting there.",
+    "Name what this is costing you right now.",
 ]
 
 
@@ -2732,6 +2740,28 @@ class Companion:
             reply = _strip_echo("".join(chunks).strip(), user_message)
             reply = _strip_thats_real_tic(reply)
             reply = _strip_vent_hollow_second(reply)
+            # beat205 (battery9_1312 comp-grief-anger-barrier-vague T1): the vague-stub
+            # guard (~line 2664 above) only ever tests the FIRST-PASS reply. When that
+            # first-pass reply is itself an echo (stripped to '' before reaching the
+            # vague-stub check, since _is_vague requires reply truthy), the no-echo
+            # regen above never gets checked against _VAGUE_FILLER_RE at all — and
+            # the observed defect ("Anger at your husband — that's a whole thing in
+            # itself.") is this no-echo regen's OWN output reproducing the identical
+            # vague-filler shape the earlier guard exists to catch. Re-apply the same
+            # test (full match or post-em-dash) to this regen's reply.
+            if reply:
+                _r1_after_dash = reply.split("—", 1)[1].strip() if "—" in reply else ""
+                _r1_is_vague = (
+                    (_VAGUE_FILLER_RE.match(_norm_apos(reply))
+                     or (_r1_after_dash and _VAGUE_FILLER_RE.match(_norm_apos(_r1_after_dash))))
+                    and reply.strip().rstrip('.!?').lower() not in _vague_lands
+                )
+                if _r1_is_vague:
+                    log.warning(
+                        "companion: no-echo regen output is itself vague filler "
+                        "('%s') — replacing with fixed bridge", reply[:60]
+                    )
+                    reply = _gerund_bridge(user_message)
             # beat124: gerund-echo guard on first-regen output.
             # The second-pass guard (beat109, below) only fires when first regen
             # also strips to empty. A gerund opener that survives first regen
@@ -3314,9 +3344,16 @@ class Companion:
             r"^No\s*[—\-,]?\s*(?:we\s+)?haven'?t\s+discussed\b", re.IGNORECASE
         )
         _pq_already_canonical = bool(reply and _pq_native_no_re.match(reply.strip()))
+        # beat205 (battery9_1312 comp-past-query): a native "We haven't discussed
+        # this before." (no leading "No") matched neither the "You/I haven't" prefix
+        # branch nor _pq_already_canonical (which requires a leading "No"), so it
+        # skipped the whole guard untouched -- shipping without the mandatory "No"
+        # opener AND without the VF/past coverage check that would catch a wrong
+        # denial. Added to the trigger; the existing generic fallback below already
+        # prepends "No -- " correctly once this reply enters the guard.
         if (_is_memory_probe(user_message)
                 and reply
-                and (re.match(r"^(?:[Yy]ou haven'?t|[Ii] haven'?t)\b", reply.strip())
+                and (re.match(r"^(?:[Yy]ou haven'?t|[Ii] haven'?t|[Ww]e haven'?t)\b", reply.strip())
                      or _pq_already_canonical)):
             _vf_ctx = self.vital_facts.context_block() if self.vital_facts else ""
             _vf_hit = bool(_vf_ctx) and _vf_covers_query(user_message, _vf_ctx)

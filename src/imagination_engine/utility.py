@@ -729,7 +729,15 @@ class Assistant:
                         re.escape(sib), f"{n} (median: {sib})", out, count=1
                     )
                 else:
-                    out = re.sub(re.escape(sib), f"{n}/{sib}", out, count=1)
+                    # beat205 (battery10_1627 sec-summarize-lossless): the blind
+                    # slash-join produced unparseable output when n/sib aren't a
+                    # median/rate pair -- e.g. "Q2/18%" (a quarter label glued to
+                    # an unrelated percentage) in "representing Q2/18% of revenue".
+                    # Both numbers still pass the mandatory-number floor check
+                    # (both literally present) while reading as broken English.
+                    # Parenthetical aside is grammatical regardless of what kind
+                    # of figure n/sib are, mirroring the median case above.
+                    out = re.sub(re.escape(sib), f"{sib} ({n})", out, count=1)
                 log.info("secretary[%s]: last-resort inject '%s' adjacent to '%s' in output",
                          task_key, n, sib)
             # Label-inversion guard: both numbers present but median/rate roles swapped.
