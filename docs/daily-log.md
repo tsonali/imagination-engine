@@ -10317,3 +10317,21 @@ Gold(A) +5 (6657→6662): pulled-sugar rose, model rocket launch, timber-frame j
 Not fixed, logged as FYI in review-queue.md: eulogy pronoun-referent incoherence ("important to him" in a first-person eulogy, high stakes, single instance, no fixed string to patch), a same-turn deadline fabrication ("Friday" → "tomorrow"), a GRAVITY-template/VF-entity cross-contamination, a possible beat118 Case 5c regression, a new discourse-marker-echo escape, a BYO pronoun/narrator-voice leak, a truncated non-responsive reply, a persona-deflection honesty-floor dodge, a raw document-heading leak, and a warmth gap on 2 honesty-floor scenarios. Full detail with exact quotes in review-queue.md.
 
 Coordination: 2 peer sessions active (sonali-f1, sonali-4d), broadcast sent claiming this beat's backlog, no replies by close, no collision. Sonali: push v1.0 tag when ready (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.
+
+## 2026-08-29 (beat206, sonali-29)
+
+Read: beat205's 2 flagged priority logs via parallel background agents — queue_0829_1746_battery11_imagination_bank.log (7 scenarios; confirmed the queue.log PASS/FAIL rollup is still a false-positive-prone counting bug, real result 35/35 PASS) and queue_0829_1915_battery9_engagement.log (20 scenarios, verifying beat205's 4 fixes: 3 hold or weren't exercised, 1 — the vague-filler regen re-check — holds for the literal "thing" phrasing but the underlying noun-allowlist escaped again via a new noun, "hour").
+
+Fixed: (1) eagle acoustic-companion 3-passage hallucination in imag-eagle-companion-bird-he ("There is company here; someone whose voice echoes...") — 3-way parity across generator.py/postcheck.py/battery11_imagination_bank.py; (2) `_VAGUE_FILLER_RE` generalized to the whole time-duration noun class (hour/day/week/month/year/decade/moment/while) instead of another single-noun patch, 6th surface form of this ~200-beat-old family; (3) `_BARRIER_PIVOT_RE` gained "miss" alongside need/want (comp-grief-anger-barrier-pivot T2); (4) `_YOUR_BEFORE_ARTICLE_RE` extended from a/an to "the" (imag-intimacy "your the way..."), same zero-FP grammar rule as beat192.
+
+Verified better: all 4 fixes tested against exact transcript quotes with explicit FP-guard cases (e.g. "That's a lie."/"That's fear talking." confirmed NOT matching the generalized vague-filler regex; "your theatre" confirmed NOT matching the your-before-article extension). py_compile clean, scripts/test_postcheck.py ALL PASS. No model launch — battery10_registers ran the whole beat; package.sh (pure file ops) was safe to run alongside it. Commit 7de2cdd. All dist copies synced, ZIP rebuilt (f6adcb8fed0a67a912fff224d273fbd4).
+
+Runs next: qc_queue continues its rotation (battery10_registers in flight at close). Next beat should live-verify these 4 fixes on their next natural battery9/battery11 cycle.
+
+Not fixed, logged as FYI in review-queue.md: imag-calm-settle severe back-half near-gibberish with zero postcheck coverage for that defect class; an orphaned sentence fragment from a drop-filter in golden-eagle-wildlife; imag-intimacy chair-bleed (still no dedicated chair postcheck for that scenario type) plus 2 more instances of the already-documented non-generalizing your/yours family; a hallucinated "they" with no antecedent; a garbled follow-up question in the single highest-stakes register scenario (comp-crisis-adjacent); an uncaught 2-word echo; a low-severity Jaccard-threshold edge case. Full detail with exact quotes in review-queue.md.
+
+Gold(A) +5 (6662→6667): dressage extended trot, sand mandala final grain, sled dog race finish chute, wingsuit valley flight line, cave-aged cheese first crack — all freshness-checked (0 prior grep hits) and forbidden-phrase-scanned clean.
+
+Mini: still unreachable, same foreign-network signature beat205 diagnosed — re-checked, no new information, not a Hearth-side bug.
+
+Coordination: 2 peer sessions active (sonali-f1, sonali-4d), broadcast sent claiming this beat's work before touching anything, no replies by close, no collision. Sonali: push v1.0 tag when ready (git push origin v1.0). Only Sonali-physical: notarization + F5 voice dial.

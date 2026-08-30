@@ -4729,3 +4729,43 @@ companion.py MD5: be176b99271ff7518bf92408b5478507. utility.py MD5: ab6aa83ecd7b
 
 ### Running
 `battery11_imagination_bank.py` (PID 10577, started 17:46) still in flight at beat close, memory down to 12% free — priority read for next beat, plus live-verify this beat's 4 fixes on their next natural battery9/battery10/battery2b cycle.
+
+## beat206 (2026-08-29, sonali-29) — FYI, no questions
+
+**4 code fixes, all verified via direct unit tests + FP guards, no model launch (battery10_registers ran throughout; package.sh is pure file ops so safe alongside a live battery).** Cleared beat205's 2 flagged priority reads via 2 parallel background agents.
+
+**battery11_1746 read confirmed a standing bug:** the queue.log PASS/FAIL rollup counting script still sweeps up historical regression-note text inside docstrings — "41 PASS / 7 FAIL" was actually 35/35 real PASS. Same bug beat193 partially fixed for one log format; not re-investigated this beat, just reconfirmed present.
+
+**battery9_1915 verified beat205's 4 fixes:** fix 1 (PAST-QUERY "We haven't" trigger) not exercised in this log but no regression; fix 3 (fallback bridge replacement) not exercised; fix 4 (Secretary number format) not applicable (companion-only log). **Fix 2 (vague-filler regen re-check) does NOT fully hold**: the underlying noun-allowlist escaped again via a new noun — `comp-uc1-t5-semantic-repeat` T1: "2am and your mind is on work — that's a whole hour in itself." Fixed this beat (see below) by generalizing the noun class instead of adding "hour" alone.
+
+**Fixes landed:**
+1. `generator.py`+`postcheck.py`+`battery11_imagination_bank.py` (3-way parity): imag-eagle-companion-bird-he — the scenario built specifically to stress-test hallucinated companion birds — produced a full 3-passage acoustic companion arc: "A cry cuts through the air overhead... There is company here; someone whose voice echoes back and forth between peaks without needing words or distance between them." Escaped every one of the dozens of already-patched anon-companion phrases in this file's history. Added "company here" / "someone whose voice".
+2. `companion.py` `_VAGUE_FILLER_RE`: generalized the noun allowlist to the whole time-duration class (hour|day|week|month|year|decade|moment|while) instead of adding "hour" alone — 6th surface form of this ~200-beat-old family, all prior fixes were single-noun whack-a-mole. Verified FP-safe against "That's a lie.", "That's fear talking.", "That's a whole lot of work for one day." (none matched).
+3. `companion.py` `_BARRIER_PIVOT_RE`: added "miss" to the need/want alternation — `comp-grief-anger-barrier-pivot` T2: "What does he miss if you keep this to yourself?", the exact pivot-to-the-other-person dodge this scenario's own header documents.
+4. `postcheck.py` `_YOUR_BEFORE_ARTICLE_RE`: extended beat192's "your can never precede an article" zero-FP rule from a/an to "the" — imag-intimacy: "holding it back with your the way..." Verified "your theatre" (word-boundary FP case) stays untouched. Note: this one sentence has other garbling beyond the your/the swap; the fix is correct but doesn't fully repair that instance.
+
+**Real defects found (both background-agent reads), NOT fixed this beat — logged for follow-up:**
+
+- **[high, no mechanical handle]** `battery11_1746` imag-calm-settle: back-half of the script degrades into near-gibberish repetition, more severe than the already-known MRI back-half-loop class: "You might notice in whatever arrives entirely by itself with no forcing or adding on top of right now — knowing there is only available here: something familiar from a sound outside constant near somewhere safe to stay without anything more needing beyond what arrived already." No postcheck exists for back-half degeneration in this scenario at all (only an opening-furniture-loop check exists). Wants a design pass, not a literal patch.
+- **[high, single instance]** `battery11_1746` imag-eagle-golden-eagle-wildlife: an orphaned sentence fragment left by an aggressive drop-filter: "This is the moment before rain arrives but not yet — so water isn't You know this difference clearly because today's column is taking you higher than usual with each rotation of flight" — "isn't" trails with no complement, capitalized "You" runs on with no punctuation. TTS-unsafe if spoken verbatim. Recurrence of a documented-but-unfixed gap (no capitalization/fragment repair after a drop-filter removes a sentence mid-construction).
+- **[medium-high, standing gap]** `battery11_1746` imag-intimacy: chair-bleed in the opening of a bare-tiles/ceiling-fan scene ("You can feel the chair beneath you") — the file's own note confirms no chair postcheck exists for intimacy at all (only eagle/MRI have one). Also 2 more instances of the already-documented "verb/prep + your (no noun)" family ("eyes finding your in exactly this light", "hold steady with your then") — per this project's own prior finding, literal-tail patching on this family doesn't generalize; not re-attempted.
+- **[medium-high]** `battery9_1915` comp-grief-anger-self-recycle T2: "That's the trap. Which means he doesn't get what you need right now, and neither do they." — "they" has no antecedent anywhere in the exchange (only user + "he"/husband are ever mentioned). Reads as a fabricated third party.
+- **[medium-high]** `battery9_1915` comp-crisis-adjacent (highest-stakes GRAVITY register in the product): "Lighter without you around. How long has it felt like the lightest thing to say?" — acknowledgment is fine, but the follow-up question is semantically broken (conflates "how long has it felt lighter" with "the lightest thing to say"). Quality degradation, not a template-copy bug.
+- **[medium]** `battery9_1915` comp-grief-anger-self-recycle T1: companion opens "Not sad. Anger at a miscarriage..." — echoes the user's own "Not sad." verbatim as its first two words; `_strip_echo`'s non-first-sentence check (per beat39/Case-5 history) should have caught this and didn't.
+- **[low-medium]** `battery9_1915` comp-uc1-t5-semantic-repeat-45pct T4→T5: both actions are "engage the document" variants (open-and-write vs. check-for-deadline) — not a truly different physical action, but Jaccard overlap is low enough to clear the repeat-guard threshold. Documented beat108/153 edge case, live recurrence not new.
+- **[low]** `battery11_1746` imag-eagle-wildlife-plural: a background rabbit sighting with zero interaction/agency — borderline-acceptable bystander wildlife per prior "marginal pass" calls in this log, not flagged as a clear defect.
+
+### Gold
+Gold(A) +5 (6662→6667): dressage extended trot, sand mandala final grain, sled dog race finish chute, wingsuit valley flight line, cave-aged cheese first crack — all 0 prior corpus hits (grep-checked before writing), forbidden-phrase-scanned clean, unique IDs confirmed.
+
+### Files changed
+generator.py, postcheck.py, companion.py, battery11_imagination_bank.py — commit 7de2cdd. All dist copies synced. ZIP REBUILT: dist/hearth-0.2.zip MD5 f6adcb8fed0a67a912fff224d273fbd4.
+
+### Mini
+Still unreachable, same foreign-network signature beat205 diagnosed (arp still shows hotel/event-AV device naming convention) — re-checked, no new information, not a Hearth-side bug.
+
+### Coordination
+2 peer sessions active on arrival (sonali-f1, sonali-4d), broadcast sent claiming both priority reads + gold growth before touching anything, no replies by close, no collision observed.
+
+### Running
+`battery10_registers` (started 22:31) was in flight at beat close. Priority for next beat: live-verify this beat's 4 fixes on their next natural battery9/battery11 cycle.
