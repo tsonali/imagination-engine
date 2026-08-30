@@ -2551,7 +2551,16 @@ class Companion:
             # naming what the barrier CREATES for the user (her bind, cost, stuck place).
             # "does it feel like he..." always means the companion is asking the user to
             # explain/diagnose the other person rather than staying with her experience.
-            r'|\bdoes it feel like (?:he|she|they)\b',
+            r'|\bdoes it feel like (?:he|she|they)\b'
+            # beat210 (review-queue comp-grief-anger declarative-pivot): "That's the trap.
+            # It means he can't hold what you're actually feeling right now." — the same
+            # pivot-to-the-other-person move in DECLARATIVE form (a statement, not a
+            # question), which every prior branch of this regex missed because they all
+            # assume a question shape. Scoped to "means X can't/won't/doesn't VERB" where
+            # VERB is about receiving the user's feelings, so unrelated declaratives like
+            # "it means he can't come to the wedding" (verb not in the list) stay unflagged.
+            r"|\bmeans (?:he|she|they) (?:can'?t|cannot|couldn'?t|won'?t|doesn'?t|isn'?t able to) "
+            r'(?:hold|handle|see|hear|know|take|understand)\b',
             re.IGNORECASE,
         )
         if reply and _BARRIER_PIVOT_RE.search(reply):

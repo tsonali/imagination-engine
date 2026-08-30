@@ -67,6 +67,7 @@ from imagination_engine.postcheck import (degeneration_report, drop_collapsed_pa
                                           fix_your_contraction,
                                           fix_copula_youre_alone, fix_predicative_your,
                                           fix_predicative_your_contraction,
+                                          fix_predicative_your_relpro,
                                           fix_predicative_her,
                                           fix_reflexive_her_object,
                                           fix_intimacy_object_pronoun_escapes,
@@ -653,6 +654,10 @@ def _generate_settling(engine: Engine, transcript: list[dict], emit) -> str:
     if predicative_your_contraction_fixed:
         log.warning("[settling] %d predicative 's your→'s yours error(s) fixed",
                     predicative_your_contraction_fixed)
+    body, predicative_your_relpro_fixed = fix_predicative_your_relpro(body)
+    if predicative_your_relpro_fixed:
+        log.warning('[settling] %d predicative your→yours before relative pronoun error(s) fixed',
+                    predicative_your_relpro_fixed)
     body, predicative_her_fixed = fix_predicative_her(body)
     if predicative_her_fixed:
         log.warning('[settling] %d predicative her→hers error(s) fixed', predicative_her_fixed)
@@ -1241,6 +1246,10 @@ def generate_session(
     if predicative_your_contraction_fixed:
         log.warning("[v6] %d predicative 's your→'s yours error(s) fixed",
                     predicative_your_contraction_fixed)
+    full, predicative_your_relpro_fixed = fix_predicative_your_relpro(full)
+    if predicative_your_relpro_fixed:
+        log.warning('[v6] %d predicative your→yours before relative pronoun error(s) fixed',
+                    predicative_your_relpro_fixed)
     full, predicative_her_fixed = fix_predicative_her(full)
     if predicative_her_fixed:
         log.warning('[v6] %d predicative her→hers error(s) fixed', predicative_her_fixed)

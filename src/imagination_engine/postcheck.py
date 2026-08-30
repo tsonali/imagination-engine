@@ -531,7 +531,13 @@ _NARRATOR_POSS = re.compile(
     # toward where we will be next." — narrator-plural future-tense "we will be"
     # is a new tense form; the existing "we + verb" lists cover past/present
     # motion and decision verbs but no future-modal "will be" construction.
-    r"|\bwe\s+will\s+be\b",
+    r"|\bwe\s+will\s+be\b"
+    # beat210 (battery11_1145 imag-eagle-golden-eagle-wildlife honest read):
+    # "...for hours ahead when we keep flying" and "...for hours ahead when we
+    # stay aloft and keep going up above here" — "stay" and "keep" are new
+    # narrator-plural verbs (stative/continuative) not in any prior "we + verb"
+    # list, which only covered motion/decision/future-tense forms.
+    r"|\bwe\s+(?:stay|stayed|keep|kept)\b",
     re.IGNORECASE,
 )
 
@@ -591,12 +597,16 @@ def fix_object_pronouns(text: str) -> tuple[str, int]:
 _HER_SUBJECT_VERBS = re.compile(
     # Present tense (3rd-person singular -s forms)
     r"\bher\s+(enters|finds|reaches|searches|stands|turns|speaks|catches|"
-    r"looks|laces|passes|breaks|stops|tells|makes|lets|comes|moves|sits|meets|"
+    r"looks|laces|passes|breaks|stops|tells|makes|lets|comes|come|moves|sits|meets|"
     r"holds|takes|runs|walks|says|goes|sees|knows|wants|needs|leaves|starts|"
     r"becomes|keeps|brings|gets|"
     # Present tense additions (beat86: found in deposition script — 'her asks', 'her has')
     r"asks|has|gives|seems|appears|does|follows|reads|checks|watches|faces|"
-    r"sets|puts|uses|calls|feels|shows|opens|closes|pulls|pushes|holds|places|"
+    # beat210 (battery11_1145 imag-intimacy honest read): "her come closer" (bare
+    # base-form "come" alongside the already-covered "comes") and "before her
+    # settles back down over chest" ("settles" was missing even though the
+    # sibling "sets" was already covered).
+    r"sets|settles|puts|uses|calls|feels|shows|opens|closes|pulls|pushes|holds|places|"
     # Past tense forms (most common)
     r"reached|found|stood|turned|met|held|told|said|came|saw|kept|went|"
     r"spoke|broke|ran|took|got|left|made|started|moved|sat|walked|"
@@ -906,7 +916,26 @@ _PREDICATIVE_YOUR_RE = re.compile(
     # follow-set, same non-noun-introducing reasoning as "on"/"at"/"in": "above"
     # always opens a comparison/prepositional clause ("above all else", "above the
     # rest"), never introduces a possessable noun directly after "your".
-    r"too|for|on|at|in|to|by|with|from|between|whenever|as|today|above)\b)"
+    # beat210 (battery11_1145 imag-mri honest read): "...their presence with you
+    # here right now will be your when Friday arrives" (should be "yours when
+    # Friday arrives") — "when" always opens a subordinate clause, never
+    # introduces a possessable noun directly after "your", same non-noun-
+    # introducing reasoning as "whenever"/"today"/"above".
+    # Same log also had "...has become something entirely your already before
+    # even trying anything different" (should be "yours already before..."),
+    # but this one is a DIFFERENT bug, not a missing follow-word: the copula
+    # here is "has become", followed by "something" then the adverb "entirely"
+    # then "your" — this regex's copula-alternation only allows ONE optional
+    # adverb between the copula and "your", so "become something entirely your"
+    # never matched the copula group at all regardless of the follow-set.
+    # Deliberately NOT adding "already" to the follow-set to patch it: "already"
+    # (unlike "when"/"today"/"whenever") commonly modifies a following adjective
+    # before a real noun ("your already-packed bag", "your already broken
+    # promise") — adding it as a bare follow-word produces a live false
+    # positive there. Left unfixed pending a version of this regex that also
+    # tolerates an intervening "something"/noun before the adverb; logged in
+    # review-queue rather than shipping the unsafe version.
+    r"too|for|on|at|in|to|by|with|from|between|whenever|as|today|above|when)\b)"
     r")",
     re.IGNORECASE,
 )
@@ -922,7 +951,7 @@ _PREDICATIVE_YOUR_RE = re.compile(
 _PREDICATIVE_YOUR_CONTRACTION_RE = re.compile(
     r"(?<=\w)'s\s+your\b"
     r"(?=\s*(?:[.,!?;]|—|$|\s+(?:entirely|completely|now|here|still|again|"
-    r"too|for|on|at|in|to|by|with|from|between|whenever|as|today|above)\b)"
+    r"too|for|on|at|in|to|by|with|from|between|whenever|as|today|above|when)\b)"
     r")",
     re.IGNORECASE,
 )
@@ -972,6 +1001,42 @@ def fix_predicative_your(text: str) -> tuple[str, int]:
     return result, fixed
 
 
+# beat210 (battery11_1145 imag-eagle-wildlife-plural honest read): "...animals
+# small enough to be overlooked at this height...within their own lives sized
+# against your which seems so much larger when measured only by how far you
+# travel each hour" — should be "against yours which". Different shape from
+# _PREDICATIVE_YOUR_RE (that regex requires a copula like is/was before "your";
+# this is "your" directly after an arbitrary preposition, e.g. "against"). Not
+# folded into that regex's copula alternation — instead: "your" immediately
+# followed by a relative pronoun (which/who/that/whom) is unconditionally wrong
+# regardless of what precedes it, because a relative pronoun can never be the
+# possessed noun in an attributive "your NOUN" construction — there is no
+# legitimate English sentence where "your" is directly followed by "which",
+# "who", "whom", or "that".
+_PREDICATIVE_YOUR_RELPRO_RE = re.compile(
+    r"\byour\b(?=\s+(?:which|who|whom|that)\b)",
+    re.IGNORECASE,
+)
+
+
+def fix_predicative_your_relpro(text: str) -> tuple[str, int]:
+    """'your [which/who/whom/that]' -> 'yours [which/who/whom/that]'.
+
+    Preposition-preceding sibling of fix_predicative_your — same standalone-
+    possessive requirement, triggered by an immediately-following relative
+    pronoun instead of a preceding copula.
+    """
+    fixed = 0
+
+    def _replace(m: "re.Match") -> str:
+        nonlocal fixed
+        fixed += 1
+        return "yours"
+
+    result = _PREDICATIVE_YOUR_RELPRO_RE.sub(_replace, text)
+    return result, fixed
+
+
 # beat198 (battery11_1317 imag-intimacy honest read): "a reminder held after
 # she has left again to do whatever is her today" — the her/hers sibling of
 # _PREDICATIVE_YOUR_RE/fix_predicative_your above (same copula+standalone-
@@ -983,7 +1048,7 @@ def fix_predicative_your(text: str) -> tuple[str, int]:
 _PREDICATIVE_HER_RE = re.compile(
     r"\b(is|was|are|were|be|been|become|becomes|became)\s+((?:\w+ly\s+)?)her\b"
     r"(?=\s*(?:[.,!?;]|—|$|\s+(?:entirely|completely|now|here|still|again|"
-    r"too|for|on|at|in|to|by|with|from|between|whenever|as|today)\b)"
+    r"too|for|on|at|in|to|by|with|from|between|whenever|as|today|above|when)\b)"
     r")",
     re.IGNORECASE,
 )
