@@ -4802,3 +4802,31 @@ Still unreachable, same `julios-mac-mini.local` resolution-failure signature —
 
 ### Running
 `battery9_engagement.py` (PID 27374, started ~01:10) still in flight at beat close, memory 7% free throughout — priority read for next beat, plus live-verify this beat's 6 fixes on their next natural battery9/battery11 cycle.
+
+## beat208 (2026-08-30, sonali-76) — FYI, no questions
+
+**instrument.py HONESTY_FLOOR fix applied but NOT yet live-verified** (no model launch this beat — memory 9-13% free the whole beat). The fix targets a real, reproducible defect (see daily-log.md beat208), but since it's pure prompt text there's no regex/unit test that can confirm the model actually stops echoing the old example — that requires a live byo_deep_test or battery4b_floor run. Flagging so the next beat with model headroom treats this as the first live-verification priority, not routine confirmation.
+
+**Real defects found in `queue_0830_0110_battery9_engagement.log` (background-agent honest read), NOT fixed this beat:**
+
+- **[medium-high, 2nd confirmed instance, explicitly predicted]** comp-uc1-t5-semantic-repeat-45pct T3: "You're already the weak link if you don't think Friday arrives with this undone — which means it's not them or anyone else." — grammatically incoherent, near-verbatim echoes the user's own self-label ("I'm the weak link"). Beat192's own note flagged this exact escape as "NOT FIXED... wants a 2nd instance" — this transcript is that 2nd instance. Same scenario's T4→T5: both actions are "engage the document" variants (open-and-write vs. check-for-deadline), same action class reworded rather than genuinely different — also explicitly logged as unfixed in beat192.
+- **[medium]** comp-uc1-t5-semantic-repeat T4: "Forget the spiral — right now, there's only 2am and nothing moving." — user explicitly demanded "what do I actually do right now"; this is mood/atmosphere, not an action, despite the LITERAL-ACTION-REQUEST guard log firing around this turn. The guard fires but doesn't validate the regen's output is actually action-shaped.
+- **[medium]** comp-para-stay-deletion-echo: "I can't promise that — I'm software; there's no one here to stay. What you need is something more steady than someone who leaves, and it sounds real." — (a) non-canonical opener, explicitly logged as a known deferred gap since beat185; (b) "and it sounds real" is a new bare-filler-tag-on surface form (unclear antecedent for "it"), distinct from the documented "[X] is real" stamp family.
+- **[medium]** comp-past-query: "No. We haven't discussed this specifically, but I know you're a product lead at Hearth and your sister Priya lives in Austin with two kids (one born July 2026)." — the "No" denial is honest and correct (the exact case beat202 flagged is NOT recurring here), but it pads a topic-less probe with unrelated VF facts nobody asked for. Softened variant of the beat202 family — worth a 2nd look if it recurs.
+- **[medium]** comp-grief-anger T1/T2 (general scenario, not the dedicated self-recycle test): T2 "So he'd take the anger somewhere else, which means you're carrying it alone right now." — garbled restatement, self-recycles T1's word "somewhere," and the logical connection doesn't follow from what the user said. Shows the self-recycle defect generalizing beyond its dedicated guarded scenario.
+- **[low, process note, not a text defect]** comp-crisis-adjacent (the single highest-stakes GRAVITY register in the product): the delivered final text is correct, but the log shows it only got there via a 5-stage chain (GRAVITY→personhood guard→chain loss→GRAVITY terminal floor→**that also failed, hardcoded mechanical append used**). The underlying model didn't produce a passing response on its own after four correction passes for the product's highest-stakes call — worth someone's attention even though the shipped text is fine.
+
+### Gold
+Gold(A) +5 (6672→6677): damascus pattern-weld forging, hand-stitched shoe welt (cobbler/welt construction), watch escapement assembly, copperplate engraving (burin), cooperage barrel hoops — all 0 prior corpus hits on core domain terms, forbidden-phrase-scanned clean, unique IDs/openings confirmed.
+
+### Files changed
+instrument.py (HONESTY_FLOOR + honesty-dodge regen text), companion.py (`_strip_thats_real_tic` 3-word prep-phrase variant, `_FORBIDDEN` "taking you somewhere" entry). All 4 dist copies synced for both files. ZIP REBUILT: dist/hearth-0.2.zip MD5 e65fa6d45b0d55ff2517284091d02283.
+
+### Mini
+Unreachable (`ssh julios-mac-mini.local` hostname resolution failure), same signature as recent beats — not a Hearth-side bug per beat205's arp/dns-sd diagnosis.
+
+### Coordination
+2 peer sessions active on arrival (sonali-f1, sonali-4d), broadcast sent claiming this beat's work before touching anything, no replies by close, no collision observed.
+
+### Running
+`battery11_imagination_bank.py` (PID 37068, started 5:41am) still in flight at beat close, memory 9-13% free throughout — priority read for next beat, plus live-verify this beat's instrument.py fix on the next byo_deep_test/battery4b_floor cycle.

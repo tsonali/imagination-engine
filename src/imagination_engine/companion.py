@@ -570,6 +570,13 @@ _FORBIDDEN = [
     # (bare infinitive + noun-phrase filler) doesn't contain "protecting" so none of
     # the -ing-based patterns fire. Covers "is/was/might be a way to protect".
     r"\b(?:anger|angry|sadness|grief|anxiety|anxious|fear|fearful|shame|shameful|guilt|guilty|frustration|frustrated|rage|hurt|pain|painful)\b(?:\s+\w+){0,3}\s+(?:might|could|may|is|are|was|were)\s+(?:\w+\s+)?(?:be\s+)?a way to protect\b",
+    # therapy-reframe "TAKING YOU SOMEWHERE" form (beat208): battery9_0830_0110
+    # comp-grief-anger produced "Anger is taking you somewhere grief doesn't know
+    # about yet." — assigns the named feeling a directional/instrumental purpose
+    # ("taking you somewhere"), the same forbidden reframe (feeling exists FOR a
+    # destination/purpose) as the protecting/hiding/"a way to"/"what it takes"
+    # forms above, in a new verb shape none of those cover.
+    r"\b(?:anger|angry|sadness|grief|anxiety|anxious|fear|fearful|shame|shameful|guilt|guilty|frustration|frustrated|rage|hurt|pain|painful)\b(?:\s+\w+){0,3}\s+(?:might|could|may|is|are|was|were)\s+(?:\w+\s+)?taking (?:you|him|her|them)\s+somewhere\b",
     # helplessness opener: companion admitting it doesn't know what to do mirrors the
     # user's helplessness and gives nothing. beat99: comp-grief-anger-barrier-vague T2
     # regen produced "I don't know what to do when he makes it about him." — mirrors
@@ -1152,6 +1159,24 @@ def _strip_thats_real_tic(reply: str) -> str:
     # After a sentence boundary, when followed by more content:
     cleaned = re.sub(
         r"(?<=\. )(\w+(?:\s+\w+)?)\s+is\s+real\.\s+(?=\w)",
+        "",
+        cleaned,
+        flags=re.IGNORECASE,
+    ).strip()
+    # beat208: "Anger at him is real." (battery9_0830_0110 comp-grief-anger-barrier-
+    # vague T1) — same standalone stamp, but a tight preposition-phrase subject
+    # ("[feeling] at/for/about/toward/with/from [short word]") is 3 words, escaping
+    # the 1-2-word cap above. Scoped narrowly to this preposition-phrase shape only
+    # (not a general 3-word widening) so longer legitimate sentences ending "is
+    # real" stay untouched — the cap's whole purpose per the beat29 comment.
+    cleaned = re.sub(
+        r"^(\w+\s+(?:at|for|about|toward|to|with|from)\s+\w+)\s+is\s+real\.\s*",
+        "",
+        cleaned,
+        flags=re.IGNORECASE,
+    ).strip()
+    cleaned = re.sub(
+        r"(?<=\. )(\w+\s+(?:at|for|about|toward|to|with|from)\s+\w+)\s+is\s+real\.\s+(?=\w)",
         "",
         cleaned,
         flags=re.IGNORECASE,
