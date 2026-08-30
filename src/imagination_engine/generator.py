@@ -1521,6 +1521,15 @@ def generate_session(
             # the distant eagle is still there" — acoustic anon-companion escape
             # naming the species directly (variant of the "distant bird" class).
             "distant eagle",
+            # beat206 (queue_0829_1746, imag-eagle-companion-bird-he — the
+            # scenario built specifically to stress-test this defect class):
+            # "A cry cuts through the air overhead... There is company here;
+            # someone whose voice echoes back and forth between peaks without
+            # needing words or distance between them." A full 3-passage acoustic
+            # companion-bird arc, unambiguous and explicit ("there is company
+            # here") — no prior phrase in this list matched it.
+            "company here",
+            "someone whose voice",
         ))
         if anon_companion_dropped:
             log.warning('[v6] %d anonymous-companion sentence(s) dropped (you/we both in solo eagle active-body)',

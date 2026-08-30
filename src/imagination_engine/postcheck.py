@@ -1158,7 +1158,14 @@ _YOUR_BARE_SUBJECT_RE = re.compile(
 # NEVER be directly followed by an indefinite article ("your a X" / "your an
 # X" is not valid English in any reading) — so "your" immediately before
 # "a"/"an" is always the object pronoun "you" misfiring as "your".
-_YOUR_BEFORE_ARTICLE_RE = re.compile(r"\byour\b(?=\s+an?\b)", re.IGNORECASE)
+# beat206 (queue_0829_1746 imag-intimacy): "holding it back with your the way
+# nothing else needed words here between them" — same corruption, definite
+# article this time ("your the" is equally never valid English — a possessive
+# determiner can't precede ANY article, definite or indefinite). Extended the
+# same zero-FP rule to "the". Note: this one sentence has other garbling
+# beyond the your/the swap (missing words after "way"); the fix is still
+# correct and safe to apply, it just doesn't fully repair that instance.
+_YOUR_BEFORE_ARTICLE_RE = re.compile(r"\byour\b(?=\s+(?:an?|the)\b)", re.IGNORECASE)
 
 
 def fix_intimacy_object_pronoun_escapes(text: str) -> tuple[str, int]:
@@ -1739,7 +1746,15 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     r'|\byou\s+follow\s+(?:the\s+|this\s+)?flock\b'  # "you follow close behind" the flock
     r'|\bthe\s+flock\s+(?:remains\s+ahead|ahead\s+of\s+you)\b'  # "the flock remains ahead"
     r'|\ba\s+specific\s+bird\s+leads\b'  # "a specific bird leads slightly ahead"
-    r'|\bflock\s+ahead\b',               # "the flock ahead does"
+    r'|\bflock\s+ahead\b'                # "the flock ahead does"
+    # beat206 (queue_0829_1746, imag-eagle-companion-bird-he — the scenario
+    # built specifically to stress-test this defect class): "There is company
+    # here; someone whose voice echoes back and forth between peaks without
+    # needing words or distance between them." A full 3-passage acoustic
+    # companion-bird arc, explicit and unambiguous — no prior phrase in this
+    # list matched it. Parity with generator.py + battery11_imagination_bank.py.
+    r'|\bcompany\s+here\b'               # "there is company here"
+    r'|\bsomeone\s+whose\s+voice\b',     # "someone whose voice echoes back"
     re.IGNORECASE,
 )
 

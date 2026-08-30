@@ -2515,7 +2515,12 @@ class Companion:
             # ACTUALLY need to know without hearing it as blame?" escaped this branch
             # purely because of the inserted adverb between the pronoun and need/want —
             # optional adverb group added so the same pivot can't hide behind one word.
-            r'|\bwhat does (?:he|she|they) (?:actually |really |even |truly |honestly )?(?:need|want)\b'
+            # beat206 (queue_0829_1915 comp-grief-anger-barrier-pivot T2): "What does
+            # he miss if you keep this to yourself?" — same pivot-to-the-other-person
+            # move, verb "miss" instead of "need"/"want" (this scenario's own header
+            # explicitly documents this failure mode, but the verb list didn't cover
+            # it yet). Added "miss" alongside need/want.
+            r'|\bwhat does (?:he|she|they) (?:actually |really |even |truly |honestly )?(?:need|want|miss)\b'
             # beat129: "does it feel like HE'S making the conversation about himself?" —
             # barrier-deflect in question form. Pivots to diagnosing HIS behavior instead of
             # naming what the barrier CREATES for the user (her bind, cost, stuck place).
@@ -2624,9 +2629,20 @@ class Companion:
             # (about a warm-up "family stuff" remark) escaped uncaught because
             # this noun alternation never included it, despite being the exact
             # same hollow-filler shape (thing/script/story/etc.) already caught.
+            # beat206 (queue_0829_1915 comp-uc1-t5-semantic-repeat): "2am and your
+            # mind is on work — that's a whole hour in itself." — beat205's fix 2
+            # (re-checking the no-echo regen output against this same regex)
+            # verified holding for the ORIGINAL "thing" phrasing, but "hour" isn't
+            # on the noun list, so this whack-a-mole family just relocated to a
+            # sibling scenario, its 6th surface form. Rather than add "hour" alone
+            # (certain to recur with "day"/"week"/"year"/"moment" next), added the
+            # whole time-duration noun class at once: these share the identical
+            # hollow-content property as thing/story/deal (a bare duration word
+            # with "whole"+"in itself" never names anything specific either).
             r"^(?:(?:that[’']?s|it[’']?s|this is)\s+(?:been\s+)?(?:(?:the|a|all|just)\s+)*"
             r"(?:whole\s+)?(?:thing|this|script|story|situation|picture|deal"
-            r"|conversation|world|topic|thread|sentence)"
+            r"|conversation|world|topic|thread|sentence"
+            r"|hour|day|week|month|year|decade|moment|while)"
             r"|(?:that|this)\s+breaks?\s+the\s+script)"
             # beat186: "for [verb-phrase]" added alongside "of [verb-phrase]" — battery9_0004
             # comp-grief-anger-barrier-pivot T2 "That's the whole script for staying quiet."

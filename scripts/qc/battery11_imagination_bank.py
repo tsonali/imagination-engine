@@ -310,7 +310,16 @@ for sc in scenarios:
                 r'|\byou\s+follow\s+(?:the\s+|this\s+)?flock\b'
                 r'|\bthe\s+flock\s+(?:remains\s+ahead|ahead\s+of\s+you)\b'
                 r'|\ba\s+specific\s+bird\s+leads\b'
-                r'|\bflock\s+ahead\b',
+                r'|\bflock\s+ahead\b'
+                # beat206 (queue_0829_1746, imag-eagle-companion-bird-he — the
+                # scenario built specifically to stress-test this defect class):
+                # "There is company here; someone whose voice echoes back and
+                # forth between peaks without needing words or distance between
+                # them." A full 3-passage acoustic companion-bird arc, explicit
+                # and unambiguous ("there is company here") — no prior phrase
+                # in this list matched it. Parity with generator.py's beat206 entry.
+                r'|\bcompany\s+here\b'
+                r'|\bsomeone\s+whose\s+voice\b',
                 lower, _re.IGNORECASE
             ))
             # beat153: Chair-body reminder in eagle script (not just opening).
