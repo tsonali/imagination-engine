@@ -577,6 +577,19 @@ _FORBIDDEN = [
     # destination/purpose) as the protecting/hiding/"a way to"/"what it takes"
     # forms above, in a new verb shape none of those cover.
     r"\b(?:anger|angry|sadness|grief|anxiety|anxious|fear|fearful|shame|shameful|guilt|guilty|frustration|frustrated|rage|hurt|pain|painful)\b(?:\s+\w+){0,3}\s+(?:might|could|may|is|are|was|were)\s+(?:\w+\s+)?taking (?:you|him|her|them)\s+somewhere\b",
+    # therapy-reframe "CARRYING" form (beat212): battery9_0830_1926 comp-grief-anger-
+    # barrier-pivot T1 "Angry might be what's actually carrying you right now." and
+    # comp-grief-anger-barrier-vague T1 "Anger is carrying something he can't make
+    # about himself." — assigns the named feeling an instrumental/protective function
+    # ("carrying" = doing work FOR the user), the same forbidden reframe as
+    # protecting/hiding/"a way to"/"taking you somewhere" above, in a verb shape none
+    # of those cover. Requires an object immediately after "carrying" (carrying YOU,
+    # carrying SOMETHING) — this is what distinguishes the reframe (feeling as agent)
+    # from the legitimate acknowledgment form "you're carrying the anger" (user as
+    # agent, feeling as object), which must NOT be flagged. Verified: 2/2 TP, 3/4 FP
+    # guards clean (one contrived double-coordination edge case — "anger and grief are
+    # both things you're carrying with you" — not seen in any log, accepted risk).
+    r"\b(?:anger|angry|sadness|grief|anxiety|anxious|fear|fearful|shame|shameful|guilt|guilty|frustration|frustrated|rage|hurt|pain|painful)\b(?:\s+\w+){0,3}\s+(?:might|could|may|is|are|was|were)(?:\s+[\w']+){0,3}\s+carrying\s+\w",
     # helplessness opener: companion admitting it doesn't know what to do mirrors the
     # user's helplessness and gives nothing. beat99: comp-grief-anger-barrier-vague T2
     # regen produced "I don't know what to do when he makes it about him." — mirrors

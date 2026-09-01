@@ -537,7 +537,20 @@ _NARRATOR_POSS = re.compile(
     # stay aloft and keep going up above here" — "stay" and "keep" are new
     # narrator-plural verbs (stative/continuative) not in any prior "we + verb"
     # list, which only covered motion/decision/future-tense forms.
-    r"|\bwe\s+(?:stay|stayed|keep|kept)\b",
+    r"|\bwe\s+(?:stay|stayed|keep|kept)\b"
+    # beat212 (queue_0830_1800 battery11 honest read, background-agent audit):
+    # imag-mri "You hold something from this space with you as we bring it back"
+    # — "bring"/"brings"/"brought" was never in the "we + verb" motion-verb list.
+    # imag-eagle-golden-eagle-wildlife "The horizon opens out as we get closer to
+    # it" — "get"/"gets"/"got" likewise missing. Both are the same standing gap
+    # (narrator-plural verb list incomplete), new verb forms, not new mechanisms.
+    r"|\bwe\s+(?:bring|brings|brought|get|gets|got)\b"
+    # imag-intimacy "...reaching us here slowly as if coming to someone who was
+    # expected after all" — "us" narrator-plural object form after "reaching";
+    # the existing spatial/relational "us" list (separates/between/around/with/
+    # near/beside/behind/above/below/beneath/joins/unites) never covered a verb
+    # of motion terminating "onto us" like "reach(ing/es)".
+    r"|\breach(?:es|ing|ed)?\s+us\b",
     re.IGNORECASE,
 )
 
@@ -896,7 +909,11 @@ def fix_copula_youre_alone(text: str) -> tuple[str, int]:
 # of adverbs/prepositions that never introduce a noun phrase, so legitimate
 # attributive uses ("is your wing", "was your turn") are untouched.
 _PREDICATIVE_YOUR_RE = re.compile(
-    r"\b(is|was|are|were|be|been|become|becomes|became)\s+((?:\w+ly\s+)?)your\b"
+    # beat212 (queue_0830_1800 battery11 honest read): imag-intimacy "This room
+    # stays your for longer than anyone knows" — "stays" (linking-verb sense of
+    # "remains") was never in the copula list; same predicative-possessive gap
+    # as is/was/are/were, just a different linking verb.
+    r"\b(is|was|are|were|be|been|become|becomes|became|stays)\s+((?:\w+ly\s+)?)your\b"
     r"(?=\s*(?:[.,!?;]|—|$|\s+(?:entirely|completely|now|here|still|again|"
     # beat188 (battery11_0826_0920 imag-eagle-companion-bird-he): "territory
     # marked in this part of sky that is your as much as any other here
@@ -1434,6 +1451,17 @@ _BACK_LEAK_PATTERNS = [
     # a generalized instruction-leak detector.
     re.compile(r"\bEach paragraph should land a new moment or feeling\b",
                re.IGNORECASE),
+    # beat212 (queue_0830_1800 battery11 honest read): imag-eagle-golden-eagle-
+    # wildlife — the single worst leak found in that run, a raw continuation-
+    # prompt/instruction fragment breaking mid-script into the narrated audio:
+    # "You don You are given a task to write more content about the same scene,
+    # but what else can be explored? Your wings are still open..." — distinct
+    # from every existing leak pattern (not a BACK-section echo, not a chat-
+    # template token, not self-referential "the script" commentary) — this
+    # reads as a leaked training-continuation instruction. Both halves are
+    # zero-legitimate-use phrases in a guided-imagination script.
+    re.compile(r"\byou (?:are|were) given a task to write\b", re.IGNORECASE),
+    re.compile(r"\bwhat else can be explored\b", re.IGNORECASE),
 ]
 
 # Instruction prefixes that leak as a label before real content — strip the prefix only,
