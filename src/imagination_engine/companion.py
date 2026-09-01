@@ -1159,19 +1159,34 @@ def _strip_thats_real_tic(reply: str) -> str:
         cleaned,
         flags=re.IGNORECASE,
     )
-    # Strip standalone "[1-2 words] is real." stamp tic.
+    # Strip standalone "[1-2 words] is real[+ trailing words]." stamp tic.
     # e.g. "Angry is real. Anger at a miscarriage..." → strip stamp, keep rest.
     # Guard: max 2 words before "is real" (won’t strip longer, potentially legitimate sentences).
+    # beat214 (battery9_0901_1037 honest read): "Anger is real here too." and "Anger is
+    # real and deserves to be felt here." both escaped — the trailing-words gap between
+    # "real" and the period (here too / and deserves to be felt here) wasn't allowed by
+    # the old \.\s* immediately after "real". The em-dash sibling form (line ~1112) already
+    # tolerates trailing words via real(?:\s+\w+)*\.? — extending this standalone form the
+    # same way, same bounded-by-period convention, so it can't run past the sentence.
     # At start of reply:
     cleaned = re.sub(
-        r"^(\w+(?:\s+\w+)?)\s+is\s+real\.\s*",
+        r"^(\w+(?:\s+\w+)?)\s+is\s+real(?:\s+\w+)*\.\s*",
         "",
         cleaned,
         flags=re.IGNORECASE,
     ).strip()
     # After a sentence boundary, when followed by more content:
     cleaned = re.sub(
-        r"(?<=\. )(\w+(?:\s+\w+)?)\s+is\s+real\.\s+(?=\w)",
+        r"(?<=\. )(\w+(?:\s+\w+)?)\s+is\s+real(?:\s+\w+)*\.\s+(?=\w)",
+        "",
+        cleaned,
+        flags=re.IGNORECASE,
+    ).strip()
+    # beat214: same mid-reply stamp but as the LAST sentence (nothing follows it) —
+    # the "(?=\w)" lookahead above requires trailing content, so a reply that ENDS on
+    # the tic ("...breaks the grief script. Anger is real here too.") never matched.
+    cleaned = re.sub(
+        r"(?<=\. )(\w+(?:\s+\w+)?)\s+is\s+real(?:\s+\w+)*\.\s*$",
         "",
         cleaned,
         flags=re.IGNORECASE,
@@ -2573,7 +2588,12 @@ class Companion:
             # VERB is about receiving the user's feelings, so unrelated declaratives like
             # "it means he can't come to the wedding" (verb not in the list) stay unflagged.
             r"|\bmeans (?:he|she|they) (?:can'?t|cannot|couldn'?t|won'?t|doesn'?t|isn'?t able to) "
-            r'(?:hold|handle|see|hear|know|take|understand)\b',
+            r'(?:hold|handle|see|hear|know|take|understand)\b'
+            # beat214 (battery9_0901_1037 comp-grief-anger-barrier-vague T2 honest read):
+            # "Everything you say gets twisted. What does he keep making it about?" — the
+            # same pivot-to-the-other-person move, verb phrase "keep making it about"
+            # instead of need/want/miss — none of the prior verb alternations cover it.
+            r'|\bwhat does (?:he|she|they) keep making\b',
             re.IGNORECASE,
         )
         if reply and _BARRIER_PIVOT_RE.search(reply):

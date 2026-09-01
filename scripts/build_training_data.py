@@ -95,21 +95,53 @@ for r in jl(_cgold):
         u = ctx.replace("You:", "").replace("Them:", "").strip()
         pool["C"].append(msg("C", u, resp))
 
-# Beat exemplars (c_gold_beat*.jsonl) — handcrafted to fix known prompt-unfixable defects.
-# These are TRIPLED (3x weight) so the model sees them frequently — they address
-# the rarest, hardest register calls (topic-whiplash, named refusal, landing-confirmation).
+# Beat exemplars (c_gold_beat*.jsonl / c_gold_beat*.json) — handcrafted to fix known
+# prompt-unfixable defects. These are TRIPLED (3x weight) so the model sees them
+# frequently — they address the rarest, hardest register calls (topic-whiplash, named
+# refusal, landing-confirmation).
 # Format 1: {context, response, src, tag}  → single-turn
 # Format 2: {id, scenario, turns:[{user,companion}], note}  → multi-turn flattened to pairs
 import glob as _glob
+
+def jl_or_array(path):
+    """Load a beat-exemplar file as either JSONL (one object/line) or a single
+    pretty-printed JSON array — heartbeat beats have used BOTH conventions over
+    time (the file extension alone doesn't reliably tell you which: many
+    ".json" files here are pretty-printed arrays spanning many lines).
+
+    beat214 finding: the glob below originally matched only "*.jsonl", so every
+    ".json"-suffixed beat exemplar file (c_gold_beat92.json through at least
+    c_gold_beat212.json — ~94 files, roughly beats 92-212) was silently
+    excluded from every training run. Even with the glob widened, jl()'s
+    line-by-line json.loads() would silently return [] on a pretty-printed
+    array (each individual line like "[" or "  {" fails to parse alone and the
+    bare except/pass swallows it) — so both the glob AND the loader needed
+    fixing together, not just one.
+    """
+    if not path or not os.path.exists(path):
+        return []
+    with open(path, encoding="utf-8", errors="ignore") as fh:
+        raw = fh.read()
+    stripped = raw.strip()
+    if stripped.startswith("["):
+        try:
+            data = json.loads(stripped)
+            if isinstance(data, list):
+                return data
+        except Exception:
+            pass
+    return jl(path)
+
 # Deduplicate by basename — _candidates/ has beat46+ which top-level doesn't have;
 # top-level has beat13-27 which _candidates/ may not. Prefer _candidates/ for any overlap.
 _beat_by_name: dict = {}
-for _f in (_glob.glob(os.path.join(ROOT, "C-companion", "c_gold_beat*.jsonl")) +
-           _glob.glob(os.path.join(ROOT, "C-companion", "_candidates", "c_gold_beat*.jsonl"))):
-    _beat_by_name[os.path.basename(_f)] = _f  # _candidates/ wins on same name (appended last)
+for _pat in ("c_gold_beat*.jsonl", "c_gold_beat*.json"):
+    for _f in (_glob.glob(os.path.join(ROOT, "C-companion", _pat)) +
+               _glob.glob(os.path.join(ROOT, "C-companion", "_candidates", _pat))):
+        _beat_by_name[os.path.basename(_f)] = _f  # _candidates/ wins on same name (appended last)
 _beat_files = sorted(_beat_by_name.values())
 for bf in _beat_files:
-    for r in jl(bf):
+    for r in jl_or_array(bf):
         if "turns" in r:
             # multi-turn format: build context accumulating user+companion pairs
             # Normalize: beat58d/58e use {role,content} (OpenAI format); others use {user,companion}

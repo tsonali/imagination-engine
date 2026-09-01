@@ -550,7 +550,23 @@ _NARRATOR_POSS = re.compile(
     # the existing spatial/relational "us" list (separates/between/around/with/
     # near/beside/behind/above/below/beneath/joins/unites) never covered a verb
     # of motion terminating "onto us" like "reach(ing/es)".
-    r"|\breach(?:es|ing|ed)?\s+us\b",
+    r"|\breach(?:es|ing|ed)?\s+us\b"
+    # beat214 (queue_0831_1835_battery11_imagination_bank.log, background-agent
+    # honest read): imag-eagle-golden-eagle-wildlife — the densest narrator-drift
+    # instance found yet (7 leaks in one ~1400-word script), including a first-
+    # person COPULA shape ("I am supposed to be", "I am up here", "I'm up here")
+    # no prior "I + verb" list entry covers (those are all action verbs, never
+    # "am"/"I'm" as a copula). Scoped to the two exact live phrasings rather than
+    # a blanket "I am"/"I'm" ban — a corpus check of A_gold.jsonl found 220 "I am"
+    # and 434 "I'm" hits, almost certainly legitimate quoted-dialogue uses inside
+    # scenes that involve another speaker, so a bare copula ban would be a severe
+    # false-positive risk. Same beat, same script: "we aren't just anyone" — the
+    # existing "we're"/"we are" pattern (line ~473) doesn't cover the negated
+    # contraction "aren't" (different token, "are" + "n't" fused); 0 hits for
+    # "we aren't" in A_gold.jsonl, confirmed safe before adding.
+    r"|\bI\s+am\s+(?:supposed\s+to\s+be|up\s+here)\b"
+    r"|\bI['’]m\s+up\s+here\b"
+    r"|\bwe\s+aren['’]t\b",
     re.IGNORECASE,
 )
 
@@ -1189,6 +1205,39 @@ _INTIMACY_OBJECT_PRONOUN_SUBS = (
     # prepositional object standing in for "your hand".
     (re.compile(r"\bin\s+your\s+one\s+final\s+time\b", re.IGNORECASE), "in yours one final time"),
     (re.compile(r"\breleases\s+your\s+finally\b", re.IGNORECASE), "releases yours finally"),
+    # beat214 (queue_0831_1835_battery11_imagination_bank.log honest read):
+    # imag-intimacy — "always made your come out slower instead of faster" —
+    # "your" standing in for the object pronoun "you" after a causative verb
+    # ("made" + object + bare infinitive), a shape distinct from every prior
+    # your/yours family (not predicative, not a preposition object, not a bare
+    # subject). Literal patch for this exact instance per the file's established
+    # discipline (narrow phrase first, generalize once a second instance
+    # justifies a verb list).
+    (re.compile(r"\bmade\s+your\s+come\s+out\b", re.IGNORECASE), "made you come out"),
+    # Same script: "The fan continues its constant hum between you and hers"
+    # is a different (ambiguous, not fixed) case, but two OTHER lines in the
+    # same script coordinate "hers and your" where "your" is predicative and
+    # standing alone (no noun follows) — "falls on hers and your differently"
+    # and "hers and your on the balcony" — needing the standalone possessive
+    # "yours" to match its coordinate "hers", the same logic fix_predicative_your
+    # uses but in a coordination ("X and your") the copula-scoped regex there
+    # doesn't reach. Reuses _YOUR_NONNOUN_FOLLOW so it only fires when nothing
+    # noun-like follows "your" (i.e. it's standing alone, not attributive).
+)
+
+# beat214: "You feel she come a little closer" (imag-intimacy, 2 instances,
+# verbatim same shape both times) — a perception-verb + accusative + bare-
+# infinitive construction ("feel" + object + bare verb) requires the object
+# pronoun "her", not the subject-case "she"; the opposite direction from
+# fix_subject_pronouns' her->she fix, and distinct from _SHE_AS_OBJECT (which
+# only covers "she" as the object of a PREPOSITION, not of a perception verb).
+# Scoped to "feel she" + a small set of bare motion/perception verbs — the two
+# live instances both used "come" — rather than a blanket "she"->"her" rule,
+# to avoid touching a legitimate complement clause like "you feel she is right"
+# (finite verb, not a bare infinitive, correctly keeps subject-case "she").
+_FEEL_SHE_OBJECT_RE = re.compile(
+    r"\bfeel\s+she\s+(come|arrive|move|lean|settle|shift|pull|ease|draw|drift)\b",
+    re.IGNORECASE,
 )
 
 
@@ -1226,8 +1275,21 @@ _YOUR_NONNOUN_FOLLOW = (
     r"with|for|from|of|to|by|on|at|in|near|into|onto|upon|under|over|through|"
     r"during|since|until|towards?|about|above|across|after|against|along|among|"
     r"before|behind|beneath|beside|beyond|despite|down|inside|outside|up|within|"
-    r"without)\b))"
+    # beat214 (queue_0831_1835_battery11_imagination_bank.log): imag-intimacy
+    # "falls on hers and your differently" — "differently" is an adverb (never
+    # a possessed noun), same class as "entirely"/"completely"/"exactly"/"slowly"
+    # already in this list, just missing.
+    r"without|differently)\b))"
 )
+
+# beat214: coordination shape "hers and your" where "your" stands alone (matches
+# _YOUR_NONNOUN_FOLLOW, i.e. nothing noun-like follows it) needs the standalone
+# possessive "yours" to parallel its coordinate "hers" — "falls on hers and your
+# differently" / "hers and your on the balcony". Same predicative-your logic as
+# fix_predicative_your, but that regex is gated on a preceding COPULA (is/was/
+# etc.); here the trigger is the coordinating "and hers" instead, which no
+# existing pattern reaches.
+_HERS_AND_YOUR_RE = re.compile(r"\bhers\s+and\s+your\b" + _YOUR_NONNOUN_FOLLOW, re.IGNORECASE)
 
 # beat193 (battery11_0827_0453 imag-intimacy): "separates her from your underneath."
 # — "underneath" used as a bare noun-substitute (the area underneath), not an
@@ -1337,6 +1399,10 @@ def fix_intimacy_object_pronoun_escapes(text: str) -> tuple[str, int]:
     text, n = _YOUR_BEFORE_ARTICLE_RE.subn("you", text)
     fixed += n
     text, n = _THAN_YOUR_STATIVE_RE.subn(lambda m: f"than yours {m.group(1)}", text)
+    fixed += n
+    text, n = _HERS_AND_YOUR_RE.subn("hers and yours", text)
+    fixed += n
+    text, n = _FEEL_SHE_OBJECT_RE.subn(lambda m: f"feel her {m.group(1)}", text)
     fixed += n
 
     return text, fixed
@@ -1919,7 +1985,15 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     r'|\bthe\s+smaller\s+bird\b'         # "the smaller bird passes in front"
     r'|\bmatches\s+altitude\b'           # "matches altitude for a moment"
     r'|\banswer\s+to\s+that\s+cry\b'     # "an answer to that cry exists too"
-    r'|\banother\s+hears\s+the\s+same\s+sound\b',  # "if another hears the same sound"
+    r'|\banother\s+hears\s+the\s+same\s+sound\b'  # "if another hears the same sound"
+    # beat214 (queue_0831_1835_battery11_imagination_bank.log, background-agent
+    # honest read): imag-eagle-wildlife-plural — "You are separate and yet part
+    # of the same sky — not competing for space but recognizing each other as
+    # fellow travelers in an endless game of sight." Uses none of the already-
+    # blocked tokens (no "hawk", "fellow eagle", "you both") — a new anon-
+    # companion surface form built on "recognizing each other" instead.
+    r'|\brecognizing\s+each\s+other\b'   # "recognizing each other as fellow travelers"
+    r'|\bfellow\s+travelers\b',          # "fellow travelers in an endless game of sight"
     re.IGNORECASE,
 )
 
