@@ -2247,53 +2247,47 @@ cd ~/Downloads/imagination-engine && nohup bash scripts/qc_queue.sh >> logs/qc/q
 
 ## NEXT HEARTBEAT PRIORITY (in order)
 
-### Beat182 priorities (in order):
+> This section had gone stale for ~30 beats (last updated at beat182 while git/daily-log had
+> already reached beat212) — RELEASE.md's Status snapshot + docs/daily-log.md are the
+> authoritative up-to-date record; treat this HANDOFF.md section as a pointer to catch up on,
+> not the source of truth, and re-sync it every beat going forward.
 
-1. **Read battery9_0825_0641 complete log** (in flight at beat181 close, PID under qc_queue
-   PID 29952) end to end for real defects — not just the rollup (known-unreliable since beat178).
+### Beat214 priorities (in order):
 
-2. **Continue queue rotation** — after battery9, the queue re-runs battery11 (the beat181
-   process incident killed battery11_0825_0620 at 2/7 scenarios; the queue will pick it up
-   again on its own — first priority when it lands is confirming the beat181 eagle fix
-   ("a pair soaring"/"not alone in the sky"/"on patrol") holds clean), then the rest of the
-   cycle (battery6/battery10/battery2b/battery12/battery4b/battery3b/product_e2e). Read each
-   log end-to-end as it lands.
+1. **Watch for a repeat of beat213's memory crisis.** 7 concurrent Claude sessions on this
+   machine drove load average to ~165 and free memory below 1%, stalling `battery11_imagination_bank.py`
+   for ~16 hours (one script generation took 51,493s). Before launching any model process
+   yourself, check `memory_pressure` (need ≥35% free) AND `uptime`'s load averages — if the
+   machine is still under heavy contention from other sessions, prefer text-only work
+   (gold growth, log reads, code fixes with unit-test verification) over anything model-dependent,
+   and say so honestly in the log rather than forcing a test through a starved system.
 
-3. **Mini SSH retry** — unreachable 58th consecutive beat at beat181 close (tried both the
-   hostname alias and direct IP `172.16.151.169`, both failed). Try again fresh. If reachable:
-   SCP A_gold (6555 entries) and all un-synced c_gold_beat*.jsonl candidate files; verify
-   caffeinate + honest_flywheel running; check flywheel log.
+2. **Use-case deep-test rotation is overdue.** `secretary_deep_test.py` and `ayf_deep_0805.py`
+   were added to qc_queue.sh's QUEUE array at beat212 but have not yet produced a read-through
+   (beat213 deliberately skipped all model-dependent work). Read their first outputs end to end
+   for real defects as soon as they land.
 
-4. **Companion deep-test slot** — next in the explicit 5-tool UC rotation (order: Imagination →
-   Secretary → Ask-Your-Files → Companion → Build-Your-Own; AYF ran beat178, BYO ran beat179).
-   Last standalone companion_deep_test run was beat92 — deferred again at beat181 (memory
-   stayed below 35% free the whole beat). Run as soon as qc_queue is between batteries and
-   memory ≥35% free; this is now overdue two beats running, prioritize the window.
+3. **comp-crisis-adjacent register drift (high, safety-adjacent, open since beat212).** The
+   companion's GRAVITY-TYPE-B regen echoes back a user's own disclaimed harsher phrasing
+   ("Everyone better off without you") instead of tracking their de-escalated wording ("Not like
+   THAT. Just... lighter without me around."), plus a garbled follow-up question. This is the
+   single highest-stakes open register issue in the product — needs a beat with real model
+   headroom to trace the regen path live, not a guessed regex. See review-queue.md beat212
+   section for the full transcript quote.
 
-5. **IMPORTANT process lesson from beat181** — when delegating QC-code verification to a
-   background agent, be explicit that "does this script import/parse cleanly" means
-   `py_compile.compile(path, doraise=True)` or `ast.parse()` ONLY. Never let an agent run or
-   import a battery script directly (even for a quick sanity check) — module-level code in
-   these files launches a live model generation, and a second concurrent model process is
-   exactly the failure class that caused the 07-12 kernel panic. Beat181's incident was caught
-   and self-healed with no lasting damage, but don't rely on luck a third time.
+4. **Read the freshly-completed battery9_engagement run** (queue_0901_1037, started under
+   beat213, likely finished by beat214) end to end — beat213 did not get to read it.
 
-6. **sec-summarize-lossless causal-ordering ambiguity** (flagged beat179, reconfirmed beat180,
-   not re-checked beat181 — queue didn't reach battery10 again) — the scenario's own source
-   sentence ("Hire 3 engineers → extends to 16 months if deferred to Q3") is genuinely
-   ambiguous about what's conditional on what. Consider tightening the scenario's source text
-   in scripts/qc/scenario_bank.py rather than building a mechanical causal-check — this reads
-   as a test-authoring gap, not a model or code defect. FYI for Sonali logged in
-   review-queue.md beat180 section.
+5. **Mini SSH retry** — unreachable at beat213 close (`julios-mac-mini.local` hostname
+   resolution failure), same signature as many recent beats; not re-diagnosed. If reachable:
+   SCP any un-synced A_gold/c_gold_beat*.jsonl files; verify caffeinate + honest_flywheel running.
 
-7. **Gold(A) growth** — +5-10 more scripts. Beat181 used comet-shower and hot-air-balloon
-   (both previously under-used); remaining still-fresh angle from beat180's assessment:
-   night fishing by headlamp (used 4x — still room for a distinct angle). darkroom photo
-   development (8x) and ice-skating first time (6x) are likely saturated — pick fresher
-   angles first.
+6. **Gold(A)/Gold(C) growth** — beat213 did none (memory crisis + orphaned-commit recovery
+   took the whole beat); resume normal per-beat growth. Check scripts/qc/scenario_bank.py /
+   corpus INDEX for recently-used angles before picking new ones to avoid saturation.
 
-8. **Gold(C) growth** — no companion gold added at beat181 (focus was defect-fixing + the
-   process incident); resume normal per-beat growth against standing companion gaps.
+7. Push v1.0 tag to origin remains Sonali-physical (`git push origin v1.0`) — not a heartbeat
+   action, just a standing reminder since it keeps appearing in beat status snapshots.
 
 ## STANDING RULES (learned the hard way — keep ALL of these)
 1. Promotion = comparative READS + full battery gate. NEVER a loss number.
