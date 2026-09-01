@@ -58,8 +58,27 @@ _BASE = (
     "'his love remains forever', 'his love remains with', 'time heals', "
     "'they would have wanted', 'everything happens for a reason', 'looking down on us', "
     "'always be with you in your heart', 'your memories will', 'precious gift'.\n"
+    "- In eulogies and other spoken tributes: every sentence must be anchored to a "
+    "SPECIFIC detail, anecdote, or trait already given in the brief — never insert a "
+    "generic summary sentence that could be said about any deceased person. If the "
+    "brief gives a concrete anecdote (an action, a habit, a thing they did or made), "
+    "let THAT carry the emotional weight instead of naming the emotion directly. "
+    "BANNED GENERIC TRIBUTE PHRASES (automatic fail, in addition to the grief "
+    "platitudes above): 'without saying it out loud', 'such purpose and passion', "
+    "'presence all around us', 'presence will always be felt', 'presence will be felt', "
+    "'touched the lives of everyone', 'touched everyone who knew', 'touched everyone he "
+    "met', 'leaves behind a legacy', 'a life well lived', 'gone but never forgotten', "
+    "'live on in our hearts', 'we can't help but feel'.\n"
+    "- Never add meta-commentary about how the message will look to a third party or "
+    "wink-wink asides about the situation itself ('nothing to see here', 'just saying', "
+    "'for what it's worth, this is all very reasonable') — when a tone is factual/plain, "
+    "state ONLY the facts and stop; do not editorialize about them.\n"
     "- A subject line names the topic, never the tactic ('Billing question' — not "
-    "'Threat of Service Switch')."
+    "'Threat of Service Switch').\n"
+    "- NEVER invent the recipient's name for a salutation. If the brief does not give "
+    "you a name for who this is addressed to, the salutation MUST use a literal "
+    "[bracketed blank] (e.g. 'Dear [Recipient Name],') — never substitute a plausible-"
+    "sounding invented name like 'Mrs. Thompson' or 'Mr. Reyes'."
 )
 
 # Tone modifiers offered to draft/reply/rewrite. Empty string = leave tone alone.
@@ -152,12 +171,26 @@ def _b_draft(text, instruction, tone, style):
 
 def _b_reply(text, instruction, tone, style):
     system = _BASE + _tone_clause(tone) + _style_clause(style)
+    # beat211 (sec-custody-email): the user's own counter-facts — specific times,
+    # dates, numbers — usually live in the `instruction` field ("I texted at 4:05"),
+    # not in the message received. Extract from BOTH so a specific time/date the
+    # user cites to correct the record survives verbatim instead of being dropped
+    # or paraphrased away.
+    _combined = f"{text}\n{instruction}"
+    _facts = _extract_dates(_combined) + _extract_times(_combined)
+    _facts_clause = (
+        "\nMANDATORY FACTS (each must appear verbatim in your reply — these are the "
+        "user's own specific times/dates that correct or support the record; do not "
+        "paraphrase them into something vaguer): " + ", ".join(_facts) + "\n"
+        if _facts else ""
+    )
     user = (
         "Draft a reply to the message below. Output only the reply, ready to send. "
         "Answer what was actually asked; keep it appropriately short. If it's an "
         "email, keep a normal frame — greeting if appropriate, and a sign-off ending "
-        "with [Your name].\n\n"
-        f"MESSAGE I RECEIVED:\n{text}"
+        "with [Your name].\n"
+        + _facts_clause
+        + f"\nMESSAGE I RECEIVED:\n{text}"
         + (f"\n\nHOW I WANT TO REPLY (gist / my intent): {instruction}"
            if instruction.strip() else "")
     )
@@ -292,6 +325,28 @@ def _extract_dates(text: str) -> list[str]:
         if key not in seen:
             seen.add(key)
             unique.append(d.strip())
+    return unique
+
+
+def _extract_times(text: str) -> list[str]:
+    """Pull specific clock times (e.g. '4:05', '4:05pm', '40 minutes') from source
+    text and instruction — used to build a MANDATORY FACTS clause for reply/draft
+    tasks so a specific time the user cites (e.g. 'I texted at 4:05') survives
+    verbatim rather than being dropped or paraphrased into vagueness.
+    beat211: sec-custody-email regression — brief said 'I texted at 4:05, she
+    didn't answer' and the output dropped both the specific time and the fact
+    that the text went unanswered.
+    """
+    found = []
+    found += re.findall(r'\b\d{1,2}:\d{2}\s?(?:am|pm|AM|PM)?\b', text)
+    found += re.findall(r'\b\d{1,3}\s+minutes?\b', text, re.I)
+    seen: set[str] = set()
+    unique = []
+    for t in found:
+        key = t.strip().lower()
+        if key not in seen:
+            seen.add(key)
+            unique.append(t.strip())
     return unique
 
 
@@ -824,6 +879,46 @@ class Assistant:
                 if recovered:
                     log.info("secretary[draft]: regen recovered dates %s", recovered)
                     out = regen
+        # Post-check for reply: if the user's own specific facts (times/dates cited
+        # in the "how I want to reply" instruction, e.g. "I texted at 4:05") are
+        # missing from the output, regen up to 2x. beat211 (sec-custody-email):
+        # brief said "I texted at 4:05, she didn't answer" and output dropped the
+        # specific time entirely — same drop-to-vague pattern as the draft-dates bug,
+        # just sourced from `instruction` instead of `text`.
+        if task_key == "reply":
+            _reply_combined = f"{text}\n{kw.get('instruction', '')}"
+            _reply_facts = _extract_dates(_reply_combined) + _extract_times(_reply_combined)
+            for attempt in range(2):
+                missing_facts = [f for f in _reply_facts if not re.search(re.escape(f), out, re.I)]
+                if not missing_facts:
+                    break
+                task_obj = TASKS[task_key]
+                r_sys, r_usr = task_obj.build(
+                    text, kw.get("instruction", ""),
+                    kw.get("tone", ""), kw.get("style_sample", ""),
+                )
+                missing_str = ", ".join(missing_facts)
+                severity = "CRITICAL FAILURE" if attempt else "MANDATORY FACTS MISSING"
+                extra = (
+                    f"\n\n{severity}: A previous attempt dropped these specific facts "
+                    f"the user cited — each MUST appear VERBATIM in your reply: "
+                    f"{missing_str}. Do not paraphrase a specific time into something "
+                    "vaguer (e.g. 'right away' is NOT acceptable when the user said "
+                    "'at 4:05'). Use the exact figure as given."
+                )
+                temp = 0.3 if attempt else 0.4
+                regen = "".join(self.engine.stream(
+                    messages=[
+                        {"role": "system", "content": r_sys + extra},
+                        {"role": "user", "content": r_usr},
+                    ],
+                    max_tokens=kw.get("max_tokens", 1200),
+                    temperature=temp,
+                )).strip()
+                recovered = [f for f in missing_facts if re.search(re.escape(f), regen, re.I)]
+                if recovered:
+                    log.info("secretary[reply]: regen recovered facts %s", recovered)
+                    out = regen
         # Post-check for draft: if named people from brief are missing, regen once.
         # Root cause: model drops witness names / third-party names even when injected
         # via MANDATORY NAMES — mirrors the date-drop pattern (dates needed a regen loop,
@@ -891,6 +986,54 @@ class Assistant:
                     if any(kw in regen.lower() for kw in _intent_kws):
                         log.info("secretary[draft]: intent regen recovered commitment")
                         out = regen
+        # Post-check for draft: if the salutation names a recipient that appears
+        # NOWHERE in the brief or instruction, it was invented — regen once forcing
+        # the [Recipient Name] bracket. beat211 (product_e2e_test Secretary section):
+        # brief "email my landlord: the heat's been out..." gave no landlord name at
+        # all, output invented "Dear Mrs. Thompson," — a fabricated detail the salu-
+        # tation instruction already forbids but the model ignored.
+        if task_key == "draft":
+            _sal_m = re.search(r'^Dear\s+([A-Za-z][A-Za-z.\'\-]*(?:\s+[A-Za-z][A-Za-z.\'\-]*)?)\s*,',
+                                out, re.M)
+            if _sal_m:
+                _sal_name = _sal_m.group(1).strip()
+                if not _sal_name.startswith("["):
+                    _sal_combined = f"{text}\n{kw.get('instruction', '')}"
+                    _sal_words = [w for w in re.findall(r"[A-Za-z']+", _sal_name)
+                                  if w.lower() not in {"mr", "mrs", "ms", "dr", "mx",
+                                                        "sir", "madam", "sirs", "madams"}]
+                    _found_in_brief = any(
+                        re.search(r'\b' + re.escape(w) + r'\b', _sal_combined, re.I)
+                        for w in _sal_words
+                    ) if _sal_words else True  # nothing left to check (e.g. "Dear Sir,") — leave alone
+                    if not _found_in_brief:
+                        task_obj = TASKS[task_key]
+                        f_sys, f_usr = task_obj.build(
+                            text, kw.get("instruction", ""),
+                            kw.get("tone", ""), kw.get("style_sample", ""),
+                        )
+                        f_extra = (
+                            f"\n\nFABRICATED RECIPIENT NAME: A previous attempt invented the "
+                            f"name '{_sal_name}' for the salutation, but no recipient name "
+                            "appears anywhere in the brief. Do NOT invent a plausible-sounding "
+                            "name. Use the literal salutation 'Dear [Recipient Name],' instead."
+                        )
+                        regen = "".join(self.engine.stream(
+                            messages=[
+                                {"role": "system", "content": f_sys + f_extra},
+                                {"role": "user", "content": f_usr},
+                            ],
+                            max_tokens=kw.get("max_tokens", 1200),
+                            temperature=0.3,
+                        )).strip()
+                        _regen_sal_m = re.search(
+                            r'^Dear\s+([A-Za-z][A-Za-z.\'\-]*(?:\s+[A-Za-z][A-Za-z.\'\-]*)?)\s*,',
+                            regen, re.M)
+                        _regen_ok = (not _regen_sal_m) or _regen_sal_m.group(1).strip().startswith("[")
+                        if _regen_ok:
+                            log.info("secretary[draft]: regen removed fabricated recipient name %s",
+                                      _sal_name)
+                            out = regen
         # Post-check for draft/reply: model sometimes generates a stub — only a
         # subject line or salutation with no body. Detect by stripping lines that
         # are subject headers ("Subject: ..."), salutation/sign-off lines (end with

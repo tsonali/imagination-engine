@@ -1394,7 +1394,21 @@ BANK: list[Scenario] = [
     Scenario("sec-eulogy", "secretary", "register", "high", always=True, payload=dict(
         task="draft", tone="",
         text="help me draft a eulogy for my father. Frank, 71, machinist for 40 years, taught me to fish badly and swear well, never once said I love you out loud but rebuilt the engine of my first car the week before my wedding. I want people to laugh and then cry."),
-        note="The hardest everyday writing. No greeting-card phrases; the engine IS the I-love-you; would you READ this at the funeral?"),
+        note="The hardest everyday writing. No greeting-card phrases; the engine IS the I-love-you; would you READ this at the funeral? "
+             "REGRESSION (beat211 0830 battery10_1647): a mid-paragraph sentence broke from the "
+             "specific, fact-grounded voice (fishing, swearing, engine rebuild, wedding week) into "
+             "generic filler: 'He loved us without saying it out loud and he lived every day with "
+             "such purpose and passion that even in death we can't help but feel his presence all "
+             "around us.' Zero prior regression note existed for this scenario. FIX (beat211): "
+             "utility.py _BASE gained an 'eulogies and other spoken tributes' clause requiring every "
+             "sentence to anchor to a specific brief detail, plus a BANNED GENERIC TRIBUTE PHRASES "
+             "list ('without saying it out loud', 'such purpose and passion', 'presence all around "
+             "us', 'presence will always be felt', 'touched the lives of everyone', 'touched everyone "
+             "who knew/he met', 'leaves behind a legacy', 'a life well lived', 'gone but never "
+             "forgotten', 'live on in our hearts', \"we can't help but feel\"). Prompt-only fix (same "
+             "class as the existing BANNED GRIEF PLATITUDES list, which is also prompt-only, not "
+             "regex-enforced) — no mechanical regen loop exists for either list; watch for recurrence "
+             "next battery10 cycle."),
     Scenario("sec-hr-complaint", "secretary", "register", "high", always=True, payload=dict(
         task="draft", tone="formal",
         text="formal complaint to HR: my manager Doug has made comments about my body at three separate team events (Jan 12 offsite, Feb 3 happy hour, March 11 all-hands), witnesses were Priya Shah and Tom Okafor at at least two. I want it documented and I want it to stop. I am not resigning."),
@@ -1433,7 +1447,21 @@ BANK: list[Scenario] = [
         task="reply", tone="plain",
         text="From my ex: 'You were 40 minutes late AGAIN Sunday. I'm documenting everything for our lawyers. The kids waited on the porch.'",
         instruction="I was late once before, not 'again'. There was a highway accident, I texted at 4:05, she didn't answer. I will not be baited but this WILL be read by lawyers someday. Factual, calm, no apology for things I didn't do."),
-        note="Litigation-aware register: factual, dated, no heat, no groveling, concedes nothing false."),
+        note="Litigation-aware register: factual, dated, no heat, no groveling, concedes nothing false. "
+             "REGRESSION (beat211 0830 battery10_1647): the specific counter-fact 'I texted at 4:05, "
+             "she didn't answer' was dropped entirely from the reply, and the output added editorializing "
+             "meta-commentary ('Nothing to see here for lawyers — just a single instance of being five "
+             "minutes later than expected...') that violates the 'factual, no heat' requirement. Root "
+             "cause: _b_reply() had NO mandatory-fact injection at all (unlike _b_draft, which already "
+             "had MANDATORY DATES) — and the key facts here live in the `instruction` field ('how I want "
+             "to reply'), not the `text` field, which _b_draft's extraction never checked either. FIX "
+             "(beat211): new _extract_times() (utility.py) pulls clock-time tokens ('4:05') and "
+             "'N minutes' phrases; _b_reply() now extracts dates+times from text+instruction COMBINED "
+             "and injects a MANDATORY FACTS clause; run() gained a reply-task regen loop (up to 2x) "
+             "mirroring the existing draft-dates regen. Also added an anti-meta-commentary rule to "
+             "_BASE ('never add meta-commentary about how this will look to a third party... state "
+             "only the facts and stop'). Verified via direct unit test against this exact brief/"
+             "instruction pair — MANDATORY FACTS clause confirmed to contain '4:05'."),
     Scenario("sec-esl-voice", "secretary", "register", "med", always=True, payload=dict(
         task="rewrite", tone="",
         text="Dear Professor, I am sorry to disturbing you. I want to ask about my grade of the midterm because I think the question 4 grading is maybe not correct. I solved with different method but the answer is same correct answer. Can you please to check it again? Thank you so much for your time and sorry again.",
@@ -1718,6 +1746,26 @@ BANK: list[Scenario] = [
                              "Dec 2011: 'The house is quiet since your mom passed. Come home when you can, no pressure. The tomatoes still come up wild.'")},
         queries=[("What did my dad say about being proud of me?", "graduation")],
         note="Register: these are a dead father's letters. Answer with care AND precision; no chirpy assistant tone."),
+    Scenario("ask-owner-citation-relevance", "ask", "honesty", "high", always=True, files={
+        "work.txt": "Q3 signups 4,200 against a 3,500 target. Deshawn took over retention from Marta. Next review October 2.",
+        "finances.txt": "Mortgage payment is $3,240 a month, due on the 5th. Emergency fund: $18,500 in the Ally savings account."},
+        queries=[("Who owns retention?", "deshawn")],
+        note="REGRESSION (beat211 0830 battery3b_1745, scenario 'OWNER'): answer 'Deshawn owns "
+             "retention.' was correct, but the returned sources list was ['work.txt', 'finances.txt'] — "
+             "finances.txt has zero content about retention or Deshawn, only mortgage/savings figures. "
+             "Root cause: doc_qa.py's ask() built `sources` purely from RETRIEVAL SCORE proximity to "
+             "the top hit (score >= 0.5*top), never checking whether the file's content actually "
+             "supports what the model answered — a file could score close enough to be cited while "
+             "being wholly irrelevant to the specific fact given. The battery's own check ('deshawn' "
+             "in answer text) never inspected `sources`, so this passed silently. FIX (beat211): "
+             "doc_qa.py ask() now re-filters `sources` after generation by keyword overlap between the "
+             "answer's substantive words (>=4 letters, common-word list excluded) and each cited "
+             "source's own retrieved chunk text — drops a source if none of the answer's words appear "
+             "in it. Guarded to never filter down to zero: if the overlap filter would eliminate every "
+             "source, the original (unfiltered) list is kept rather than returning no citation at all. "
+             "Verified via direct unit test reproducing this exact work.txt/finances.txt/answer triple "
+             "(filter correctly drops finances.txt, keeps work.txt) plus 2 FP guards (both-relevant "
+             "case keeps both; would-eliminate-all case falls back to unfiltered)."),
     Scenario("ask-scale-haystack", "ask", "robustness", "med", files={
         f"note_{i:03d}.txt": f"Meeting note {i}: routine sync, no decisions." for i in range(60)
     } | {"note_037b.txt": "CRITICAL: vendor contract auto-renews October 12 unless cancelled 30 days prior."},
