@@ -590,6 +590,20 @@ _FORBIDDEN = [
     # guards clean (one contrived double-coordination edge case — "anger and grief are
     # both things you're carrying with you" — not seen in any log, accepted risk).
     r"\b(?:anger|angry|sadness|grief|anxiety|anxious|fear|fearful|shame|shameful|guilt|guilty|frustration|frustrated|rage|hurt|pain|painful)\b(?:\s+\w+){0,3}\s+(?:might|could|may|is|are|was|were)(?:\s+[\w']+){0,3}\s+carrying\s+\w",
+    # therapy-reframe "DOING WHAT [OTHER FEELING] CAN'T" form (beat218):
+    # battery9_engagement_0902_0141 comp-grief-anger-barrier-pivot T1 produced
+    # "Anger at a miscarriage, not sadness — that breaks the script. Anger is
+    # doing what grief can't." — assigns the named feeling an instrumental
+    # function relative to a second, expected feeling ("doing what grief
+    # can't [do]"), the same forbidden reframe (feeling exists FOR a purpose)
+    # as "what it takes"/"a way to protect"/"taking you somewhere"/"carrying"
+    # above, in a verb shape none of those cover. Requires the second feeling
+    # word + a negated modal (can't/couldn't/won't/doesn't) so it doesn't fire
+    # on unrelated "is doing what it can" statements. Verified: matches the
+    # exact quote above; 0 FP on "Anger is doing what it always does" (no
+    # negated modal) and "That's doing what needs doing" (no feeling noun
+    # after "what").
+    r"\b(?:anger|angry|sadness|grief|anxiety|anxious|fear|fearful|shame|shameful|guilt|guilty|frustration|frustrated|rage|hurt|pain|painful)\b(?:\s+\w+){0,3}\s+(?:is|are|was|were)\s+doing what\s+(?:anger|angry|sadness|grief|anxiety|fear|shame|guilt|frustration|rage|hurt|pain|it|that)\s+(?:can'?t|cannot|couldn'?t|won'?t|doesn'?t)\b",
     # helplessness opener: companion admitting it doesn't know what to do mirrors the
     # user's helplessness and gives nothing. beat99: comp-grief-anger-barrier-vague T2
     # regen produced "I don't know what to do when he makes it about him." — mirrors
@@ -2810,8 +2824,18 @@ class Companion:
             # whole time-duration noun class at once: these share the identical
             # hollow-content property as thing/story/deal (a bare duration word
             # with "whole"+"in itself" never names anything specific either).
-            r"^(?:(?:that[’']?s|it[’']?s|this is)\s+(?:been\s+)?(?:(?:the|a|all|just)\s+)*"
-            r"(?:whole\s+)?(?:thing|this|script|story|situation|picture|deal"
+            # beat218 (battery9_engagement_0902_0141 comp-grief-anger-barrier-vague
+            # T1): "That's a clear pattern." — names nothing about the specific
+            # bind (husband deflecting/making it about himself), same hollow-stub
+            # shape as the rest of this family, but "clear" sits between "a" and
+            # the noun where the pre-noun quantifier only allowed the/a/all/just,
+            # so the match failed even before "pattern" was considered. Added
+            # "clear" to the allowed pre-noun modifiers and "pattern" to the noun
+            # list. Verified: matches "That's a clear pattern.", still 0 FP on
+            # "That's a clear answer to a hard question." (has real trailing
+            # content past the bare noun, doesn't hit the end-anchor).
+            r"^(?:(?:that[’']?s|it[’']?s|this is)\s+(?:been\s+)?(?:(?:the|a|all|just|clear)\s+)*"
+            r"(?:whole\s+)?(?:thing|this|script|story|situation|picture|deal|pattern"
             r"|conversation|world|topic|thread|sentence"
             r"|hour|day|week|month|year|decade|moment|while)"
             r"|(?:that|this)\s+breaks?\s+the\s+script)"

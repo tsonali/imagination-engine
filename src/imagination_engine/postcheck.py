@@ -1317,6 +1317,13 @@ _INTIMACY_OBJECT_PRONOUN_SUBS = (
     # discipline (narrow phrase first, generalize once a second instance
     # justifies a verb list).
     (re.compile(r"\bmade\s+your\s+come\s+out\b", re.IGNORECASE), "made you come out"),
+    # beat218 (battery11_imagination_bank_0902_0000 honest read): imag-intimacy —
+    # "She meets your with equal pressure — something known and practiced
+    # between them both" — same beat187/198 shape (verb-governed "your"
+    # standing in for the standalone possessive "yours" as the object of
+    # "meets"). Literal patch for this exact instance per this file's
+    # established discipline.
+    (re.compile(r"\bmeets\s+your\s+with\s+equal\s+pressure\b", re.IGNORECASE), "meets yours with equal pressure"),
     # Same script: "The fan continues its constant hum between you and hers"
     # is a different (ambiguous, not fixed) case, but two OTHER lines in the
     # same script coordinate "hers and your" where "your" is predicative and
