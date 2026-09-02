@@ -4991,3 +4991,46 @@ Unreachable (`julios-mac-mini.local` resolution failure), same signature, 82nd+ 
 
 ### Running
 `battery9_engagement.py` (started 18:15) still in flight at beat215 close, 5/20 scenarios read so far (all clean, no defects in live turns) — priority read for next beat.
+
+### beat216 (2026-09-01, sonali-a4)
+
+**Fixed and verified (unit tests, no model launch — see RELEASE.md status snapshot for MD5s):**
+- Companion UC3 T3→T4 verbatim opener repeat ("You're still doing the work.") — survived the
+  existing self-recycle guard's 2 regen attempts; added a mechanical fallback strip.
+- BYO UC1 T5 bare pronoun-swap echo — first instance on the custom-instrument surface; added
+  a lightweight echo detector + regen (companion.py's own echo system wasn't reused as-is;
+  BYO personas are too register-diverse for its grief/therapy-specific logic).
+
+**Not fixed — flagged for a beat with live model access to trace/verify safely:**
+- **[medium, new]** Companion UC3 T5 pronoun-referent inversion: "write one sentence about
+  what you'd do differently if **they** gave your manager feedback" — T2 established the user
+  withholds feedback FROM their manager; "they gave your manager feedback" inverts the
+  relationship and garbles the intended concrete step. Logic/grammar bug, not a simple
+  string-level fix — needs a live trace of how the pronoun gets assigned.
+- **[medium, long-open family, new instance]** Companion UC1 T4→T5 near-duplicate concrete
+  suggestion (`comp-uc1-t5-semantic-repeat`, open since beat108, dozens of prior instances) —
+  confirmed still recurring outside `battery9`, no new fix angle found this beat.
+- **[low-medium, new]** BYO UC4 Elia persona opener: "Should I break out the butter and spin a
+  spell of sweet nothings..." — "break out the butter" doesn't parse as an established idiom;
+  reads as a stray/garbled insertion. Wants a second instance before treating as a class
+  (could be intentional whimsy).
+- **[low confidence, new]** Companion UC2 T1 opener alludes to "the rhythm of your week, coming
+  around to this thread once more" without citing specifics — a soft version of the
+  "shouldn't feel like a memory dump" violation the T1-silence design intends. Worth a second
+  read before acting.
+- **[cosmetic, new]** `sec-braindump-organize` battery10 output header reads "## Engineering 3
+  Bugs" — awkward machine-sounding phrasing (the body text correctly spells out "three critical
+  ones"; only the header uses the bare digit). The floor check technically passes because the
+  digit is present, but the header itself is a minor prose-quality miss worth a look.
+
+**Process note:** `scripts/test_companion.py` was run this beat to try to verify the companion
+fix and turned out to load the model (imports `inference.Engine`) — a mistake, since
+`battery10_registers.py` was already the one active model process. Caught via `memory_pressure`
+dropping to 5% free within ~90s; killed immediately (PID kill), recovered to 54% free within a
+few seconds. No crash, but flagging honestly: **check a test script's imports for
+`inference.Engine` BEFORE running it**, not after, while any other model process may be live.
+
+### Running (beat216 close)
+Battery10 finished mid-beat (945s, all 10 scenarios genuinely clean on full read). qc_queue.sh's
+next battery was not checked at beat close — verify it's still cycling (PID 21789 was the queue
+shell process on arrival) next beat.

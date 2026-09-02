@@ -421,3 +421,28 @@ Forecast (not a deadline — gates still decide): beta ~Jul 18-19, public ~Jul 2
   Gold(C)+4 (c_gold_beat215.json, 2 exemplars directly targeting beat214's flagged UC2-T4/
   UC1-T2-T3 companion defects). Mini unreachable (82nd+), beat214's _train/ sync still pending.
   Sonali: push v1.0 tag when ready. Only Sonali-physical: notarization + F5 voice dial.
+- **2026-09-01 (beat216 COMPLETE, sonali-a4):** AYF UC5 fix RECONFIRMED on a fresh re-run
+  (18/18 PASS, "Ben" named correctly with date) via background-agent honest read of 4 fresh
+  unread logs. 2 NEW defects found+fixed: (1) Companion UC3 T3->T4 verbatim opener repeat
+  ("You're still doing the work.") surviving the existing self-recycle guard's 2 regen
+  attempts — new `_strip_recycled_opener_if_survived()` mechanical fallback added, verified
+  via direct unit test against the exact fixture strings + FP guards. companion.py MD5
+  e4a470311df5157bdf8febf036ae7eb0, all 3 dist copies synced. (2) BYO UC1 T5 bare
+  pronoun-swap echo ("My blocker is X" -> "You don't have X.") — first instance on the
+  custom-instrument surface (most overdue use-case, last real read beat167); new
+  `_is_bare_pronoun_swap_echo()` + regen added to instrument.py, verified via 4 direct unit
+  tests (2 true-positive shapes, 2 FP guards). instrument.py MD5 bfc16b37cbfe42211373bfbc0c9eee42,
+  all 3 dist synced. Neither fix re-verified live (battery10_registers.py held the one safe
+  model slot most of the beat; one accidental second model launch — scripts/test_companion.py —
+  caught at 5% free memory and killed within seconds, recovered to 54%; no crash). Own
+  battery10_registers.py honest full read after it finished: all 10 scenarios genuinely clean
+  (all lossless-number/fact floors hold) except one minor prose oddity (sec-braindump-organize
+  header "## Engineering 3 Bugs" is awkward — logged to review-queue, not fixed, cosmetic).
+  Gold(A)=6716 (+5: bark-tanning, lost-wax bronze pour, gold-leaf gilding, whiskey still cuts,
+  bobbin lace — all 0 prior corpus hits checked before writing). Mini unreachable (83rd+
+  consecutive beat, same DNS-resolution signature). ZIP rebuilt+MD5-verified alongside the
+  in-flight battery (pure file ops). 5 lower-confidence findings logged to review-queue for a
+  beat with model headroom: companion UC3 T5 pronoun-referent inversion, UC1 T4->T5 semantic-
+  repeat family (still recurring, no new fix angle), UC2 T1 soft "thread" allusion, BYO UC4
+  "break out the butter" (wants a 2nd instance), sec-braindump-organize header oddity.
+  Sonali: push v1.0 tag when ready. Only Sonali-physical: notarization + F5 voice dial.
