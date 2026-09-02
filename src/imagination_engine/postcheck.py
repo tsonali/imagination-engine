@@ -566,7 +566,48 @@ _NARRATOR_POSS = re.compile(
     # "we aren't" in A_gold.jsonl, confirmed safe before adding.
     r"|\bI\s+am\s+(?:supposed\s+to\s+be|up\s+here)\b"
     r"|\bI['’]m\s+up\s+here\b"
-    r"|\bwe\s+aren['’]t\b",
+    r"|\bwe\s+aren['’]t\b"
+    # beat215 (queue_0901_1640_battery11_imagination_bank.log honest read,
+    # imag-eagle-wildlife-plural — the densest narrator-drift instance since
+    # beat214, 6/6 eagle postchecks PASS but 8+ leaks survived): root-caused
+    # why "we've gained" and "we've been up here" escaped the beat170 "we've
+    # [past-participle]" list (line ~469) despite "gained" already being in
+    # it — that pattern's contraction group is `(?:[‘’]ve)`, curly quotes
+    # only, missing the ASCII apostrophe (\x27) the beat171 "we're" pattern
+    # (line ~473) already carries. Model output here used the ASCII form.
+    # Also added "been" to that verb list — "we've been" was never covered by
+    # any verb form (only past-participles of motion/decision verbs).
+    r"|\bwe[\x27’]ve\s+been\b"
+    # "if I did land again among the trees or rocks far below" — modal "did"
+    # + verb construction; the "I + verb" allowlist only ever covered bare
+    # present/past forms, never "I did [verb]". Scoped to the literal found
+    # verb ("land") rather than a blanket "I did X" ban: A_gold.jsonl has a
+    # legitimate quoted-dialogue "I did what you told me" instance, the same
+    # dialogue-quote risk this file already navigates carefully elsewhere.
+    r"|\bI\s+did\s+land\b"
+    # "how I'd never expect it down below where everything falls toward
+    # ground" — "I'd" (I would/I had) + verb is a first-person narrator
+    # intent/history claim with zero legitimate instances anywhere in
+    # A_gold.jsonl (checked directly, both apostrophe forms) — safe to ban
+    # the contraction outright rather than scoping to just this one verb.
+    r"|\bI['’]d\s+\w+"
+    # "anything we'd hold down there" — sibling of the "I'd" ban above, but
+    # "we'd" DOES have legitimate uses in A_gold.jsonl (quoted dialogue: "We'd
+    # like to offer you the position", "who thought we'd be spies") — scoped
+    # narrowly to the literal found verb rather than banning the contraction.
+    r"|\bwe['’]d\s+hold\b"
+    # "take us from here in flight" — verb "take(s)" terminating in the
+    # narrator-plural object "us", a motion-onto-us shape not covered by the
+    # existing spatial/relational "us" list (beat212's "reach(ing/es) us" is
+    # the nearest sibling). 0 hits in A_gold.jsonl.
+    r"|\btakes?\s+us\b"
+    # "our own wings", "our ascent began" — bare possessive "our" is common
+    # in a different, older gold-corpus content style (collective-address
+    # loving-kindness scripts: "we think of our good friends") and can't be
+    # banned broadly without destroying that legitimate content class; scoped
+    # to the two literal found noun phrases only, both 0 hits in A_gold.jsonl.
+    r"|\bour\s+own\s+wings\b"
+    r"|\bour\s+ascent\b",
     re.IGNORECASE,
 )
 
@@ -636,13 +677,18 @@ _HER_SUBJECT_VERBS = re.compile(
     # settles back down over chest" ("settles" was missing even though the
     # sibling "sets" was already covered).
     r"sets|settles|puts|uses|calls|feels|shows|opens|closes|pulls|pushes|holds|places|"
+    # beat215 (battery11_0901_1640 imag-intimacy honest read): "where her
+    # arrived before coming into view fully" — "arrive"/"arrives" was never
+    # in either tense list despite being one of the most common motion verbs
+    # in this corpus. 0 hits for "her arrive(d/s)" in A_gold.jsonl.
+    r"arrive|arrives|"
     # Past tense forms (most common)
     r"reached|found|stood|turned|met|held|told|said|came|saw|kept|went|"
     r"spoke|broke|ran|took|got|left|made|started|moved|sat|walked|"
     r"entered|searched|passed|stopped|caught|looked|laced|"
     # Past tense additions (beat86)
     r"asked|had|gave|seemed|appeared|did|followed|watched|faced|"
-    r"used|called|felt|showed|opened|closed|pulled|pushed|placed|"
+    r"used|called|felt|showed|opened|closed|pulled|pushed|placed|arrived|"
     # beat189 (battery11_0826_1712 imag-intimacy): "where her hadn't been" —
     # subject "her" before a contracted auxiliary verb, a form the finite-verb
     # list above didn't cover (only bare "had", not "hadn't").
@@ -674,6 +720,40 @@ def fix_subject_pronouns(text: str) -> tuple[str, int]:
     return result, fixed
 
 
+# beat215 (battery11_0901_1640 imag-intimacy honest read): "hers" — the
+# standalone possessive pronoun, correct only after a copula ("it's hers")
+# — used as a SUBJECT pronoun instead of "she". Two confirmed shapes in one
+# script: (1) direct copula subject, "hers is still turned fully toward
+# you" / "when hers is about to tell something your has not yet heard";
+# (2) coordinated subject with "you", "hers or you arrived late" (verb
+# agreement follows the nearer noun "you", so only the pronoun itself needs
+# fixing, not a verb). Distinct from _HER_SUBJECT_VERBS above (which fixes
+# "her" + finite verb) — this is a different incorrect pronoun ("hers" vs
+# "her") in a different grammatical slot. 0 hits for either shape in
+# A_gold.jsonl.
+_HERS_SUBJECT_RE = re.compile(
+    r"\bhers\b(?=\s+is\b)"
+    r"|\bhers\b(?=\s+(?:or|and)\s+you\b)",
+    re.IGNORECASE,
+)
+
+
+def fix_hers_subject_pronoun(text: str) -> tuple[str, int]:
+    """Replace 'hers' -> 'she' when used as a subject pronoun ('hers is
+    still turned toward you' -> 'she is still turned toward you'; 'hers or
+    you arrived late' -> 'she or you arrived late').
+    """
+    fixed = 0
+
+    def _replace(m: "re.Match") -> str:
+        nonlocal fixed
+        fixed += 1
+        return "She" if m.group(0)[0].isupper() else "she"
+
+    result = _HERS_SUBJECT_RE.sub(_replace, text)
+    return result, fixed
+
+
 # beat196 (battery11_2152 honest read, imag-intimacy): "your came later" —
 # "your" used as a SUBJECT pronoun (should be "you") immediately before a finite
 # verb, a 5th distinct grammatical shape of the your/yours escape family (prior
@@ -688,15 +768,36 @@ def fix_subject_pronouns(text: str) -> tuple[str, int]:
 _YOUR_SUBJECT_VERBS = re.compile(
     r"\byour\s+(came|arrived|went|left|stayed|waited|returned|walked|ran|stood|"
     r"sat|moved|woke|slept|cried|laughed|smiled|nodded|paused|hesitated|"
+    # beat215 (battery11_0901_1640 imag-intimacy honest read): "your has not
+    # yet heard" — bare "has" was never in this list (only the negated
+    # "hasn't"). 0 hits for "your has" in A_gold.jsonl.
+    r"has|"
     r"wasn't|weren't|hadn't|didn't|doesn't|hasn't|haven't|isn't|aren't|"
     r"wouldn't|couldn't|shouldn't|won't|can't)\b",
     re.IGNORECASE,
 )
 
 
+# beat215: a blind "your [verb]" -> "you [verb]" swap is grammatically wrong
+# for the handful of verbs that conjugate by person — "your has" naively
+# becomes "you has" (should be "you have"), and the same latent mismatch
+# already existed for "hasn't"/"doesn't"/"isn't" before this beat (all
+# person-invariant elsewhere in the list: past tense and n't-contractions
+# other than these three never change between "you" and "she"). Discovered
+# while adding bare "has" to _YOUR_SUBJECT_VERBS above; fixed here rather
+# than propagated, since the conjugation mapping is small and unambiguous.
+_YOUR_SUBJECT_CONJUGATION = {
+    "has": "have", "hasn't": "haven't", "hasn’t": "haven’t",
+    "doesn't": "don't", "doesn’t": "don’t",
+    "isn't": "aren't", "isn’t": "aren’t",
+}
+
+
 def fix_your_subject_pronoun(text: str) -> tuple[str, int]:
     """Replace 'your [verb]' → 'you [verb]' when 'your' is incorrectly used as
-    the subject of a finite verb ('your came later' → 'you came later').
+    the subject of a finite verb ('your came later' → 'you came later'),
+    conjugating the small set of verbs that require it ('your has' → 'you
+    have', not the ungrammatical 'you has').
 
     Sibling of fix_subject_pronouns (her→she); same defect class, your→you.
     """
@@ -705,7 +806,9 @@ def fix_your_subject_pronoun(text: str) -> tuple[str, int]:
     def _replace(m: "re.Match") -> str:
         nonlocal fixed
         fixed += 1
-        return f"you {m.group(1)}"
+        verb = m.group(1)
+        verb = _YOUR_SUBJECT_CONJUGATION.get(verb.lower(), verb)
+        return f"you {verb}"
 
     result = _YOUR_SUBJECT_VERBS.sub(_replace, text)
     return result, fixed
@@ -1993,7 +2096,21 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     # blocked tokens (no "hawk", "fellow eagle", "you both") — a new anon-
     # companion surface form built on "recognizing each other" instead.
     r'|\brecognizing\s+each\s+other\b'   # "recognizing each other as fellow travelers"
-    r'|\bfellow\s+travelers\b',          # "fellow travelers in an endless game of sight"
+    r'|\bfellow\s+travelers\b'           # "fellow travelers in an endless game of sight"
+    # beat215 (queue_0901_1640_battery11_imagination_bank.log honest read):
+    # imag-embodiment-eagle — "You turn your head and see another cabin
+    # appearing ahead" — new structure-hallucination surface form (the word
+    # "another" implies a prior cabin the user never described; same
+    # human-bystander/structure hallucination family as the beat178/186/187
+    # "figure below"/"loghouse" patterns above, new token "cabin" specifically).
+    # imag-eagle-golden-eagle-wildlife (same log) — "another animal carrying
+    # its own voice across this land that is both yours and theirs at once" —
+    # new visual+acoustic companion-animal escape, distinct wording from every
+    # prior "another [X]" entry (none of which cover bare "animal"). 0 hits for
+    # both phrases in A_gold.jsonl, confirmed safe before adding.
+    r'|\banother\s+cabin\b'              # "see another cabin appearing ahead"
+    r'|\banother\s+animal\b'             # "another animal carrying its own voice"
+    r'|\bboth\s+yours\s+and\s+theirs\b',  # "this land that is both yours and theirs"
     re.IGNORECASE,
 )
 

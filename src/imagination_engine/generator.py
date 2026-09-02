@@ -71,7 +71,8 @@ from imagination_engine.postcheck import (degeneration_report, drop_collapsed_pa
                                           fix_predicative_her,
                                           fix_reflexive_her_object,
                                           fix_intimacy_object_pronoun_escapes,
-                                          fix_subject_pronouns, fix_your_subject_pronoun,
+                                          fix_subject_pronouns, fix_hers_subject_pronoun,
+                                          fix_your_subject_pronoun,
                                           fix_you_before_bodypart,
                                           fix_third_person_alone_drift,
                                           drop_crutch_word_overuse,
@@ -676,6 +677,9 @@ def _generate_settling(engine: Engine, transcript: list[dict], emit) -> str:
     body, subj_fixed = fix_subject_pronouns(body)
     if subj_fixed:
         log.warning('[settling] %d subject-pronoun error(s) fixed (her→she before verb)', subj_fixed)
+    body, hers_subj_fixed = fix_hers_subject_pronoun(body)
+    if hers_subj_fixed:
+        log.warning('[settling] %d subject-pronoun error(s) fixed (hers→she)', hers_subj_fixed)
     body, your_subj_fixed = fix_your_subject_pronoun(body)
     if your_subj_fixed:
         log.warning('[settling] %d subject-pronoun error(s) fixed (your→you before verb)', your_subj_fixed)
@@ -1268,6 +1272,9 @@ def generate_session(
     full, subj_fixed = fix_subject_pronouns(full)
     if subj_fixed:
         log.warning('[v6] %d subject-pronoun error(s) fixed (her→she before verb)', subj_fixed)
+    full, hers_subj_fixed = fix_hers_subject_pronoun(full)
+    if hers_subj_fixed:
+        log.warning('[v6] %d subject-pronoun error(s) fixed (hers→she)', hers_subj_fixed)
     full, your_subj_fixed = fix_your_subject_pronoun(full)
     if your_subj_fixed:
         log.warning('[v6] %d subject-pronoun error(s) fixed (your→you before verb)', your_subj_fixed)
