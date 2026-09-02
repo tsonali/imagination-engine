@@ -773,15 +773,28 @@ class Assistant:
                                     continue
                         continue
                 sib = sibs[0]
+                # beat220 (battery10 sec-summarize-lossless 1414): _num_present() uses a
+                # \b-bounded regex to VERIFY a pure-digit sib is present (so "2" doesn't
+                # falsely match inside "2026"), but the re.sub()s below were matching
+                # re.escape(sib) with NO boundary at all — so a verified-present bare "2"
+                # (e.g. from a real "2 items" mention later in the text) got spliced into
+                # the FIRST unrelated "2" in the output, which was the leading digit of
+                # "2026", producing "2 (18% (Q2))026". Plain \b isn't enough either: "." and
+                # "$" are non-word chars, so \b2\b still matches the "2" inside "$2.4M".
+                # Require no adjacent digit/decimal/comma/currency marker on either side so
+                # the match can only land on a genuinely standalone digit, the same
+                # occurrence the presence check verified.
+                _sib_pat = (r'(?<![\d.,$])' + re.escape(sib) + r'(?![\d.,%KMB])') \
+                    if re.fullmatch(r'\d+', sib) else re.escape(sib)
                 if "median" in _src_ctx.lower() and "%" in n and "%" in sib:
                     # "median of 2.1%" → "rate of 3.2% (median: 2.1%)"
                     replaced = re.sub(
-                        r'median\s+(?:of\s+)?' + re.escape(sib),
+                        r'median\s+(?:of\s+)?' + _sib_pat,
                         f"rate of {n} (median: {sib})",
                         out, count=1, flags=re.I,
                     )
                     out = replaced if replaced != out else re.sub(
-                        re.escape(sib), f"{n} (median: {sib})", out, count=1
+                        _sib_pat, f"{n} (median: {sib})", out, count=1
                     )
                 else:
                     # beat205 (battery10_1627 sec-summarize-lossless): the blind
@@ -792,7 +805,7 @@ class Assistant:
                     # (both literally present) while reading as broken English.
                     # Parenthetical aside is grammatical regardless of what kind
                     # of figure n/sib are, mirroring the median case above.
-                    out = re.sub(re.escape(sib), f"{sib} ({n})", out, count=1)
+                    out = re.sub(_sib_pat, f"{sib} ({n})", out, count=1)
                 log.info("secretary[%s]: last-resort inject '%s' adjacent to '%s' in output",
                          task_key, n, sib)
             # Label-inversion guard: both numbers present but median/rate roles swapped.

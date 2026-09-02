@@ -724,6 +724,16 @@ def _require_size(text: str, limit: int, what: str = "message") -> None:
 @app.post("/utility/run")
 def utility_run(req: UtilityRequest) -> StreamingResponse:
     """Run one utility task with post-processing guards, returning the finished artifact."""
+    # beat220 (battery6_crosscut 1408): both bad-input cases below used to fall through
+    # to the generator's try/except, which caught KeyError/ValueError and yielded
+    # "[error: ...]" as the STREAM BODY of a 200 response — a bad task name or empty
+    # text silently succeeded at the HTTP level instead of getting a clean 4xx, the
+    # opposite of every sibling endpoint's bad-input behavior. Validate eagerly instead.
+    from imagination_engine.utility import TASKS
+    if req.task not in TASKS:
+        raise HTTPException(status_code=400, detail=f"Unknown task '{req.task}'.")
+    if not req.text.strip():
+        raise HTTPException(status_code=400, detail="text must not be empty.")
     _require_size(req.text, UTILITY_MAX_CHARS, "text")
     _require_size(req.style_sample, UTILITY_MAX_CHARS, "style sample")
     assistant = _get_assistant()
@@ -740,6 +750,9 @@ def utility_run(req: UtilityRequest) -> StreamingResponse:
             )
             yield result.output.encode("utf-8")
         except (KeyError, ValueError) as e:
+            # Should be unreachable now that task/text are validated above; kept as a
+            # last-resort guard against a mid-stream failure so a crash still degrades
+            # to visible text in the body rather than an unhandled 500.
             yield f"[error: {e}]".encode("utf-8")
 
     return StreamingResponse(stream(), media_type="text/plain; charset=utf-8")

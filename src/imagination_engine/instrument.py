@@ -225,6 +225,20 @@ def _pronoun_swap_i_to_you(text: str) -> str:
     return out
 
 
+def _bare_echo_overlap(r_words: list[str], m_words: list[str]) -> bool:
+    if len(r_words) < 3 or len(m_words) < 3:
+        return False
+    if len(r_words) > len(m_words) + 4:
+        return False  # this stretch adds substantial content -> not a bare echo
+    # Overlap measured against the REPLY's own vocabulary: a bare echo is a reply
+    # almost entirely made of words borrowed from the user's (swapped) message,
+    # regardless of preamble in the user's message that the reply doesn't restate
+    # (e.g. "My blocker is that I don't have X" -> "You don't have X" is still a
+    # bare echo even though "blocker"/"is"/"that" aren't reused).
+    overlap = len(set(r_words) & set(m_words))
+    return overlap / max(len(set(r_words)), 1) >= 0.8
+
+
 def _is_bare_pronoun_swap_echo(reply: str, message: str) -> bool:
     """True if `reply` is essentially the user's own sentence restated with only an
     I->you pronoun swap and no added content -- a decayed parrot, not a real response.
@@ -235,20 +249,27 @@ def _is_bare_pronoun_swap_echo(reply: str, message: str) -> bool:
     value; doesn't treat the named blocker as a thing to actually respond to.
     Companion (companion.py) has a much larger echo-detection system for its own
     register; this is a lighter, generic version for arbitrary user-built personas.
+
+    beat220 (BYO UC1 T5, 2nd instance): the whole-reply check missed a reply that
+    prefixed the echo with an unrelated real sentence ("You're working on CSS fixes
+    and have a roadmap meeting at 2. As for your blocker, you don't have clear
+    requirements for the next feature.") -- the preamble made the whole-reply word
+    count exceed the message's by more than 4, so the bail-out at line 2 hid a
+    sentence that, on its own, is still a pure bare echo. Now also checks each
+    sentence of the reply individually against the full swapped message.
     """
-    r_words = re.findall(r"[a-z']+", reply.lower())
     m_words = re.findall(r"[a-z']+", _pronoun_swap_i_to_you(message).lower())
-    if len(r_words) < 3 or len(m_words) < 3:
-        return False
-    if len(r_words) > len(m_words) + 4:
-        return False  # reply adds substantial content -> not a bare echo
-    # Overlap measured against the REPLY's own vocabulary: a bare echo is a reply
-    # almost entirely made of words borrowed from the user's (swapped) message,
-    # regardless of preamble in the user's message that the reply doesn't restate
-    # (e.g. "My blocker is that I don't have X" -> "You don't have X" is still a
-    # bare echo even though "blocker"/"is"/"that" aren't reused).
-    overlap = len(set(r_words) & set(m_words))
-    return overlap / max(len(set(r_words)), 1) >= 0.8
+    r_words = re.findall(r"[a-z']+", reply.lower())
+    if _bare_echo_overlap(r_words, m_words):
+        return True
+    sentences = re.split(r"(?<=[\.\!\?])\s+", reply.strip())
+    if len(sentences) < 2:
+        return False  # single-sentence replies are already covered by the whole-reply check
+    for sent in sentences:
+        s_words = re.findall(r"[a-z']+", sent.lower())
+        if _bare_echo_overlap(s_words, m_words):
+            return True
+    return False
 
 
 class Instrument:
