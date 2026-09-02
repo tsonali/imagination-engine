@@ -4962,3 +4962,32 @@ Unreachable (`julios-mac-mini.local` resolution failure), same signature, 81st+ 
 
 ### Coordination
 6 peer sessions on arrival (sonali-08, sonali-2f, contractor-compliance-engine-60, sonali-65, sonali-66, sonali-21) — broadcast sent to the 5 Hearth-relevant ones before touching anything, no replies, no collision.
+
+## beat215 (2026-09-01, sonali-c0-heartbeat) — Secretary/AYF rotation gap closed (AYF bug fixed), systemic eagle narrator-drift fixes, gold +6/+4
+
+**Closed a stale gap**: `secretary_deep_test`/`ayf_deep_0805` produced their first-ever logs since beat212 wired them into rotation, and neither had been read since beat167. Secretary 6/6 clean. AYF surfaced and fixed a real bug (see daily-log.md / use-cases.md for full writeup) — `doc_qa.py`'s bare-refusal strip was end-anchored and missed a LEADING self-contradictory "not in your files" + real answer; also never required naming a person for who-questions. Fixed, MD5-synced, verified without a model launch.
+
+**Battery11 honest read** (`queue_0901_1640_battery11_imagination_bank.log`, background agent, 7 scenarios) — most severe finding: systemic first-person narrator drift ("if I did land again", "how I'd never expect", "our own wings", "our ascent began") surviving in 3 of 4 eagle scripts despite extensive prior patching, including a full first-person protagonist claim ("if I did land again among the trees or rocks far below") that's more severe than any prior logged shape. Also found: a root-caused bug in the beat170 "we've [verb]" pattern — its apostrophe class only matched curly quotes (`[‘’]ve`), not ASCII (`\x27`), unlike the sibling "we're" pattern which already covers both — so ASCII "we've gained"/"we've been" escaped silently; a new imag-intimacy pronoun sub-family ("hers" used as a subject pronoun — "hers is still turned toward you", "hers or you arrived late" — distinct from the existing "her"-as-subject fixer, which fixes a different wrong pronoun in a different slot); "arrive/arrived" missing entirely from the her-subject-verb and your-subject-verb allowlists; two new hallucination phrasings ("another cabin appearing ahead", "another animal carrying its own voice... both yours and theirs").
+
+**9 fixes landed, all verified via py_compile + `scripts/test_postcheck.py` (ALL PASS) + direct unit tests against every exact defect quote above + FP guards checked against A_gold.jsonl before each addition (each new pattern's hit-count against the corpus is documented inline) — no model launch (battery9_engagement.py held the one safe slot all beat):**
+1. `_NARRATOR_POSS`: ASCII-apostrophe fix for "we've been" (`\bwe[\x27']ve\s+been\b`), literal "I did land", blanket "I'd [verb]" ban (0 legitimate hits anywhere in A_gold.jsonl, both apostrophe forms — unlike "we'd", which has 2 legitimate quoted-dialogue hits and was scoped narrowly to "we'd hold" instead), "take(s) us", "our own wings", "our ascent" (both "our" phrases scoped narrowly — bare "our" is common in an older, different-style loving-kindness-meditation content class in the gold corpus and can't be banned broadly).
+2. `_EAGLE_ANON_COMPANION_PATTERN`: "another cabin", "another animal", "both yours and theirs" (all 0 hits in A_gold.jsonl).
+3. `_HER_SUBJECT_VERBS`: added "arrive/arrives/arrived" (present in neither tense list before).
+4. `_YOUR_SUBJECT_VERBS`: added bare "has".
+5. **Found and fixed a latent grammar bug while adding #4**: `fix_your_subject_pronoun()` did a blind textual "your"→"you" swap with no verb conjugation — adding "has" would have produced the ungrammatical "you has" (should be "you have"), and the same mismatch already existed pre-beat215 for "hasn't"/"doesn't"/"isn't" (should conjugate to "haven't"/"don't"/"aren't"). Added a small conjugation map rather than propagate it.
+6. New `fix_hers_subject_pronoun()` — "hers" (not "her") used as a subject pronoun, two shapes: direct copula ("hers is") and coordinated-subject-with-you ("hers or/and you"). Wired into both generator.py pipeline call sites (settling + v6), same pattern as the sibling fixers.
+
+postcheck.py + generator.py MD5s in daily-log.md beat215 entry. All 3 dist copies synced (MD5-verified). ZIP REBUILT (`package.sh`, safe alongside a running battery — pure file ops): dist/hearth-0.2.zip, verified the packaged postcheck.py MD5 matches source.
+
+**Not fixed, logged for follow-up** (from battery11's other findings, needs a 2nd instance or model-trace before attempting): imag-mri back-half circular degeneration (known n376/n115 floor, unusually dense this instance); imag-calm-settle read fully clean this cycle (no defects — a positive data point against the standing back-half-decay concern for THAT scenario specifically).
+
+**Still open from beat214** (not attempted this beat — all need live model trace, which wasn't available; battery9_engagement.py held the one safe slot the entire beat): the UC2-T4 topic-matched VF-pollution recurrence, the UC1 T2→T3 self-recycle, and the rest of beat214's 11-item list. Priority for the next beat with model headroom.
+
+### Gold
+Gold(A) +6 (6705→6711: curling stone sweep, emergency suturing, tower bell change-ringing, gemstone faceting, pork shoulder butchery, luge start — all 0 prior corpus hits, forbidden-phrase-scanned clean, unique openings confirmed). Gold(C) +4 (`c_gold_beat215.json`: barrier-names-cost exemplar, past-query positive-recall-with-real-detail exemplar, two-distinct-disclosures-get-distinct-replies exemplar, anger-received-flat-no-reframe exemplar — all targeting still-open defect families from beat214's review-queue list).
+
+### Mini
+Unreachable (`julios-mac-mini.local` resolution failure), same signature, 82nd+ consecutive beat. beat214's training-pipeline fix (`_train/{train.jsonl,valid.jsonl}` regenerated locally, 192→270 files/820→1214 records) still not synced — top priority the moment mini is reachable.
+
+### Running
+`battery9_engagement.py` (started 18:15) still in flight at beat215 close, 5/20 scenarios read so far (all clean, no defects in live turns) — priority read for next beat.

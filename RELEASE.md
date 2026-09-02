@@ -401,3 +401,23 @@ Forecast (not a deadline — gates still decide): beta ~Jul 18-19, public ~Jul 2
   recurrence, UC1 T2→T3 self-recycle) — not fixed, need model access to trace. Gold(A)=6705 (+6).
   Gold(C)+4 (c_gold_beat214.json). Mini unreachable (81st+). Sonali: push v1.0 tag when ready.
   Only Sonali-physical: notarization + F5 voice dial.
+
+- **2026-09-01 (beat215 — SHIP GATE HOLDS):** Closed a structural gap: secretary_deep_test/
+  ayf_deep_0805 (wired into rotation beat212) had their first-ever logs unread through beats
+  213-214. Secretary 6/6 clean. AYF 17/18 — 1 real bug found+fixed: doc_qa.py's bare-refusal
+  strip was end-anchored (only caught refusal TRAILING a real answer), so a dated-status query
+  got a self-contradictory LEADING "not in your files" + real answer that never named the
+  person; generalized the strip position-agnostic + added an explicit who-question naming rule
+  to QA_SYSTEM. doc_qa.py MD5 9a61806010edcfb211e9fa975c174307, all dist synced. Battery11
+  honest read (background agent): systemic eagle narrator-drift, most severe instance yet (a
+  full first-person "if I did land again" protagonist claim). 9 mechanical fixes (ASCII-
+  apostrophe "we've" gap closed, "I did land"/"I'd [verb]" ban, narrowly-scoped "our own
+  wings"/"our ascent", 2 new hallucination phrases, "arrive/arrived" added to her/your-subject
+  verb lists, new fix_hers_subject_pronoun(), a self-caught latent verb-conjugation bug in
+  fix_your_subject_pronoun()) — all verified py_compile + test_postcheck.py + unit tests + FP
+  guards against A_gold.jsonl, no model launch (battery9_engagement.py held the one safe slot
+  all beat). postcheck.py MD5 8744d225060b605fd90b677d5d108caf, generator.py MD5
+  ec0d3788483d9dedba603a6fb68dd7bf, all dist synced, ZIP rebuilt+verified. Gold(A)=6711 (+6).
+  Gold(C)+4 (c_gold_beat215.json, 2 exemplars directly targeting beat214's flagged UC2-T4/
+  UC1-T2-T3 companion defects). Mini unreachable (82nd+), beat214's _train/ sync still pending.
+  Sonali: push v1.0 tag when ready. Only Sonali-physical: notarization + F5 voice dial.

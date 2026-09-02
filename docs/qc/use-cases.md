@@ -585,3 +585,32 @@ Battery9 read served as the companion rotation for this beat (12 scenarios, 29 r
 - Vital Facts: battery12 13/13 PASS
 
 **Rotation next beat: Imagination deep test** (re-verify MRI/intimacy/eagle/mid-switch/grief-pet; quality notes on calm-settle mid-script lamp + eagle back-half loop from beat167 battery11 read).
+
+---
+### 2026-09-01 (beat215) — Secretary + AYF deep tests read for the first time since beat167's rotation gap; AYF real bug found and fixed
+
+**GAP CLOSED**: beat212 wired `secretary_deep_test.py`/`ayf_deep_0805.py` into `qc_queue.sh`'s rotation but their first outputs (`queue_0901_1451_secretary_deep_test.log`, `queue_0901_1502_ayf_deep_0805.log`) sat unread until this beat — this is the first honest read of either since beat167.
+
+**Secretary deep test (queue_0901_1451, 498s): 6/6 UCs CLEAN.**
+- UC1 meeting-notes → minutes: lossless, no invented facts, floors CLEAN
+- UC2 messy braindump → organized doc: lossless, floors CLEAN
+- UC3a/b/c hard emails (decline/apology/negotiation counter): all CLEAN, no groveling, no invented reasons
+- UC4 summarize-for-decision: all numbers survived, no banned openers, floors CLEAN
+- UC5a voice-note → organized doc: CLEAN
+- UC5b "shorter x3": genuinely shrinks each pass (54→19→15→2 words), PASS
+
+**AYF deep test (queue_0901_1502, 17/18 checks PASS): 1 real defect found and FIXED this beat.**
+- UC5 dated-status: "Who is handling the compliance review?" (source: Clio→Ben transfer March 19, Ben completed April 2, now in legal hold) answered "That isn't in your files.\nAs of April 2, the compliance review is in legal hold." — self-contradictory leading refusal, never named Ben, so the actual "who" was never answered.
+- Root cause: `doc_qa.py`'s beat178 bare-refusal-strip regex was end-anchored (only caught the refusal trailing a real answer, not leading it) + `QA_SYSTEM` never explicitly required naming the person for who-questions.
+- Fix (background-agent investigated + verified, spot-checked and MD5-synced this beat): bare-refusal strip now position-agnostic (leading/trailing/embedded); `QA_SYSTEM` gained an explicit who-question rule using this exact fixture as the in-prompt example. All 4 copies MD5-synced (9a61806010edcfb211e9fa975c174307). Verified via py_compile + direct unit test against the exact fixture strings + FP guards (true full refusals and named partial-refusals untouched) — no model launch (battery9_engagement.py held the one safe slot).
+- All other 17 AYF checks (no-hallucination, cross-file synthesis, partial-answer, injection-guard, long-doc needle, citation floor) CLEAN.
+
+**Use-cases.md STATUS (all gates closed, ship gate holds):**
+- Imagination: battery11 7/7 PASS (mechanically) — see review-queue.md beat215 for real defects found by honest read (narrator drift, 6 fixed this beat)
+- Secretary: battery10 10/10; deep test 6/6 (beat215, first read since beat167) — CLEAN
+- AYF: battery3b 5/5; deep test 17/18 (beat215, first read since beat167) — 1 real bug found + fixed this beat
+- Companion: battery9 in flight at beat215 close (5/20 scenarios clean so far, no defects in live turns read) — read remainder next beat
+- BYO: beat167 4/4 PASS (stale, needs re-verification when memory allows a live run)
+- Vital Facts: battery12 13/13 PASS
+
+**Rotation next beat: finish reading the in-flight battery9_0901_1815 log (started 18:15, ~44KB/5 scenarios at beat215 close); BYO deep test is now the most overdue (last real run beat167).**
