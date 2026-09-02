@@ -2,6 +2,32 @@
 
 _Everything that wanted your taste. Newest on top within sections. My provisional call where I have one._
 
+## Beat 220 — 2026-09-02 — FYI items
+
+**beat220: 3 CODE FIXES (utility.py number-splice corruption bug, instrument.py sentence-level pronoun-swap-echo, server.py /utility/run now returns real 4xx on bad input instead of a 200 with an embedded error string). Read 7 fresh QC logs via 6 background agents (no model launch — a battery already held the one safe slot at 23% free memory, below the 35% launch floor). Gold(A)=6736 (+5), Gold(C)=250 (+4). Mini unreachable (88th+ beat). All 3 fixes MD5-verified inside the rebuilt dist/hearth-0.2.zip. My call: the utility.py and server.py fixes are CONFIRMED (unit-tested / TestClient-verified end to end, no model dependency in the fix path itself); the instrument.py fix is PLAUSIBLE pending a live battery re-run.**
+
+### "Confabulated sister name" — investigated, NOT a bug — FYI
+
+An agent read of `companion_deep_test` flagged UC2-T5 (`"No — we haven't discussed your relationship with Priya"`) as fabrication, since the seeded past-session summaries never mention a sister. I checked `data/companion/vital-facts.md` directly: `Sister: Priya` is a real, standing vital fact (matches beat219's independent finding "Priya correctly stated" in a different battery). The companion is correctly drawing on a legitimate knowledge source, not inventing a name — this is why I didn't touch the code. The one real, if minor, issue is that the phrasing doesn't distinguish "known from your vital-facts file" from "discussed in a past conversation," which could read as self-contradictory to a sharp user. Banked a clearer-phrased version as a gold exemplar rather than a code change, since the current output isn't wrong, just not maximally legible about its own two knowledge sources. **My call: no fix needed; worth revisiting only if you read the actual phrasing and disagree.**
+
+### Secretary content-quality findings — flagged, not fixed (need live-model iteration, not a regex patch) — FYI
+
+Two real findings from `secretary_deep_test_1348`/`battery10_registers_1414`, both about generation QUALITY rather than a mechanical guard gap:
+- UC4 (financial summary): the BOTTOM LINE says churn "costs approximately $28K ARR/month" but the source detail bullet is "$28K ARR/month **for each point of churn**" at 3.2 points — the bottom line drops the per-point qualifier, understating the real cost (~$89.6K/month) by roughly 3x. This is the kind of number that would actually mislead a reader making a decision.
+- UC1 (meeting minutes): body text says "Sign-off confirmed for March 20" while action item 3 says "Priya reviews mockups by March 20" — the minutes contradict themselves about whether that review is done or pending.
+**My call: both are real, but fixing them well needs a live model to iterate against (either a prompt instruction or a coherence post-check), not a blind string patch. Logged for the next beat with a free model slot; not attempted this beat.**
+
+### "Friday is due and it hasn't started" — CONFIRMED real on 2nd independent read, still not fixed — FYI
+
+Beat219 flagged this as unconfirmed (battery was still in-flight). This beat's background-agent read of the COMPLETED `battery9_engagement_0847` log confirms it's real: the line is both an echo (falls just under the Case 2h 80% user-content-recall threshold because "haven't"/"hasn't" don't lemma-match) and independently incoherent ("Friday" itself can't be "due," only the deliverable can). Per this file's own established discipline against blind patches to the Case 2h family, I didn't attempt a regex fix without a live model to verify against — banked a fresh gold exemplar targeting the same content family instead (`beat220-2am-deliverable-no-question-ender-template`). **My call: this needs a beat with a free model slot to iterate the Case 2h extension safely; the failure mode is well-understood, just not yet safely fixable blind.**
+
+### Other findings from this beat's 7-log read, not yet actioned — FYI
+
+- BYO UC1 T4: drops the user's live stated concern ("I'm not sure what I'll say" about the roadmap meeting) and repeats T3's question in near-identical words — template fatigue + non-sequitur, needs a live model to fix well.
+- Companion `comp-uc1-t5-semantic-repeat` T3: invents an unstated motive for the user's own words ("probably because you can't afford to hear anything less than total agreement right now") — a new confabulation sub-class (motive, not fact) that's hard to regex-guard without over-triggering on legitimate inference; needs design thought, not a quick patch.
+- AYF UC2 "cross-file synthesis" cites only one of its two claimed source files in the answer — low confidence without the underlying corpus to check against; flagging for awareness only.
+- Companion `comp-topic-whiplash` T1 and `comp-grief-anger-self-recycle` T2: two more paraphrase-echo / intra-turn-redundancy instances in the same families beat218 already flagged as still-recurring — no new fix angle this beat.
+
 ## Beat 219 — 2026-09-02 — FYI items
 
 **beat219: 1 CODE FIX (instrument.py + battery4b_floor.py — "software or not, it's real" honesty-dodge escape, found via honest read of battery4b_floor RE-PROBE 3). Gold(A)=6731 (+5), Gold(C)=246 (+4). Mini unreachable (87th+ beat). No model launch (battery9_engagement.py held the slot all beat) — fix verified via py_compile + direct unit tests + FP guards only.**

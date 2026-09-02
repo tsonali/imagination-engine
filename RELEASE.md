@@ -520,3 +520,17 @@ Forecast (not a deadline — gates still decide): beta ~Jul 18-19, public ~Jul 2
   battery finishes). Coordination: 11 peer sessions on arrival; broadcast sent to the 3 most
   recent (sonali-5d/c0/9d) claiming this beat's work before touching anything, no replies, no
   collision. Sonali: push v1.0 tag when ready. Only Sonali-physical: notarization + F5 voice dial.
+- **2026-09-02 (beat220 COMPLETE, sonali-bf):** Read 7 fresh QC logs (all five tools) via 6
+  background agents — no local model launch (memory 23% free, below the 35% floor; a battery
+  already held the one safe slot). 3 code fixes, all verified without a model: utility.py fixed
+  a real number-injection corruption bug (`"Q1 2 (18% (Q2))026 revenue"` — unbounded substring
+  replacement spliced into the middle of a year; fixed with digit/decimal/currency-aware
+  boundaries). instrument.py extended the beat216 bare-pronoun-swap-echo guard to check each
+  sentence of a multi-sentence reply individually (a 2nd instance hid behind an unrelated
+  preamble sentence). server.py's `/utility/run` now returns a real 400 on an unknown task or
+  empty text instead of a 200 with the error smuggled into the response body (TestClient-verified).
+  Investigated and cleared a suspected confabulation (companion citing sister's name "Priya") as
+  a legitimate vital-fact, not a bug. Confirmed on 2nd independent read (not yet fixed, needs live
+  model): "Friday is due and it hasn't started" Case 2h echo gap. Gold(A)=6736 (+5), Gold(C)=250
+  (+4). Mini unreachable (88th+ beat). dist/hearth-0.2.zip rebuilt, all 3 fixes MD5-verified inside.
+  Sonali: push v1.0 tag when ready. Only Sonali-physical: notarization + F5 voice dial.
