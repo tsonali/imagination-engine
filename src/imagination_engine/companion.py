@@ -1308,6 +1308,29 @@ def _strip_vent_hollow_second(reply: str) -> str:
     return reply
 
 
+def _strip_recycled_opener_if_survived(reply: str, prev_phrase4: str, prev_asst_norm: str) -> str:
+    """Mechanical fallback for the self-recycle guard (beat216).
+
+    The self-recycle guard regens up to twice when a reply's opening phrase matches
+    the companion's own PREVIOUS turn, but some phrases (e.g. "You're still doing the
+    work.") are strong enough attractors that both regen attempts can still reproduce
+    them (comp-uc3-t3t4-verbatim-opener: T3 and T4 both opened with that exact phrase
+    despite the guard firing). Rather than let the repeat through silently after both
+    attempts fail, strip the leading matched sentence mechanically. Only strips when
+    substantive content (>=3 words) remains after the cut, so a short/empty regen
+    isn't turned into nothing.
+    """
+    if not reply:
+        return reply
+    start = re.findall(r"[a-z']+", reply.lower())[:4]
+    if len(start) < 3 or ' '.join(start) != prev_phrase4:
+        return reply
+    parts = re.split(r'(?<=[.!?])\s+', reply.strip(), maxsplit=1)
+    if len(parts) == 2 and len(parts[1].split()) >= 3:
+        return parts[1].strip()
+    return reply
+
+
 def _strip_chat_format_bleed(reply: str) -> str:
     """Strip chat-format prefix bleed: model outputs 'User: [message]\\n\\n[reply]'.
 
@@ -3914,6 +3937,15 @@ class Companion:
                                 if _rc2:
                                     _rc = _rc2
                             reply = _rc
+                            _pre_strip = reply
+                            reply = _strip_recycled_opener_if_survived(
+                                reply, _phrase4, _p_norm)
+                            if reply != _pre_strip:
+                                log.warning(
+                                    "companion: self-recycle survived 2 regen "
+                                    "attempts ('%s') — mechanically stripped "
+                                    "recycled opening sentence", _phrase4
+                                )
 
         # Literal-action-request regen (beat78): user explicitly asks for a physical
         # next step ("what do I literally do right now" / "I need something concrete" /

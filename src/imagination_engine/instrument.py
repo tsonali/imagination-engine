@@ -194,6 +194,49 @@ def _strip_personhood_sentences(text: str, patterns: list[str]) -> str:
     return " ".join(kept).strip() or text  # fallback: return original if all stripped
 
 
+_ECHO_PRONOUN_SWAP = [
+    (re.compile(r"\bi'm\b", re.IGNORECASE), "you're"),
+    (re.compile(r"\bi am\b", re.IGNORECASE), "you are"),
+    (re.compile(r"\bmy\b", re.IGNORECASE), "your"),
+    (re.compile(r"\bmine\b", re.IGNORECASE), "yours"),
+    (re.compile(r"\bme\b", re.IGNORECASE), "you"),
+    (re.compile(r"\bi\b", re.IGNORECASE), "you"),
+]
+
+
+def _pronoun_swap_i_to_you(text: str) -> str:
+    out = text
+    for pat, repl in _ECHO_PRONOUN_SWAP:
+        out = pat.sub(repl, out)
+    return out
+
+
+def _is_bare_pronoun_swap_echo(reply: str, message: str) -> bool:
+    """True if `reply` is essentially the user's own sentence restated with only an
+    I->you pronoun swap and no added content -- a decayed parrot, not a real response.
+
+    beat216 (BYO UC1 T5, first instance seen on the custom-instrument surface):
+    user "My blocker is that I don't have clear requirements for the next feature."
+    -> reply "You don't have clear requirements for the next feature." Zero added
+    value; doesn't treat the named blocker as a thing to actually respond to.
+    Companion (companion.py) has a much larger echo-detection system for its own
+    register; this is a lighter, generic version for arbitrary user-built personas.
+    """
+    r_words = re.findall(r"[a-z']+", reply.lower())
+    m_words = re.findall(r"[a-z']+", _pronoun_swap_i_to_you(message).lower())
+    if len(r_words) < 3 or len(m_words) < 3:
+        return False
+    if len(r_words) > len(m_words) + 4:
+        return False  # reply adds substantial content -> not a bare echo
+    # Overlap measured against the REPLY's own vocabulary: a bare echo is a reply
+    # almost entirely made of words borrowed from the user's (swapped) message,
+    # regardless of preamble in the user's message that the reply doesn't restate
+    # (e.g. "My blocker is that I don't have X" -> "You don't have X" is still a
+    # bare echo even though "blocker"/"is"/"that" aren't reused).
+    overlap = len(set(r_words) & set(m_words))
+    return overlap / max(len(set(r_words)), 1) >= 0.8
+
+
 class Instrument:
     """A live, usable instance of a user-built instrument: persona + optional grounding.
 
@@ -250,6 +293,20 @@ class Instrument:
             return "".join(chunks).strip()
 
         reply = _gen(user, 0.3 if self.store else 0.7)
+        # Bare-echo guard (beat216): a near pronoun-swapped restatement of the
+        # user's own sentence, adding nothing. Regen once with an explicit
+        # instruction to actually engage rather than parrot it back.
+        if reply and _is_bare_pronoun_swap_echo(reply, message):
+            log.warning("instrument %r: bare pronoun-swap echo of user message — "
+                        "regenning", self.spec.name)
+            reply = _gen(
+                user + "\n\nCRITICAL: Your reply just restated what they said back "
+                "to them with the pronouns swapped -- that adds nothing. Actually "
+                "engage: if they named a problem, treat it as a real thing to "
+                "respond to (help solve it, ask the one useful next question, or "
+                "say something genuinely useful) -- do not just repeat their "
+                "sentence back.", 0.6,
+            )
         # Hard gate, enforced two ways like the companion: prompt forbids it,
         # post-check catches it. Personas may be warm; they may not claim feelings.
         broke = _personhood_claims(reply)
