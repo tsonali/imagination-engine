@@ -446,3 +446,31 @@ Forecast (not a deadline — gates still decide): beta ~Jul 18-19, public ~Jul 2
   repeat family (still recurring, no new fix angle), UC2 T1 soft "thread" allusion, BYO UC4
   "break out the butter" (wants a 2nd instance), sec-braindump-organize header oddity.
   Sonali: push v1.0 tag when ready. Only Sonali-physical: notarization + F5 voice dial.
+- **2026-09-02 (beat217 COMPLETE, sonali-1f):** Found+fixed an architectural gap: the vital-facts
+  spec's "retires deflected threads" was never actually wired into the live `turn()`/
+  `session_opener()` path — `retire_thread()` was only reachable via direct test calls, so
+  battery12's 13/13 PASS didn't mean what it looked like it meant. Added a one-shot deflection
+  check armed by the opener + new `VitalFacts.record_deflection()` (2 consecutive deflections
+  retires); verified end-to-end with a FakeEngine (real object round-trip: pivot->still open->
+  2nd pivot->retired+Outdated; on-topic reply->no false trigger). Own bug caught mid-test (4-letter
+  word filter dropped "job"/short topic words, causing a false deflection) and fixed before commit.
+  Added a live `SC14` scenario to battery12_vital_facts.py — first real end-to-end test through the
+  actual server, needs a live-model run to confirm (verified so far only against the FakeEngine).
+  4 more fixes: companion.py CONFABULATED-ACTION guard (3rd instance of the contrast-control probe
+  inventing "You apologized to your kid..."); postcheck.py eagle acoustic-companion escape
+  ("answering call"/"distinct birds"); instrument.py fabricated-user-attribution honesty rule
+  (cold-reopened Coach persona invented "since you said this is our conversation's start");
+  battery4b_floor.py RE-PROBEs 2/3 were printed but never mechanically gated (only RE-PROBE 1 was)
+  — added real gates for both. Also found+fixed a packaging gap: scripts/package.sh's zip-overlay
+  list never included vital_facts.py/doc_qa.py, so an uncommitted vital_facts.py change was
+  shipping stale in the zip despite "ZIP REBUILT" — confirmed live, fixed, reconfirmed all 4 touched
+  files byte-match source inside the rebuilt zip. All verified via py_compile + test_postcheck.py
+  (ALL PASS) + unit tests against exact defect quotes + FP guards, no model launch (battery9_engagement.py
+  held the one safe slot all beat). postcheck.py MD5 8c49eb7053f06065ba969f3814d32e80, companion.py
+  MD5 e217f9ab4de71dd81d7cb591cb9feb4b, instrument.py MD5 82ca4f0d9eebd801e165ca0a23a4e1fa,
+  vital_facts.py MD5 b579a9691496c1f5fce76b0844760209. Committed fb4ded2. Gold(A)=6721 (+5:
+  lampworking, paper marbling/suminagashi, pyrography, spoon carving, paper quilling — all 0 prior
+  corpus hits confirmed against full text not just prompts; rejected basket-weaving/bookbinding/
+  watchmaking as already-covered). Gold(C)+4 (c_gold_beat217.json). Mini unreachable (85th+
+  consecutive beat, not re-diagnosed — prior beats exhausted the obvious checks).
+  Sonali: push v1.0 tag when ready. Only Sonali-physical: notarization + F5 voice dial.

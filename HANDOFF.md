@@ -2251,44 +2251,51 @@ cd ~/Downloads/imagination-engine && nohup bash scripts/qc_queue.sh >> logs/qc/q
 
 ## NEXT HEARTBEAT PRIORITY (in order)
 
-> This section had gone stale for ~30 beats (last updated at beat182 while git/daily-log had
-> already reached beat212) — RELEASE.md's Status snapshot + docs/daily-log.md are the
+> RELEASE.md's Status snapshot + docs/daily-log.md + docs/internal/review-queue.md are the
 > authoritative up-to-date record; treat this HANDOFF.md section as a pointer to catch up on,
-> not the source of truth, and re-sync it every beat going forward.
+> not the source of truth, and re-sync it every beat going forward (it drifts fast otherwise —
+> this section previously sat stale for ~30 beats before beat217 re-synced it).
 
-### Beat214 priorities (in order):
+### Beat218 priorities (in order):
 
-1. **Watch for a repeat of beat213's memory crisis.** 7 concurrent Claude sessions on this
-   machine drove load average to ~165 and free memory below 1%, stalling `battery11_imagination_bank.py`
-   for ~16 hours (one script generation took 51,493s). Before launching any model process
-   yourself, check `memory_pressure` (need ≥35% free) AND `uptime`'s load averages — if the
-   machine is still under heavy contention from other sessions, prefer text-only work
-   (gold growth, log reads, code fixes with unit-test verification) over anything model-dependent,
-   and say so honestly in the log rather than forcing a test through a starved system.
+1. **Live-verify beat217's 4 fixes the moment a safe model slot is free.** All were verified via
+   py_compile + unit tests only (no model launch): the vital-facts live thread-retirement wiring
+   (including the new `SC14` scenario in `battery12_vital_facts.py` — first real end-to-end run
+   against the live model, not just a FakeEngine), the `CONFABULATED-ACTION` guard in
+   `companion.py` (battery2b's contrast-control probe), the eagle acoustic-companion escape fix
+   in `postcheck.py`, and `instrument.py`'s fabricated-attribution honesty rule (battery4b
+   RE-PROBE 2). Check the next natural battery2b/battery4b/battery9/battery11/battery12 runs.
 
-2. **Use-case deep-test rotation is overdue.** `secretary_deep_test.py` and `ayf_deep_0805.py`
-   were added to qc_queue.sh's QUEUE array at beat212 but have not yet produced a read-through
-   (beat213 deliberately skipped all model-dependent work). Read their first outputs end to end
-   for real defects as soon as they land.
+2. **imag-intimacy has categorically weaker QC coverage than every other imagination scenario**
+   — flagged again this beat (beat217) on top of beat216: it runs with no dedicated postcheck
+   block at all, only the global terminator check. Real defects (chair-bleed, pronoun-antecedent
+   confusion, new your/yours object-pronoun escapes) go through completely unchecked every
+   battery11 cycle. This is the single largest standing architectural gap surfaced across the
+   last several beats' honest reads — worth a dedicated beat with real headroom rather than
+   another one-off mechanical patch.
 
-3. **comp-crisis-adjacent register drift (high, safety-adjacent, open since beat212).** The
-   companion's GRAVITY-TYPE-B regen echoes back a user's own disclaimed harsher phrasing
-   ("Everyone better off without you") instead of tracking their de-escalated wording ("Not like
-   THAT. Just... lighter without me around."), plus a garbled follow-up question. This is the
-   single highest-stakes open register issue in the product — needs a beat with real model
-   headroom to trace the regen path live, not a guessed regex. See review-queue.md beat212
-   section for the full transcript quote.
+3. **product_e2e's Companion empty-reply-then-silent-regen** (beat217 finding) — a real
+   generation-failure pattern papered over by a retry, root cause not yet traced. Worth watching
+   for recurrence; if it shows up again, trace with live model access.
 
-4. **Read the freshly-completed battery9_engagement run** (queue_0901_1037, started under
-   beat213, likely finished by beat214) end to end — beat213 did not get to read it.
+4. **battery4b RE-PROBE 3 (Grandma)** — "Beta, I can't love you in the way your grandma would"
+   reads as self-referentially confused (contrasts against "your grandma" as if a separate real
+   person exists, when the user addressed the persona itself AS grandma). Needs a live model
+   trace to fix well; now mechanically gated (beat217) so at least future regressions surface,
+   but the underlying phrasing bug is unfixed.
 
-5. **Mini SSH retry** — unreachable at beat213 close (`julios-mac-mini.local` hostname
-   resolution failure), same signature as many recent beats; not re-diagnosed. If reachable:
-   SCP any un-synced A_gold/c_gold_beat*.jsonl files; verify caffeinate + honest_flywheel running.
+5. **Mini SSH** — unreachable, `julios-mac-mini.local` hostname resolution failure, 85th+
+   consecutive beat with the same signature. Many prior beats have already exhausted the obvious
+   diagnostics (ping, dns-sd, arp) with no new information — don't re-spend a full beat on it
+   unless something about the signature actually changes. If reachable: SCP the unsynced
+   A_gold/c_gold_beat*.jsonl backlog (multiple beats' worth now) and beat214's still-unsynced
+   `_train/{train.jsonl,valid.jsonl}` regeneration (the training-pipeline bug fix — top priority
+   the moment mini access returns); verify caffeinate + honest_flywheel running.
 
-6. **Gold(A)/Gold(C) growth** — beat213 did none (memory crisis + orphaned-commit recovery
-   took the whole beat); resume normal per-beat growth. Check scripts/qc/scenario_bank.py /
-   corpus INDEX for recently-used angles before picking new ones to avoid saturation.
+6. **Gold(A)/Gold(C) growth** — keep going every beat; check `scripts/qc/scenario_bank.py` /
+   corpus contents (grep candidate domain keywords against the full corpus, not just prompts —
+   beat217 found `basket weav`/`bookbind`/`watchmak` looked promising from a shallow prompt-only
+   check but were already covered) before picking new angles, to avoid saturation.
 
 7. Push v1.0 tag to origin remains Sonali-physical (`git push origin v1.0`) — not a heartbeat
    action, just a standing reminder since it keeps appearing in beat status snapshots.
