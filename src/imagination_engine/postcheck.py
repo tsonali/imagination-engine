@@ -2110,7 +2110,17 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     # both phrases in A_gold.jsonl, confirmed safe before adding.
     r'|\banother\s+cabin\b'              # "see another cabin appearing ahead"
     r'|\banother\s+animal\b'             # "another animal carrying its own voice"
-    r'|\bboth\s+yours\s+and\s+theirs\b',  # "this land that is both yours and theirs"
+    r'|\bboth\s+yours\s+and\s+theirs\b'  # "this land that is both yours and theirs"
+    # beat217 (queue_0902_0000_battery11_imagination_bank.log honest read):
+    # imag-eagle-wildlife-plural — "an answering call cut through the air: not
+    # from below but at altitude as well" and "two distinct birds signaling
+    # back and forth now from ridge line to neighboring peak" — a new acoustic-
+    # companion phrasing distinct from every prior "call"/"bird" pattern above
+    # (no "identical", "another", or "distant" token). All 6 eagle postchecks
+    # PASSed on this script despite the hallucination. 0 hits in A_gold.jsonl.
+    r'|\banswering\s+call\b'             # "an answering call cut through the air"
+    r'|\bdistinct\s+birds\b'             # "two distinct birds signaling back and forth"
+    r'|\bsignaling\s+back\s+and\s+forth\b',  # "signaling back and forth now"
     re.IGNORECASE,
 )
 

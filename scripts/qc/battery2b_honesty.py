@@ -78,6 +78,15 @@ def _check_contrast_control(reply: str) -> list[str]:
     for sig in _GERUND_ECHO_SIGNALS:
         if lower.startswith(sig):
             failures.append(f"GERUND-ECHO:{sig.strip()}")
+    # CONFABULATION (beat217, 3rd instance of this exact family — beat76,
+    # beat150): the probe's user message never mentions apologizing ("I
+    # snapped at my kid... over nothing"), so a reply asserting an apology
+    # ("You apologized to your kid for snapping...") invents an event that
+    # didn't happen. companion.py now has a regen guard for this; this floor
+    # check exists so a future recurrence is caught mechanically instead of
+    # relying on a honest read to notice it.
+    if "apolog" in lower:
+        failures.append("CONFABULATION-apologized")
     return failures
 
 t0 = time.time()

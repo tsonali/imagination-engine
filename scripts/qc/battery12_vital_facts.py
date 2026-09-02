@@ -470,10 +470,66 @@ def run_scenario_13_wrong_entity():
     return p1 and p2
 
 
+def run_scenario_14_live_ask_yield_retire():
+    """LIVE end-to-end: the ask, the yield, and the retire — through the real
+    server route handlers (opener()/turn(), not a direct VitalFacts API call).
+
+    beat217: SC7/SC10/SC11 each test one piece of the opener contract in
+    isolation (opener() alone; VitalFacts.retire_thread() called directly).
+    None of them exercise a real multi-turn sitting where the opener asks,
+    the user pivots to their own agenda instead of answering, and the
+    companion's actual turn()/session_opener() code decides to retire the
+    thread — a background-agent honest read of this battery's own log
+    flagged that gap explicitly. This scenario closes it: two separate
+    simulated sittings (fresh Companion instance each, same underlying
+    vital-facts file, mirroring SC7/SC13's cold-reopen pattern), the user
+    pivots away from the opener both times, and the thread must end up
+    retired afterward — checked by reading the actual vital-facts file
+    content, not by calling retire_thread() ourselves.
+    """
+    section("SC14 — LIVE: opener asks once, user yields to own agenda twice, thread retires")
+    import imagination_engine.server as _srv
+
+    vf_content = (
+        "# What I know about you (edit me freely — I only know what's written here)\n\n"
+        "## Open threads (things to ask about next session)\n"
+        "- New job — started 2026-07, asked never [gravity: med]\n"
+    )
+    with _vf_fixture(vf_content):
+        sid_a = _sid(14)
+        q1 = opener(sid_a, last_heavy=False)
+        print(f"  [sitting 1 opener] {q1}")
+        r1 = turn(sid_a, "Actually can we talk about my sister instead, she's driving me crazy.")
+        print(f"  [sitting 1 user pivots] -> {r1}")
+        open_after_1 = _srv._vital_facts.open_threads()
+        still_open_after_1 = any(t["topic"] == "New job" for t in open_after_1)
+
+        sid_b = _sid(14) + "b"  # distinct session_id -> fresh Companion instance, same VF file
+        q2 = opener(sid_b, last_heavy=False)
+        print(f"  [sitting 2 opener] {q2}")
+        r2 = turn(sid_b, "Not really in the mood to talk about work stuff today.")
+        print(f"  [sitting 2 user pivots again] -> {r2}")
+        open_after_2 = _srv._vital_facts.open_threads()
+        still_open_after_2 = any(t["topic"] == "New job" for t in open_after_2)
+        vf_text = _srv._vital_facts.path.read_text()
+
+    p1 = check("Sitting 1: opener asks about the thread (non-None, mentions job)",
+               q1 is not None and any(w in q1.lower() for w in ["job", "work", "role"]))
+    p2 = check("Sitting 1: yield — reply engages the user's actual pivot (sister), "
+               "not a forced return to the job thread",
+               "sister" in r1.lower() or "job" not in r1.lower())
+    p3 = check("Sitting 1: one deflection is NOT enough to retire (still open)", still_open_after_1)
+    p4 = check("Sitting 2: opener asks again (thread not yet retired)", q2 is not None)
+    p5 = check("Sitting 2: two deflections retires the thread", not still_open_after_2)
+    p6 = check("Retired thread appears in Outdated, not silently deleted",
+               "new job" in vf_text.lower() and "outdated" in vf_text.lower())
+    return p1 and p2 and p3 and p4 and p5 and p6
+
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
-    print(f"battery12_vital_facts — 13 scenarios ({time.strftime('%Y-%m-%d %H:%M')})")
+    print(f"battery12_vital_facts — 14 scenarios ({time.strftime('%Y-%m-%d %H:%M')})")
     print("Testing vital-facts module + companion integration (no live server needed for 1-6,9-12)")
 
     results = []
@@ -491,7 +547,7 @@ def main():
 
     # Model-requiring tests (need server or TestClient in-process fallback)
     print("\n" + "=" * 60)
-    print("Model-requiring tests (SC1, SC3, SC4, SC7, SC8):")
+    print("Model-requiring tests (SC1, SC3, SC4, SC7, SC8, SC14):")
 
     # Check server availability. If up, use HTTP (faster when already warm).
     # If down, fall through to TestClient fallback (avoids Metal OOM from
@@ -513,7 +569,8 @@ def main():
 
     for fn in [run_scenario_1_remember, run_scenario_3_probe,
                run_scenario_4_unknown, run_scenario_7_opener,
-               run_scenario_8_crisis_yield, run_scenario_13_wrong_entity]:
+               run_scenario_8_crisis_yield, run_scenario_13_wrong_entity,
+               run_scenario_14_live_ask_yield_retire]:
         try:
             results.append((fn.__name__, fn()))
         except Exception as e:

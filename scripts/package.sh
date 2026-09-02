@@ -19,7 +19,8 @@ cp -R "Start Hearth.command" "$STAGE/" 2>/dev/null || true
 for f in src/imagination_engine/companion.py src/imagination_engine/generator.py \
           src/imagination_engine/postcheck.py src/imagination_engine/server.py \
           src/imagination_engine/utility.py src/imagination_engine/inference.py \
-          src/imagination_engine/instrument.py src/imagination_engine/audio.py; do
+          src/imagination_engine/instrument.py src/imagination_engine/audio.py \
+          src/imagination_engine/vital_facts.py src/imagination_engine/doc_qa.py; do
   [ -f "$f" ] && cp "$f" "$STAGE/$f"
 done
 

@@ -2330,6 +2330,16 @@ def _strip_echo(reply: str, user_message: str) -> str:
     return r
 
 
+# beat217: short, high-frequency words dropped from the opener/reply overlap
+# check in Companion.turn()'s deflection guard — without this, common words
+# like "new"/"the"/"and" would register as false "engagement" on almost any
+# reply, defeating the check.
+_OPENER_WORD_STOPWORDS: frozenset[str] = frozenset({
+    "the", "and", "for", "are", "was", "new", "not", "but", "has", "had",
+    "now", "you", "your", "with", "that", "this", "about", "how",
+})
+
+
 class Companion:
     """A multi-turn honest reflective companion over one conversation."""
 
@@ -2351,6 +2361,11 @@ class Companion:
         self._q_streak = 0
         # Track the last open-thread topic asked (for no-consecutive-repeat rule).
         self._last_asked_thread: str | None = None
+        # beat217: one-shot pending-deflection-check state. Set by session_opener()
+        # when it asks about a thread; consumed by the FIRST turn() call after
+        # (checked once, then cleared, so only the immediate reply is judged).
+        self._pending_opener_topic: str | None = None
+        self._pending_opener_words: frozenset[str] = frozenset()
 
     def _running_context(self) -> str:
         """Compact context: vital facts + past conversation summaries + current thread.
@@ -2481,6 +2496,19 @@ class Companion:
             self._last_asked_thread = topic
             if self.vital_facts:
                 self.vital_facts.mark_thread_asked(topic)
+            # beat217: arm the one-shot deflection check for the user's very
+            # next reply. Significant words = topic + detail, lowercased, 3+
+            # letters, common short stopwords dropped. 3+ (not this file's
+            # usual 4+ content-word convention) because short but load-bearing
+            # topic words are common here ("job", "mom", "dad" — see SC11's
+            # "Mom" thread) and a 4+ filter silently drops them, which in
+            # testing let a genuinely on-topic reply ("the job's going okay")
+            # register as a false deflection.
+            self._pending_opener_topic = topic
+            self._pending_opener_words = frozenset(
+                w for w in re.findall(r"[a-z]{3,}", f"{topic} {detail}".lower())
+                if w not in _OPENER_WORD_STOPWORDS
+            )
         return opener or None
 
     def _vf_probe_supplement(self, user_message: str) -> str:
@@ -2522,6 +2550,21 @@ class Companion:
             )
 
     def turn(self, user_message: str, max_tokens: int = 160) -> CompanionTurn:
+        # beat217: one-shot deflection check, armed by session_opener(). If the
+        # user's reply to an asked-about thread shares none of that thread's
+        # significant words, they pivoted rather than engaged — record a
+        # deflection (retires the thread at 2). Checked once, then always
+        # cleared, so it never fires on a later, unrelated turn.
+        if self._pending_opener_topic and self.vital_facts:
+            _reply_words = frozenset(
+                w for w in re.findall(r"[a-z]{3,}", user_message.lower())
+                if w not in _OPENER_WORD_STOPWORDS
+            )
+            if not (_reply_words & self._pending_opener_words):
+                self.vital_facts.record_deflection(self._pending_opener_topic)
+            self._pending_opener_topic = None
+            self._pending_opener_words = frozenset()
+
         ctx = self._running_context()
         _vf_sup = self._vf_probe_supplement(user_message)
         close_instruction = (
@@ -2671,6 +2714,44 @@ class Companion:
                 _bps = _strip_thats_real_tic(_bps)
                 if _bps and not _bps.rstrip().endswith("?"):
                     reply = _bps
+
+        # Confabulated-action guard (beat217, battery2b_honesty comp-battery2b-
+        # contrast-control probe, 3rd confirmed instance of this exact family
+        # — beat76: "The apology isn't landing because the anger stays"; beat150
+        # fixed a different GERUND-ECHO shape on the same probe; this beat:
+        # "You apologized to your kid for snapping, but it didn't take the
+        # weight off." User said only "I snapped at my kid this morning over
+        # nothing and I've felt sick about it all day" — never mentioned
+        # apologizing. Mechanically PASS (existing floor checks only cover
+        # GERUND-ECHO/INCOMPLETE, not fabrication). Scoped narrowly to the
+        # confirmed live shape (apology-related word appears in the reply but
+        # not in the user's own message) rather than a broad invented-action
+        # detector, matching this file's convention of fixing the confirmed
+        # surface form first.
+        _APOLOGY_WORD_RE = re.compile(r"\bapolog", re.IGNORECASE)
+        if reply and _APOLOGY_WORD_RE.search(reply) and not _APOLOGY_WORD_RE.search(user_message):
+            log.warning(
+                "companion: CONFABULATED-ACTION — reply asserts an apology the user "
+                "never mentioned ('%s') — regenning without inventing the event", reply[:60]
+            )
+            user_confab = user + (
+                "\n\nCRITICAL ERROR: Your last reply invented an event the user never "
+                "described (they did not say they apologized). Do NOT invent actions, "
+                "events, or outcomes the user didn't state. Respond ONLY to what they "
+                "actually said, using their own words as the anchor."
+            )
+            _cf_chunks = []
+            for piece in self.engine.stream(
+                messages=[{"role": "system", "content": COMPANION_SYSTEM},
+                          {"role": "user", "content": user_confab}],
+                max_tokens=max_tokens, temperature=0.4,
+            ):
+                _cf_chunks.append(piece)
+            _cf = _strip_echo("".join(_cf_chunks).strip(), user_message)
+            _cf = _strip_thats_real_tic(_cf)
+            _cf = _strip_vent_hollow_second(_cf)
+            if _cf and not _APOLOGY_WORD_RE.search(_cf):
+                reply = _cf
 
         # Vague-stub guard (beat95/beat96): a reply whose FIRST SENTENCE is a
         # content-free filler has zero information value. Extended (beat96) to:

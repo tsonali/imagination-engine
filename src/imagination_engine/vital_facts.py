@@ -226,6 +226,37 @@ class VitalFacts:
         self.path.write_text(text, encoding="utf-8")
         return True
 
+    def record_deflection(self, topic: str) -> bool:
+        """Record that the user's reply to an asked-about thread didn't engage
+        with it. Two consecutive deflections retire the thread (spec: "retires
+        deflected"). Returns True if this call retired the thread.
+
+        beat217: added because no code path ever called retire_thread() during
+        a live conversation — it was only reachable via direct test calls
+        (SC10/SC11), so "retires deflected threads" was untested-in-production
+        despite battery12 showing 13/13 PASS. The live wiring (deciding
+        whether a reply "engaged" with the topic) lives in companion.py's
+        turn(); this method only owns the counting + retire-at-2 threshold.
+        """
+        text = self._raw()
+        pattern = re.compile(
+            rf"^(- {re.escape(topic)} —[^\n]*)$", re.MULTILINE | re.IGNORECASE
+        )
+        m = pattern.search(text)
+        if not m:
+            return False
+        old = m.group(1)
+        count_m = re.search(r"deflected:\s*(\d+)", old)
+        count = (int(count_m.group(1)) if count_m else 0) + 1
+        if count >= 2:
+            self.retire_thread(topic)
+            return True
+        updated = (re.sub(r"deflected:\s*\d+", f"deflected: {count}", old)
+                   if count_m else old + f", deflected: {count}")
+        text = text[:m.start()] + updated + text[m.end():]
+        self.path.write_text(text, encoding="utf-8")
+        return False
+
     def mark_thread_asked(self, topic: str, date_str: str | None = None) -> None:
         """Update the 'asked' date on an open thread."""
         date_str = date_str or datetime.now().strftime("%Y-%m-%d")
