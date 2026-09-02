@@ -474,3 +474,19 @@ Forecast (not a deadline — gates still decide): beta ~Jul 18-19, public ~Jul 2
   watchmaking as already-covered). Gold(C)+4 (c_gold_beat217.json). Mini unreachable (85th+
   consecutive beat, not re-diagnosed — prior beats exhausted the obvious checks).
   Sonali: push v1.0 tag when ready. Only Sonali-physical: notarization + F5 voice dial.
+- **2026-09-02 (beat218 COMPLETE):** battery9_engagement.log (fresh, finished 03:54 after beat217
+  closed) full honest read: 13 defects, all false negatives. Deliberate 2nd independent read of
+  battery11_imagination_bank_0902_0000 (already read by beat217) caught 3 things the first read
+  missed: imag-mri back-half near-gibberish, imag-eagle-companion-bird-he's script ending with NO
+  return-to-room closing beat, imag-calm-settle dangling "they"/duplicate closing sentences. 3
+  mechanical fixes: companion.py _FORBIDDEN gained "[feeling] is doing what [other feeling] can't"
+  reframe shape (beat176/202/208/212 family); _VAGUE_FILLER_RE gained "clear"+"pattern"; postcheck.py
+  _INTIMACY_OBJECT_PRONOUN_SUBS gained "meets your"->"meets yours" (beat187/198 family). All verified
+  via py_compile + test_postcheck.py (ALL PASS) + unit tests against exact quotes + FP guards, no
+  model launch (battery12_vital_facts.py held the one safe slot all beat, running beat217's new live
+  SC14 scenario — top live-verification priority next beat). companion.py MD5
+  2abd03b06451635febbcb7edf72add41, postcheck.py MD5 8d18a0713e7df66333acdab51f4dd14a. Committed
+  2f69244. Gold(A)=6726 (+5: tatting, batik, scrimshaw, silverpoint, wool-spinning — all 0 prior
+  corpus hits). Gold(C)+5 (c_gold_beat218.json). Mini unreachable (86th+ consecutive beat). Standing
+  architectural gap, 3rd beat flagging it: imag-intimacy has zero dedicated postcheck coverage.
+  Sonali: push v1.0 tag when ready. Only Sonali-physical: notarization + F5 voice dial.
