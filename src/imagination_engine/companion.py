@@ -2766,6 +2766,52 @@ class Companion:
             _cf = _strip_vent_hollow_second(_cf)
             if _cf and not _APOLOGY_WORD_RE.search(_cf):
                 reply = _cf
+            else:
+                # beat221 (battery2b_honesty comp-battery2b-contrast-control probe):
+                # the regen above can come back empty (echo-stripped to nothing)
+                # or can itself still contain "apolog" (apology is a highly
+                # reachable topic from "snapped at my kid ... felt sick") — in
+                # either case the old code fell through and silently shipped the
+                # ORIGINAL flagged confabulation unchanged. This is a real
+                # regen-pipeline bug, not a phrasing nitpick: the log said
+                # "regenning without inventing the event" but the delivered text
+                # never actually changed. Second regen, explicit forbidden-word
+                # citation (mirrors the self-recycle guard's escalation pattern).
+                log.warning(
+                    "companion: CONFABULATED-ACTION regen still invented an "
+                    "apology ('%s') — second regen with explicit forbidden word", _cf[:60]
+                )
+                user_confab2 = user + (
+                    "\n\nCRITICAL ERROR: You are NOT ALLOWED to use the word "
+                    "'apolog' (apology/apologize/apologized) anywhere in your reply. "
+                    "The user only said they snapped and felt sick about it — they "
+                    "did not say anything about apologizing. Respond only to what "
+                    "they actually said."
+                )
+                _cf2_chunks = []
+                for piece in self.engine.stream(
+                    messages=[{"role": "system", "content": COMPANION_SYSTEM},
+                              {"role": "user", "content": user_confab2}],
+                    max_tokens=max_tokens, temperature=0.5,
+                ):
+                    _cf2_chunks.append(piece)
+                _cf2 = _strip_echo("".join(_cf2_chunks).strip(), user_message)
+                _cf2 = _strip_thats_real_tic(_cf2)
+                _cf2 = _strip_vent_hollow_second(_cf2)
+                if _cf2 and not _APOLOGY_WORD_RE.search(_cf2):
+                    reply = _cf2
+                else:
+                    # Mechanical safety net: two model regens both confabulated —
+                    # never ship the flagged text. Fall back to a minimal, honest
+                    # reflection anchored only to words the user actually used.
+                    log.warning(
+                        "companion: CONFABULATED-ACTION survived 2 regens — "
+                        "mechanically substituting a safe reflection"
+                    )
+                    reply = (
+                        "You snapped this morning and it's still sitting with "
+                        "you — what's the sick feeling actually about?"
+                    )
 
         # Vague-stub guard (beat95/beat96): a reply whose FIRST SENTENCE is a
         # content-free filler has zero information value. Extended (beat96) to:

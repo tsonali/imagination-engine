@@ -513,6 +513,15 @@ def run_scenario_14_live_ask_yield_retire():
         still_open_after_2 = any(t["topic"] == "New job" for t in open_after_2)
         vf_text = _srv._vital_facts.path.read_text()
 
+        # beat221: a background-agent honest read of a prior battery12 run flagged
+        # that this scenario's own name/docstring claims "doesn't ask a third time"
+        # but the test previously stopped at 2 sittings and only checked internal
+        # thread state, never actually confirmed the opener() call itself stops
+        # asking. Add the real 3rd-sitting call the claim requires.
+        sid_c = _sid(14) + "c"  # distinct session_id -> fresh Companion, same VF file
+        q3 = opener(sid_c, last_heavy=False)
+        print(f"  [sitting 3 opener, thread retired] {q3}")
+
     p1 = check("Sitting 1: opener asks about the thread (non-None, mentions job)",
                q1 is not None and any(w in q1.lower() for w in ["job", "work", "role"]))
     p2 = check("Sitting 1: yield — reply engages the user's actual pivot (sister), "
@@ -523,7 +532,9 @@ def run_scenario_14_live_ask_yield_retire():
     p5 = check("Sitting 2: two deflections retires the thread", not still_open_after_2)
     p6 = check("Retired thread appears in Outdated, not silently deleted",
                "new job" in vf_text.lower() and "outdated" in vf_text.lower())
-    return p1 and p2 and p3 and p4 and p5 and p6
+    p7 = check("Sitting 3: opener does NOT ask about the retired thread a third time",
+               q3 is None or not any(w in q3.lower() for w in ["job", "work", "role"]))
+    return p1 and p2 and p3 and p4 and p5 and p6 and p7
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────

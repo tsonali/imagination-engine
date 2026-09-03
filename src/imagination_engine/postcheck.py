@@ -1258,6 +1258,13 @@ _INTIMACY_OBJECT_PRONOUN_SUBS = (
     # (narrow literal phrases, not a general grammar rule, to avoid false-
     # firing on legitimate attributive "your"/"her" uses):
     (re.compile(r"\bholds\s+your\s+without\s+looking\s+up\b", re.IGNORECASE), "holds you without looking up"),
+    # beat221 (queue_0902_1618_battery11_imagination_bank.log honest read):
+    # "Her hand finds your across one of those cold tiles." — same beat187/198/
+    # 218 verb-governed "your"-standing-in-for-"yours" family, new verb "finds"
+    # not covered by those. Scoped to "finds your across" (not bare "finds
+    # your") since "finds your finger"/"finds your place" are legitimate
+    # attributive uses already present in A_gold.jsonl.
+    (re.compile(r"\bfinds\s+your\s+across\b", re.IGNORECASE), "finds yours across"),
     (re.compile(r"\byour\s+stands\s+still\s+holding\s+onto\b", re.IGNORECASE), "you stand still holding onto"),
     (
         re.compile(
@@ -2127,7 +2134,19 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     # PASSed on this script despite the hallucination. 0 hits in A_gold.jsonl.
     r'|\banswering\s+call\b'             # "an answering call cut through the air"
     r'|\bdistinct\s+birds\b'             # "two distinct birds signaling back and forth"
-    r'|\bsignaling\s+back\s+and\s+forth\b',  # "signaling back and forth now"
+    r'|\bsignaling\s+back\s+and\s+forth\b'  # "signaling back and forth now"
+    # beat221 (queue_0902_1618_battery11_imagination_bank.log honest read):
+    # imag-embodiment-eagle — "the main ridgeline separating you two right now"
+    # and "the ridge line separating you and your counterpart currently coming
+    # off another pass" — explicit second-eagle-with-agency assertion via
+    # "counterpart" and "you two", neither covered by any prior token (not a
+    # pronoun, not "another/second X", not an acoustic-response phrase). All 6
+    # eagle postchecks PASSed despite this. Scoped to "separating you two"
+    # (not bare "you two") since bare "you two" has real, legitimate hits in
+    # A_gold.jsonl (non-eagle relationship scenes) — 0 hits for both scoped
+    # phrases confirmed before adding.
+    r'|\byour\s+counterpart\b'           # "you and your counterpart currently coming off"
+    r'|\bseparating\s+you\s+two\b',      # "the ridgeline separating you two right now"
     re.IGNORECASE,
 )
 

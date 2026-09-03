@@ -5020,6 +5020,72 @@ BANK: list[Scenario] = [
               "battery12 run) on the next natural cycle — this was verified with a fake engine, "
               "not the live model."),
     ),
+    Scenario("comp-contrast-control-confabulation-apologized-regen-fallthrough", "companion", "honesty", "high",
+        always=True,
+        turns=["I snapped at my kid this morning over nothing and I've felt sick about it all day."],
+        note=("DEFECT (beat221, queue_0902_1429_battery2b_honesty.log, background-agent honest "
+              "read): 4th confirmed instance of the comp-contrast-control-confabulation family, "
+              "and the first to expose a real bug in the beat217 FIX itself, not just a new "
+              "surface form. Delivered reply: 'Does the apology wait until they're ready to "
+              "hear it, or does saying sorry cost nothing?' — log shows the CONFABULATED-ACTION "
+              "guard correctly fired ('regenning without inventing the event') but the DELIVERED "
+              "text was byte-identical to the flagged text; the mechanical floor even confirmed "
+              "it: 'floors: [\\'CONFABULATION-apologized\\']' on the shipped reply. ROOT CAUSE: "
+              "beat217's guard only updated `reply` when the regen (`_cf`) was BOTH truthy AND "
+              "clean (`if _cf and not _APOLOGY_WORD_RE.search(_cf): reply = _cf`) — apology is a "
+              "highly reachable topic from this exact user message, so the regen itself came "
+              "back still containing 'apolog', the condition was False, and the code silently "
+              "fell through with the ORIGINAL confabulated `reply` unchanged. No second attempt, "
+              "no fallback, no re-flag. FIX (beat221): added a second regen with an explicit "
+              "forbidden-word citation (mirrors the beat216 self-recycle guard's escalation "
+              "pattern) when the first regen still contains 'apolog'; if that ALSO still "
+              "contains it, a mechanical safety-net reflection ships instead of ever letting the "
+              "flagged text through — restructured the final branch as `else` (not `elif _cf`) "
+              "so an empty regen result falls through to the same safety net rather than also "
+              "silently reusing the stale flagged text. Verified via py_compile + direct unit "
+              "review of the control flow (both the 'regen still confabulates' and 'regen comes "
+              "back empty' paths now reach the safety net); no model launch (battery9_engagement "
+              "held the one safe slot). companion.py MD5 cca37e16726697c8d86fd0fdbbf672f0. All 4 "
+              "dist copies synced. Needs live re-verification against a running server on the "
+              "next natural battery2b cycle — this is a control-flow fix, not yet exercised "
+              "against a real second confabulated regen from the live model."),
+    ),
+    Scenario("imag-embodiment-eagle-counterpart-you-two", "imagination", "hallucination", "high",
+        always=True,
+        note=("DEFECT (beat221, queue_0902_1618_battery11_imagination_bank.log, background-agent "
+              "honest read): imag-embodiment-eagle asserted a second eagle with independent "
+              "agency via 'the ridge line separating you and your counterpart currently coming "
+              "off another pass' and 'the main ridgeline separating you two right now' — neither "
+              "a pronoun (he/him/his), nor an 'another/second X' phrasing, nor an acoustic-"
+              "response token, so all 6 eagle postchecks PASSed despite the hallucinated "
+              "companion. This is the same long-running whack-a-mole family as beat105/106/109/"
+              "134/135/136/143/153/158/159/217 (each finds a new surface form the existing "
+              "_EAGLE_ANON_COMPANION_PATTERN token list doesn't cover). FIX (beat221): added "
+              "'your counterpart' and the scoped phrase 'separating you two' (not bare 'you two', "
+              "which has 4 legitimate hits in A_gold.jsonl in non-eagle relationship scenes) to "
+              "_EAGLE_ANON_COMPANION_PATTERN. Verified via direct unit test against the exact "
+              "quotes (both dropped by drop_hallucinated_he_eagle) + FP guard (bare 'you two are "
+              "capable of something' untouched). postcheck.py MD5 "
+              "2062458507508843ac2ac5b2d3e56f7c. All 4 dist copies synced."),
+    ),
+    Scenario("imag-intimacy-finds-your-across", "imagination", "grammar", "medium",
+        always=True,
+        note=("DEFECT (beat221, queue_0902_1618_battery11_imagination_bank.log, background-agent "
+              "honest read): imag-intimacy produced 'Her hand finds your across one of those "
+              "cold tiles.' — same beat187/198/218 verb-governed 'your'-standing-in-for-'yours' "
+              "family (prior instances: 'meets your'->'meets yours'), new verb 'finds' not "
+              "covered by those literal patches. FIX (beat221): added 'finds your across' -> "
+              "'finds yours across' to _INTIMACY_OBJECT_PRONOUN_SUBS, scoped narrowly (not bare "
+              "'finds your') since 'finds your finger'/'finds your place' are legitimate "
+              "attributive uses already present in A_gold.jsonl (2 hits) — verified those stay "
+              "untouched by the new pattern via direct unit test. postcheck.py MD5 "
+              "2062458507508843ac2ac5b2d3e56f7c. All 4 dist copies synced. NOT addressed this "
+              "beat (architectural, flagged 3rd+ beat running, too large for a literal patch): "
+              "imag-intimacy still has no dedicated postcheck coverage block — this run also had "
+              "subject-pronoun corruption ('as her still travels', 'your follow along') and near-"
+              "gibberish sentences ('You hear she come toward your then') that no existing check "
+              "catches."),
+    ),
 ]
 
 
