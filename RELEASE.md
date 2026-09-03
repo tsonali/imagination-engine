@@ -534,3 +534,25 @@ Forecast (not a deadline — gates still decide): beta ~Jul 18-19, public ~Jul 2
   model): "Friday is due and it hasn't started" Case 2h echo gap. Gold(A)=6736 (+5), Gold(C)=250
   (+4). Mini unreachable (88th+ beat). dist/hearth-0.2.zip rebuilt, all 3 fixes MD5-verified inside.
   Sonali: push v1.0 tag when ready. Only Sonali-physical: notarization + F5 voice dial.
+- **2026-09-02 (beat221 COMPLETE, sonali-ec):** Read 6 fresh queue logs since beat220 via 3
+  background agents (memory <1% free all beat — battery2b then battery9 held the one safe model
+  slot in sequence, no local model launched). Found+fixed a real regen-pipeline bug that survived
+  beat217's own fix: companion.py's CONFABULATED-ACTION guard correctly detected+logged an
+  invented apology ("regenning without inventing the event") but silently shipped the SAME
+  flagged text unchanged whenever the regen itself also said "apolog" — the success-check
+  (`if _cf and not _APOLOGY_WORD_RE.search(_cf)`) had no else branch, so both "regen still
+  confabulates" and "regen comes back empty" fell through to stale text. Fixed with a second
+  escalated regen + mechanical safety-net fallback. 2 postcheck.py escapes fixed: eagle
+  "your counterpart"/"separating you two" (new anon-companion form, ~20th in this whack-a-mole
+  family), intimacy "finds your across" -> "finds yours across" (new verb, same beat187/198/218
+  family). Strengthened battery12_vital_facts.py's SC14 with a real 3rd-sitting opener() call
+  (a background-agent read found the "doesn't ask a third time" claim was never actually tested).
+  companion.py MD5 cca37e16726697c8d86fd0fdbbf672f0, postcheck.py MD5
+  2062458507508843ac2ac5b2d3e56f7c — all 4 dist copies synced (also found+fixed a 2nd stale
+  copy location, dist/imagination_engine/, not touched by package.sh, orphaned but silently
+  drifting). Gold(A)=6741 (+5: woodblock printing, chair caning, rug hooking, cloisonné
+  enameling, violin-making). Gold(C)+4 (c_gold_beat221.json: friend-loan anger-received,
+  grief-anniversary->text-draft redirect, infidelity say-plain-thing, burnt-dinner playful-
+  no-question). Mini unreachable (89th+ beat). All 3 fixes need live re-verification next beat
+  with a free model slot. Sonali: push v1.0 tag when ready. Only Sonali-physical: notarization
+  + F5 voice dial.

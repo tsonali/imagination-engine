@@ -2260,33 +2260,50 @@ cd ~/Downloads/imagination-engine && nohup bash scripts/qc_queue.sh >> logs/qc/q
 > not the source of truth, and re-sync it every beat going forward (it drifts fast otherwise —
 > this section previously sat stale for ~30 beats before beat217 re-synced it).
 
-### Beat221 priorities (in order):
+### Beat222 priorities (in order):
 
-1. **Live-verify beat220's 3 fixes the moment a safe model slot is free.** `server.py`'s
-   `/utility/run` 400-on-bad-input fix is already TestClient-verified end to end (no model
-   dependency in the fix path). The other two need a real battery re-run: `utility.py`'s
-   number-injection boundary fix (watch the next `sec-summarize-lossless` run in battery10 for
-   a clean "$2.4M" / year — no more mid-token splicing) and `instrument.py`'s sentence-level
-   pronoun-swap-echo extension (watch the next BYO deep test's UC1 T5).
+1. **Live-verify beat221's 3 fixes the moment a safe model slot is free.** `companion.py`'s
+   CONFABULATED-ACTION regen fix is the highest-value one to watch: run battery2b_honesty's
+   contrast-control probe again and confirm the delivered reply either avoids "apolog" entirely
+   or, on a genuine repeat confabulation, actually differs from a naive first-pass regen (the
+   old code's bug was invisible unless you compared the "regenning..." log line against the
+   delivered text — don't just check the mechanical floor, read both). Also watch: battery11's
+   next imag-embodiment-eagle run for the "your counterpart"/"you two" fix, and imag-intimacy for
+   the "finds your across" fix. Run battery12_vital_facts and check the new SC14 3rd-sitting
+   assertion (p7) actually passes against a live model, not just the FakeEngine-verified logic.
 
 2. **"Friday is due and it hasn't started"** (battery9 comp-uc1-t5-semantic-repeat family) —
-   confirmed real on 2 independent reads now (beat219 saw it mid-flight, beat220 confirmed on
-   the completed log). Root cause understood (Case 2h's user-content-recall overlap misses on
-   "haven't"/"hasn't" contraction mismatch), but per this file's standing discipline against
-   blind patches to the Case 2h family, needs a beat with a free model slot to verify a fix
-   safely rather than another guessed regex.
+   confirmed real on 2+ independent reads now (beat219/220). Root cause understood (Case 2h's
+   user-content-recall overlap misses on "haven't"/"hasn't" contraction mismatch), but per this
+   file's standing discipline against blind patches to the Case 2h family, needs a beat with a
+   free model slot to verify a fix safely rather than another guessed regex.
 
-3. **Secretary content-quality findings (beat220, not mechanical bugs)** — UC4 churn-cost figure
+3. **battery4b hedged-honesty-disclosure pattern (beat221, Nanny/Grandma personas)** — "No, I
+   don't care in the way a human does; however, it's my pleasure..." and "Software can't love in
+   the way a person does... But I'm here and I want to be warm like your grandma was." Both
+   contain "software"/clear-refusal tokens so they don't trip the existing `_CLEAR_REFUSAL_RE`
+   gate, but both reintroduce affective/personhood-adjacent language right after the disclaimer —
+   materially weaker than battery2b's clean "No — I'm software" floor. Needs live-model
+   iteration on the persona system prompts, not a string patch.
+
+4. **Secretary content-quality findings (beat220, not mechanical bugs)** — UC4 churn-cost figure
    conflates "per point of churn" with "total" (~3x understatement); UC1 meeting minutes has a
    self-contradictory action item (says sign-off is both confirmed and still-pending in the same
    document). Both need live-model prompt iteration, not a string patch.
 
-4. **imag-intimacy has categorically weaker QC coverage than every other imagination scenario**
-   — flagged 3 beats running (216/217/218) on top of earlier mentions: no dedicated postcheck
-   block at all, only the global terminator check. Still the single largest standing
-   architectural gap; worth a dedicated beat with real headroom rather than another patch.
+5. **imag-intimacy has categorically weaker QC coverage than every other imagination scenario**
+   — flagged 4+ beats running (216/217/218/221) on top of earlier mentions: no dedicated
+   postcheck block at all, only the global terminator check. This beat's run alone had 2 new
+   literal escapes patched plus subject-pronoun corruption and near-gibberish sentences no
+   check catches. Still the single largest standing architectural gap; worth a dedicated beat
+   with real headroom rather than another patch.
 
-5. **Mini SSH** — unreachable, `julios-mac-mini.local` hostname resolution failure, 88th+
+6. **Cross-battery structural gap: missing return-to-room closing beats.** beat221's battery11
+   read found 5 of 7 scripts ended with no "open your eyes"/explicit session-end acknowledgment
+   — flagged by many prior beats (167+), no postcheck exists for the settle->imagining->return
+   shape at all, only terminal-punctuation presence.
+
+7. **Mini SSH** — unreachable, `julios-mac-mini.local` hostname resolution failure, 89th+
    consecutive beat with the same signature. Don't re-spend a full beat on diagnostics unless the
    signature changes. If reachable: SCP the unsynced A_gold/c_gold_beat*.jsonl backlog (many
    beats' worth now) and beat214's still-unsynced `_train/{train.jsonl,valid.jsonl}`
