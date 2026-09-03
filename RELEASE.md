@@ -556,3 +556,38 @@ Forecast (not a deadline — gates still decide): beta ~Jul 18-19, public ~Jul 2
   no-question). Mini unreachable (89th+ beat). All 3 fixes need live re-verification next beat
   with a free model slot. Sonali: push v1.0 tag when ready. Only Sonali-physical: notarization
   + F5 voice dial.
+- **2026-09-02 (beat222 COMPLETE, sonali-7a):** 15 peer sessions on arrival; broadcast sent to
+  the 3 most recent (sonali-5a/78/ed), no replies, no collision. Memory 13-27% free all beat,
+  `companion_deep_test.py` (PID 92152) held the one safe model slot the entire beat — no local
+  model launched. Dispatched a background cloud agent to fully read `battery9_engagement_1820`
+  end to end (227 lines) rather than touch the shared model. 3 pure-logic fixes in companion.py,
+  each verified via py_compile + direct unit tests against exact defect strings + FP guards (no
+  model launch): (1) leaked role-label opener — "User, you haven't told me about anything
+  specific in the vital-facts block." escaped every existing beat88/154/178/194 no-"No"-opener
+  normalizer because none of them fire on a reply that doesn't start with "No" at all; new guard
+  strips the leaked "User,"/"You," label and only rewraps with the canonical "No — we haven't
+  discussed" opener when a genuine denial phrase survives underneath. (2) CROSS-TURN OPENER
+  RECYCLING (beat111) regenerated once on a repeated 5-word opener but accepted the regen
+  unconditionally — live log showed the regen reproducing the SAME recycled opener verbatim
+  ("Friday is just three days away and you haven't started"); generalized beat216's self-recycle
+  mechanical-strip fallback (previously hardcoded to 4-word phrases) to any phrase length and
+  wired it in here. (3) `_BARRIER_PIVOT_RE` gained an 8th alternation for "does he/she/they
+  (ever/even) check if" — a pivot-to-the-other-person escape none of the existing 7 covered.
+  companion.py MD5 f6185a31b73981ee1143a48e75858e66 — all 4 dist copies synced,
+  `dist/hearth-0.2.zip` rebuilt and spot-checked byte-for-byte. Near-miss: almost launched a
+  SECOND local model process (`scripts/test_companion.py` calls `Engine.load()`) while
+  `companion_deep_test.py` was in flight — caught via `ps aux` and killed with TaskStop before
+  the model loaded; no stray process, no memory impact. battery9_1820's full read also surfaced
+  4 new unfixed defects (pronoun/voice confusion "what I'm actually feeling", action-deferred-
+  despite-"right now"-urgency, 2 new `_VAGUE_FILLER_RE` escape shapes) — logged to HANDOFF Beat223
+  priorities, not fixed this beat (semantic, need live-model iteration not a blind regex). The
+  flagged "Friday is due and it hasn't started" defect did NOT reproduce in this full read (the
+  equivalent turn came out grammatically clean) — 2 confirmed sightings + 1 clean read now,
+  suggesting it's intermittent rather than a reliable repro; still no patch attempted. Gold(A)=6746
+  (+5: ikebana nageire, pipe organ voicing, harpsichord quilling, wig ventilating, rokkaku kite
+  building — all confirmed zero prior corpus hits before writing; caught+fixed one CJK-character
+  typo contamination and one "maybe" hedge before landing). Gold(C)+4 (c_gold_beat222.json:
+  inheritance anger-received, resignation-email redirect-drops-therapy-frame, lowball-offer
+  say-plain-thing, wrong-costume playful-no-deflating-question). Mini unreachable (90th+ beat,
+  same signature). All 3 fixes need live re-verification next beat with a free model slot.
+  Sonali: push v1.0 tag when ready. Only Sonali-physical: notarization + F5 voice dial.

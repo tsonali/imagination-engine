@@ -5179,3 +5179,32 @@ Unreachable (`julios-mac-mini.local` hostname resolution failure), 89th+ consecu
 
 ### Running (beat221 close)
 `battery9_engagement.py` (PID 77453, started 18:20) still in flight at close (~21min elapsed, memory <1% free all beat) — worth a stall check next beat if still running then. `qc_queue.sh` (PID 21789) alive throughout. Sonali: push v1.0 tag when ready (`git push origin v1.0`). Only Sonali-physical: notarization + F5 voice dial. Priority for next beat: live-verify this beat's 3 fixes (companion.py confabulation-regen control flow, postcheck.py eagle-counterpart, postcheck.py finds-your-across) and the strengthened battery12 SC14 the moment a model slot is free; battery4b's hedged-honesty-disclosure pattern and the imag-intimacy no-postcheck-coverage gap want a beat with real headroom.
+
+## beat222 (2026-09-02, sonali-7a) — 3 companion.py fixes from a full battery9_1820 read, near-miss second-model-launch caught and killed, gold +5/+4
+
+**[Coordination note.]** 15 peer sessions active on arrival (`ListAgents`). Broadcast sent to the 3 most recent (sonali-5a/78/ed) claiming this beat's work before touching anything, no replies by close, no collision (git status clean on arrival — beat220/221 already landed by peers). Memory 13-27% free the entire beat; `companion_deep_test.py` (PID 92152, started 21:26) held the one safe local model slot throughout, still in flight at close — no local model launch attempted. Reading dispatched to a background cloud agent (`battery9_engagement_1820`, 227 lines, transcript-level) rather than touching the shared model.
+
+**[FYI, safety near-miss.]** Ran `scripts/test_companion.py` to sanity-check a fix and only noticed afterward it calls `Engine.load()` ("Runs multi-turn scripted reflective transcripts on real Qwen") — a second local model load while `companion_deep_test.py` was already in flight, the exact stacked-process shape behind the 2026-07-12 kernel panic. Caught within seconds via `ps aux` (nothing had actually spawned yet) and killed with `TaskStop` before any model loaded; confirmed no stray process, no memory impact. Worth other sessions double-checking any `scripts/test_*.py` for `Engine.load()`/`mlx`/"real Qwen" before running — none of the standing rules currently say this explicitly, they only cover batteries/product_e2e/gen_candidates by name.
+
+### companion.py — 3 fixes, all pure-logic, verified via py_compile + unit tests against exact defect strings + FP guards, NOT yet live-verified
+1. **Leaked role-label opener** — `comp-past-query` generic-probe-yes produced `"User, you haven't told me about anything specific in the vital-facts block."` None of the beat88/154/178/194 normalizers fire because they all require the reply to already start with "No"; this reply skipped "No" entirely. New guard strips a leading `"User,"`/`"You,"` label and only rewraps with the canonical "No — we haven't discussed..." when a genuine denial phrase survives underneath — verified it does NOT force-rewrap an unrelated leaked-label reply into a false denial.
+2. **CROSS-TURN OPENER RECYCLING (beat111) accepted its own regen blind** — the guard fires on a repeated 5-word opener, regenerates once, and previously shipped whatever came back with zero re-check. Live log: T2 and T3 both opened with the identical 8-word phrase after the guard's own regen fired and logged. Generalized beat216's self-recycle mechanical-strip fallback (previously hardcoded to a 4-word phrase) to any phrase length via `len(prev_phrase4.split())` and wired it into this guard too.
+3. **`_BARRIER_PIVOT_RE` new alternation** — `"does he ever check if the issue is actually yours, or just assume it's him?"`, a pivot-to-the-other-person deflection in a "check if" shape none of the existing 7 alternations covered.
+
+companion.py MD5 `f6185a31b73981ee1143a48e75858e66` — all 4 dist copies synced, `dist/hearth-0.2.zip` rebuilt and spot-checked byte-for-byte. `scripts/test_postcheck.py` (no model dependency) re-run clean.
+
+### Battery9_1820 full read — 4 new unfixed defects, logged for a beat with model headroom
+(a) Pronoun/voice confusion: `"So he wouldn't get what I'm actually feeling"` — companion misvoices the user's own feeling as its own "I," distinct from the cataloged I→You echo family. (b) Action deferred despite explicit "right now"/"2am" immediacy language — dodges urgency, semantic not mechanical. (c) Two new `_VAGUE_FILLER_RE` escape shapes: `"The word family is a whole conversation in itself"` (wrong-entity opener) and `"That's a whole week without the thing that needs to be done by Friday."` (buried mid-sentence, not an opener).
+
+**"Friday is due and it hasn't started" did NOT reproduce** in this beat's full 227-line read — the equivalent turn came out grammatically clean. 2 confirmed sightings (beat219/220) + this 1 clean read suggests intermittent/stochastic rather than a reliable repro. No patch attempted, per standing discipline against blind fixes to the Case 2h family.
+
+### Gold
+Gold(A) +5 (6741→6746: ikebana nageire, pipe organ voicing, harpsichord quilling, wig ventilating, rokkaku kite building — all confirmed 0 prior corpus hits via direct grep before writing. Caught+fixed a stray CJK-character typo and a "maybe" hedge before either landed. Unique first-40-char openings, all 6746 lines JSONL-validated).
+
+Gold(C) +4 (`c_gold_beat222.json`): anger-received-protection-dodge (inheritance split), redirect-drops-therapy-frame-instantly (health-scare -> resignation email), say-plain-thing-when-asked (lowball offer), playful-no-deflating-question (wrong costume) — all fresh content distinct from beat220/221's exemplars.
+
+### Mini
+Unreachable (`julios-mac-mini.local` hostname resolution failure), 90th+ consecutive beat. Not re-diagnosed.
+
+### Running (beat222 close)
+`companion_deep_test.py` (PID 92152, started 21:26, ~1h20min+ elapsed) + `qc_queue.sh` (PID 21789) still alive at close, memory 26-27% free — approaching but not yet past the 35% launch gate, worth a stall check next beat if still running then. Sonali: push v1.0 tag when ready (`git push origin v1.0`). Only Sonali-physical: notarization + F5 voice dial. Priority for next beat: live-verify this beat's 3 companion.py fixes the moment a model slot is free; the 4 newly-surfaced defects and the still-unconfirmed "Friday is due" pattern want continued live-model attention.

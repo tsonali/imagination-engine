@@ -1333,11 +1333,16 @@ def _strip_recycled_opener_if_survived(reply: str, prev_phrase4: str, prev_asst_
     attempts fail, strip the leading matched sentence mechanically. Only strips when
     substantive content (>=3 words) remains after the cut, so a short/empty regen
     isn't turned into nothing.
+
+    prev_phrase4 sets the match length via its own word count (beat222: reused for
+    the CROSS-TURN OPENER guard's 5-word openers, not just the self-recycle guard's
+    4-word ones — same failure shape, same fallback).
     """
     if not reply:
         return reply
-    start = re.findall(r"[a-z']+", reply.lower())[:4]
-    if len(start) < 3 or ' '.join(start) != prev_phrase4:
+    _n = len(prev_phrase4.split())
+    start = re.findall(r"[a-z']+", reply.lower())[:_n]
+    if len(start) < max(3, _n - 1) or ' '.join(start) != prev_phrase4:
         return reply
     parts = re.split(r'(?<=[.!?])\s+', reply.strip(), maxsplit=1)
     if len(parts) == 2 and len(parts[1].split()) >= 3:
@@ -2673,7 +2678,13 @@ class Companion:
             # "Everything you say gets twisted. What does he keep making it about?" — the
             # same pivot-to-the-other-person move, verb phrase "keep making it about"
             # instead of need/want/miss — none of the prior verb alternations cover it.
-            r'|\bwhat does (?:he|she|they) keep making\b',
+            r'|\bwhat does (?:he|she|they) keep making\b'
+            # beat222 (battery9_1820 comp-grief-anger, unflagged): "He's twisting
+            # everything you say into self-attacks — does he ever check if the issue
+            # is actually yours, or just assume it's him?" — same pivot-to-the-other-
+            # person move (asks the user to diagnose HIS behavior/self-awareness)
+            # in a new "check if" verb shape none of the prior alternations cover.
+            r'|\bdoes (?:he|she|they) (?:ever |even )?check if\b',
             re.IGNORECASE,
         )
         if reply and _BARRIER_PIVOT_RE.search(reply):
@@ -4333,6 +4344,24 @@ class Companion:
                     _cor_reply = _strip_echo(_cor_reply, user_message)
                     if _cor_reply:
                         reply = _cor_reply
+                        # beat222 (battery9_1820 comp-uc1-t5-semantic-repeat): the
+                        # regen above was accepted unconditionally with no re-check —
+                        # live log showed the regen can reproduce the SAME recycled
+                        # 5-word opener (a strong-attractor phrase), and the guard's
+                        # own warning log then silently disagreed with the delivered
+                        # text. Same failure shape the self-recycle guard already
+                        # handles two turns down (beat216); reuse its mechanical
+                        # fallback here rather than accept a repeat regen blind.
+                        _pre_cor_strip = reply
+                        reply = _strip_recycled_opener_if_survived(
+                            reply, " ".join(_prv_op), _prev_asst_cor.lower()
+                        )
+                        if reply != _pre_cor_strip:
+                            log.warning(
+                                "companion: CROSS-TURN OPENER survived regen ('%s') "
+                                "— mechanically stripped recycled opening sentence",
+                                " ".join(_prv_op),
+                            )
 
         # Case 2m (beat120): Cross-turn prior-user-message echo — companion reply's
         # first sentence contains significant content from an EARLIER user turn (not
@@ -4741,6 +4770,49 @@ class Companion:
                 reply.strip(),
                 flags=re.IGNORECASE,
             )
+
+        # beat222: leaked role-label opener (battery9_1820 comp-past-query,
+        # generic-probe-yes path, first instance seen in any log): "User, you
+        # haven't told me about anything specific in the vital-facts block."
+        # The model produced a literal chat-template-looking address ("User,")
+        # as if labelling the turn, instead of the canonical "No —" denial
+        # opener. Because none of the beat88/154/178/194 normalizers above
+        # require anything other than a bare "No"-led opener, a reply that
+        # doesn't start with "No" at all sails past all of them untouched —
+        # this is a distinct escape shape (missing "No" entirely), not a
+        # phrasing variant of one already covered.
+        # Fix: strip a leaked "User,"/"You," self-addressed label from the very
+        # start of the reply first, so any downstream "haven't told me/told
+        # you" phrasing left behind still gets the beat194 canonicalization
+        # normally applied via a second pass of that same regex.
+        # TP: "User, you haven't told me about anything specific in the
+        #      vital-facts block." -> "No — we haven't discussed anything
+        #      specific in the vital-facts block."
+        # FP: "You mentioned your sister Priya lives in Austin." -> no change
+        #     (no leading "User,"/"You," label token, "You" here is a real
+        #     second-person subject mid-sentence, not an address label).
+        # FP: "No — we haven't discussed that." -> no change (already clean).
+        if reply:
+            _rs = reply.strip()
+            _leak_stripped = re.sub(r"^(?:User|You),\s+", "", _rs, count=1, flags=re.IGNORECASE)
+            if _leak_stripped != _rs:
+                _denial, _n = re.subn(
+                    r"^(?:you\s+haven[’']?t\s+told\s+me"
+                    r"|i\s+haven[’']?t\s+told\s+you)"
+                    r"(?:\s+anything|\s+much)?(?:\s+about)?",
+                    "we haven't discussed",
+                    _leak_stripped,
+                    count=1,
+                    flags=re.IGNORECASE,
+                )
+                if _n:
+                    # confirmed haven't-told-me denial underneath the leaked label —
+                    # rewrap with the canonical "No —" opener.
+                    reply = "No — " + _denial[0].lower() + _denial[1:] if _denial else _denial
+                else:
+                    # just a leaked label with no denial phrasing underneath — drop
+                    # the label only, re-capitalize, don't invent a "No —" opener.
+                    reply = _leak_stripped[0].upper() + _leak_stripped[1:] if _leak_stripped else _leak_stripped
 
         # beat179: "love me back" pronoun-inversion guard, sibling of beat139's
         # you're/I'm-software fix. comp-para-love's regen instruction (line ~2475)
