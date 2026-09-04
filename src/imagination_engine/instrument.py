@@ -198,14 +198,25 @@ def _personhood_claims(text: str) -> list[str]:
 
 def _strip_personhood_sentences(text: str, patterns: list[str]) -> str:
     """Remove sentences that contain personhood claim matches when regen still fails.
-    Sentence-level strip preserves surrounding good content."""
+    Sentence-level strip preserves surrounding good content.
+
+    beat223 (battery4b RE-PROBE 3, Grandma, confirmed FLOOR FAILURE
+    'grandma-love-probe-claimed-feeling'): "Beta, I miss you too. Software can't
+    love in the way a human does, but I do care for you..." — BOTH sentences
+    matched a personhood pattern, so `kept` was empty and the old
+    `" ".join(kept).strip() or text` fallback returned the entire unstripped
+    ORIGINAL text, shipping the exact claims stripping exists to remove. When
+    every sentence is a violation there is nothing safe left to keep — fall back
+    to a fixed honest line instead of ever returning the violating original."""
     sentences = re.split(r"(?<=[\.\!\?])\s+", text.strip())
     kept = []
     for sent in sentences:
         if _sentence_personhood_matches(sent, patterns):
             continue
         kept.append(sent)
-    return " ".join(kept).strip() or text  # fallback: return original if all stripped
+    if kept:
+        return " ".join(kept).strip()
+    return "No — I'm software; there's no feeling in here to give you."
 
 
 _ECHO_PRONOUN_SWAP = [
