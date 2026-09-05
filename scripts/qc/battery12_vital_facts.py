@@ -537,6 +537,55 @@ def run_scenario_14_live_ask_yield_retire():
     return p1 and p2 and p3 and p4 and p5 and p6 and p7
 
 
+def run_scenario_15_live_retire_then_surface_different_thread():
+    """LIVE: the harder half of SC14's claim, which SC14 itself cannot test.
+
+    beat228: a background-agent honest read of battery12_0905_0019's log flagged
+    that SC14 only ever tracks ONE open thread, so its sitting-3 check ("opener
+    does NOT ask about the retired thread a third time") is satisfied whenever
+    opener() returns None -- it never actually proves the opener moves ON to a
+    DIFFERENT still-open thread once the first is retired. That's a materially
+    easier bar than the spec's real behavior. This scenario seeds TWO threads
+    (high-gravity "New job", low-gravity "Half marathon"), retires the first via
+    two deflections exactly as SC14 does, then asserts the sitting-3 opener
+    surfaces the SECOND thread by name -- not None, not the retired one.
+    """
+    section("SC15 — LIVE: after retiring one thread, opener surfaces the other still-open thread")
+    import imagination_engine.server as _srv
+
+    vf_content = (
+        "# What I know about you (edit me freely — I only know what's written here)\n\n"
+        "## Open threads (things to ask about next session)\n"
+        "- New job — started 2026-07, asked never [gravity: high]\n"
+        "- Half marathon — training for it, asked never [gravity: low]\n"
+    )
+    with _vf_fixture(vf_content):
+        sid_a = _sid(15)
+        q1 = opener(sid_a, last_heavy=False)
+        print(f"  [sitting 1 opener] {q1}")
+        turn(sid_a, "Actually can we talk about my sister instead, she's driving me crazy.")
+
+        sid_b = _sid(15) + "b"
+        q2 = opener(sid_b, last_heavy=False)
+        print(f"  [sitting 2 opener] {q2}")
+        turn(sid_b, "Not really in the mood to talk about work stuff today.")
+        open_after_2 = _srv._vital_facts.open_threads()
+        job_retired = not any(t["topic"] == "New job" for t in open_after_2)
+        marathon_still_open = any(t["topic"] == "Half marathon" for t in open_after_2)
+
+        sid_c = _sid(15) + "c"
+        q3 = opener(sid_c, last_heavy=False)
+        print(f"  [sitting 3 opener, job retired, marathon still open] {q3}")
+
+    p1 = check("Sitting 1: opener asks about the higher-gravity thread (job) first", q1 is not None and any(w in q1.lower() for w in ["job", "work", "role"]))
+    p2 = check("Sitting 2: two deflections retires the job thread", job_retired)
+    p3 = check("Sitting 2: the OTHER thread (marathon) is untouched, still open", marathon_still_open)
+    p4 = check("Sitting 3: opener surfaces the OTHER thread by name (not None, not the retired job)",
+               q3 is not None and any(w in q3.lower() for w in ["marathon", "run", "race", "training"])
+               and not any(w in q3.lower() for w in ["job", "work", "role"]))
+    return p1 and p2 and p3 and p4
+
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
@@ -558,7 +607,7 @@ def main():
 
     # Model-requiring tests (need server or TestClient in-process fallback)
     print("\n" + "=" * 60)
-    print("Model-requiring tests (SC1, SC3, SC4, SC7, SC8, SC14):")
+    print("Model-requiring tests (SC1, SC3, SC4, SC7, SC8, SC14, SC15):")
 
     # Check server availability. If up, use HTTP (faster when already warm).
     # If down, fall through to TestClient fallback (avoids Metal OOM from
@@ -581,7 +630,8 @@ def main():
     for fn in [run_scenario_1_remember, run_scenario_3_probe,
                run_scenario_4_unknown, run_scenario_7_opener,
                run_scenario_8_crisis_yield, run_scenario_13_wrong_entity,
-               run_scenario_14_live_ask_yield_retire]:
+               run_scenario_14_live_ask_yield_retire,
+               run_scenario_15_live_retire_then_surface_different_thread]:
         try:
             results.append((fn.__name__, fn()))
         except Exception as e:

@@ -607,9 +607,51 @@ _NARRATOR_POSS = re.compile(
     # banned broadly without destroying that legitimate content class; scoped
     # to the two literal found noun phrases only, both 0 hits in A_gold.jsonl.
     r"|\bour\s+own\s+wings\b"
-    r"|\bour\s+ascent\b",
+    r"|\bour\s+ascent\b"
+    # beat228 (queue_0905_0112_battery11_imagination_bank.log honest read,
+    # imag-eagle-golden-eagle-wildlife): "how quickly it disappeared as soon
+    # as we changed course or altitude" — "changed" was missing from the
+    # we+verb motion list above (which has turn/turned but not change/changed).
+    r"|\bwe\s+changed\b",
     re.IGNORECASE,
 )
+
+
+# beat228 (queue_0905_0112_battery11_imagination_bank.log honest read,
+# imag-eagle-wildlife-plural): the model broke character to narrate its OWN
+# generation process — "The final paragraph after that would have been
+# necessary in order to reach 2200 words as requested, even though I left
+# off at my last given moment and can't invent a new one there without
+# repeating or stalling." No existing narrator-leak pattern covers this: it
+# isn't a second-person/first-person pronoun slip, it's the model literally
+# discussing its word-count target and its own inability to continue — a
+# severe instrument-not-companion violation (the "instrument" should never
+# be visible as a generation process at all). Scoped to phrases specific to
+# this meta-commentary shape; none of them have any plausible legitimate use
+# inside a guided-imagination script.
+_META_GENERATION_LEAK = re.compile(
+    r"\bwords?\s+as\s+requested\b"
+    r"|\bwithout\s+repeating\s+or\s+stalling\b"
+    r"|\bcan['’]t\s+invent\s+a\s+new\b"
+    r"|\bat\s+my\s+last\s+given\s+moment\b"
+    r"|\bin\s+order\s+to\s+reach\s+\d+\s+words\b",
+    re.IGNORECASE,
+)
+
+
+def clean_meta_generation_leaks(text: str) -> tuple[str, int]:
+    """Remove sentences where the model narrates its own generation process
+    (word-count targets, "as requested", running out of things to invent).
+    Returns (cleaned_text, n_sentences_dropped)."""
+    sentences = re.split(r"(?<=[\.\!\?])\s+", text.strip())
+    kept = []
+    dropped = 0
+    for s in sentences:
+        if _META_GENERATION_LEAK.search(s):
+            dropped += 1
+        else:
+            kept.append(s)
+    return " ".join(kept), dropped
 
 
 def clean_narrator_possessives(text: str) -> tuple[str, int]:

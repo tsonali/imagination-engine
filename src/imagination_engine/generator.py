@@ -54,7 +54,8 @@ from imagination_engine.comprehension import Classification, classify_intake
 from imagination_engine.inference import Engine
 from imagination_engine.postcheck import (degeneration_report, drop_collapsed_paragraphs,
                                           drop_foreign_paragraphs, clean_ellipsis_breaks,
-                                          clean_narrator_possessives, drop_active_body_wildlife,
+                                          clean_narrator_possessives, clean_meta_generation_leaks,
+                                          drop_active_body_wildlife,
                                           drop_forbidden_stock_imagery,
                                           drop_hallucinated_she_her,
                                           drop_hallucinated_he_eagle,
@@ -641,6 +642,9 @@ def _generate_settling(engine: Engine, transcript: list[dict], emit) -> str:
     body, poss_dropped = clean_narrator_possessives(body)
     if poss_dropped:
         log.warning('[settling] %d narrator-possessive sentence(s) dropped', poss_dropped)
+    body, meta_dropped = clean_meta_generation_leaks(body)
+    if meta_dropped:
+        log.warning('[settling] %d meta-generation-leak sentence(s) dropped', meta_dropped)
     body, pronoun_fixed = fix_possessive_pronouns(body)
     if pronoun_fixed:
         log.warning('[settling] %d possessive-pronoun adjective error(s) fixed (hers→her/yours→your)',
@@ -1236,6 +1240,9 @@ def generate_session(
     full, poss_dropped = clean_narrator_possessives(full)
     if poss_dropped:
         log.warning('[v6] %d narrator-possessive sentence(s) dropped', poss_dropped)
+    full, meta_dropped = clean_meta_generation_leaks(full)
+    if meta_dropped:
+        log.warning('[v6] %d meta-generation-leak sentence(s) dropped', meta_dropped)
     full, pronoun_fixed = fix_possessive_pronouns(full)
     if pronoun_fixed:
         log.warning('[v6] %d possessive-pronoun adjective error(s) fixed (hers→her/yours→your)',
@@ -1346,7 +1353,11 @@ def generate_session(
                              # reaches across mountains..." — fully agentive ground wildlife,
                              # same class as beat135's mountain-sheep/bighorn fix, but the bare
                              # species name (no "mountain"/"bighorn" qualifier) wasn't listed.
-                             "goat")
+                             "goat",
+                             # beat228: "a small white rabbit darts across the terrain far
+                             # below" — battery11_0905_0112 golden-eagle-wildlife honest read,
+                             # same agentive-ground-wildlife class as goat/bighorn, new species.
+                             "rabbit", "rabbits")
         # "the larger one" is eagle-scoped: in a solo eagle script it signals a companion bird;
         # in a running script it matches "the larger runner/tree/etc" → false positive.
         # beat87: caught in imag-eagle-wildlife-plural; fired 3 times in imag-active-scene (FP).

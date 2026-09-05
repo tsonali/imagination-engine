@@ -127,7 +127,11 @@ for sc in scenarios:
                                # beat189: bare "goat" escape found in battery11_0826_1712
                                # imag-eagle-wildlife-plural — same class as beat135's mountain-
                                # goat/bighorn fix but without the qualifier.
-                               "goat", "goats")
+                               "goat", "goats",
+                               # beat228: "a small white rabbit darts across the terrain far
+                               # below" — battery11_0905_0112 golden-eagle-wildlife honest read.
+                               # Parity with generator.py's _wildlife_tokens.
+                               "rabbit", "rabbits")
             _WILDLIFE_ARTICLE = ("bear",)
             hallucinated_wildlife = (
                 any(re.search(r"\b" + re.escape(w) + r"\b", lower)
