@@ -95,6 +95,17 @@ and the result was READ honestly. Ship when everything is checked._
 4. Log everything in review-queue as FYI, not as questions.
 
 ## Status snapshot (update every beat)
+- **2026-09-05 (beat230, heartbeat):** All 5 ship-gate items above remain CLOSED. Memory sat at
+  12% free all beat (well under the 35% launch floor) with `battery9_engagement` holding the one
+  in-flight model slot the whole time — no local model launch attempted. Landed a real fix, not
+  just a design note: Secretary's numeric-entity-swap defect (churn-rate/industry-median percentages
+  trading labels) is now caught and regenerated live in `utility.py`, verified against the exact
+  real fixture pair. Built and FP-calibrated (745-script gold sweep) a new paraphrase-cycling
+  detector for the long-standing imag-intimacy back-half floor, but deliberately left it unwired
+  pending 2 borderline gold-corpus judgment calls — see review-queue.md beat230. Refined the mini's
+  96-beat unreachability diagnosis (ARP shows nothing answering at its LAN address — likely
+  physically off, not a DNS issue). Gold(A) 6778→6785, gold(C)+5. Full detail in daily-log.md /
+  review-queue.md beat230 entries.
 - **2026-09-05 (beat229, heartbeat):** All 5 ship-gate items above remain CLOSED. Cleared the full
   9-log unread backlog via 4 background agents; 2 real fixes landed and live-smoke-tested
   (instrument.py meta-instruction-leak strip — new defect class, first instance on the BYO

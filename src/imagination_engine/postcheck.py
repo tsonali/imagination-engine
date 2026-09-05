@@ -89,6 +89,86 @@ def find_degeneration_start(text: str) -> int | None:
     return None
 
 
+# Beat230: the imag-intimacy back-half floor (flagged beat227/228/229 as the
+# largest standing architectural gap) never trips find_degeneration_start
+# above — measured on the real defect script (queue_0904_1805_battery11,
+# "ceiling fan"/"unhurried"/"three blades" reworded ~10 times across the last
+# 14 sentences), the highest sentence-pair similarity was 0.64, never 3
+# CONSECUTIVE hits at SIM_THRESHOLD=0.75. This is a looser failure: the model
+# keeps re-describing the same handful of images in freshly paraphrased
+# sentences that are never adjacent and never that close individually, but
+# saturate the back of the script. CYCLE_* below is deliberately a separate,
+# lower-confidence bar from the degeneration check, not a replacement for it.
+CYCLE_SIM_THRESHOLD = 0.30
+CYCLE_MIN_WORDS = 6
+CYCLE_MIN_RUN = 8       # trailing run must span at least this many sentences
+CYCLE_MIN_DENSITY = 0.5  # and at least half of them must each repeat something earlier
+# beat230 FP sweep against all 745 500+ char A_gold.jsonl scripts at the
+# thresholds above: 16/745 (2.15%) flagged, several cutting 80-100% of a
+# legitimate short repetitive-by-design meditation script (breath-count/
+# body-scan styles legitimately repeat core vocabulary throughout a SHORT
+# script — that's real cadence, not the imag-intimacy back-HALF failure this
+# is meant to catch). Requiring the cut point to preserve at least this
+# fraction of the script cuts the FP set to 2/745 (0.27%, both far milder —
+# 69-71% survival, not 0-20%) while still catching the real defect (natural
+# survival fraction there was 0.51). NOT wired into generator.py yet: the 2
+# residual borderline flags want a human/live-model read before this is safe
+# to auto-trim in the live pipeline — see review-queue.md beat230.
+CYCLE_MIN_SURVIVE_FRAC = 0.45
+
+
+def find_cycling_start(text: str) -> int | None:
+    """Return the char offset where loose, paraphrased thematic cycling takes
+    over the tail of a script, or None. Sibling of find_degeneration_start for
+    the looser, non-adjacent, non-near-verbatim repeat class described above.
+    Finds the EARLIEST (= longest) trailing run of at least CYCLE_MIN_RUN
+    sentences where at least CYCLE_MIN_DENSITY of them each moderately
+    resemble some earlier sentence in the script."""
+    sents = _sentences(text)
+    word_sets = [_words(s) for s in sents]
+    eligible = [len(ws) >= CYCLE_MIN_WORDS for ws in word_sets]
+    is_hit = [False] * len(sents)
+    for i, ws in enumerate(word_sets):
+        if not eligible[i]:
+            continue
+        is_hit[i] = any(
+            _similarity(ws, word_sets[j]) >= CYCLE_SIM_THRESHOLD
+            for j in range(i) if eligible[j]
+        )
+    n = len(sents)
+    if n < CYCLE_MIN_RUN:
+        return None
+    best_start = None
+    for start in range(0, n - CYCLE_MIN_RUN + 1):
+        window = range(start, n)
+        elig_count = sum(1 for k in window if eligible[k])
+        if elig_count < CYCLE_MIN_RUN:
+            continue
+        hit_count = sum(1 for k in window if is_hit[k])
+        if hit_count / elig_count >= CYCLE_MIN_DENSITY:
+            best_start = start
+            break  # earliest qualifying start = longest trailing run
+    if best_start is None:
+        return None
+    offset = 0
+    for s in sents[:best_start]:
+        offset = text.find(s, offset) + len(s)
+    char_offset = text.find(sents[best_start], offset if best_start else 0)
+    if char_offset / max(len(text), 1) < CYCLE_MIN_SURVIVE_FRAC:
+        return None  # would cut too much of the script — see CYCLE_MIN_SURVIVE_FRAC note
+    return char_offset
+
+
+def trim_cycling_tail(text: str) -> tuple[str, bool]:
+    """Trim the script at the point loose paraphrased cycling takes over.
+    Returns (script, trimmed?). NOT currently called from generator.py — see
+    the CYCLE_MIN_SURVIVE_FRAC note above for why this is staged, not live."""
+    start = find_cycling_start(text)
+    if start is None:
+        return text, False
+    return text[:start].rstrip(), True
+
+
 def trim_degenerate_tail(text: str) -> tuple[str, bool]:
     """Trim the script at the point degeneration begins.
 

@@ -350,6 +350,83 @@ def _extract_times(text: str) -> list[str]:
     return unique
 
 
+def _extract_entity_number_bindings(text: str) -> list[tuple[str, str]]:
+    """Find (label, number) bindings for same-unit numbers that co-occur in one
+    sentence, each attached to a distinguishing label word (e.g. "Churn: 3.2%
+    monthly (industry median: 2.1%)" -> [("churn", "3.2%"), ("industry median", "2.1%")]).
+    Root cause this targets: the model can swap which of two same-unit numbers
+    attaches to which label while keeping both numbers present verbatim — the
+    presence-only missing-number check below can't catch that since neither
+    number is actually missing, just mis-bound (beat230: reproduced with
+    churn-rate/industry-median percentages trading places between two runs of
+    the same source document). Deliberately narrow to same-sentence, same-unit
+    pairs — the reproduced failure shape, not a general claim-verification pass."""
+    bindings: list[tuple[str, str]] = []
+    for sent in re.split(r'(?<=[.!?)])\s+|\n', text):
+        nums_in_sent = _extract_numbers(sent)
+        if len(nums_in_sent) < 2:
+            continue
+        by_suffix: dict[str, list[str]] = {}
+        for n in nums_in_sent:
+            suffix = re.sub(r'[\d.,\s]', '', n)  # "%" from "3.2%", "K" from "$28K"
+            by_suffix.setdefault(suffix, []).append(n)
+        for group in by_suffix.values():
+            if len(group) < 2:
+                continue
+            for n in group:
+                idx = sent.find(n)
+                if idx == -1:
+                    continue
+                before = sent[max(0, idx - 40):idx]
+                m = re.search(r'([A-Za-z][A-Za-z \-]{2,24}?)\s*[:\(]?\s*$', before)
+                if not m:
+                    continue
+                label = re.sub(r'^(the|a|an|is|at|of|and)\s+', '', m.group(1).strip().lower())
+                if len(label) < 3 or label in ('the', 'and', 'for', 'with'):
+                    continue
+                bindings.append((label, n))
+    return bindings
+
+
+def _label_binding_violations(bindings: list[tuple[str, str]], out: str) -> list[tuple[str, str, str]]:
+    """Return (label, correct_number, wrongly_bound_number) for each source
+    binding where the label's NEAREST number in the output (by character
+    distance, not just "somewhere in a window") is a sibling rather than its
+    own — a confirmed swap, not just an absence. Nearest-number-wins is what
+    the fixed-window version above missed: in a short sentence both numbers
+    can sit within any generous window of the label regardless of which one
+    the label is actually attached to, so distance has to break the tie."""
+    violations = []
+    checked_labels = set()
+    for label, num in bindings:
+        if label in checked_labels:
+            continue
+        checked_labels.add(label)
+        siblings = [n2 for (l2, n2) in bindings if l2 != label and n2 != num]
+        if not siblings:
+            continue
+        bound_correctly = False
+        bound_wrong_to = None
+        for m in re.finditer(re.escape(label), out, re.IGNORECASE):
+            win_start, win_end = max(0, m.start() - 60), m.end() + 60
+            window = out[win_start:win_end]
+            best_cand, best_dist = None, None
+            for cand in (num, *siblings):
+                for nm in re.finditer(re.escape(cand), window):
+                    dist = min(abs((win_start + nm.start()) - m.end()),
+                               abs((win_start + nm.end()) - m.start()))
+                    if best_dist is None or dist < best_dist:
+                        best_dist, best_cand = dist, cand
+            if best_cand == num:
+                bound_correctly = True
+                break
+            if best_cand in siblings and bound_wrong_to is None:
+                bound_wrong_to = best_cand
+        if not bound_correctly and bound_wrong_to:
+            violations.append((label, num, bound_wrong_to))
+    return violations
+
+
 def _b_summarize(text, instruction, tone, style):
     system = _BASE
     nums = _extract_numbers(text)
@@ -573,6 +650,7 @@ class Assistant:
         # second attempt escalates with CRITICAL FAILURE framing; third uses lowest temp.
         if task_key in ("summarize", "organize"):
             nums = _extract_numbers(text)
+            bindings = _extract_entity_number_bindings(text)
 
             def _num_present(n: str, o: str) -> bool:
                 """True if number n appears in output o.
@@ -585,7 +663,8 @@ class Assistant:
 
             for attempt in range(3):
                 missing = [n for n in nums if not _num_present(n, out)]
-                if not missing:
+                swaps = _label_binding_violations(bindings, out)
+                if not missing and not swaps:
                     break
                 task_obj = TASKS[task_key]
                 system, user = task_obj.build(
@@ -648,14 +727,28 @@ class Assistant:
                     else:
                         per_num.append(n)
                 missing_detail = "; ".join(per_num)
-                extra = (
-                    f"\n\n{severity}: A previous attempt dropped "
-                    f"these required numbers — each MUST appear verbatim in your output: "
-                    f"{missing_detail}. "
-                    "Do not substitute a related figure; include EACH ONE as it appears. "
-                    "For cost-context figures (e.g., 'each churn point costs $28K ARR/month'), "
-                    "include BOTH the percentage rate AND the dollar amount."
-                )
+                extra_parts = []
+                if missing:
+                    extra_parts.append(
+                        f"\n\n{severity}: A previous attempt dropped "
+                        f"these required numbers — each MUST appear verbatim in your output: "
+                        f"{missing_detail}. "
+                        "Do not substitute a related figure; include EACH ONE as it appears. "
+                        "For cost-context figures (e.g., 'each churn point costs $28K ARR/month'), "
+                        "include BOTH the percentage rate AND the dollar amount."
+                    )
+                if swaps:
+                    swap_detail = "; ".join(
+                        f"'{label}' is {correct}, NOT {wrong} — you attached {wrong} to"
+                        f" '{label}' instead of its own figure {correct}"
+                        for label, correct, wrong in swaps
+                    )
+                    extra_parts.append(
+                        f"\n\nNUMBER-LABEL SWAP: two figures of the same type got attached to"
+                        f" the wrong labels — {swap_detail}. Both numbers must stay verbatim,"
+                        " but each must stay bound to ITS OWN label, not its sibling's."
+                    )
+                extra = "".join(extra_parts)
                 temp = 0.25 if attempt >= 2 else (0.35 if attempt == 1 else 0.4)
                 regen = "".join(self.engine.stream(
                     messages=[
