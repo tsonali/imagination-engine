@@ -95,6 +95,20 @@ and the result was READ honestly. Ship when everything is checked._
 4. Log everything in review-queue as FYI, not as questions.
 
 ## Status snapshot (update every beat)
+- **2026-09-05 (beat231, heartbeat):** All 5 ship-gate items above remain CLOSED. Memory 81-82%
+  free all beat; all fixes were pure post-processing regex on already-generated text, so no local
+  model launch was needed. **battery12 SC15 (the retire-then-surface-a-different-thread vital-facts
+  test, added beat228) confirmed genuinely live-verified for the first time — 15/15 PASS** —
+  closing a multi-beat-standing top priority. **Cycling-detector decision made, not left open:**
+  read both of beat230's residual FP-sweep flags in full and confirmed both are genuine false
+  positives (a deliberate loving-kindness escalating-repetition meditation, and an intentional
+  anaphoric-parallelism script) — `trim_cycling_tail` stays unwired; a stricter redesign is now the
+  concrete next step for the imag-intimacy floor. 4 postcheck.py grammar/hallucination fixes landed
+  (colon-triggered predicative-your, her/hers-alone predicative gap, elliptical your-too gap, 2 new
+  eagle hallucinated-companion escapes), all verified via unit tests, no model launch. Secretary's
+  numeric-entity-swap fix (beat230) holds; a new cross-unit ($-vs-%) sibling found, logged for a
+  design pass. Gold(A) 6785→6790, gold(C)+4. Full detail in daily-log.md / review-queue.md beat231
+  entries.
 - **2026-09-05 (beat230, heartbeat):** All 5 ship-gate items above remain CLOSED. Memory sat at
   12% free all beat (well under the 35% launch floor) with `battery9_engagement` holding the one
   in-flight model slot the whole time — no local model launch attempted. Landed a real fix, not

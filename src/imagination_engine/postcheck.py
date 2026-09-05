@@ -1229,6 +1229,45 @@ def fix_predicative_your_contraction(text: str) -> tuple[str, int]:
     return result, fixed
 
 
+# beat231 (queue_0905_0646_battery11_imagination_bank.log honest read):
+# imag-embodiment-eagle — "You are aware of the shadow moving across an aspen
+# grove: your in every detail." — a colon standing in for the copula
+# (semantically "[it is] yours in every detail"). _PREDICATIVE_YOUR_RE never
+# fires because it requires one of the explicit copula words (is/was/are/
+# were/be/been/become/becomes/became/stays) directly before "your"; a colon
+# is not one of those tokens. First instance of this bug in imag-embodiment-
+# eagle — previously only ever seen with an explicit copula, in different
+# scenarios. Same follow-set (what determines "yours" is grammatically
+# required is what comes AFTER "your", not what precedes it), just triggered
+# by a preceding colon instead of a copula word. 0 hits for ": your
+# [followword]" in A_gold.jsonl confirmed before adding.
+_PREDICATIVE_YOUR_COLON_RE = re.compile(
+    r":\s*your\b"
+    r"(?=\s*(?:[.,!?;]|—|$|\s+(?:entirely|completely|now|here|still|again|"
+    r"too|for|on|at|in|to|by|with|from|between|whenever|as|today|above|when)\b)"
+    r")",
+    re.IGNORECASE,
+)
+
+
+def fix_predicative_your_colon(text: str) -> tuple[str, int]:
+    """': your [end-of-clause]' -> ': yours [end-of-clause]'.
+
+    Colon-preceding sibling of fix_predicative_your — same standalone-
+    possessive requirement (driven by what follows "your"), triggered by a
+    preceding colon instead of an explicit copula word.
+    """
+    fixed = 0
+
+    def _replace(m: "re.Match") -> str:
+        nonlocal fixed
+        fixed += 1
+        return m.group(0)[: -len("your")] + "yours"
+
+    result = _PREDICATIVE_YOUR_COLON_RE.sub(_replace, text)
+    return result, fixed
+
+
 def fix_predicative_your(text: str) -> tuple[str, int]:
     """'is/was your [end-of-clause]' -> 'is/was yours [end-of-clause]'.
 
@@ -1295,6 +1334,45 @@ def fix_predicative_your_relpro(text: str) -> tuple[str, int]:
     return result, fixed
 
 
+# beat231 (queue_0905_0646_battery11_imagination_bank.log honest read):
+# imag-intimacy-finds-your-across — "some small thing she did that was her
+# alone and now your too." — the "now your too" clause has no explicit
+# copula at all (elliptical coordination, the implied "[it was]" dropped
+# before "your"), so it matches neither _PREDICATIVE_YOUR_RE (needs a copula
+# word immediately before "your") nor any other sibling above. Same
+# unconditional-on-preceding-context logic as _PREDICATIVE_YOUR_RELPRO_RE:
+# "too" can never be the possessed noun in an attributive "your NOUN"
+# construction (it's an adverb, not a noun), so "your too" at a clause
+# boundary is unconditionally wrong regardless of what precedes it. 0 hits
+# for "your too" followed by end-of-clause punctuation in A_gold.jsonl
+# confirmed before adding (the corpus's only "your too" substring hits are
+# "your tool", an unrelated word, not a real match against the word-
+# boundary-scoped pattern below).
+_PREDICATIVE_YOUR_TOO_RE = re.compile(
+    r"\byour\s+too\b(?=\s*(?:[.,!?;]|—|$))",
+    re.IGNORECASE,
+)
+
+
+def fix_predicative_your_too(text: str) -> tuple[str, int]:
+    """'your too [end-of-clause]' -> 'yours too [end-of-clause]'.
+
+    Unconditional-on-preceding-context sibling of fix_predicative_your_relpro
+    — "too" can never introduce a possessed noun, so this fires regardless
+    of what comes before "your" (including no copula at all, the elliptical
+    coordination shape that triggered this).
+    """
+    fixed = 0
+
+    def _replace(m: "re.Match") -> str:
+        nonlocal fixed
+        fixed += 1
+        return "yours too"
+
+    result = _PREDICATIVE_YOUR_TOO_RE.sub(_replace, text)
+    return result, fixed
+
+
 # beat198 (battery11_1317 imag-intimacy honest read): "a reminder held after
 # she has left again to do whatever is her today" — the her/hers sibling of
 # _PREDICATIVE_YOUR_RE/fix_predicative_your above (same copula+standalone-
@@ -1326,6 +1404,45 @@ def fix_predicative_her(text: str) -> tuple[str, int]:
         return f"{m.group(1)} {m.group(2)}hers"
 
     result = _PREDICATIVE_HER_RE.sub(_replace, text)
+    return result, fixed
+
+
+# beat231 (queue_0905_0646_battery11_imagination_bank.log honest read):
+# imag-intimacy-finds-your-across — "some small thing she did that was her
+# alone and now your too." — "was her alone" should be "was hers alone"
+# (predicative possessive before "alone"). _PREDICATIVE_HER_RE's follow-set
+# never included "alone" because for the your/yours sibling "alone" already
+# has a DIFFERENT established meaning ("your alone" -> "you're alone", a
+# homophone-contraction fix, not a possessive one — see fix_your_contraction)
+# that "her alone" has no equivalent for ("her're" isn't a word). Scoped
+# narrowly to require the phrase end in punctuation or a coordinating
+# conjunction (and/but/or/so) specifically to avoid "her alone time" (a real
+# compound noun phrase — "alone" modifying "time" — where "her" IS correctly
+# attributive and must stay untouched). 0 hits for "her alone" preceded by a
+# copula anywhere in A_gold.jsonl confirmed before adding (the corpus's only
+# "her alone" hits are "kept her alone in the middle of crowds", object
+# pronoun, no copula before "her", correctly left untouched by this scoping).
+_PREDICATIVE_HER_ALONE_RE = re.compile(
+    r"\b(is|was|are|were|be|been|become|becomes|became)\s+her\s+alone\b"
+    r"(?=\s*(?:[.,!?;]|—|$|\s+(?:and|but|or|so)\b))",
+    re.IGNORECASE,
+)
+
+
+def fix_predicative_her_alone(text: str) -> tuple[str, int]:
+    """'is/was her alone [end-of-clause/and/but/or/so]' -> '...hers alone...'.
+
+    Narrow "alone" sibling of fix_predicative_her — deliberately excludes the
+    "her alone time" compound-noun shape (see the comment above the regex).
+    """
+    fixed = 0
+
+    def _replace(m: "re.Match") -> str:
+        nonlocal fixed
+        fixed += 1
+        return f"{m.group(1)} hers alone"
+
+    result = _PREDICATIVE_HER_ALONE_RE.sub(_replace, text)
     return result, fixed
 
 
@@ -2335,7 +2452,20 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     # 187 human-bystander hallucination class, new phrasing ("people are
     # hiking") none of the prior "someone"/"hiker"/"figure"/"rock climber"
     # tokens cover. 0 hits in A_gold.jsonl confirmed before adding.
-    r'|\bpeople\s+are\s+hiking\b',
+    r'|\bpeople\s+are\s+hiking\b'
+    # beat231 (queue_0905_0646_battery11_imagination_bank.log honest read):
+    # imag-eagle-golden-eagle-wildlife — "You hear your own wings
+    # flapping through the crisp mountain air, and then someone else. The sound
+    # fills the still sky: two sets of large feathers beating against each
+    # other..." — an acoustic + explicit-count companion assertion in one
+    # passage. "then someone else" is a new companion-reveal tell (not covered
+    # by "fly with someone" or any "someone has..." pattern above). "two sets
+    # of ... feathers" is scoped to require "feathers" within one modifier
+    # word of "two sets of" — deliberately NOT bare "two sets of" (that phrase
+    # has real non-eagle hits in A_gold.jsonl, e.g. tessellation "two sets of
+    # diagonals"). 0 hits for both scoped phrases confirmed before adding.
+    r'|\bthen\s+someone\s+else\b'
+    r'|\btwo\s+sets\s+of\s+(?:\w+\s+)?feathers\b',
     re.IGNORECASE,
 )
 

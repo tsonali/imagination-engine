@@ -69,7 +69,10 @@ from imagination_engine.postcheck import (degeneration_report, drop_collapsed_pa
                                           fix_copula_youre_alone, fix_predicative_your,
                                           fix_predicative_your_contraction,
                                           fix_predicative_your_relpro,
+                                          fix_predicative_your_colon,
+                                          fix_predicative_your_too,
                                           fix_predicative_her,
+                                          fix_predicative_her_alone,
                                           fix_reflexive_her_object,
                                           fix_intimacy_object_pronoun_escapes,
                                           fix_subject_pronouns, fix_hers_subject_pronoun,
@@ -663,9 +666,21 @@ def _generate_settling(engine: Engine, transcript: list[dict], emit) -> str:
     if predicative_your_relpro_fixed:
         log.warning('[settling] %d predicative your→yours before relative pronoun error(s) fixed',
                     predicative_your_relpro_fixed)
+    body, predicative_your_colon_fixed = fix_predicative_your_colon(body)
+    if predicative_your_colon_fixed:
+        log.warning('[settling] %d predicative colon-your→yours error(s) fixed',
+                    predicative_your_colon_fixed)
+    body, predicative_your_too_fixed = fix_predicative_your_too(body)
+    if predicative_your_too_fixed:
+        log.warning('[settling] %d predicative your too→yours too error(s) fixed',
+                    predicative_your_too_fixed)
     body, predicative_her_fixed = fix_predicative_her(body)
     if predicative_her_fixed:
         log.warning('[settling] %d predicative her→hers error(s) fixed', predicative_her_fixed)
+    body, predicative_her_alone_fixed = fix_predicative_her_alone(body)
+    if predicative_her_alone_fixed:
+        log.warning('[settling] %d predicative her alone→hers alone error(s) fixed',
+                    predicative_her_alone_fixed)
     body, reflexive_her_fixed = fix_reflexive_her_object(body)
     if reflexive_her_fixed:
         log.warning('[settling] %d reflexive herself→her error(s) fixed', reflexive_her_fixed)
@@ -1261,9 +1276,21 @@ def generate_session(
     if predicative_your_relpro_fixed:
         log.warning('[v6] %d predicative your→yours before relative pronoun error(s) fixed',
                     predicative_your_relpro_fixed)
+    full, predicative_your_colon_fixed = fix_predicative_your_colon(full)
+    if predicative_your_colon_fixed:
+        log.warning('[v6] %d predicative colon-your→yours error(s) fixed',
+                    predicative_your_colon_fixed)
+    full, predicative_your_too_fixed = fix_predicative_your_too(full)
+    if predicative_your_too_fixed:
+        log.warning('[v6] %d predicative your too→yours too error(s) fixed',
+                    predicative_your_too_fixed)
     full, predicative_her_fixed = fix_predicative_her(full)
     if predicative_her_fixed:
         log.warning('[v6] %d predicative her→hers error(s) fixed', predicative_her_fixed)
+    full, predicative_her_alone_fixed = fix_predicative_her_alone(full)
+    if predicative_her_alone_fixed:
+        log.warning('[v6] %d predicative her alone→hers alone error(s) fixed',
+                    predicative_her_alone_fixed)
     full, reflexive_her_fixed = fix_reflexive_her_object(full)
     if reflexive_her_fixed:
         log.warning('[v6] %d reflexive herself→her error(s) fixed', reflexive_her_fixed)

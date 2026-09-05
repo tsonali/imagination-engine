@@ -640,3 +640,27 @@ Battery9 read served as the companion rotation for this beat (12 scenarios, 29 r
 - Vital Facts: 13/13 -> 15 scenarios pending live verification of the new SC15
 
 **Rotation next beat: read the 7 still-unread backlog logs (esp. product_e2e/ayf_deep/secretary_deep — AYF and Secretary deep-test data is now the stalest); live-verify SC15 and the BYO template-fatigue prompt fix the moment a model slot is free.**
+
+### 2026-09-05 (beat231) — status refresh across all 5 tools from today's 7-log honest-read backlog + battery12 SC15 live-verified
+
+**Vital Facts (battery12):** SC15 (retire-then-surface-a-different-thread, added beat228) confirmed genuinely live-verified for the first time — 15/15 PASS, including a real 3rd-sitting `opener()` call that correctly surfaces the still-open second thread by name rather than going silent. This closes the multi-beat-standing top priority.
+
+**Imagination (battery11):** Mechanically passing; the standing back-half decay floors (imag-mri, imag-calm-settle) and imag-intimacy's chair-bleed + paraphrase-cycling floor all confirmed still open, unchanged in kind. This beat fixed 4 new mechanical surface forms surfacing within those known floors (a colon-triggered predicative-your, a her/hers-alone predicative gap, an elliptical your-too gap, 2 new eagle hallucinated-companion escapes) — see review-queue.md beat231. The cycling-detector built beat230 was evaluated and decided against wiring live (both residual FP-sweep flags are genuine false positives — deliberate meditation techniques, not defects); a stricter redesign is now the concrete next step, not an open question.
+
+**Secretary (battery10, deep test):** Numeric-entity-swap fix (beat230) holds for its exact same-unit target pair. A new cross-unit sibling found (a dollar figure mislabeled onto a percentage-only metric, "Churn rate $380K") — same bug family, needs a label→expected-unit schema, not yet fixed.
+
+**AYF (battery3b, ayf_deep):** All clean — beat215's leading/trailing bare-refusal bug confirmed not recurring (18/18), fresh `battery3b_ask_retest` 5/5 PASS. One long-standing low-priority register nit (verbatim ALL-CAPS document heading substituted for the user's own framing) still present, unchanged since beat208/209.
+
+**Companion (battery9, companion_deep):** Clean 238-line full read — all 5 watch items from beats 228-230 checked, none regressed (confabulated-apology guard holds through the double-empty-regen path; no pronoun-inversion or bare-fragment-delivery recurrence; "Friday is due" read clean a 3rd time).
+
+**BYO:** Both tracked issues resolved on this read — meta-instruction-leak fix (beat228/229) holds with zero recurrence; the "no cross-session memory" disclaimer template-fatigue flagged beat230 as still cross-instrument now shows genuinely distinct per-persona phrasing (not attributed to any code fix — likely generation variance).
+
+**Use-cases.md STATUS (ship gate holds, all 5 tools clean on this beat's reads):**
+- Imagination: battery11 mechanically passing; known floors unchanged, 4 new surface-form fixes landed
+- Secretary: battery10/deep-test clean except the new $-vs-% cross-unit mislabel (design gap, not yet fixed)
+- AYF: clean, beat215 fix confirmed holding
+- Companion: clean, all beat228-230 fixes/watch-items hold
+- BYO: clean, both tracked issues resolved/improved
+- Vital Facts: SC15 live-verified PASS — 15/15, the multi-beat top priority is closed
+
+**Rotation next beat:** design pass on Secretary's $-vs-% cross-unit mislabel; cycling-detector redesign (stricter shape) for the imag-intimacy floor; continue clearing the day's newest logs (battery3b_1430/product_e2e_1433 already read clean this beat).
