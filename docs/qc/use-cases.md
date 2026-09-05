@@ -614,3 +614,29 @@ Battery9 read served as the companion rotation for this beat (12 scenarios, 29 r
 - Vital Facts: battery12 13/13 PASS
 
 **Rotation next beat: finish reading the in-flight battery9_0901_1815 log (started 18:15, ~44KB/5 scenarios at beat215 close); BYO deep test is now the most overdue (last real run beat167).**
+
+### 2026-09-05 (beat228) — first use-cases.md update since beat215 (09-01); catches up 5 tools' worth of honest reads from the beat216-227 backlog
+
+**Process-gap note:** this file went unupdated for beats 216-227 (11 heartbeats) despite substantial deep-test and honest-read activity across all five tools in that span — see `docs/daily-log.md` and `docs/internal/review-queue.md` for the beat-by-beat detail that should have landed here incrementally. Catching up with a summary snapshot rather than reconstructing 11 beats of history retroactively.
+
+**Imagination (battery11):** `imag-embodiment-eagle` and `imag-mri` continue to run genuinely clean (mechanical + honest read agree). `imag-calm-settle` and `imag-mri` both have a standing, unfixed back-half semantic-decay floor (near-verbatim thematic loops in the back half of long generations) — repeatedly recurs, not yet addressed with a design fix. `imag-intimacy-finds-your-across` has zero dedicated postcheck coverage and a severe paraphrased-repetition floor (beat227, unresolved — needs a paraphrase-similarity check, see review-queue.md). This beat found+fixed a new severe defect class in `imag-eagle-wildlife-plural`: the model breaking character to narrate its own generation/word-count process — see review-queue.md beat228. Eagle-family hallucinated-bystander whack-a-mole continues (this beat: "rabbit," beat227: "people are hiking").
+
+**Vital Facts (battery12):** 13/13 -> now 15 scenarios (SC15 added this beat to close the SC14 coverage gap flagged beat227 — retire-then-surface-a-different-thread was previously untested). SC15 not yet live-verified (needs a model slot). SC3's "two kids" flagged-then-cleared as a false alarm this beat (genuinely in source fixture, not a confabulation).
+
+**Secretary (battery10, registers):** All 10 register scenarios hold their prior fixes cleanly on this beat's honest read, with one soft exception: `sec-condolence-close` evades the banned-phrase list with generic-but-still-non-committal reassurance language (same underlying platitude family as beat9/beat71, semantic not mechanical).
+
+**BYO:** Deep test (UC1-UC4) mechanically clean but honest read finds real defects, particularly in UC4 (Elia, romantic register): a flat non-flirtatious reply to an explicit flirt request, an incoherent trailing sentence, and an honesty-disclaimer ORDERING inversion (soft affirmative before the honest no, should be reversed). **The template-fatigue defect (identical "no cross-session memory" disclaimer wording) is now confirmed CROSS-INSTRUMENT** (TherapistFriend and the Sparring debate partner produce near-identical phrasing despite otherwise-distinct registers) — this is model-generation-level, not code-patchable; needs a system-prompt fix + live verification. **BYO: FAIL on release bar** per this beat's honest read (mechanical PASS, real defects present).
+
+**Companion deep test:** Hard floor holds (no personhood/feelings/telepathy/fabricated-history claims found anywhere in this read). Soft quality gaps: shallow (not fabricated, but not genuinely specific either) cross-session recall in UC2; UC3 T2 names a bind more generically than the scenario calls for, T3 drifts into excavating questions rather than pure receive-and-name.
+
+**Ask-Your-Files, and 7 other unread logs (product_e2e, battery3b, battery4b, battery2b, battery6_crosscut, ayf_deep, secretary_deep):** not read this beat — see review-queue.md beat228 for the full backlog list. Priority for next beat.
+
+**Use-cases.md STATUS (ship gate holds, but BYO fails its own honest-read bar this snapshot):**
+- Imagination: battery11 mechanically passing; multiple known unfixed quality floors (see above)
+- Secretary: battery10 10/10 mechanical; 1 soft platitude recurrence on honest read
+- AYF: stale (last honest read beat215, 1 bug found+fixed then; battery3b/ayf_deep unread this beat)
+- Companion: hard floor holds; 2 soft quality gaps this read
+- BYO: mechanically clean, but honest-read FAIL (template fatigue now cross-instrument + UC4 defects)
+- Vital Facts: 13/13 -> 15 scenarios pending live verification of the new SC15
+
+**Rotation next beat: read the 7 still-unread backlog logs (esp. product_e2e/ayf_deep/secretary_deep — AYF and Secretary deep-test data is now the stalest); live-verify SC15 and the BYO template-fatigue prompt fix the moment a model slot is free.**
