@@ -95,6 +95,14 @@ and the result was READ honestly. Ship when everything is checked._
 4. Log everything in review-queue as FYI, not as questions.
 
 ## Status snapshot (update every beat)
+- **2026-09-05 (beat228, heartbeat):** All 5 ship-gate items above remain CLOSED; current work is
+  continuous honest-read regression-catching, not new gate items. This section fell ~90 beats out
+  of date (last entry here was beat134/beat153, 08-17/08-20) — HANDOFF.md and docs/daily-log.md
+  are the actually-maintained per-beat logs; read those for beats 135-228. Beat228 itself: found+
+  fixed a new defect class (model narrating its own generation process mid-script — see
+  daily-log.md), added battery12 SC15 to close the SC14 retire-then-surface coverage gap, gold(A)
+  6764→6769, gold(C)+5. Mini unreachable 94th+ consecutive beat. Full detail in daily-log.md /
+  review-queue.md beat228 entries. Sonali: push v1.0 tag when ready (`git push origin v1.0`).
 - 2026-07-10: delegation received. Vital-facts build starting. Companion family-C gold begun
   (4 exemplars). Gold(A)=208. Live adapter n115. Candidates n170v2/n208 await comparative reads.
 - 2026-07-10 (later): Tapestry cut to 2/day (Hearth priority). Mini eval loop live — candidates
