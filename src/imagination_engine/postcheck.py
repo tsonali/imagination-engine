@@ -1349,6 +1349,24 @@ _INTIMACY_OBJECT_PRONOUN_SUBS = (
     # uses but in a coordination ("X and your") the copula-scoped regex there
     # doesn't reach. Reuses _YOUR_NONNOUN_FOLLOW so it only fires when nothing
     # noun-like follows "your" (i.e. it's standing alone, not attributive).
+    # beat227 (queue_0904_1805_battery11_imagination_bank.log honest read),
+    # imag-intimacy-finds-your-across (a scenario with zero dedicated postcheck
+    # coverage before this beat): two new instances of the established
+    # verb-governed "your"-for-"yours" family, distinct trailing words from
+    # every prior "finds your ..." entry above ("across", "without a word").
+    # 0 hits in A_gold.jsonl confirmed before adding.
+    (re.compile(r"\bstays\s+your\s+inside\b", re.IGNORECASE), "stays yours inside"),
+    (re.compile(r"\bfinds\s+your\s+when\b", re.IGNORECASE), "finds yours when"),
+    # Same script: "Her voice is unhurried as hers does so often when you're
+    # near her" — a different corruption shape from the your/yours family
+    # above: "hers" (a standalone possessive pronoun, never a grammatical
+    # subject) used as the subject of "does". Scoped to the exact "as hers
+    # does" construction — grammatically "hers" can never correctly precede a
+    # finite verb as its subject, so this is a safe, narrow fix, not a style
+    # judgment. Confirmed 0 hits for "hers does" in A_gold.jsonl (the raw
+    # substring "hers does" appears 3x only as part of unrelated "others
+    # doesn't", which this word-boundary-scoped pattern does not match).
+    (re.compile(r"\bas\s+hers\s+does\b", re.IGNORECASE), "as she does"),
 )
 
 # beat214: "You feel she come a little closer" (imag-intimacy, 2 instances,
@@ -2187,7 +2205,15 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     # birds are seen in numbers but never truly flown close without reason." —
     # implies unnamed companionship distinct from the background-wildlife
     # observation the scenario is meant to allow. 0 hits in A_gold.jsonl.
-    r'|\bnot\s+entirely\s+alone\b',
+    r'|\bnot\s+entirely\s+alone\b'
+    # beat227 (queue_0904_1805_battery11_imagination_bank.log honest read):
+    # imag-eagle-golden-eagle-wildlife — "a small creek that runs toward a
+    # clearing in which people are hiking. You watch them move through this
+    # terrain without any awareness..." — 6th occurrence of the beat178/186/
+    # 187 human-bystander hallucination class, new phrasing ("people are
+    # hiking") none of the prior "someone"/"hiker"/"figure"/"rock climber"
+    # tokens cover. 0 hits in A_gold.jsonl confirmed before adding.
+    r'|\bpeople\s+are\s+hiking\b',
     re.IGNORECASE,
 )
 

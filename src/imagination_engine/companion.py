@@ -2932,7 +2932,12 @@ class Companion:
             # to be in your mind." ("to be in your mind" is the same hollow,
             # unelaborated tail as "of staying quiet"/"for staying silent",
             # just introduced by "to" instead).
-            r"(?:\s+(?:in\s+itself|(?:of|for|to)\s+\w+(?:\s+\w+){0,9}))?"
+            # beat227 (battery9_engagement_1956 honest read): comp-grief-anger
+            # T1 — the single most-fixed scenario in this file — produced
+            # "That's a whole thing by itself.", substituting "by" for "in" and
+            # slipping past every prior fix undetected (no guard fired at all).
+            # Same hollow-stub shape, just the other idiomatic preposition.
+            r"(?:\s+(?:(?:in|by)\s+itself|(?:of|for|to)\s+\w+(?:\s+\w+){0,9}))?"
             # beat194: optional trailing tag-question ("... in itself, isn't it?")
             # — battery9_0827_0614's escape above also had a rhetorical tag
             # question tacked on after "in itself"; a vague filler noun doesn't
@@ -3904,10 +3909,20 @@ class Companion:
         # leaves that specific question unanswered. TP: comp-vf-sister-memory
         # (review-queue beat178/180). Same prepend convention as the PAST-QUERY
         # "No — " prepend above (line ~2654).
+        # beat227 (battery9_engagement_1956 honest read): comp-vf-sister-memory
+        # T2 produced "You're asking about whether I remember your sister. Yes
+        # — she's Priya, lives in Austin..." — the reply's OWN second sentence
+        # already opened with "Yes —" but its first sentence (reflection-of-
+        # question filler) didn't, so this guard's start-anchored check missed
+        # the embedded "Yes —" and prepended a second one, shipping a
+        # duplicated "Yes — ... Yes —" opener. Added a search-anywhere check:
+        # if "yes" already appears anywhere in the reply, the fact is already
+        # marked affirmative and prepending would double it.
         if (_is_memory_probe(user_message)
                 and reply
                 and len(reply.strip().split()) > 3
                 and not re.match(r"^(?:yes|no)\b", reply.strip(), re.IGNORECASE)
+                and not re.search(r"\byes\b", reply, re.IGNORECASE)
                 and self.vital_facts):
             _vf_ctx_yes = self.vital_facts.context_block()
             if _vf_ctx_yes and _vf_covers_query(user_message, _vf_ctx_yes):

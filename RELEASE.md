@@ -620,3 +620,18 @@ Forecast (not a deadline — gates still decide): beta ~Jul 18-19, public ~Jul 2
   playful-no-deflating-question). Mini unreachable (91st+ beat, same DNS signature). Battery9
   still in flight at close (~2h20min, within normal 2.2-3.2hr range, not stalled). Sonali: push
   v1.0 tag when ready. Only Sonali-physical: notarization + F5 voice dial.
+- 2026-09-04 (beat227, heartbeat, sonali-c1): [note: beat226's status snapshot update didn't land
+  here — see HANDOFF.md/daily-log.md beat226 for its 3 companion.py fixes (anger-protect bare-verb
+  reframe, 2 vague-filler escapes, empty-reply safety net) and gold +8/+5.] This beat: honest reads
+  of 2 completed batteries (battery9_1956, battery11_1805) found beat226's vague-filler fix had an
+  unpatched sibling ("by itself" vs "in itself") plus a new VF-AFFIRMATIVE-MISSING-YES double-Yes
+  bug, and confirmed beat225's scenario/postcheck fixes hold live while surfacing a severe
+  paraphrased-repetition defect in imag-intimacy-finds-your-across (zero postcheck coverage —
+  3rd instance of the "invisible gap" bug class this week). 4 mechanical fixes landed (vague-filler
+  by-itself, VF double-Yes guard, eagle "people are hiking" bystander escape, 2 intimacy pronoun
+  subs + 1 hers-does fix), all verified via py_compile + unit tests against exact defect quotes +
+  FP guards, no model launch (companion_deep_test held the one safe slot all beat). Gold(A)=6764
+  (+5: fly-tying, bell casting/tuning, repoussé, netsuke, millinery). Gold(C)+4 (c_gold_beat227.json).
+  Mini unreachable (93rd+ beat). Not fixed: imag-intimacy paraphrased repetition (needs real design
+  bandwidth, not a patch); 5 carried-forward single-sighting semantic defects. Sonali: push v1.0
+  tag when ready. Only Sonali-physical: notarization + F5 voice dial.
