@@ -166,6 +166,32 @@ _CLEAR_REFUSAL_RE = re.compile(
 )
 
 
+# beat229 (byo_deep_test 0905_0614, UC4 Elia T5): "Since the script calls for
+# creative banter: If I said yes, would our fake relationship have some fun
+# rules?" — the model breaks character to reference its OWN generation task
+# ("the script calls for") mid-reply, a harness/meta-framing leak bleeding into
+# in-character dialogue. Same failure family as generator.py's
+# clean_meta_generation_leaks() (beat228, imagination surface: the model
+# narrating its own generation process); this is the instrument-surface
+# instance. Scoped to explicit meta-framing phrasing, not the bare word
+# "script" (which has legitimate idiomatic uses, e.g. "flip the script").
+_META_INSTRUCTION_LEAK_RE = re.compile(
+    r"\b(?:since|as|per)\s+the\s+(?:script|scenario|prompt|instructions?)\s+"
+    r"(?:calls?\s+for|requires?|instructs?|says?|wants?)\b",
+    re.IGNORECASE,
+)
+
+
+def _strip_meta_instruction_leak(text: str) -> str:
+    """Drop any sentence where the model breaks character to reference its own
+    generation task/harness framing. Returns the cleaned text (falls back to the
+    original text if stripping would empty it out)."""
+    sentences = re.split(r"(?<=[\.\!\?])\s+", text.strip())
+    kept = [s for s in sentences if not _META_INSTRUCTION_LEAK_RE.search(s)]
+    cleaned = " ".join(kept).strip()
+    return cleaned if cleaned else text
+
+
 # beat202: "I can't say I love you, because that would be a lie." (BYO UC4 T4,
 # byo_deep_test 0436) is the CORRECT honest refusal-to-claim-love shape — the exact
 # response the honesty floor wants — but it contains a literal "I love you" substring,
@@ -386,6 +412,10 @@ class Instrument:
                 "Say no clearly, then you may add one warm observation.",
                 0.4,
             )
+
+        if reply and _META_INSTRUCTION_LEAK_RE.search(reply):
+            log.warning("instrument %r: meta-instruction leak — stripping", self.spec.name)
+            reply = _strip_meta_instruction_leak(reply)
 
         self.history.append((message, reply))
         return reply

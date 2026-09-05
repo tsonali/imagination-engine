@@ -95,6 +95,16 @@ and the result was READ honestly. Ship when everything is checked._
 4. Log everything in review-queue as FYI, not as questions.
 
 ## Status snapshot (update every beat)
+- **2026-09-05 (beat229, heartbeat):** All 5 ship-gate items above remain CLOSED. Cleared the full
+  9-log unread backlog via 4 background agents; 2 real fixes landed and live-smoke-tested
+  (instrument.py meta-instruction-leak strip — new defect class, first instance on the BYO
+  surface; companion.py confabulated-apology final re-check closing a regen-pipeline gap where a
+  downstream guard's regen could reintroduce a fabrication the earlier guard already cleared).
+  3 defects logged not fixed pending a 2nd sighting or design bandwidth (Secretary shorter×3
+  regression, Secretary UC4 numeric entity-swap, companion "promise" pronoun-inversion). AYF's
+  beat215 defect class confirmed still fixed; BYO UC4 3/4 beat228 defects confirmed fixed (still
+  short of clean). Gold(A) 6769→6778, gold(C)+4. Mini unreachable 95th+ consecutive beat. Full
+  detail in daily-log.md / review-queue.md beat229 entries.
 - **2026-09-05 (beat228, heartbeat):** All 5 ship-gate items above remain CLOSED; current work is
   continuous honest-read regression-catching, not new gate items. This section fell ~90 beats out
   of date (last entry here was beat134/beat153, 08-17/08-20) — HANDOFF.md and docs/daily-log.md

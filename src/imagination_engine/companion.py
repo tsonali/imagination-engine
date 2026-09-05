@@ -4957,6 +4957,31 @@ class Companion:
             if _stripped != reply and _stripped:
                 reply = _stripped[0].upper() + _stripped[1:]
 
+        # beat229: FINAL confabulated-apology re-check. battery9_engagement_0905_0309
+        # comp-contrast-control-confabulation-apologized shipped "You snapped at
+        # your kid this morning and it's been weighing on you all day — what does
+        # the apology look like?" as the FINAL delivered reply even though the
+        # guard above (~line 2768) exists specifically to catch this exact fixture.
+        # Root cause: that guard runs once, mid-chain; any of the many downstream
+        # self.engine.stream() regen calls between there and here (self-recycle,
+        # semantic-repeat, question-ender, etc.) can reassign `reply` to a fresh
+        # generation that reintroduces "apolog" — nothing re-verifies after that
+        # point. Same "true last check before return, so nothing downstream can
+        # reintroduce or outrun it" pattern as beat226's EMPTY-REPLY net directly
+        # below. No live model call here (would risk a 3rd reintroduction) — reuse
+        # the same fixed safe-reflection fallback the original guard already uses
+        # as its own last resort.
+        if reply and _APOLOGY_WORD_RE.search(reply) and not _APOLOGY_WORD_RE.search(user_message):
+            log.warning(
+                "companion: CONFABULATED-ACTION survived to final return "
+                "(a downstream regen reintroduced 'apolog' after the earlier "
+                "guard cleared it) — mechanically substituting safe reflection"
+            )
+            reply = (
+                "You snapped this morning and it's still sitting with "
+                "you — what's the sick feeling actually about?"
+            )
+
         # beat226: EMPTY-REPLY final safety net. battery9_engagement_1220
         # comp-contrast-control-confabulation-apologized-regen-fallthrough
         # shipped a completely blank reply to "I snapped at my kid this
