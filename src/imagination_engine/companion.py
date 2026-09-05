@@ -546,6 +546,17 @@ _FORBIDDEN = [
     # "what's it protecting/hiding/guarding" in companion context is always the therapy
     # reframe regardless of what follows. Pronoun form is equally forbidden.
     r"\bwhat(?:'s| is) it (?:protecting|guarding|covering|hiding)\b",
+    # therapy-reframe "WHAT DOES X PROTECT" bare-verb form (beat226):
+    # battery9_engagement_1220 comp-grief-anger-1word-echo produced "Anger is
+    # here. What does this anger protect?" — same forbidden reframe as beat96's
+    # "what's the anger protecting?" but using "what does...protect" (bare
+    # present-tense verb, "does"-construction) instead of "what's...protecting"
+    # (gerund). Neither the beat96 gerund pattern (line ~524) nor the beat128
+    # "does it feel like...protects" pattern (different subject position) cover
+    # this shape. Verified: matches "What does this anger protect?"/"What does
+    # the grief protect?"; 0 FP on "What does this decision protect against?"/
+    # "What do you protect at work?" (no feeling noun as the object of "does").
+    r"\bwhat does (?:this |that |your |the )?(?:anger|sadness|grief|anxiety|fear|shame|guilt|frustration|rage|hurt|pain)\s+protect\b",
     # therapy-reframe DOES-IT-FEEL-LIKE form (beat128): battery9-1624 comp-grief-anger-
     # barrier-pivot T1 produced "Angry is a word that breaks the grief script — does it
     # feel like anger protects you from something else?" — "protects" (plain present-tense
@@ -2891,8 +2902,18 @@ class Companion:
             # list. Verified: matches "That's a clear pattern.", still 0 FP on
             # "That's a clear answer to a hard question." (has real trailing
             # content past the bare noun, doesn't hit the end-anchor).
-            r"^(?:(?:that[’']?s|it[’']?s|this is)\s+(?:been\s+)?(?:(?:the|a|all|just|clear)\s+)*"
-            r"(?:whole\s+)?(?:thing|this|script|story|situation|picture|deal|pattern"
+            # beat226: adverb-absorption. battery9_engagement_1220 comp-vf-sister-
+            # memory produced "That's already a whole conversation in itself —
+            # what does it feel like to be the one who thinks this?" — "already"
+            # sits between "that's" and the quantifier ("a"), and the quantifier
+            # group only allowed the/a/all/just/clear directly after "been"?, so
+            # the whole match failed before "conversation" was even considered.
+            # Added (?:\w+\s+)? to absorb one optional adverb, mirroring the
+            # same technique used for the anger-protecting pattern (beat167).
+            # Also added "trap" to the noun list (comp-grief-anger-barrier-pivot
+            # T2: "That's the whole trap." — same hollow-stub shape, new noun).
+            r"^(?:(?:that[’']?s|it[’']?s|this is)\s+(?:been\s+)?(?:\w+\s+)?(?:(?:the|a|all|just|clear)\s+)*"
+            r"(?:whole\s+)?(?:thing|this|script|story|situation|picture|deal|pattern|trap"
             r"|conversation|world|topic|thread|sentence"
             r"|hour|day|week|month|year|decade|moment|while)"
             r"|(?:that|this)\s+breaks?\s+the\s+script)"
@@ -2906,7 +2927,12 @@ class Companion:
             # failed to match even though this is the exact same hollow-filler
             # shape the guard exists to catch — the tail is still ALL filler
             # (staying silent, not feeling accused), not new substance.
-            r"(?:\s+(?:in\s+itself|(?:of|for)\s+\w+(?:\s+\w+){0,9}))?"
+            # beat226: "to [verb-phrase]" trailing shape added alongside "of"/
+            # "for" — comp-discourse-marker-echo produced "That's a whole thing
+            # to be in your mind." ("to be in your mind" is the same hollow,
+            # unelaborated tail as "of staying quiet"/"for staying silent",
+            # just introduced by "to" instead).
+            r"(?:\s+(?:in\s+itself|(?:of|for|to)\s+\w+(?:\s+\w+){0,9}))?"
             # beat194: optional trailing tag-question ("... in itself, isn't it?")
             # — battery9_0827_0614's escape above also had a rhetorical tag
             # question tacked on after "in itself"; a vague filler noun doesn't
@@ -4915,6 +4941,32 @@ class Companion:
             )
             if _stripped != reply and _stripped:
                 reply = _stripped[0].upper() + _stripped[1:]
+
+        # beat226: EMPTY-REPLY final safety net. battery9_engagement_1220
+        # comp-contrast-control-confabulation-apologized-regen-fallthrough
+        # shipped a completely blank reply to "I snapped at my kid this
+        # morning over nothing and I've felt sick about it all day" — the
+        # worst possible outcome for an engagement test. Root cause: the
+        # echo-strip empty-reply regen (~line 2978) is a single attempt; if
+        # THAT regen also echo-strips to empty (or the raw generation itself
+        # returns empty/whitespace), every subsequent guard in this function
+        # is gated on `if reply and ...` and no-ops on a falsy string, so an
+        # empty reply silently survives all the way to return with no
+        # fallback at all. This is the true last resort (should be rare) —
+        # a generic, honest, non-inventive line: doesn't claim to know
+        # anything the user didn't say, doesn't open with the banned
+        # "I don't know" (line ~610), and ends declaratively (not a
+        # question), matching the project's question-ender reduction goal.
+        if not reply or not reply.strip():
+            log.warning(
+                "companion: EMPTY-REPLY — generation produced nothing after "
+                "all regen attempts, substituting mechanical safety net"
+            )
+            reply = (
+                "I don't want to answer that with a placeholder — say the "
+                "specific part that's loudest right now and I'll meet it "
+                "directly."
+            )
 
         self.history.append({"role": "user", "content": user_message})
         self.history.append({"role": "assistant", "content": reply})
