@@ -591,3 +591,32 @@ Forecast (not a deadline — gates still decide): beta ~Jul 18-19, public ~Jul 2
   say-plain-thing, wrong-costume playful-no-deflating-question). Mini unreachable (90th+ beat,
   same signature). All 3 fixes need live re-verification next beat with a free model slot.
   Sonali: push v1.0 tag when ready. Only Sonali-physical: notarization + F5 voice dial.
+- **2026-09-04 (beat224, heartbeat):** Found + fixed a ~33hr total QC dead zone (wedged
+  MTLCompilerService XPC processes since 09-03 01:41, invisible to qc_queue.sh's ghost-process
+  guards since those only target battery/mlx_lm process names) — killed the wedged processes,
+  verified real generation worked again, relaunched the queue. Also completed a peer session's
+  uncommitted instrument.py personhood-strip-fallback fix + synced dist. No gold growth or
+  use-case rotation this beat (full budget went to the outage). Detail in daily-log.md.
+- **2026-09-04 (beat225, heartbeat):** QC recovery confirmed complete — dead zone actually ran
+  ~2min past beat224's stated fix time (true end 10:31:43, confirmed via qc_queue's own runner-
+  restart timestamp; logs 1007-1029 were still crash noise, not real signal). First clean
+  battery11 run since 09-03 (37/37 mechanical PASS, 1031 log) honestly read via background agent:
+  **not an honest quality signal** — 4 of 9 scripts had real defects mechanical checks missed.
+  Found and fixed a genuinely new bug class: 2 "Scenario" entries in scenario_bank.py
+  (`imag-embodiment-eagle-counterpart-you-two`, `imag-intimacy-finds-your-across`) were added in
+  beat221 as changelog/note entries but used the live Scenario() constructor with `always=True`
+  and no `turns=`, so they silently ran every battery11 cycle since with an empty intake —
+  producing garbage output (one generated a fully off-scenario MRI/traffic scene with a
+  first-person narrator leak) under zero postcheck coverage. Fixed: gave both real turns matching
+  their target scenario, added the eagle one to battery11's eagle-postcheck tuple. 5 more literal
+  postcheck.py fixes from the same honest read (new your/yours pronoun-corruption surface forms:
+  "beside your it's", "near your once more", "leaves your for", "her meet across from yours",
+  "both of your were"; 2 new eagle anon-companion escapes: "sender and receiver", "not entirely
+  alone") — all verified via unit test against exact defect quotes + FP guards, no model launch
+  (battery9_engagement held the one safe slot all beat). Gold(A)=6751 (+5: green woodturning,
+  clinker boat-plank riveting, true fresco giornata, stone lithography, checkering a walnut rifle
+  stock). Gold(C)+4 (c_gold_beat225.json: miscarriage-confidence-leaked anger-received, mother's-
+  guilt-calls redirect-drops-therapy-frame, prenup-cliff say-plain-thing, stolen-rotisserie-chicken
+  playful-no-deflating-question). Mini unreachable (91st+ beat, same DNS signature). Battery9
+  still in flight at close (~2h20min, within normal 2.2-3.2hr range, not stalled). Sonali: push
+  v1.0 tag when ready. Only Sonali-physical: notarization + F5 voice dial.

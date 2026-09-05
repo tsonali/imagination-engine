@@ -1265,6 +1265,15 @@ _INTIMACY_OBJECT_PRONOUN_SUBS = (
     # your") since "finds your finger"/"finds your place" are legitimate
     # attributive uses already present in A_gold.jsonl.
     (re.compile(r"\bfinds\s+your\s+across\b", re.IGNORECASE), "finds yours across"),
+    # beat225 (queue_0904_1031_battery11_imagination_bank.log): "Her hand leaves
+    # your for only an instant" — same verb-governed family as the "leaves your
+    # long enough" entry above, new trailing phrase "for only an instant".
+    (re.compile(r"\bleaves\s+your\s+for\s+only\s+an\s+instant\b", re.IGNORECASE), "leaves yours for only an instant"),
+    # beat225: "They land exactly where her meet across from yours" — subject-
+    # case + missing-verb corruption ("her meet" for "her hand meets"), not the
+    # possessive-vs-standalone shape the rest of this list targets. Literal
+    # phrase fix, scoped to the exact defect string.
+    (re.compile(r"\bwhere\s+her\s+meet\s+across\s+from\s+yours\b", re.IGNORECASE), "where her hand meets yours"),
     (re.compile(r"\byour\s+stands\s+still\s+holding\s+onto\b", re.IGNORECASE), "you stand still holding onto"),
     (
         re.compile(
@@ -1396,7 +1405,15 @@ _YOUR_NONNOUN_FOLLOW = (
     # "falls on hers and your differently" — "differently" is an adverb (never
     # a possessed noun), same class as "entirely"/"completely"/"exactly"/"slowly"
     # already in this list, just missing.
-    r"without|differently)\b))"
+    r"without|differently|"
+    # beat225 (queue_0904_1031_battery11_imagination_bank.log, first clean read
+    # after the 33hr MTLCompilerService dead zone): "beside your it's not hard
+    # to notice" (imag-intimacy) — "it's" opens a new clause the same way
+    # "that"/"where" already do, missing from this set. "near your once more"
+    # (same script) — "once" is a temporal adverb, same class as "again"/
+    # "still"/"now" already listed, missing. 0 FP hits in A_gold.jsonl for
+    # "your it"/"your once" confirmed before adding.
+    r"it's|once)\b))"
 )
 
 # beat214: coordination shape "hers and your" where "your" stands alone (matches
@@ -1446,6 +1463,16 @@ _OF_YOUR_STANDALONE_RE = re.compile(
     r"\bof\s+your\b" + _YOUR_NONNOUN_FOLLOW,
     re.IGNORECASE,
 )
+
+# beat225 (queue_0904_1031_battery11_imagination_bank.log, imag-embodiment-eagle):
+# "first call you'd heard earlier when both of your were farther apart" — "of
+# your" immediately before a copula ("were"/"are"/"was"/"is") is SUBJECT case
+# ("of you were"), not the possessive-standalone case _OF_YOUR_STANDALONE_RE
+# handles ("of yours") — that rule would wrongly produce "of yours were" here.
+# Checked before the standalone rule below since its follow-word list doesn't
+# include these copulas (no overlap today), but scoped as its own rule so it
+# stays correct if that list ever grows.
+_OF_YOUR_SUBJECT_CASE_RE = re.compile(r"\bof\s+your\s+(were|are|was|is)\b", re.IGNORECASE)
 
 # (2) "your" as a BARE SUBJECT immediately before a finite verb ("your sits",
 #     "your stands", "your remains") -> "you" + de-conjugated verb. Curated verb
@@ -1504,6 +1531,8 @@ def fix_intimacy_object_pronoun_escapes(text: str) -> tuple[str, int]:
         fixed += n
 
     text, n = _YOUR_PREP_OBJECT_RE.subn(lambda m: f"{m.group(1)} you", text)
+    fixed += n
+    text, n = _OF_YOUR_SUBJECT_CASE_RE.subn(lambda m: f"of you {m.group(1)}", text)
     fixed += n
     text, n = _OF_YOUR_STANDALONE_RE.subn("of yours", text)
     fixed += n
@@ -2146,7 +2175,19 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     # A_gold.jsonl (non-eagle relationship scenes) — 0 hits for both scoped
     # phrases confirmed before adding.
     r'|\byour\s+counterpart\b'           # "you and your counterpart currently coming off"
-    r'|\bseparating\s+you\s+two\b',      # "the ridgeline separating you two right now"
+    r'|\bseparating\s+you\s+two\b'       # "the ridgeline separating you two right now"
+    # beat225 (queue_0904_1031_battery11_imagination_bank.log, first clean read
+    # after the 33hr MTLCompilerService dead zone): imag-embodiment-eagle —
+    # "without obstruction between sender and receiver" implies a reciprocal
+    # acoustic exchange between two distinct eagles (an echo "arriving back"
+    # from a "receiver") without naming a species or using a pronoun. 0 hits
+    # in A_gold.jsonl confirmed before adding.
+    r'|\bsender\s+and\s+receiver\b'
+    # imag-eagle-wildlife-plural, same run: "The sight is not entirely alone;
+    # birds are seen in numbers but never truly flown close without reason." —
+    # implies unnamed companionship distinct from the background-wildlife
+    # observation the scenario is meant to allow. 0 hits in A_gold.jsonl.
+    r'|\bnot\s+entirely\s+alone\b',
     re.IGNORECASE,
 )
 

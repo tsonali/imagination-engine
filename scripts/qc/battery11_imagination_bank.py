@@ -89,7 +89,14 @@ for sc in scenarios:
         if sc.id in ("imag-embodiment-eagle", "imag-eagle-wildlife-plural",
                       "imag-eagle-back-leak-chair-whatever", "imag-eagle-crow-agency",
                       "imag-eagle-osprey-wildlife", "imag-eagle-golden-eagle-wildlife",
-                      "imag-eagle-companion-bird-he") and first:
+                      "imag-eagle-companion-bird-he",
+                      # beat225: this regression scenario (added beat221) had
+                      # zero postcheck coverage — it wasn't in this tuple, and
+                      # was separately found running with an empty intake
+                      # (fixed in scenario_bank.py). Now that it has a real
+                      # eagle intake, it needs the same eagle postchecks as
+                      # the base scenario it protects.
+                      "imag-embodiment-eagle-counterpart-you-two") and first:
             # Check for hallucinated companion animals (user only said 'eagle')
             lower = first.lower()
             # Named companion wildlife — automatic failure if present as characters

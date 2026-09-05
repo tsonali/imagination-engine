@@ -5052,6 +5052,22 @@ BANK: list[Scenario] = [
     ),
     Scenario("imag-embodiment-eagle-counterpart-you-two", "imagination", "hallucination", "high",
         always=True,
+        # beat225 (queue_0904_1031_battery11_imagination_bank.log): this
+        # Scenario was added in beat221 as a regression-note entry but never
+        # given `turns=` — it silently ran every battery11 cycle since with
+        # Scenario's `turns: list = field(default_factory=list)` default
+        # (empty list), so battery11's `for msg in sc.turns:` loop sent it
+        # NO intake at all. The engine generated a completely unrelated
+        # MRI/traffic scene with a first-person narrator leak ("They will be
+        # here soon to take me away for this MRI — I'm alone now") under
+        # this scenario's banner, undetected because it also wasn't in
+        # battery11_imagination_bank.py's eagle-postcheck scenario tuple.
+        # Fixed by giving it the same eagle intake as imag-embodiment-eagle
+        # (the base scenario whose fix this regression test exists to
+        # protect) and adding it to that tuple (see battery11_imagination_bank.py).
+        turns=["I want to be an eagle soaring over mountains",
+               "Rocky Mountains, golden aspens, autumn",
+               "begin"],
         note=("DEFECT (beat221, queue_0902_1618_battery11_imagination_bank.log, background-agent "
               "honest read): imag-embodiment-eagle asserted a second eagle with independent "
               "agency via 'the ridge line separating you and your counterpart currently coming "
@@ -5070,6 +5086,14 @@ BANK: list[Scenario] = [
     ),
     Scenario("imag-intimacy-finds-your-across", "imagination", "grammar", "medium",
         always=True,
+        # beat225: same missing-`turns=` bug as imag-embodiment-eagle-
+        # counterpart-you-two above (see that entry's comment) — this
+        # regression scenario ran with an empty intake every battery11 cycle
+        # since beat221. Fixed by giving it the same intake as imag-intimacy
+        # (the base scenario this regression test protects).
+        turns=["I want to imagine a slow evening with my wife like before the kids — the apartment in Lisbon, the heat, her laugh",
+               "the tiles cool under bare feet, the fan turning, no clock anywhere",
+               "I'm ready"],
         note=("DEFECT (beat221, queue_0902_1618_battery11_imagination_bank.log, background-agent "
               "honest read): imag-intimacy produced 'Her hand finds your across one of those "
               "cold tiles.' — same beat187/198/218 verb-governed 'your'-standing-in-for-'yours' "
