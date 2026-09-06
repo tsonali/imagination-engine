@@ -568,7 +568,14 @@ def check_return_to_room_closing(text: str, tail_words: int = 150) -> bool:
         r"\breturn(?:ing)?\s+to\s+(?:the\s+)?room\b|"
         r"\bcome\s+back\s+to\s+(?:the\s+)?room\b|"
         r"\bwhen\s+you'?re?\s+ready\s+to\s+open\b|"
-        r"\bbring(?:ing)?\s+yourself\s+back\b",
+        r"\bbring(?:ing)?\s+yourself\s+back\b|"
+        # beat234 (queue_0905_2326_battery11_imagination_bank.log honest read):
+        # false FAIL on a genuinely clean closing — "Invite your eyes to open
+        # whenever they feel ready" — "eyes ... open" reversed word order with
+        # "to" between them, which neither existing eyes/open pattern covers
+        # (one requires "open your eyes", the other requires eyes immediately
+        # before open with no "to"). 0 hits risk-checked in A_gold.jsonl.
+        r"\beyes\s+to\s+open\b",
         tail, re.I))
 
 
@@ -616,7 +623,7 @@ _NARRATOR_POSS = re.compile(
     r"|\bI\s*'\s*m\s+\w+ing\b"          # "I'm [verb]ing" mid-script
     r"|\bI\s*'\s*ve\s+\w+\b"            # "I've [past]" mid-script
     r"|\bby\s+my\s+side\b"              # "by my side" narrator possessive
-    r"|\bfor\s+me\s+(?:just|here|now|there|too)\b"  # "for me just watching"
+    r"|\bfor\s+me\s+(?:just|here|now|there|too|but)\b"  # "for me just watching"
     r"|\bunder\s+me\b"                  # should be "under you"
     r"|\bthrough\s+me\b"               # should be "through you"
     r"|\bwith\s+me\b"                  # should be "with you"
@@ -631,7 +638,7 @@ _NARRATOR_POSS = re.compile(
     # "like we’re arriving") — plain \bwe\s+are\b was not in the verb list; "we’re" contraction
     # form had no pattern at all. Found in 09:26 eagle-wildlife-plural honest read.
     r"|\bwe[\x27’’]re\b|\bwe\s+are\b"  # "we’re" (ASCII \x27 + curly) and "we are"
-    r"|\bmy\s+(?:hand|hands|breath|side|step|voice|foot)\b"   # narrator body-part possessives
+    r"|\bmy\s+(?:hand|hands|breath|side|step|voice|foot|body|mind)\b"   # narrator body-part possessives
     # beat171 (2026-08-23): narrator "me" preposition gaps — "beneath me"/"below me" not caught.
     # Line 433-435 already has "under me"/"through me"/"with me". Extending to full spatial set.
     # Found in imag-eagle-companion-bird-he 09:26 honest read ("far beneath me", "mountains below me").
@@ -794,7 +801,19 @@ _NARRATOR_POSS = re.compile(
     # before adding.
     r"|\bdriving\s+us\b"
     r"|\bours\s+to\s+go\b"
-    r"|\bare\s+our\s+too\b",
+    r"|\bare\s+our\s+too\b"
+    # beat234 (queue_0905_2326_battery11_imagination_bank.log honest read,
+    # imag-eagle-wildlife-plural — a FALSE PASS, all 8 mechanical checks green):
+    # "This is where I would rest if it were necessary for me but as flight has
+    # become my body and mind that stay unburdened of any such thing." — a full
+    # first-person narrator claim, more severe than the usual pronoun-slip shape
+    # (this is the narrator asserting it HAS a body it would rest). "I would
+    # rest" scoped to the literal verb rather than a blanket "I would X" ban:
+    # A_gold.jsonl has one ambiguous "I would imagine" hit that looks like a
+    # legacy corpus artifact (bracketed timestamp prefix), not clearly safe to
+    # generalize from. "my body"/"my mind" (0 hits) and "for me but" (0 hits)
+    # fixed separately in the existing my-body-part and for-me lists above.
+    r"|\bI\s+would\s+rest\b",
     re.IGNORECASE,
 )
 

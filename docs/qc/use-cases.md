@@ -664,3 +664,15 @@ Battery9 read served as the companion rotation for this beat (12 scenarios, 29 r
 - Vital Facts: SC15 live-verified PASS — 15/15, the multi-beat top priority is closed
 
 **Rotation next beat:** design pass on Secretary's $-vs-% cross-unit mislabel; cycling-detector redesign (stricter shape) for the imag-intimacy floor; continue clearing the day's newest logs (battery3b_1430/product_e2e_1433 already read clean this beat).
+
+### 2026-09-06 (beat234) — backlog-clearing beat (battery11 + battery9 honest reads), not a fresh single-product rotation
+
+**Imagination (battery11):** Confirmed a second live instance of the standing "worst defect, zero coverage" first-person-narrator-embodiment leak (`imag-eagle-wildlife-plural`, all 8 mechanical checks green) — extended the narrator-possessive postcheck filter. Also fixed a false-FAIL in the return-to-room closing check (reversed "eyes to open" word order). imag-intimacy's zero-dedicated-postcheck-coverage gap confirmed still the largest standing architectural item (37+ pronoun fixes needed in one script this read).
+
+**Secretary:** Closed the $-vs-% cross-unit mislabel design gap open since beat231 ("Churn rate $380K") via a new label→expected-unit schema check in `utility.py`.
+
+**Companion (battery9):** Root-caused and fixed the beat's most product-critical finding — a `comp-past-query` "Yes" answer with no seeding, traced to a QC-harness memory-isolation gap (cross-process bleed via `CompanionMemory.recent()`'s unscoped fetch, live given 5 concurrent Claude Code sessions sharing the DB this beat) rather than a genuine confabulation. Also found (not fixed): a real battery-level canned-answer pattern (3 grief-anger-barrier scenarios converging on near-identical "carrying it alone" phrasing, invisible to any per-conversation guard — needs a new cross-scenario diversity check); a therapy-frame relapse surviving the personhood guard; a hollow topic-mirror echo new surface form; a hardcoded fallback bridge firing live after 2 regen failures.
+
+**AYF, BYO:** Not touched this beat.
+
+**Rotation next beat:** BYO is now the most overdue for a fresh deep-test rotation (last real run referenced beat167/228/229). The battery-level cross-scenario diversity check (Companion) and imag-intimacy's grammar postcheck gap (Imagination) are the two biggest open design items across all five tools.

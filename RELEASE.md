@@ -95,6 +95,50 @@ and the result was READ honestly. Ship when everything is checked._
 4. Log everything in review-queue as FYI, not as questions.
 
 ## Status snapshot (update every beat)
+- **2026-09-06 (beat234, heartbeat):** All 5 ship-gate items above remain CLOSED. Memory read
+  0.4-2.3% free across two checks this beat (well below the 35% launch floor); `ps aux` showed
+  5 concurrent Claude Code sessions on this machine (this one + 4 `ListAgents` peers) — the
+  pressure looks driven by session count, not stacked model processes; only one battery
+  (`battery9_engagement.py`, PID 33529) was in flight, no local model launch attempted. Cleared
+  the 2-log unread backlog (`queue_0905_2326_battery11_imagination_bank.log` 9 scenarios,
+  `queue_0906_0120_battery9_engagement.log` 22 scenarios, the latter still being actively written
+  during the read) via 2 background agents doing full honest transcript reads. **Landed 3 real
+  fixes:** (1) Root-caused and closed the beat's most product-critical finding —
+  `comp-past-query`'s no-past-context case answered "Yes — we've been circling a decision about
+  leaving your job..." with no seeding. Not a from-nothing confabulation: `battery9_engagement.py`
+  only purged `b9-*` session rows between scenarios, but `CompanionMemory.recent()` fetches ALL
+  summaries with no session scoping — with 5 concurrent Claude Code processes sharing
+  `data/companion.sqlite`, a peer session's own companion test content (matching this project's
+  own canonical "tech job/startup" seed data) could bleed in. Fixed by calling the existing
+  `_wipe_all_sessions()` before every scenario instead of the narrower per-scenario purge — a
+  QC-harness isolation fix, not a production honesty bug (production's un-scoped `.recent()` is
+  intentional single-user aggregation). (2) Closed the Secretary $-vs-% cross-unit mislabel
+  design gap open since beat231 ("Churn rate $380K" — a dollar figure bound to a label that's
+  always a percentage): new `_LABEL_UNIT_SCHEMA` + `_unit_schema_violations()` in `utility.py`,
+  verified against the exact beat231 fixture with 0 false positives. (3) 2 postcheck.py fixes:
+  a confirmed second instance of the standing uncovered first-person-narrator-embodiment leak
+  ("This is where I would rest... as flight has become my body and mind") extended into the
+  existing narrator-possessive filter; a false-FAIL in `check_return_to_room_closing()` fixed
+  (reversed word order "eyes to open" wasn't covered). All fixes verified via py_compile + unit
+  tests against real fixtures + full A_gold.jsonl FP sweeps + `scripts/test_postcheck.py` (ALL
+  PASS), synced to all dist copies, `dist/hearth-0.2.zip` rebuilt and MD5-verified byte-for-byte.
+  **Logged, not fixed:** imag-intimacy's zero-dedicated-postcheck-coverage gap (37+ pronoun fixes
+  needed in one script this log alone) remains the single largest standing architectural item;
+  the eagle anonymous-companion filter had 2 more fresh whack-a-mole escapes (~15+ patches deep);
+  a real battery-level pattern found in battery9 (3 different grief-anger-barrier scenarios
+  converging on near-identical "carrying it alone" phrasing — invisible to any per-conversation
+  guard) partially addressed via a targeted gold exemplar but the missing check-scope itself is
+  still open; a therapy-frame relapse, a hollow topic-mirror echo new surface form, and a
+  hardcoded fallback bridge firing live after 2 regen failures all logged for a future beat.
+  Gold(A) 6802→6807 (+5: straight-razor hone-and-strop, cast-iron first-seasoning-layer, bonsai
+  root-pruning, diamond prong-setting, typewriter type-bar clean+ribbon-rethread — all confirmed
+  0 prior corpus hits). Gold(C)+3 (`c_gold_beat234.json`: discourse-marker no-thread-echo,
+  para-love no-therapy-frame, grief-anger specific-vet-error — the third targets this beat's own
+  cross-scenario canned-answer finding). Mini still unreachable (ssh + ping both failed), 100+
+  consecutive beat, not re-diagnosed per standing guidance. `battery9_engagement.py` PID 33529
+  had accumulated only ~1 minute of CPU over 2+ hours wall-clock at beat close — flagged as a
+  possible stall, worth checking next beat. Full detail in daily-log.md / review-queue.md beat234
+  entries.
 - **2026-09-05 (beat233, heartbeat):** All 5 ship-gate items above remain CLOSED. Memory 18-22%
   free all beat (below the 35% launch floor throughout), `battery12_vital_facts` (PID 18740) then
   `qc_queue.sh`'s next batteries held the one in-flight model slot the whole time — no local model

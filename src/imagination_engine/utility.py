@@ -450,6 +450,53 @@ def _label_binding_violations(bindings: list[tuple[str, str]], out: str) -> list
     return violations
 
 
+_LABEL_UNIT_SCHEMA = {
+    '%': ('churn', 'margin', 'attrition', 'retention', 'concentration', 'percentage'),
+    '$': ('burn', 'revenue', 'budget', 'investment', 'partnership', 'arr', 'mrr', 'upside'),
+}
+
+
+_NUM_RE = re.compile(r'\$[\d,]+(?:\.\d+)?[A-Za-z]*|\d[\d,]*(?:\.\d+)?%')
+
+
+def _unit_schema_violations(text: str, out: str) -> list[tuple[str, str, str]]:
+    """Return (keyword, correct_number, wrongly_bound_number) where a metric with an
+    intrinsic unit (e.g. 'churn' is always a percentage, 'burn' is always a dollar
+    figure) got attached in the output to a number of the WRONG unit — catches
+    cross-unit mislabeling that _label_binding_violations' same-suffix grouping
+    can't see (beat231: 'Churn rate $380K' in output — the burn-rate dollar figure
+    bled onto the churn label; the same-suffix swap check misses this since $380K
+    and 3.2% don't share a suffix to group on). The "correct" number is whichever
+    number of the metric's own expected unit sits nearest to it in the SOURCE text."""
+    violations = []
+    for expected, keywords in _LABEL_UNIT_SCHEMA.items():
+        for kw in keywords:
+            m = re.search(r'\b' + re.escape(kw), text, re.IGNORECASE)
+            if not m:
+                continue
+            window = text[max(0, m.start() - 10):m.end() + 40]
+            right_unit = [n for n in _NUM_RE.findall(window)
+                          if n.endswith('%') == (expected == '%')]
+            if not right_unit:
+                continue
+            correct_num = right_unit[0]
+            om = re.search(r'\b' + re.escape(kw), out, re.IGNORECASE)
+            if not om:
+                continue
+            win_start, win_end = max(0, om.start() - 40), om.end() + 40
+            owindow = out[win_start:win_end]
+            cands = [(owindow.find(c), c) for c in _NUM_RE.findall(owindow)]
+            if not cands:
+                continue
+            _, best = min(cands, key=lambda ic: abs((win_start + ic[0]) - om.end()))
+            if best == correct_num:
+                continue
+            bound_unit = '%' if best.endswith('%') else ('$' if best.startswith('$') else None)
+            if bound_unit and bound_unit != expected:
+                violations.append((kw, correct_num, best))
+    return violations
+
+
 def _b_summarize(text, instruction, tone, style):
     system = _BASE
     nums = _extract_numbers(text)
@@ -687,7 +734,8 @@ class Assistant:
             for attempt in range(3):
                 missing = [n for n in nums if not _num_present(n, out)]
                 swaps = _label_binding_violations(bindings, out)
-                if not missing and not swaps:
+                unit_swaps = _unit_schema_violations(text, out)
+                if not missing and not swaps and not unit_swaps:
                     break
                 task_obj = TASKS[task_key]
                 system, user = task_obj.build(
@@ -770,6 +818,16 @@ class Assistant:
                         f"\n\nNUMBER-LABEL SWAP: two figures of the same type got attached to"
                         f" the wrong labels — {swap_detail}. Both numbers must stay verbatim,"
                         " but each must stay bound to ITS OWN label, not its sibling's."
+                    )
+                if unit_swaps:
+                    unit_detail = "; ".join(
+                        f"'{label}' is ALWAYS {correct} — you wrote {wrong} instead, which"
+                        f" belongs to a different metric"
+                        for label, correct, wrong in unit_swaps
+                    )
+                    extra_parts.append(
+                        f"\n\nWRONG-UNIT LABEL: {unit_detail}. Do not attach a figure of the"
+                        " wrong unit type to a label that only ever takes one unit."
                     )
                 extra = "".join(extra_parts)
                 temp = 0.25 if attempt >= 2 else (0.35 if attempt == 1 else 0.4)

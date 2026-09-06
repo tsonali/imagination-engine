@@ -74,9 +74,16 @@ print(f"running {len(scenarios)} companion scenarios: {[x.id for x in scenarios]
 _wipe_all_sessions()   # clear ALL sessions (including companion_deep_test artifacts)
 _clear_b9_sessions()  # belt+suspenders: also clear b9-* slice
 for sc in scenarios:
-    # Purge b9 sessions + evict cached companion instance before each scenario.
-    # Prevents cross-scenario contamination via CompanionMemory.recent().
-    _clear_b9_sessions()
+    # Full wipe + evict cached companion instance before each scenario. A b9-only
+    # purge isn't enough: CompanionMemory.recent() fetches ALL summaries with no
+    # session filtering, so a row written by a concurrently-running peer process
+    # (e.g. another heartbeat session's companion_deep_test hitting the same
+    # data/companion.sqlite) survives a b9-scoped delete and can leak into this
+    # scenario's self._past — confirmed beat234: comp-past-query (run with no
+    # turns of its own preceding the probe) answered "Yes — we've been circling
+    # a decision about leaving your job..." sourced from exactly this kind of
+    # bleed. Full wipe before every scenario closes that gap regardless of source.
+    _wipe_all_sessions()
     s._companions.pop(f"b9-{sc.id}", None)
     hdr(f"{sc.id} [{sc.dim}/{sc.stakes}]" + (f" — {sc.note}" if sc.note else ""))
     for msg in sc.turns:
