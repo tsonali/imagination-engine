@@ -1278,6 +1278,11 @@ _VENT_HOLLOW_SECOND_RE: re.Pattern = re.compile(
         It\s+sounds\s+like\b |
         That\s+feels\s+like\b |
         It\s+feels\s+like\b |
+        What\s+does\s+it\s+feel\s+like\s+to\b |
+        What\s+does\s+it\s+feel\s+like\s+when\b |
+        # ^ beat235: question-form excavation ("what does it feel like to have
+        # your effort go unseen?") — same therapy-frame excavation as the
+        # declarative "It feels like X", just interrogative; battery9 UC3.
         That\s+(had|has)\s+to\b |
         It\s+(had|has)\s+to\b |
         That'?\W?s\s+more\s+than(\s+just)?\b |
@@ -1296,6 +1301,8 @@ _VENT_HOLLOW_EMDASH_RE: re.Pattern = re.compile(
     r'[Ii]t\s+sounds\s+like\b|'
     r'[Tt]hat\s+feels\s+like\b|'
     r'[Ii]t\s+feels\s+like\b|'
+    r'[Ww]hat\s+does\s+it\s+feel\s+like\s+to\b|'
+    r'[Ww]hat\s+does\s+it\s+feel\s+like\s+when\b|'
     r'[Tt]hat\'?\W?s\s+more\s+than(?:\s+just)?\b|'
     r'[Tt]hat\s+makes\s+the\s+whole\b|'
     r'[Ii]\s+can\s+only\s+imagine\b'

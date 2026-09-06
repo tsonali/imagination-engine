@@ -467,7 +467,14 @@ def _unit_schema_violations(text: str, out: str) -> list[tuple[str, str, str]]:
     can't see (beat231: 'Churn rate $380K' in output — the burn-rate dollar figure
     bled onto the churn label; the same-suffix swap check misses this since $380K
     and 3.2% don't share a suffix to group on). The "correct" number is whichever
-    number of the metric's own expected unit sits nearest to it in the SOURCE text."""
+    number of the metric's own expected unit sits nearest to it in the SOURCE text.
+
+    beat235: must check EVERY occurrence of the keyword in `out`, not just the
+    first — a real regression escaped beat231's fix because the BOTTOM LINE
+    correctly bound 'churn' to 3.2% (first occurrence, checked out clean) while a
+    LATER bullet point re-mentioned 'Churn rate' and bound it to the wrong $380K
+    burn figure; re.search's first-match-only stopped at the clean occurrence and
+    never inspected the broken one."""
     violations = []
     for expected, keywords in _LABEL_UNIT_SCHEMA.items():
         for kw in keywords:
@@ -480,20 +487,43 @@ def _unit_schema_violations(text: str, out: str) -> list[tuple[str, str, str]]:
             if not right_unit:
                 continue
             correct_num = right_unit[0]
-            om = re.search(r'\b' + re.escape(kw), out, re.IGNORECASE)
-            if not om:
-                continue
-            win_start, win_end = max(0, om.start() - 40), om.end() + 40
-            owindow = out[win_start:win_end]
-            cands = [(owindow.find(c), c) for c in _NUM_RE.findall(owindow)]
-            if not cands:
-                continue
-            _, best = min(cands, key=lambda ic: abs((win_start + ic[0]) - om.end()))
-            if best == correct_num:
-                continue
-            bound_unit = '%' if best.endswith('%') else ('$' if best.startswith('$') else None)
-            if bound_unit and bound_unit != expected:
-                violations.append((kw, correct_num, best))
+            for om in re.finditer(r'\b' + re.escape(kw), out, re.IGNORECASE):
+                win_start, win_end = max(0, om.start() - 40), om.end() + 40
+                owindow = out[win_start:win_end]
+                cands = [(owindow.find(c), c) for c in _NUM_RE.findall(owindow)]
+                if not cands:
+                    continue
+                _, best = min(cands, key=lambda ic: abs((win_start + ic[0]) - om.end()))
+                if best == correct_num:
+                    continue
+                bound_unit = '%' if best.endswith('%') else ('$' if best.startswith('$') else None)
+                if bound_unit and bound_unit != expected:
+                    violations.append((kw, correct_num, best))
+    return violations
+
+
+_MONTH_DAY_RE = re.compile(
+    r'\b((?:January|February|March|April|May|June|July|August|September|'
+    r'October|November|December)\s+\d{1,2})\b'
+)
+
+
+def _same_day_contradiction(out: str) -> list[tuple[str, str]]:
+    """Return (date_a, date_b) pairs where the output claims two actions happen
+    'the same day' but names two DIFFERENT dates for them in the same sentence —
+    a fabricated temporal link the source never stated. beat235 (UC1 meeting
+    minutes): source gave two separate action items ('Camille sends design
+    assets by March 18' / 'Priya reviews mockups by March 20'); the model
+    merged them into one sentence — 'Camille sends design assets by March 18,
+    then reviews with Priya on the same day (March 20)' — inventing a same-day
+    relationship the source explicitly contradicts."""
+    violations = []
+    for sent in re.split(r'(?<=[.!?])\s+', out):
+        if 'same day' not in sent.lower():
+            continue
+        dates = list(dict.fromkeys(_MONTH_DAY_RE.findall(sent)))
+        if len(dates) >= 2:
+            violations.append((dates[0], dates[-1]))
     return violations
 
 
@@ -735,7 +765,8 @@ class Assistant:
                 missing = [n for n in nums if not _num_present(n, out)]
                 swaps = _label_binding_violations(bindings, out)
                 unit_swaps = _unit_schema_violations(text, out)
-                if not missing and not swaps and not unit_swaps:
+                same_day = _same_day_contradiction(out)
+                if not missing and not swaps and not unit_swaps and not same_day:
                     break
                 task_obj = TASKS[task_key]
                 system, user = task_obj.build(
@@ -828,6 +859,18 @@ class Assistant:
                     extra_parts.append(
                         f"\n\nWRONG-UNIT LABEL: {unit_detail}. Do not attach a figure of the"
                         " wrong unit type to a label that only ever takes one unit."
+                    )
+                if same_day:
+                    same_day_detail = "; ".join(
+                        f"you wrote 'the same day' but named both {a} and {b} in the"
+                        f" same sentence — they are NOT the same day"
+                        for a, b in same_day
+                    )
+                    extra_parts.append(
+                        f"\n\nFABRICATED SAME-DAY LINK: {same_day_detail}. Do not merge two"
+                        " separate action items into one sentence with an invented 'same day'"
+                        " connector — keep each action's own date and state them as separate"
+                        " items unless the source explicitly says they happen on the same day."
                     )
                 extra = "".join(extra_parts)
                 temp = 0.25 if attempt >= 2 else (0.35 if attempt == 1 else 0.4)

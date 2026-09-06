@@ -95,6 +95,38 @@ and the result was READ honestly. Ship when everything is checked._
 4. Log everything in review-queue as FYI, not as questions.
 
 ## Status snapshot (update every beat)
+- **2026-09-06 (beat235, heartbeat, sonali-6a):** All 5 ship-gate items above remain CLOSED.
+  1 peer session on arrival (unrelated project) — no broadcast needed. Memory 81% free early
+  (queue between batteries), dropped to 20% once `battery11_imagination_bank` launched later
+  in the beat; no local model launch attempted either time. Resolved beat234's flagged possible
+  stall (`battery9_engagement.py` PID 33529) — it completed normally at 03:38:23, not a stall.
+  Cleared the full 8-log unread backlog via 3 parallel background agents doing full honest
+  reads. **5 real fixes, all verified via pure unit tests + FP guards, no model launch:**
+  (1) Secretary's `_unit_schema_violations` was checking only the FIRST occurrence of a metric
+  keyword via `re.search` — a live 1-beat regression let "Churn rate $380K" through again
+  because an earlier, correct "churn" mention shadowed the broken later one; switched to
+  `re.finditer` to check every occurrence. (2) New `_same_day_contradiction()` in `utility.py`
+  catches a fabricated "same day" link between two source-distinct dates merged into one
+  invented sentence (UC1 meeting minutes: "sends assets by March 18... on the same day
+  (March 20)"). (3) AYF citation-completeness bug root-caused: the score-cutoff citation list
+  can omit a retrieved file the answer actually drew from (contacts.txt held the email/phone
+  used in the answer but never made the cited-sources list); refactored into `_recompute_sources()`
+  in `doc_qa.py`, recomputing citations from ALL retrieved hits by keyword overlap — both drops
+  (beat211's case) and adds back (this beat's case) in one pass. (4) Companion's therapy-frame
+  excavation strip now also catches the question-form "What does it feel like to/when X" (only
+  the declarative "It feels like X" was covered before) — closes a gap the system prompt already
+  explicitly bans. (5) `battery10_registers.py`'s `sec-condolence-close` commitment check
+  tightened to require a first-person subject, closing a bare-substring gap ("this is not going
+  anywhere" was wrongly passing). **Investigated and CLEARED one false alarm:** a "just answer,
+  don't reflect it back" reply that looked like an ignored user instruction is actually the
+  companion's own documented designed behavior (`WHEN THEY DEMAND A DECISION`) — not fixed,
+  logged so it isn't blind-patched later. All 3 changed files synced to all 4 dist copies,
+  `dist/hearth-0.2.zip` rebuilt and MD5-verified byte-for-byte. Gold(A) 6807→6812 (+5: murrine
+  paperweight, cheddaring curds, willow basket weave, green-wood spoon carving, goldwork
+  couching). Gold(C)+4 (`c_gold_beat235.json`, one exemplar per standing defect family). Mini
+  unreachable (100+ consecutive beat, same signature). Full detail in daily-log.md /
+  review-queue.md beat235 entries. Sonali: push v1.0 tag when ready. Only Sonali-physical:
+  notarization + F5 voice dial + Mac Mini check.
 - **2026-09-06 (beat234, heartbeat):** All 5 ship-gate items above remain CLOSED. Memory read
   0.4-2.3% free across two checks this beat (well below the 35% launch floor); `ps aux` showed
   5 concurrent Claude Code sessions on this machine (this one + 4 `ListAgents` peers) — the

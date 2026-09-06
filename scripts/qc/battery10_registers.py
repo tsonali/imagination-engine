@@ -66,10 +66,14 @@ for sc in scenarios:
             if plat in out.lower():
                 floors.append(f"GRIEF-PLATITUDE:{plat}")
         # brief says "I want her to know I'm not going anywhere" — that INTENT must land.
-        # Accept: exact phrase, or forward commitment ("I'll", "I will", "I'm not going",
+        # Accept: exact phrase (FIRST-PERSON SUBJECT ONLY — beat235: a bare substring
+        # check let "and this is not going anywhere" pass, a referent-swapped garble
+        # where "this"/"it"/"that" stands in for "I"; that isn't the commitment
+        # landing, it's a dangling clause), or forward commitment ("I'll", "I will",
         # "I am here for you", "I'm here for you", "here for you").
         has_commitment = (
-            "not going anywhere" in out.lower()
+            re.search(r"\bi(?:'m| am)\s+not\s+going\s+anywhere\b", out, re.I)
+            or re.search(r"\bi\s+will\s+not\s+(?:be\s+)?going\s+anywhere\b", out, re.I)
             or re.search(r"\bi'?ll\b|\bi will\b", out, re.I)
             or re.search(r"\bi(?:'m| am) here for you\b|here for you\b", out, re.I)
         )

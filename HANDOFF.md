@@ -2310,9 +2310,59 @@ cd ~/Downloads/imagination-engine && nohup bash scripts/qc_queue.sh >> logs/qc/q
 > authoritative up-to-date record; treat this HANDOFF.md section as a pointer to catch up on,
 > not the source of truth, and re-sync it every beat going forward (it drifts fast otherwise —
 > this section sat stale from beat224 through beat231, 8 beats, before beat232 re-synced it;
-> beat233 and beat234 re-synced it again on top).
+> beat233, beat234, and beat235 re-synced it again on top).
 
-### Beat234 priorities (in order):
+### Beat235 priorities (in order):
+
+1. **Live-verify this beat's 5 fixes on their next natural cycle** (all pure-logic, unit-tested,
+   no model launch needed for the fix itself — just watch the next real run): (a) Secretary's
+   `_unit_schema_violations` `re.finditer` fix — watch `secretary_deep_test` UC4 for "Churn rate"
+   not recurring bound to the wrong dollar figure; (b) new `_same_day_contradiction()` — watch
+   UC1 (meeting minutes) for the two Camille/Priya dates not getting merged into an invented
+   "same day" sentence again; (c) AYF's `_recompute_sources()` — watch `ayf_deep_0805` UC2 for
+   `contacts.txt` correctly appearing in `sources=` alongside `project.txt`; (d) companion's
+   question-form excavation strip — watch `companion_deep_test` UC3 for "what does it feel like
+   to/when" no longer surviving as a second sentence/em-dash clause; (e) `battery10_registers`'s
+   tightened `sec-condolence-close` check — confirm it still passes on legitimate first-person
+   commitments and correctly flags a bare "X is not going anywhere" with no other fallback phrase.
+
+2. **New tracked defect class: "regen produces broken/invented filler clause."** 3 sightings in
+   one beat across 2 logs — sec-condolence-close's referent-swapped "this is not going anywhere,"
+   battery2b's garbled "What it feels like to have the one conversation land so much stands out
+   in itself," and battery2b's unsupported "there is someone might say how rarely you've had this
+   kind of attention lately." All look like raw generation breaking down under regen pressure
+   (echo-strip / honesty-floor regen chains) rather than a clean single failure mode. Not designed
+   yet — worth a general "does this sentence parse / is this claim grounded" sanity pass on
+   regen output rather than 3 more one-off literal patches.
+
+3. **imag-intimacy's zero-dedicated-grammar/pronoun-postcheck gap** remains the single largest
+   standing architectural item (flagged 216-234; beat233 built structural coverage — furniture
+   consistency, presence continuity, return-to-room closing — but the your/yours PRONOUN family
+   specifically, 37+ fixes in one beat234 read alone, still has no dedicated checker). Not
+   touched this beat (full effort went to the 8-log backlog clear).
+
+4. **Companion UC1 T3 near-verbatim paraphrase-echo** ("Your boss thinks you're the weak link,
+   and probably correctly.") — the existing echo-strip only catches literal duplicate output, not
+   paraphrase-with-minor-reword. Needs a second sighting before designing a fix (a Jaccard-style
+   check similar to the existing semantic-repeat guard, but applied to user-echo rather than
+   self-repeat, is the likely shape).
+
+5. **Companion UC1 T4 confabulated task medium** ("Write the first sentence of your email to
+   your boss" when no email was ever established as the deliverable) — a new confabulation
+   variant (inventing task specifics, not personal/relational facts). Needs a second sighting.
+
+6. **BYO UC2 T2's possible third-person caring-claim** ("someone who genuinely cares in this
+   conversation with us") may evade the first-person-only honesty-floor regex family — referent
+   is genuinely ambiguous in the raw text, not confirmed as a real escape. Needs a clearer,
+   unambiguous second sighting before extending the regex (a wrong extension here risks false
+   positives on legitimate third-person empathy language).
+
+### Beat234 priorities (carried forward, not reverified this beat):
+
+> Beat235 update: item 1 below is RESOLVED (PID 33529 completed normally at 03:38:23, not a
+> stall). Item 2(b) below (Secretary unit-schema fix) was found to still have a live gap this
+> beat (first-occurrence-only check) and has been re-fixed — see Beat235 priorities item 1(a)
+> above for the new fix to watch instead. Items 2(a), 2(c), 3-8 below are unverified/unchanged.
 
 1. **Check whether `battery9_engagement.py` (PID 33529, started 1:20AM) is genuinely stalled.**
    At beat234 close it had accumulated only ~1 minute of CPU time over 2+ hours of wall clock,
