@@ -492,6 +492,86 @@ def repair_phrase_repeats(text: str, max_rounds: int = 4) -> tuple[str, int]:
     return text, dropped
 
 
+# --- imag-intimacy scenario-specific detectors (beat233) --------------------
+# imag-intimacy / imag-intimacy-finds-your-across have carried zero dedicated
+# postcheck coverage for 6+ beats (216-232) despite being the source of the
+# most severe uncaught defects in battery11 — furniture inconsistency and a
+# presence-continuity break, both confirmed live in queue_0905_1447. These are
+# QC-time detectors (report only, not auto-fixers) — the failure mode needs a
+# regen or a prompt-engineering pass, not a safe mechanical rewrite.
+
+_FURNITURE_HEDGE_RE = re.compile(
+    r'\b(?:chair|couch|sofa)\s+or\s+(?:chair|couch|sofa)\b', re.I)
+_FURNITURE_TRANSITION_RE = re.compile(
+    r'\b(?:get|got|gets|getting)\s+up\b|\bstands?\s+up\b|\bstanding\s+up\b|'
+    r'\bmove[sd]?\s+(?:to|toward)\b|\bwalk(?:s|ed|ing)?\s+(?:to|toward|over)\b|'
+    r'\b(?:sits?|sat|sitting)\s+down\s+(?:on|onto)\s+(?:the|her|his|your)?\s*'
+    r'(?:couch|sofa)\b|'
+    r'\b(?:eases?|eased|easing|settl(?:es|ed|ing)|lean(?:s|ed|ing))\s+'
+    r'(?:down\s+)?(?:onto|on)\s+(?:the|her|his|your)?\s*(?:couch|sofa)\b',
+    re.I)
+
+
+def check_furniture_consistency(text: str) -> str | None:
+    """Detect chair<->couch/sofa seating inconsistency within one script (beat232
+    finding: imag-intimacy-finds-your-across opened 'this chair... the armrests'
+    then later stated 'sitting close on her couch' as established fact, with no
+    transition — an internal contradiction about where the scene is happening).
+    A deliberate hedge ('chair or couch') is NOT a defect — it's intentionally
+    ambiguous and appears in the clean base imag-intimacy script. A transition
+    verb (gets up, moves to, sits down onto the couch) also clears it — getting
+    up from a chair and later sitting on a couch elsewhere is a normal scene
+    change, not a contradiction. Returns a reason string if inconsistent, else
+    None."""
+    stripped = _FURNITURE_HEDGE_RE.sub('', text)
+    has_chair = bool(re.search(r'\bchair\b|\barmrests?\b', stripped, re.I))
+    has_couch = bool(re.search(r'\bcouch\b|\bsofa\b', stripped, re.I))
+    if not (has_chair and has_couch):
+        return None
+    if _FURNITURE_TRANSITION_RE.search(stripped):
+        return None
+    return "chair and couch/sofa both asserted as the seat with no transition between them"
+
+
+_PRESENCE_BREAK_RE = re.compile(
+    r'\b(?:she|he|they)\s+(?:is|are|was|were)\s+not\s+physically\s+present\b',
+    re.I)
+
+
+def check_presence_continuity(text: str) -> str | None:
+    """Detect a direct presence contradiction (beat232 finding: imag-intimacy-
+    finds-your-across said 'you feel her presence somewhere near even though she
+    is not physically present' in a scene the user asked to inhabit as a vivid,
+    physically-together evening — the companion figure being declared absent
+    breaks the continuity of a scene built entirely on her being there). Narrow
+    literal-phrase check per this project's discipline for a first-sighting
+    defect; wants a 2nd sighting before generalizing beyond this exact shape.
+    Returns a reason string with context if found, else None."""
+    m = _PRESENCE_BREAK_RE.search(text)
+    if not m:
+        return None
+    ctx = text[max(0, m.start() - 40):m.end() + 10].strip()
+    return f"explicit not-physically-present contradiction: '...{ctx}...'"
+
+
+def check_return_to_room_closing(text: str, tail_words: int = 150) -> bool:
+    """True if the script's final `tail_words` contain a return-to-room / eyes-
+    open cue — the required settle -> imagining -> return shape. False = the
+    scenario ends with no closing beat at all (flagged since beat167, reconfirmed
+    beat232: 4/9 scenarios in one battery11 run ended with no eyes-open/return
+    cue). An 'open your eyes' moment INSIDE the imagined scene (not at the real
+    close) does not count — only checks the tail, since that's the actual ending
+    the listener is left with."""
+    tail = " ".join(text.split()[-tail_words:])
+    return bool(re.search(
+        r"\bopen(?:ing)?\s+your\s+eyes\b|\beyes?\s+(?:flutter(?:ing)?\s+)?open\b|"
+        r"\breturn(?:ing)?\s+to\s+(?:the\s+)?room\b|"
+        r"\bcome\s+back\s+to\s+(?:the\s+)?room\b|"
+        r"\bwhen\s+you'?re?\s+ready\s+to\s+open\b|"
+        r"\bbring(?:ing)?\s+yourself\s+back\b",
+        tail, re.I))
+
+
 def degeneration_report(text: str) -> dict:
     """Diagnostic summary for QC harnesses and logs."""
     start = find_degeneration_start(text)
@@ -692,7 +772,29 @@ _NARRATOR_POSS = re.compile(
     # imag-eagle-golden-eagle-wildlife): "how quickly it disappeared as soon
     # as we changed course or altitude" — "changed" was missing from the
     # we+verb motion list above (which has turn/turned but not change/changed).
-    r"|\bwe\s+changed\b",
+    r"|\bwe\s+changed\b"
+    # beat232 (queue_0905_1447_battery11_imagination_bank.log honest read,
+    # imag-calm-settle): "We'll let our words get slower still, trailing off
+    # finally until they stop completely" and (same script, second instance)
+    # "Let us let our words get slower now and far apart" — a first-person-
+    # plural narrator voice announcing itself winding down, the same
+    # instrument-not-companion violation class as beat178's "when I stopped
+    # talking" but a new surface form ("let" + "our words" as object, not a
+    # "we + verb" subject construction the existing patterns require). 0 hits
+    # for "our words" anywhere in A_gold.jsonl, confirmed before adding.
+    r"|\blet\s+our\s+words\b"
+    # beat232 (same log, imag-mri): three new narrator "us"/"our"/"ours"
+    # collective-pronoun leaks not covered by the existing spatial/relational
+    # "us" list or the literal "our own wings"/"our ascent" entries: "in time
+    # with whatever drum pattern is now driving us both forward", "knowing
+    # it's also ours to go past", "knowing they are our too" (the model's own
+    # garbled attempt at "ours too"). MRI has no dedicated postcheck at all
+    # for narrator-pronoun bleed (only chair/tube/drums), so these survived
+    # uncaught. 0 hits for all three exact phrases in A_gold.jsonl, confirmed
+    # before adding.
+    r"|\bdriving\s+us\b"
+    r"|\bours\s+to\s+go\b"
+    r"|\bare\s+our\s+too\b",
     re.IGNORECASE,
 )
 
@@ -1606,6 +1708,31 @@ _INTIMACY_OBJECT_PRONOUN_SUBS = (
     # substring "hers does" appears 3x only as part of unrelated "others
     # doesn't", which this word-boundary-scoped pattern does not match).
     (re.compile(r"\bas\s+hers\s+does\b", re.IGNORECASE), "as she does"),
+    # beat232 (queue_0905_1447_battery11_imagination_bank.log honest read),
+    # imag-intimacy-finds-your-across: "it closes around your not quite
+    # overlapping" — same verb-governed "your"-for-"yours" family as the
+    # "finds your across"/"finds your without a word" entries above, new verb
+    # "closes". Scoped to the exact trailing phrase, not bare "closes around
+    # your", since "it closes around your legs, your waist, your chest" is a
+    # legitimate attributive list already present in A_gold.jsonl.
+    (re.compile(r"\bcloses\s+around\s+your\s+not\s+quite\s+overlapping\b", re.IGNORECASE), "closes around yours, not quite overlapping"),
+    # Same script: "The smell that enters the space then, neither hers nor
+    # your exclusively" — "your" standing in for the standalone possessive
+    # "yours" in a correlative "neither X nor Y" coordination, sibling to the
+    # existing "hers and your" -> "hers and yours" coordination fix above but
+    # with "neither...nor" instead of a bare "and". 0 hits in A_gold.jsonl.
+    (re.compile(r"\bneither\s+hers\s+nor\s+your\s+exclusively\b", re.IGNORECASE), "neither hers nor yours exclusively"),
+    # beat232 (same log, imag-eagle-wildlife-plural): "A shadow moves across
+    # your vision: your crossing the mountains below" — a 6th grammatical
+    # shape of the your/yours family, distinct from every entry above: "your"
+    # is the SUBJECT of a gerund clause ("[you] crossing the mountains"),
+    # standing in for "you", not "yours". Scoped to the exact trailing phrase
+    # "your crossing the mountains" rather than bare "your crossing", since
+    # A_gold.jsonl has 2 legitimate attributive uses where "crossing" is a
+    # noun object, not a gerund governing a following noun phrase ("The mat
+    # registered your crossing.", "You add your crossing to theirs") —
+    # confirmed neither is followed by "the mountains" before adding.
+    (re.compile(r"\byour\s+crossing\s+the\s+mountains\b", re.IGNORECASE), "you crossing the mountains"),
 )
 
 # beat214: "You feel she come a little closer" (imag-intimacy, 2 instances,

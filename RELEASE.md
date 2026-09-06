@@ -95,6 +95,66 @@ and the result was READ honestly. Ship when everything is checked._
 4. Log everything in review-queue as FYI, not as questions.
 
 ## Status snapshot (update every beat)
+- **2026-09-05 (beat233, heartbeat):** All 5 ship-gate items above remain CLOSED. Memory 18-22%
+  free all beat (below the 35% launch floor throughout), `battery12_vital_facts` (PID 18740) then
+  `qc_queue.sh`'s next batteries held the one in-flight model slot the whole time — no local model
+  launch attempted; every fix this beat verified via pure unit tests against real fixture text, no
+  model needed. Cleared the full unread backlog (10 logs: battery3b, product_e2e, battery9,
+  companion_deep, byo_deep, secretary_deep, ayf_deep, battery6, battery10, battery2b) via 4
+  background agents plus 2 direct reads. **Landed 2 real fixes:** (1) Secretary's keyword-anchor
+  number-injection fallback could fuse a missing number into an adjacent hyphenated word — root
+  cause of a NEW defect a background agent caught passing its own "floors: CLEAN" check:
+  "$400K upside by year 68%-end" (68% injected mid-compound after matching "year" inside
+  "year-end"). Fixed via `_safe_keyword_inject()` in `utility.py`, which now skips any anchor
+  candidate sitting against a hyphen; verified against the exact real fixture (Gross-margin
+  68% / churn 23% source doc) plus a normal-path regression check. (2) Built imag-intimacy's
+  first-ever dedicated postcheck coverage — `check_furniture_consistency`,
+  `check_presence_continuity`, `check_return_to_room_closing` in `postcheck.py` — closing the
+  single largest standing architectural gap (flagged 6+ beats, 216-232). Verified against the
+  real beat232 fixtures: correctly FAILS the known-broken imag-intimacy-finds-your-across script
+  (chair→couch with no transition; "she is not physically present" contradiction; no closing
+  beat) and correctly PASSES the clean base imag-intimacy script's deliberate "chair or couch"
+  hedge with zero false positive — though the closing-beat check also caught the base script
+  genuinely missing its own return-to-room cue, a second real instance of the beat167+ gap, not
+  a false positive. Wired into `battery11_imagination_bank.py` (intimacy-specific block + a new
+  global return-to-room check for all scenarios). All changes synced to all 3-4 dist copies +
+  `dist/hearth-0.2.zip` rebuilt and MD5-verified byte-for-byte inside the zip.
+  **Logged, not fixed** (needs a 2nd sighting, live-model iteration, or semantic judgment per
+  this project's standing discipline against blind patches): sec-condolence-close platitude
+  recurrence (semantic, evades the banned-phrase list, 3rd+ instance of an old class); Companion
+  UC2 verbatim cross-turn self-repeat non-answering a direct memory question (possible new
+  instance); Companion UC3's hardcoded "tell me more" fallback bridge traced to its exact source
+  line (companion.py ~3246/3341) but not yet redesigned; BYO disclaimer-ordering inversion
+  recurring in a new turn (girlfriend request) outside the beat228/231-verified scope; BYO
+  register mismatch on an explicit flirt cue; battery9's semantic-repeat Jaccard threshold still
+  gameable (same action class, reworded, confirmed reproducible in 2 sibling scenarios this run)
+  — all carried-forward known gaps, no genuinely new defect classes found in battery9. AYF (18/18)
+  and battery3b/product_e2e/battery6/most of battery10+2b read genuinely clean. Gold(A) 6797→6802
+  (+5: shamisen restringing, sealing-wax brass-seal press, hand-stretched mozzarella, layered
+  terrarium, ship-in-a-bottle mast-raising — all confirmed 0 prior corpus hits, hedge-scanned
+  clean). Gold(C)+3 (`c_gold_beat233.json`: landlord shower-photo anger-received, missed-pitch
+  say-plain-thing, burnt-wellington playful-no-question — zero topic overlap vs beat218-232
+  confirmed). Mini still unreachable, 99th+ consecutive beat, same signature, not re-diagnosed
+  per standing guidance. **Note: beat232's work was fully written but never committed** (docs +
+  6 postcheck.py fixes sat uncommitted in the working tree on arrival) — folded into this beat's
+  commit rather than left stranded. Full detail in daily-log.md / review-queue.md beat233 entries.
+- **2026-09-05 (beat232, heartbeat):** All 5 ship-gate items above remain CLOSED. Memory 12-23%
+  free all beat, `battery9_engagement` holding the one in-flight model slot throughout — no local
+  model launch attempted. Read the previously-unread `queue_0905_1447_battery11_imagination_bank.log`
+  (9 scenarios) via a background agent: found and fixed 6 real defects as narrow `postcheck.py`
+  literal-phrase patches (no model launch needed), worst a new uncaught narrator self-reference in
+  imag-calm-settle ("We'll let our words get slower... until they stop completely") plus 3 new
+  "us/our/ours" narrator-pronoun leaks in imag-mri and 2 new your/yours-family escapes plus a
+  6th grammatical shape (gerund-subject "your crossing the mountains"→"you crossing") in
+  imag-intimacy-finds-your-across / imag-eagle-wildlife-plural. All verified via py_compile + unit
+  tests against exact defect strings + false-positive guards, full test_postcheck.py suite ALL
+  PASS, synced to all 3 dist copies + `dist/hearth-0.2.zip` rebuilt and MD5-verified inside the
+  zip. Confirmed (not new): imag-intimacy chair/couch furniture inconsistency within a single
+  script, a presence-continuity break, and a runaway-generation truncation the "no truncation"
+  postcheck technically-but-misleadingly passed. Re-synced HANDOFF.md's NEXT HEARTBEAT PRIORITY
+  section, stale since beat224 (8 beats). Gold(A) 6790→6797, gold(C)+5. Mini still unreachable,
+  98th+ consecutive beat, same signature. Full detail in daily-log.md / review-queue.md beat232
+  entries.
 - **2026-09-05 (beat231, heartbeat):** All 5 ship-gate items above remain CLOSED. Memory 81-82%
   free all beat; all fixes were pure post-processing regex on already-generated text, so no local
   model launch was needed. **battery12 SC15 (the retire-then-surface-a-different-thread vital-facts

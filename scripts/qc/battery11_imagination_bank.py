@@ -13,7 +13,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 from fastapi.testclient import TestClient
 import imagination_engine.server as s
 from imagination_engine.generator import generate_session
-from imagination_engine.postcheck import _sentences, _words, _similarity
+from imagination_engine.postcheck import (
+    _sentences, _words, _similarity,
+    check_furniture_consistency, check_presence_continuity,
+    check_return_to_room_closing)
 from scenario_bank import sample, BANK
 
 ap = argparse.ArgumentParser()
@@ -431,6 +434,19 @@ for sc in scenarios:
             print(f"\n>>> MID-SWITCH POSTCHECKS:", flush=True)
             print(f"  {'❌ FAIL' if sleep_fail else '✅ PASS'} — REGISTER: no sleep props", flush=True)
             print(f"  {'❌ FAIL' if not alert_ok else '✅ PASS'} — REGISTER: alert anchors present", flush=True)
+        if sc.id in ("imag-intimacy", "imag-intimacy-finds-your-across") and first:
+            # beat233: imag-intimacy had ZERO dedicated postcheck coverage despite
+            # being flagged 6+ beats (216-232) as the source of the most severe
+            # uncaught defects in the whole battery. These two checks are report-only
+            # (no safe mechanical rewrite exists for either) — a FAIL here means the
+            # scene needs a regen or a prompt-engineering pass, logged for that.
+            furniture_issue = check_furniture_consistency(first)
+            presence_issue = check_presence_continuity(first)
+            print(f"\n>>> INTIMACY POSTCHECKS:", flush=True)
+            print(f"  {'❌ FAIL' if furniture_issue else '✅ PASS'} — seating furniture consistent"
+                  + (f" ({furniture_issue})" if furniture_issue else ""), flush=True)
+            print(f"  {'❌ FAIL' if presence_issue else '✅ PASS'} — no presence-continuity break"
+                  + (f" ({presence_issue})" if presence_issue else ""), flush=True)
         # Global truncation check (all scenarios): script must end with a sentence
         # terminator. Missing terminator = model hit max_tokens mid-sentence.
         # beat123: found in imag-eagle-wildlife-plural 0812 run — 2737-word script
@@ -438,8 +454,13 @@ for sc in scenarios:
         # Fix: trim_truncated_tail() in generator.py; postcheck here detects escapes.
         if first:
             truncated = first.rstrip() and first.rstrip()[-1] not in '.!?"…'
+            # beat233: closing-beat gap flagged since beat167, reconfirmed beat232
+            # (4/9 scenarios in one battery11 run had no eyes-open/return cue at all).
+            # Report-only — no safe mechanical way to append a real closing beat.
+            has_closing = check_return_to_room_closing(first)
             print(f"\n>>> GLOBAL POSTCHECKS:", flush=True)
             print(f"  {'❌ FAIL' if truncated else '✅ PASS'} — script ends with sentence terminator (no token-limit truncation)", flush=True)
+            print(f"  {'❌ FAIL' if not has_closing else '✅ PASS'} — return-to-room/eyes-open closing beat present", flush=True)
     except Exception as e:
         traceback.print_exc()
 

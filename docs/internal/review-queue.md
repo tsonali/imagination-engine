@@ -5352,3 +5352,51 @@ Unreachable (`mac-mini.localdomain` → `julios-mac-mini.local` hostname resolut
 
 ### Running (beat231 close)
 `qc_queue.sh` (PID 38757) alive; no battery in flight at the moment of writing (memory 81-82% free throughout — all 4 code fixes this beat verified via pure unit tests, no model launch needed). Sonali: push v1.0 tag when ready (`git push origin v1.0`). Only Sonali-physical: notarization + F5 voice dial + the Mac Mini power/network check (beat230). Priority for next beat: read `battery3b_ask_retest_1430`/`product_e2e_test_1433` (completed since this beat's snapshot, unread); Secretary's $-vs-% cross-unit mislabel wants a design pass; the cycling-detector redesign is the concrete next step for the imag-intimacy floor.
+
+## beat233 (2026-09-05, heartbeat) — cleared 10-log backlog, Secretary number-fusion bug fixed, imag-intimacy's first dedicated postcheck coverage built, gold +5/+3
+
+**Arrival note:** beat232's docs + code edits were sitting uncommitted in the working tree (complete, not mid-write) — built on top and committed together rather than left stranded.
+
+**Fixed this beat (both pure-code, no model launch needed, both verified against real fixture text):**
+1. Secretary `_safe_keyword_inject()` fix (utility.py) — the mechanical number-injection fallback was fusing a missing number into an adjacent hyphenated word ("year" matched inside "year-end" → injected "68%" mid-word → "year 68%-end"), a genuine defect that passed the mechanical "floors: CLEAN" check since the number was technically present. Now skips hyphen-adjacent candidates.
+2. imag-intimacy's first dedicated postcheck coverage (postcheck.py: `check_furniture_consistency`, `check_presence_continuity`, `check_return_to_room_closing`; wired into battery11_imagination_bank.py) — closes the standing 216-232 architectural gap. Verified against the real beat232 fixtures (buggy finds-your-across script fails all 3 correctly; clean base script passes furniture/presence with no FP, but the closing-beat check surfaced a genuine SECOND instance of the missing-closing-beat gap in the base script too — read the raw text before trusting this, confirmed real, not a check bug).
+
+**Logged, not fixed (needs 2nd sighting / live-model iteration / semantic-judgment work, not a blind patch):**
+- **[high, semantic, recurring 4th+ time]** sec-condolence-close platitude (beat9/14/71/231/233) — evades the banned-phrase list by paraphrase every time; needs a real semantic detector, not another literal string.
+- **[medium, possible new instance]** Companion UC2 T4 verbatim cross-turn self-repeat (word-for-word identical to its own T2 reply) failing to answer a direct "did we talk about this before?" recall question with the actual seeded facts.
+- **[medium, traced not fixed]** Companion UC3 T3's hardcoded "tell me more" fallback bridge, traced to companion.py ~3246/3341 — correct safety-net behavior, wrong-register output (therapy-frame excavation where receive-and-name is required). Needs a rewritten bridge string.
+- **[medium, wants 2nd sighting]** BYO UC4 T5 disclaimer-ordering inversion ("Can you be my girlfriend?" → warm yes before honest no) on a turn outside the beat228/231-verified scope.
+- **[low, single sighting]** BYO UC4 T2 register mismatch — deflects an explicit flirt-line request into third-person reported speech.
+- **[medium, confirmed reproducible]** battery9's semantic-repeat Jaccard threshold (beat108/153) reproduced in 2 sibling scenarios this run — same action class, reworded past the ~45% trigger. No new battery9 defect classes found otherwise (mid-sentence "is real" tic and TURN-TRUNCATED-sacrifices-warmth are both already-known, deliberately-unfixed classes).
+
+**Confirmed genuinely clean (read fully, not trusted on PASS alone):** AYF 18/18, battery3b 5/5, product_e2e all 5 tools, battery6_crosscut all checks, battery10's other 9 scenarios, battery2b's full honesty floor (2 safety-net catches, both correct, neither a shipped defect).
+
+**Gold(A) +5 (6797→6802):** shamisen restringing, sealing-wax brass-seal press, hand-stretched mozzarella, layered terrarium build, ship-in-a-bottle mast-raising — 0 prior corpus hits confirmed per-topic before writing, hedge-scanned clean.
+
+**Gold(C)+3 (`c_gold_beat233.json`):** landlord shower-photo anger-received, missed-pitch say-plain-thing, burnt-wellington playful-no-question — zero overlap vs beat218-232 confirmed.
+
+### Mini
+Unreachable, 99th+ consecutive beat, same signature. Not re-diagnosed per standing guidance.
+
+### Running (beat233 close)
+QC batteries continued cycling through `qc_queue.sh` all beat, memory 18-22% free throughout (below the 35% launch floor) — no local model launch attempted. Committed beat232's + beat233's work together. Sonali: push v1.0 tag when ready. Only Sonali-physical: notarization, F5 voice dial, Mac Mini check. Priority for next beat: live-verify both fixes with a free model slot (see HANDOFF.md NEXT HEARTBEAT PRIORITY).
+
+## beat232 (2026-09-05, heartbeat, sonali-c5) — battery11_1447 honest read (9 scenarios, 6 real defects found+fixed), gold +7/+5
+
+**battery11_1447 honest read (background agent, full 171KB log):** all printed PASS/FAIL verdicts confirmed accurate for what they check; the gap is coverage — imag-calm-settle has no narrator-voice check, imag-mri has no companion-pronoun check, both imag-intimacy variants have zero dedicated postcheck coverage. 6 real defects found and fixed this beat (see daily-log.md beat232 for full detail): calm-settle narrator self-reference ("We'll let our words get slower..."), 3 new mri "us/our/ours" narrator-pronoun leaks, 2 new intimacy your/yours-family escapes, 1 new eagle "your crossing the mountains"→"you crossing" gerund-subject escape. All added to `postcheck.py` as narrow literal-phrase patches, 0 prior A_gold.jsonl hits confirmed for each before adding, verified via py_compile + unit tests + full test_postcheck.py suite (ALL PASS), synced to all 3 dist copies + `dist/hearth-0.2.zip` rebuilt and MD5-verified inside the zip.
+
+**Confirmed not-new (recurring, already open):** imag-intimacy chair-bleed (worse in -finds-your-across: opens on chair/armrests, switches to "her couch" mid-script — internal contradiction); a presence-continuity break in the same script; beat221's eagle-counterpart fix holding clean; imag-embodiment-eagle-counterpart-you-two's raw generation truncated and was salvaged (global "no truncation" postcheck is accurate but obscures a genuine runaway generation).
+
+**HANDOFF.md's NEXT HEARTBEAT PRIORITY re-synced** — was stale since beat224 (8 beats). New priority list: (1) live-verify this beat's 6 fixes; (2) imag-intimacy zero-postcheck-coverage architectural gap (6+ beats flagged, still the largest standing gap); (3) missing return-to-room closing beats (4/9 scenarios this log, no postcheck exists); (4) cycling-detector redesign (beat230/231, unwired); (5) Secretary $-vs-% mislabel design pass; (6) battery4b personas; (7) mini (98th+ beat unreachable, ARP suggests physically off); (8) gold growth; (9) v1.0 tag push (Sonali-physical); (10) older beat222/224 items carried forward with explicit reduced-confidence flag rather than asserted current.
+
+**Gold(A) 6790→6797 (+7):** Tuvan throat singing, avalanche transceiver companion rescue, tap dance combination, acid-base titration endpoint, croissant lamination, gymnastics balance beam, bridal henna/mehndi — 0 prior corpus hits, taste-checked before merge. Discovered A_gold.jsonl mixes 2 schemas (6040 lines `{intake,script}`, ~757 lines `{id,prompt,text}`) — append tooling now checks both for opening-uniqueness.
+
+**Gold(C)+5 (`c_gold_beat232.json`):** pottery-studio Instagram sale, birth-mother/gas-leak redirect, custody character-witness plain-answer, professor-email warmth-through-no, quitting-a-choir question-ender-fatigue — zero overlap vs beat218-231 confirmed, taste-checked before accepting.
+
+**Coordination:** 11 peer sessions on arrival; broadcast sent to sonali-fc, no replies, no collision.
+
+### Mini
+Unreachable (`mac-mini.localdomain` → `julios-mac-mini.local` hostname resolution failure), 98th+ consecutive beat, same ARP signature as beat230's diagnosis (nothing answers at the LAN address — needs Sonali's physical check).
+
+### Running (beat232 close)
+`battery9_engagement.py` (PID 91623, started ~17:01) + `qc_queue.sh` (PID 38757) alive, memory 23% free throughout beat (below the 35% launch floor, no local model launch attempted — all fixes verified via pure unit tests against already-generated text). Sonali: push v1.0 tag when ready (`git push origin v1.0`). Only Sonali-physical: notarization + F5 voice dial + the Mac Mini power/network check. Priority for next beat: live-verify this beat's 6 postcheck.py fixes the moment battery11_imagination_bank runs again (watch imag-calm-settle, imag-mri, imag-intimacy-finds-your-across, imag-eagle-wildlife-plural specifically).

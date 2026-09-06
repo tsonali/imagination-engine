@@ -388,6 +388,29 @@ def _extract_entity_number_bindings(text: str) -> list[tuple[str, str]]:
     return bindings
 
 
+def _safe_keyword_inject(n: str, src_ctx: str, out: str, stop_words: set) -> tuple[str, bool]:
+    """Insert missing number `n` immediately after the first keyword from `src_ctx`
+    that appears in `out`. Skips any candidate that sits inside a hyphenated
+    compound word — injecting there fuses the number into the word instead of
+    alongside it (beat233: keyword-anchor picked "year" out of "year-end" and
+    injected mid-compound, producing "$400K upside by year 68%-end"; the missing
+    number was technically present, satisfying the mechanical floor, but the
+    output was broken English). Returns (new_out, injected)."""
+    for kw in re.findall(r'[A-Za-z]{3,}', src_ctx):
+        if kw.lower() in stop_words:
+            continue
+        kw_re = re.compile(r'\b' + re.escape(kw) + r'\b', re.I)
+        m = kw_re.search(out)
+        if not m:
+            continue
+        after = out[m.end():m.end() + 1]
+        before = out[m.start() - 1:m.start()]
+        if after == '-' or before == '-':
+            continue
+        return kw_re.sub(lambda mm, _n=n: mm.group(0) + f" {_n}", out, count=1), True
+    return out, False
+
+
 def _label_binding_violations(bindings: list[tuple[str, str]], out: str) -> list[tuple[str, str, str]]:
     """Return (label, correct_number, wrongly_bound_number) for each source
     binding where the label's NEAREST number in the output (by character
@@ -806,24 +829,12 @@ class Assistant:
                             _kw_stop = {'the', 'and', 'for', 'with', 'that', 'this',
                                         'from', 'per', 'its', 'are', 'not', 'but',
                                         'has', 'was', 'all'}
-                            _kw_cands = re.findall(r'[A-Za-z]{3,}', _src_ctx)
-                            _kw_injected = False
-                            for _kw in _kw_cands:
-                                if _kw.lower() in _kw_stop:
-                                    continue
-                                _kw_re = re.compile(
-                                    r'\b' + re.escape(_kw) + r'\b', re.I)
-                                if _kw_re.search(out):
-                                    _n_cap = n  # capture for lambda
-                                    out = _kw_re.sub(
-                                        lambda m, _nc=_n_cap: m.group(0) + f" {_nc}",
-                                        out, count=1,
-                                    )
-                                    log.info(
-                                        "secretary[%s]: keyword-anchor inject '%s'"
-                                        " after '%s'", task_key, n, _kw)
-                                    _kw_injected = True
-                                    break
+                            out, _kw_injected = _safe_keyword_inject(
+                                n, _src_ctx, out, _kw_stop)
+                            if _kw_injected:
+                                log.info(
+                                    "secretary[%s]: keyword-anchor inject '%s'",
+                                    task_key, n)
                             if not _kw_injected and task_key == "summarize":
                                 # Absolute fallback: append bracket note to BOTTOM LINE.
                                 # Fires only when model drops the number AND every source-
