@@ -5527,7 +5527,7 @@ Unreachable, 100+ consecutive beat, same signature. Not re-diagnosed per standin
 ### Running (beat240 close)
 `battery11_imagination_bank.py` (started 05:23:40) + `qc_queue.sh` alive at close, memory 0.38-0.57% free throughout (lowest readings logged yet). Sonali: push v1.0 tag when ready. Only Sonali-physical: notarization + F5 voice dial + Mac Mini check. Priority for next beat: live-verify this beat's 3 fixes on their next natural cycle; Secretary's 2 new contradiction defect classes need a design pass; the filler-clause garble pattern (5+ sightings) is overdue for a dedicated design beat.
 
-## beat241 (2026-09-08, heartbeat) — cleared 14-log backlog, 2 instrument.py personhood-guard fixes (1 confirmed floor-violation-shipped-uncorrected) + closed the overdue filler-clause-garble design pass in companion.py, gold +5/0
+## beat241 (2026-09-08, heartbeat) — cleared 14-log backlog, 2 instrument.py personhood-guard fixes (1 confirmed floor-violation-shipped-uncorrected) + closed the overdue filler-clause-garble design pass in companion.py, gold +5/+2
 
 **Logged, not fixed (needs design pass / live-model iteration / 2nd sighting, not a blind patch):**
 - **[HIGH, new, hard FAIL]** Secretary UC2 lossless-summary dropped ~half the source ($200/SOC2 fintech section entirely missing), harness-confirmed FAIL. Stochastic — sibling run same brief was clean.
@@ -5553,7 +5553,7 @@ Unreachable, 100+ consecutive beat, same signature. Not re-diagnosed per standin
 
 **Gold(A) +5 (6840→6845):** fly-tying/hand-rolled pasta/wheel-throwing pottery (already in progress on arrival) + raku firing, sashiko running-stitch (added this session) — 0 prior corpus hits, taste_cull-clean.
 
-**Gold(C)+0 this session** beyond the 2 already in progress on arrival (`c_gold_beat241.json`).
+**Gold(C)+2 this session** on top of the 2 already in progress on arrival — `c_gold_beat241.json` now has 4, the 2 new ones targeting this session's own fresh findings (permanence-probe explicit temporal negation; receive-not-probe on a hostile one-word reply).
 
 ### Mini
 Unreachable, 100+ consecutive beat, same signature. Not re-diagnosed per standing guidance.
