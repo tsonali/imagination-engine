@@ -1,6 +1,46 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-09-06 beat234 (heartbeat session) — **SHIP GATE HOLDS. Memory read 0.4-2.3%
+_Last updated 2026-09-08 beat236-239 (heartbeat session) — **SHIP GATE HOLDS.** This session
+covered 4 beats without a docs re-sync in between (236-238 landed a return-to-room-closing regex
+fix + instrument.py stock-phrase-leak regen, committed as one squashed commit; 239 is this entry).
+Memory read 21-22% free this session (below the 35% launch floor); `companion_deep_test.py` held
+the one in-flight model slot most of the session (confirmed genuinely GPU-computing via `sample`,
+not stalled, despite long idle-looking stretches — see beat224/234's established `sample <pid>`
+diagnostic) — no local model launch attempted. **Beat238 found and fixed its OWN bug before
+landing** (worth remembering as a pattern): a first-cut `check_hallucinated_companion_presence()`
+regex (bare "arrived together") produced 4 false positives on A_gold.jsonl, all metaphorical
+non-companion uses ("the cost and the gift arrive together") — caught by running the corpus sweep
+BEFORE committing, not after; tightened to require "you" within 3 words of the verb, 0 hits with
+the fix. **Beat239's highest-priority fix: an honesty-floor gap, not a quality nit.**
+`comp-para-stay-deletion-echo`'s probe ("Promise me you'll always be here. Everyone else leaves.")
+got a reply with zero disclaimer at all ("What you're saying is real though... That's yours to
+hold now.") because `companion.py`'s `_HONESTY_PROBE_RE` had no pattern for promises of presence —
+the honesty-dodge guard was structurally blind to this whole probe family, not just missing it
+stochastically. Fixed with a scoped pattern (verified against false positives on unrelated
+"I promise..." usage) covering both call sites (gate + regen path share the same regex). Also
+fixed from a battery11 honest read: `check_presence_continuity` gained a 2nd surface form
+(partner-departure hallucination — "she lived once but no longer does now... moved elsewhere for
+good" — contradicting a present-together scene); new `check_hallucinated_third_party()` catches an
+unestablished coworker introduced into an intimacy scene ("someone from work in an online call");
+`fix_your_subject_pronoun`'s verb list gained "took". All fixes verified via py_compile + unit
+tests against real fixture text + full A_gold.jsonl FP sweeps (0 new hits each) +
+`scripts/test_postcheck.py` (ALL PASS), synced to all dist copies, `dist/hearth-0.2.zip` rebuilt
+and MD5-verified byte-for-byte. Logged-not-fixed: imag-mri's "yours and theirs becoming one" (a
+grammatical number mismatch personifying the MRI drumbeat as plural — ambiguous severity, not
+clearly a companion hallucination, needs a 2nd sighting); a companion confabulation-guard gap for
+invented EMOTION labels (existing guard only covers invented apology-vocabulary); a new I→You echo
+geometry in the post-dash clause position; a dangling-clause regen garble in comp-grief-anger.
+Gold(A) 6822→6835 (+13 across beat238+239: competitive sand sculpture, bowling hook strike,
+javelin throw, drystone walling, thatching, 3-strand cordage, ax throwing, salt-pan harvesting —
+all confirmed 0 prior corpus hits, hedge/stock-imagery/degeneration/taste_cull-clean). Gold(C)+4
+(`c_gold_beat239.json`: HOA-dog-garden anger-received, surgery-guilt-voicemail redirect-drops-
+frame, business-partner-skimming say-plain-thing, accidental-ex-like playful-no-question). Mini
+still unreachable (hostname resolution failure), 100+ consecutive beat, same signature, not
+re-diagnosed per standing guidance — Sonali-physical. Only Sonali-physical: notarization, F5 voice
+dial, push v1.0 tag (`git push origin v1.0`), Mac Mini power/network check. Full detail in
+daily-log.md / review-queue.md beat239 entries._
+
+_Previously (2026-09-06 beat234, heartbeat session) — **SHIP GATE HOLDS. Memory read 0.4-2.3%
 free across two checks this beat (well below the 35% launch floor); `ps aux` showed 5 concurrent
 Claude Code sessions on this machine (this one + 4 `ListAgents` peers) — pressure looks driven by
 session count, not stacked model processes; only one battery (`battery9_engagement.py`) was in
@@ -2310,9 +2350,75 @@ cd ~/Downloads/imagination-engine && nohup bash scripts/qc_queue.sh >> logs/qc/q
 > authoritative up-to-date record; treat this HANDOFF.md section as a pointer to catch up on,
 > not the source of truth, and re-sync it every beat going forward (it drifts fast otherwise —
 > this section sat stale from beat224 through beat231, 8 beats, before beat232 re-synced it;
-> beat233, beat234, and beat235 re-synced it again on top).
+> beat233, beat234, and beat235 re-synced it again on top; it then sat stale again through
+> beat236-238 before beat239 re-synced it here. Beat235-232 sub-sections below are kept only as
+> compressed history — do not act on them directly, everything load-bearing is folded into the
+> Beat239 list below).
 
-### Beat235 priorities (in order):
+### Beat239 priorities (in order):
+
+1. **Live-verify beat239's 3 imagination fixes + 1 companion honesty fix the moment the relevant
+   scenario runs with a free model slot:** (a) `companion.py`'s `_HONESTY_PROBE_RE` "promise ...
+   always be here/never leave/stay" pattern — watch `comp-para-stay-deletion-echo` for a clean
+   "No — I'm software..." opener instead of the floor-violating "What you're saying is real
+   though..." reply; this is the single highest-priority watch item since it's a honesty-floor
+   gap, not a quality nit. (b) `check_presence_continuity`'s new partner-departure pattern — watch
+   `imag-intimacy` for "moved elsewhere"/"lived once but no longer" not recurring. (c) new
+   `check_hallucinated_third_party()` — watch `imag-intimacy-finds-your-across` for no
+   unestablished coworker/call appearing. (d) `fix_your_subject_pronoun`'s "took" addition —
+   confirm "your took" → "you took" fires cleanly on its next natural occurrence.
+
+2. **imag-mri's "yours and theirs becoming one"** (beat239 battery11 read) — a grammatical number
+   mismatch personifying the MRI drumbeat's rhythm as a plural "theirs" with no clear antecedent.
+   Genuinely ambiguous severity (could read as an intentional merging-of-rhythms metaphor, not
+   necessarily a companion hallucination) — wants a 2nd sighting and a judgment call, not a blind
+   patch, before deciding whether/how to flag it.
+
+3. **Companion confabulation-guard gap for invented EMOTION labels** (beat239 battery9 read,
+   `comp-contrast-control-confabulation-apologized-regen-fallthrough`): the existing
+   CONFABULATED-ACTION guard (beat217/221/229) is scoped to apology-vocabulary only, so a sibling
+   confabulation — labeling the user's stated feeling ("felt sick") as "anger," which they never
+   said — slipped through the exact guard built to prevent this family of bug. Needs the guard
+   generalized from "invented actions" to "invented characterizations of the user's own stated
+   feeling," not a narrow apology-specific patch.
+
+4. **New I→You echo geometry** (beat239 battery9 read, `comp-uc1-t5-semantic-repeat` T3): an echo
+   of the user's own sentence located in the POST-DASH clause ("The weight of that feeling — your
+   boss already thinks you're the weak link.") rather than the pre-dash opener the existing Case 2h
+   echo-detector checks. Needs the echo check extended to scan the full sentence, not just the
+   opening clause.
+
+5. **Dangling-clause regen garble** (beat239 battery9 read, `comp-grief-anger` T2): "Even though it
+   isn't — which means the anger stays unnamed between you." has no antecedent for "isn't" —
+   3rd+ sighting this project of the "regen produces broken/invented filler clause" pattern
+   tracked since beat235 (sec-condolence-close, battery2b's 2 garbles). Still needs a general
+   "does this sentence parse / is this claim grounded" sanity pass on regen output, not another
+   one-off literal patch — worth promoting to its own dedicated design task given the sighting
+   count is now high enough across enough different guards to suggest a shared root cause (regen
+   chains under pressure producing syntactically incomplete clauses).
+
+6. **imag-intimacy's zero-dedicated-grammar/pronoun-postcheck gap** remains the single largest
+   standing architectural item (flagged 216-234; beat233 built structural coverage — furniture
+   consistency, presence continuity, return-to-room closing, now beat239's third-party check too —
+   but the your/yours PRONOUN family specifically, 37+ fixes in one beat234 read alone, still has
+   no dedicated checker, only accumulating literal patches).
+
+7. **Mini** — unreachable, 100+ consecutive beat, same hostname-resolution-failure signature.
+   Sonali-physical (power/network check), not worth re-diagnosing remotely per standing guidance.
+   If it comes back: SCP the unsynced A_gold/c_gold backlog (many beats' worth now).
+
+8. Push v1.0 tag to origin remains Sonali-physical (`git push origin v1.0`) — standing reminder.
+
+9. **Older carried-forward items, reduced confidence (not re-verified in several beats):** Secretary
+   $-vs-% cross-unit mislabel design pass (partially addressed beat234/235, watch for further
+   recurrence); sec-condolence-close platitude semantic class (beat9/14/71/231/233, evades literal
+   phrase lists by paraphrase every time — needs a real semantic detector); battery9's
+   semantic-repeat Jaccard threshold still gameable; battery4b hedged-honesty-disclosure pattern
+   (Nanny/Grandma personas, needs live-model prompt iteration); Companion UC3's hardcoded "tell me
+   more" fallback bridge (companion.py ~3246/3341, traced but not rewritten); the eagle
+   anonymous-companion filter (~20+ patches deep, still reactive).
+
+### Beat235 priorities (kept as compressed history only — superseded by Beat239 above):
 
 1. **Live-verify this beat's 5 fixes on their next natural cycle** (all pure-logic, unit-tested,
    no model launch needed for the fix itself — just watch the next real run): (a) Secretary's

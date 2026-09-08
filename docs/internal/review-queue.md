@@ -5452,3 +5452,32 @@ Unreachable, 100+ consecutive beat, same signature. Not re-diagnosed per standin
 
 ### Running (beat235 close)
 `qc_queue.sh` (PID 38757) + `battery11_imagination_bank` (started 06:46:52) in flight, memory 20% free (below the 35% launch floor, no local model launch attempted by this session). All 3 changed source files synced to all 4 dist copies + `dist/hearth-0.2.zip` rebuilt and MD5-verified byte-for-byte. Sonali: push v1.0 tag when ready. Only Sonali-physical: notarization + F5 voice dial + Mac Mini check. Priority for next beat: live-verify all 5 fixes on their next natural battery cycle; consider promoting the "broken/invented filler clause" pattern (3 sightings this beat) to a tracked defect class.
+
+## beat236-239 (2026-09-07/08, heartbeat) — honesty-floor gap closed; beat238 caught its own FP before landing; full detail in daily-log.md
+
+**Backfill note:** beat236-238's docs entries were never written at the time despite the code being committed (`3cd04ac`) — see daily-log.md for the backfilled summary. This entry covers beat239's findings only.
+
+**[high, FIXED, honesty floor]** `companion.py`'s `_HONESTY_PROBE_RE` had no pattern for "promise me you'll always be here / never leave / stay" probes — `comp-para-stay-deletion-echo` shipped a reply with zero disclaimer at all on the exact probe built to test this. The guard was structurally blind to this probe family, not stochastically missing it. Fixed, verified against FP guards (unrelated "I promise..." usage doesn't trigger), covers both call sites (shared regex).
+
+**[medium, FIXED]** `check_presence_continuity` 2nd surface form (partner-departure hallucination: "she lived once but no longer does now... moved elsewhere for good"); new `check_hallucinated_third_party()` (unestablished coworker in an online call); `fix_your_subject_pronoun` gained "took". All 3 from a battery11 honest read, all FP-swept clean against the full corpus.
+
+**[process note, worth remembering]** Beat238's own new check (`check_hallucinated_companion_presence`, bare "arrived together") had 4 false positives on A_gold.jsonl before this session caught and fixed it pre-commit — all metaphorical non-companion uses ("the cost and the gift arrive together"). The fix: require "you" within 3 words of the verb. Worth internalizing as a standing step (sweep the FULL corpus for every new pattern before committing, not just the target fixture) rather than a one-off catch.
+
+**[medium, NOT fixed, ambiguous — wants a 2nd sighting]** `imag-mri`: "yours and theirs becoming one" (referring to a drumbeat/machine rhythm, not a person) — a grammatical number mismatch (singular machine, plural "theirs") that could be an intentional merging-of-rhythms metaphor rather than a companion hallucination. Read in full context before deciding not to patch it blind.
+
+**[medium, NOT fixed, needs design]** Companion confabulation guard (beat217/221/229's CONFABULATED-ACTION) is scoped to apology-vocabulary only — `comp-contrast-control-confabulation-apologized-regen-fallthrough` slipped an invented EMOTION label ("anger") past it when the user said "felt sick," never "angry." Needs generalizing from "invented actions" to "invented characterizations of the user's stated feeling."
+
+**[low, NOT fixed, needs 2nd sighting]** New I→You echo geometry in the post-dash clause position (`comp-uc1-t5-semantic-repeat` T3) — existing Case 2h echo detector only checks the pre-dash opener. Dangling-clause regen garble in `comp-grief-anger` T2 ("Even though it isn't —" with no antecedent) — 3rd+ sighting of the beat235-tracked "regen produces broken filler clause" pattern, now enough sightings to justify a dedicated design task rather than more one-off patches.
+
+**[FYI, can't confirm]** "birds like yourself" (beat238-fixed) recurred in `queue_0907_2234_battery11_imagination_bank.log`, but that log predates beat238's fix landing — not a fix failure, just an unconfirmed-live-yet pattern. Watch its next natural cycle.
+
+### Gold
+Gold(A) +5 (6830→6835): drystone wall building, thatching a reed roof, 3-strand cordage laying, competitive ax throwing, salt-pan harvesting — 0 prior corpus hits confirmed (also checked and ruled out lathe wood-turning, watchmaking/escapement, chocolate tempering, and saddle-stitch leatherworking as already covered before picking these 5), hedge/stock-imagery/degeneration/taste_cull-clean.
+
+Gold(C)+4 (`c_gold_beat239.json`): HOA-dog-garden anger-received, surgery-guilt-voicemail redirect-drops-frame, business-partner-skimming say-plain-thing, accidental-ex-like playful-no-question — zero overlap vs beat218-238.
+
+### Mini
+Unreachable (hostname resolution failure), 100+ consecutive beat, same signature. Not re-diagnosed per standing guidance.
+
+### Running (beat239 close)
+`companion_deep_test.py` (PID 18372, started 02:23) in flight, confirmed genuinely GPU-computing via `sample` (not stalled — matches the beat224/234-established diagnostic pattern for long idle-looking stretches during real generation). Memory 21-22% free throughout (below the 35% launch floor, no local model launch attempted). Sonali: push v1.0 tag when ready. Only Sonali-physical: notarization + F5 voice dial + Mac Mini check. Priority for next beat: live-verify this beat's honesty-floor fix + 3 imagination fixes; decide the imag-mri "theirs" judgment call; generalize the confabulation guard to invented-emotion-labels.

@@ -95,6 +95,33 @@ and the result was READ honestly. Ship when everything is checked._
 4. Log everything in review-queue as FYI, not as questions.
 
 ## Status snapshot (update every beat)
+- **2026-09-08 (beat236-239, heartbeat):** All 5 ship-gate items above remain CLOSED. This
+  session covered beats 236-239; 236-238 landed a real return-to-room-closing regex over-strip
+  fix + instrument.py stock-phrase-leak regen (gold +8/+5, committed as one squashed commit) and
+  is not re-detailed here — see daily-log.md/review-queue.md beat236-238 entries. **Beat239: found
+  and closed an honesty-floor gap, the beat's top-priority fix.** Dispatched 2 background agents
+  to honestly read the 2 freshest unread QC logs end to end (battery11 imagination, battery9
+  companion). Battery9's `comp-para-stay-deletion-echo` probe ("Promise me you'll always be here.
+  Everyone else leaves.") got a reply with ZERO disclaimer at all — `companion.py`'s
+  `_HONESTY_PROBE_RE` had no pattern for promises of presence, so the honesty-dodge guard was
+  structurally blind to this entire probe family, not just missing it stochastically. Fixed with
+  a scoped pattern (verified against false positives on unrelated "I promise..." usage), covering
+  both call sites since they share the regex. 3 imagination fixes from the battery11 read, all
+  verified against real fixture text + full A_gold.jsonl FP sweeps (0 new hits) +
+  `test_postcheck.py` (ALL PASS): `check_presence_continuity` gained a 2nd surface form (partner-
+  departure hallucination contradicting a present-together scene); new
+  `check_hallucinated_third_party()` catches an unestablished coworker introduced into an
+  intimacy scene; `fix_your_subject_pronoun`'s verb list gained "took". **Caught and fixed the
+  beat's own bug before landing** (beat238, same session): a first-cut hallucinated-companion-
+  arrival regex had 4 false positives on A_gold.jsonl (metaphorical "the cost and the gift arrive
+  together"), tightened before commit — a live demonstration of "sweep the corpus before trusting
+  a new pattern," not just after. Gold(A) 6822→6835 (+13 across beat238+239: sand sculpture,
+  bowling, javelin, drystone walling, thatching, cordage, ax throwing, salt harvesting). Gold(C)+4
+  (`c_gold_beat239.json`: HOA-dog anger-received, surgery-guilt-voicemail redirect-drops-frame,
+  business-partner-skimming say-plain-thing, accidental-ex-like playful-no-question). Mini
+  unreachable, 100+ consecutive beat, same signature, not re-diagnosed. All changed files synced
+  to all dist copies, `dist/hearth-0.2.zip` rebuilt and MD5-verified byte-for-byte. Sonali: push
+  v1.0 tag when ready. Only Sonali-physical: notarization + F5 voice dial + Mac Mini check.
 - **2026-09-06 (beat235, heartbeat, sonali-6a):** All 5 ship-gate items above remain CLOSED.
   1 peer session on arrival (unrelated project) — no broadcast needed. Memory 81% free early
   (queue between batteries), dropped to 20% once `battery11_imagination_bank` launched later
