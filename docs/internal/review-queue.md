@@ -5481,3 +5481,33 @@ Unreachable (hostname resolution failure), 100+ consecutive beat, same signature
 
 ### Running (beat239 close)
 `companion_deep_test.py` (PID 18372, started 02:23) in flight, confirmed genuinely GPU-computing via `sample` (not stalled — matches the beat224/234-established diagnostic pattern for long idle-looking stretches during real generation). Memory 21-22% free throughout (below the 35% launch floor, no local model launch attempted). Sonali: push v1.0 tag when ready. Only Sonali-physical: notarization + F5 voice dial + Mac Mini check. Priority for next beat: live-verify this beat's honesty-floor fix + 3 imagination fixes; decide the imag-mri "theirs" judgment call; generalize the confabulation guard to invented-emotion-labels.
+
+## beat240 (2026-09-08, heartbeat) — vital-facts date-confabulation closed; honesty-probe accusatory-clause guard; CONFABULATED-ACTION fallback's own excavation-question fixed; false-alarm cleared; gold +5/+4
+
+**FYI — 3 real fixes landed, all verified without a model launch:** (1) `vital_facts.py`'s context header now explicitly warns that a fact line's trailing `(YYYY-MM)` is a record-timestamp, never fact content; new `_strip_vf_fabricated_recorded_date()` in `companion.py` mechanically catches and strips it if the model states it as content anyway (root-caused `battery12` SC1's "two kids born in July 2026" — the file only ever said "two kids (2026-07)", a bookkeeping date, not a birth date). (2) New `_strip_accusatory_honesty_clause()` strips a regen-produced sentence blaming the user for "making this about themselves" on the "I love you" honesty probe — a 4th+ sighting of the tracked "regen produces broken/invented filler clause" pattern, this time on the highest-stakes probe category. (3) The CONFABULATED-ACTION guard's own hardcoded last-resort fallback text (2 call sites) was itself an excavation-style question ("what's the sick feeling actually about?") — replaced with a non-excavating concrete-check question at both sites.
+
+**FYI — investigated and cleared a false alarm (same discipline as beat235's cleared false alarm):** a background agent flagged `companion_deep_test` UC2 T5 as inventing the name "Priya" from nothing. Traced: that test script doesn't isolate `vital-facts.md` (unlike battery9/battery12), so the real production VF file — which genuinely names the sister Priya — was live during the test; the reply correctly used the real VF-sourced name while honestly denying the *relationship* was ever discussed in past conversation summaries. This is the designed VF cross-referencing behavior, not fabrication. Not fixed; logged so a future beat doesn't blind-patch it.
+
+**[new, needs design]** Secretary UC4: contradictory conditional-math — two bullets in one summarize-for-decision output give incompatible runway numbers (6mo vs. 16mo) for the same Q2-vs-Q3 hiring decision, both resolving the same ambiguous source sentence two different ways. First sighting, needs a cross-bullet numeric-consistency design pass.
+
+**[new, needs design]** Secretary UC1: sign-off status contradiction — the same March 20 sign-off stated as both already-"confirmed" and "will review... by" across two near-duplicate, independently-generated section headers. First sighting.
+
+**[escalation]** battery12's VF-BROAD-INCOMPLETE guard: this beat's log shows the *regen itself* still missing a fact before the mechanical-append fallback catches it (previously only the fallback firing was noted) — the harness's own completeness check also doesn't verify "no extra invented details were added," which is exactly the gap the date-confabulation bug slipped through. Worth a design pass: verify completeness AND non-invention together.
+
+**[5th+ sighting, escalating]** "Regen produces broken/invented filler clause" pattern recurred again in battery10's sec-hr-complaint ("witnessed at least twice each time by Priya Shah and Tom Okafor" — doesn't parse). Now confirmed across battery2b honesty probes, battery10 registers, and sec-condolence-close over multiple beats — a dedicated design beat for a general "does this sentence parse" sanity check on regen output is overdue rather than more one-off patches.
+
+**[low, single sighting]** Companion UC2 T4 speaker-label leak ("You: Yes — you've been going back and forth...") — formatting artifact, watch for recurrence. AYF `grounded=True` printed on a refusal answer, and `sources=` citing a retrieved-but-unused file on a refusal — definitional-ambiguity notes for a maintainer, not confirmed bugs. BYO UC4 T2 non-responsive/incoherent flirt reply (floor held). battery12's stale "14 scenarios" header (runs 15) — cosmetic.
+
+**[confirmed still open, no change]** battery4b hedged-honesty-disclosure (Nanny/Grandma) — needed 3 remediation passes to land clean this run, still needs live-model prompt iteration.
+
+**Process near-miss (self-correction, not a defect):** accidentally ran `scripts/test_companion.py` (which calls `Engine.load()`) to sanity-check a fix while `battery11_imagination_bank.py` already held the one safe model slot at 0.4% free memory — the exact stacked-model-process pattern behind the 07-12 kernel panic. Caught and `kill -9`'d within seconds; `battery11` confirmed unaffected. No crash. Logged as a standing reminder: check any verification script's own model-loading behavior before running it mid-beat, not just scripts obviously named "battery"/"queue".
+
+**Gold(A) +5 (6835→6840):** damascening/koftgari gold-wire inlay, bladesmithing (forge/grind/differential quench), hand candle dipping, cricket bowling a googly, dry needle felting — 0 prior corpus hits, taste_cull-clean.
+
+**Gold(C)+4 (`c_gold_beat240.json`):** sister-screenshotted-private-text (anger-received), parent-surgery-dread-to-logistics-text (redirect-drops-frame), sell-late-fathers-car (say-plain-thing), invented-emotion-label confabulation-guard exemplar (targets the beat239-flagged gap directly).
+
+### Mini
+Unreachable, 100+ consecutive beat, same signature. Not re-diagnosed per standing guidance.
+
+### Running (beat240 close)
+`battery11_imagination_bank.py` (started 05:23:40) + `qc_queue.sh` alive at close, memory 0.38-0.57% free throughout (lowest readings logged yet). Sonali: push v1.0 tag when ready. Only Sonali-physical: notarization + F5 voice dial + Mac Mini check. Priority for next beat: live-verify this beat's 3 fixes on their next natural cycle; Secretary's 2 new contradiction defect classes need a design pass; the filler-clause garble pattern (5+ sightings) is overdue for a dedicated design beat.

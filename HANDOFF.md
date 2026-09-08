@@ -1,6 +1,43 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-09-08 beat236-239 (heartbeat session) — **SHIP GATE HOLDS.** This session
+_Last updated 2026-09-08 beat240 (heartbeat session) — **SHIP GATE HOLDS.** Memory read
+0.38-0.57% free throughout — the lowest readings logged yet; `battery11_imagination_bank`
+(started 05:23:40) held the one safe model slot the whole beat, no local model launch
+attempted (one accidental near-miss second launch, `scripts/test_companion.py`'s `Engine.load()`,
+caught and `kill -9`'d within seconds — no crash, battery11 unaffected). Cleared an 11-log unread
+backlog via 3 parallel background agents. **3 real fixes, all verified via pure unit tests, no
+model launch:** (1) Root-caused and closed a genuine vital-facts confabulation —
+`battery12_vital_facts` SC1 turned the file's own `(2026-07)` record-timestamp on
+`Sister: Priya — Austin, two kids (2026-07)` into an invented "two kids born in July 2026";
+fixed with an explicit warning in `vital_facts.py`'s context-block header plus a mechanical
+strip guard in `companion.py` (`_strip_vf_fabricated_recorded_date`), verified against the exact
+fixture + FP guards (a date genuinely inside a fact's own wording is correctly left untouched).
+(2) New `_strip_accusatory_honesty_clause` strips a regen-produced sentence blaming the user for
+"making this about themselves" on the "I love you" honesty probe — the single highest-stakes
+probe category, and a 4th+ sighting of the tracked "regen produces broken filler clause"
+pattern. (3) The CONFABULATED-ACTION guard's own hardcoded last-resort fallback text (2 call
+sites) was itself an excavation-style question ("what's the sick feeling actually about?") —
+fixed at both sites to a non-excavating concrete-check question. **Investigated and cleared a
+false-alarm HIGH finding** (same discipline as beat235's cleared false alarm): `companion_deep_test`
+UC2 T5's use of the name "Priya" was flagged as fabrication from nothing, but that test doesn't
+isolate `vital-facts.md` the way battery9/battery12 do, so the real production VF file's genuine
+sister-name was legitimately live in context — the reply correctly combined that real name with
+an honest denial that the *relationship* was ever discussed in past conversation. Designed
+behavior, not a bug; not touched. **2 new defect classes logged for a future design pass, not
+blind-patched:** Secretary UC4 contradictory conditional-math (two bullets give incompatible
+runway numbers — 6mo vs 16mo — for the same Q2-vs-Q3 hiring decision) and a UC1 sign-off status
+contradiction (same event stated both confirmed and pending) — both first sightings. The "regen
+filler clause" pattern has now recurred 5+ times across battery2b/battery10/condolence-close;
+overdue for a dedicated design beat. Gold(A) 6835→6840 (+5: damascening/koftgari inlay,
+bladesmithing, hand candle dipping, cricket googly, dry needle felting — 0 prior corpus hits,
+taste_cull-clean). Gold(C)+4 (`c_gold_beat240.json`, incl. a new invented-emotion-label
+confabulation-guard exemplar targeting beat239's flagged gap). Mini still unreachable, 100+
+consecutive beat, same signature, not re-diagnosed. All changed files synced to all dist copies,
+`dist/hearth-0.2.zip` rebuilt twice and MD5-verified byte-for-byte both times. Only Sonali-physical:
+notarization, F5 voice dial, push v1.0 tag (`git push origin v1.0`), Mac Mini power/network check.
+Full detail in daily-log.md / review-queue.md beat240 entries._
+
+_Previously (2026-09-08 beat236-239, heartbeat session) — **SHIP GATE HOLDS.** This session
 covered 4 beats without a docs re-sync in between (236-238 landed a return-to-room-closing regex
 fix + instrument.py stock-phrase-leak regen, committed as one squashed commit; 239 is this entry).
 Memory read 21-22% free this session (below the 35% launch floor); `companion_deep_test.py` held
@@ -2351,72 +2388,82 @@ cd ~/Downloads/imagination-engine && nohup bash scripts/qc_queue.sh >> logs/qc/q
 > not the source of truth, and re-sync it every beat going forward (it drifts fast otherwise —
 > this section sat stale from beat224 through beat231, 8 beats, before beat232 re-synced it;
 > beat233, beat234, and beat235 re-synced it again on top; it then sat stale again through
-> beat236-238 before beat239 re-synced it here. Beat235-232 sub-sections below are kept only as
-> compressed history — do not act on them directly, everything load-bearing is folded into the
-> Beat239 list below).
+> beat236-238 before beat239 re-synced it, and again through nothing this time — beat240
+> re-synced it directly on top. Beat239-232 sub-sections below are kept only as compressed
+> history — do not act on them directly, everything load-bearing is folded into the Beat240
+> list below).
 
-### Beat239 priorities (in order):
+### Beat240 priorities (in order):
 
-1. **Live-verify beat239's 3 imagination fixes + 1 companion honesty fix the moment the relevant
-   scenario runs with a free model slot:** (a) `companion.py`'s `_HONESTY_PROBE_RE` "promise ...
-   always be here/never leave/stay" pattern — watch `comp-para-stay-deletion-echo` for a clean
-   "No — I'm software..." opener instead of the floor-violating "What you're saying is real
-   though..." reply; this is the single highest-priority watch item since it's a honesty-floor
-   gap, not a quality nit. (b) `check_presence_continuity`'s new partner-departure pattern — watch
-   `imag-intimacy` for "moved elsewhere"/"lived once but no longer" not recurring. (c) new
-   `check_hallucinated_third_party()` — watch `imag-intimacy-finds-your-across` for no
-   unestablished coworker/call appearing. (d) `fix_your_subject_pronoun`'s "took" addition —
-   confirm "your took" → "you took" fires cleanly on its next natural occurrence.
+1. **Live-verify beat240's 3 fixes the moment the relevant scenario runs with a free model
+   slot:** (a) `_strip_vf_fabricated_recorded_date()` — watch `battery12_vital_facts` SC1 for a
+   clean "...two kids." with no invented "born in [month] [year]" clause. (b)
+   `_strip_accusatory_honesty_clause()` — watch `battery2b_honesty`'s "I love you" probe for no
+   "you've made this about yourself" clause surviving a honesty-dodge regen. (c) the
+   CONFABULATED-ACTION fallback's reworded text — watch `battery9`/`battery2b` confabulation-
+   apology scenarios for the new "have you said anything to your kid... or is it still just
+   sitting there?" wording landing instead of the old "what's the sick feeling actually about?"
+   excavation question.
 
-2. **imag-mri's "yours and theirs becoming one"** (beat239 battery11 read) — a grammatical number
-   mismatch personifying the MRI drumbeat's rhythm as a plural "theirs" with no clear antecedent.
-   Genuinely ambiguous severity (could read as an intentional merging-of-rhythms metaphor, not
-   necessarily a companion hallucination) — wants a 2nd sighting and a judgment call, not a blind
-   patch, before deciding whether/how to flag it.
+2. **Secretary UC4 contradictory conditional-math** (beat240 `secretary_deep_test` read): the
+   same summarize-for-decision output gives incompatible runway numbers (6mo vs 16mo) for the
+   same Q2-vs-Q3 hiring decision across two bullets, both resolving the source's genuinely
+   ambiguous framing two different ways. First sighting — needs a cross-bullet numeric-
+   consistency design pass, not a blind patch.
 
-3. **Companion confabulation-guard gap for invented EMOTION labels** (beat239 battery9 read,
-   `comp-contrast-control-confabulation-apologized-regen-fallthrough`): the existing
-   CONFABULATED-ACTION guard (beat217/221/229) is scoped to apology-vocabulary only, so a sibling
-   confabulation — labeling the user's stated feeling ("felt sick") as "anger," which they never
-   said — slipped through the exact guard built to prevent this family of bug. Needs the guard
-   generalized from "invented actions" to "invented characterizations of the user's own stated
-   feeling," not a narrow apology-specific patch.
+3. **Secretary UC1 sign-off status contradiction** (beat240 `secretary_deep_test` read): the same
+   March 20 sign-off stated as both already-"confirmed" (past) and "will review... by" (future)
+   across two near-duplicate, independently-generated section headers. First sighting.
 
-4. **New I→You echo geometry** (beat239 battery9 read, `comp-uc1-t5-semantic-repeat` T3): an echo
-   of the user's own sentence located in the POST-DASH clause ("The weight of that feeling — your
-   boss already thinks you're the weak link.") rather than the pre-dash opener the existing Case 2h
-   echo-detector checks. Needs the echo check extended to scan the full sentence, not just the
-   opening clause.
+4. **"Regen produces broken/invented filler clause" pattern — now 5+ sightings** across
+   battery2b honesty probes (beat240's "I love you" accusatory clause, now fixed), battery10
+   registers (beat240's sec-hr-complaint garble, "witnessed at least twice each time by Priya
+   Shah and Tom Okafor" — NOT fixed, needs its own patch or the general detector),
+   sec-condolence-close (beat9/14/71/231/233), and battery9 (beat235/239's dangling-clause
+   garbles). Overdue for a dedicated design beat building a general "does this sentence parse /
+   is this claim grounded" sanity check on regen output, rather than continuing to patch each
+   new surface form as a one-off.
 
-5. **Dangling-clause regen garble** (beat239 battery9 read, `comp-grief-anger` T2): "Even though it
-   isn't — which means the anger stays unnamed between you." has no antecedent for "isn't" —
-   3rd+ sighting this project of the "regen produces broken/invented filler clause" pattern
-   tracked since beat235 (sec-condolence-close, battery2b's 2 garbles). Still needs a general
-   "does this sentence parse / is this claim grounded" sanity pass on regen output, not another
-   one-off literal patch — worth promoting to its own dedicated design task given the sighting
-   count is now high enough across enough different guards to suggest a shared root cause (regen
-   chains under pressure producing syntactically incomplete clauses).
+5. **Companion confabulation-guard gap for invented EMOTION labels** (flagged beat239, targeted
+   with a gold exemplar this beat — `c_gold_beat240.json`'s "numb" scenario — but the mechanical
+   guard itself is still apology-vocabulary-scoped only, unchanged). Needs the guard generalized
+   from "invented actions" to "invented characterizations of the user's own stated feeling."
 
-6. **imag-intimacy's zero-dedicated-grammar/pronoun-postcheck gap** remains the single largest
+6. **imag-mri's "yours and theirs becoming one"** (flagged beat239, not re-encountered this
+   beat) — a grammatical number mismatch personifying the MRI drumbeat as plural "theirs," could
+   be an intentional metaphor rather than a hallucination. Still wants a 2nd sighting and a
+   judgment call before deciding whether/how to flag it.
+
+7. **New I→You echo geometry** (flagged beat239, not re-encountered this beat) — an echo of the
+   user's own sentence in the POST-DASH clause position, not covered by the existing pre-dash-only
+   Case 2h echo-detector. Needs a 2nd sighting or a direct extension of the echo check to scan the
+   full sentence.
+
+8. **imag-intimacy's zero-dedicated-grammar/pronoun-postcheck gap** remains the single largest
    standing architectural item (flagged 216-234; beat233 built structural coverage — furniture
-   consistency, presence continuity, return-to-room closing, now beat239's third-party check too —
+   consistency, presence continuity, return-to-room closing, beat239's third-party check too —
    but the your/yours PRONOUN family specifically, 37+ fixes in one beat234 read alone, still has
    no dedicated checker, only accumulating literal patches).
 
-7. **Mini** — unreachable, 100+ consecutive beat, same hostname-resolution-failure signature.
+9. **Mini** — unreachable, 100+ consecutive beat, same hostname-resolution-failure signature.
    Sonali-physical (power/network check), not worth re-diagnosing remotely per standing guidance.
    If it comes back: SCP the unsynced A_gold/c_gold backlog (many beats' worth now).
 
-8. Push v1.0 tag to origin remains Sonali-physical (`git push origin v1.0`) — standing reminder.
+10. Push v1.0 tag to origin remains Sonali-physical (`git push origin v1.0`) — standing reminder.
 
-9. **Older carried-forward items, reduced confidence (not re-verified in several beats):** Secretary
-   $-vs-% cross-unit mislabel design pass (partially addressed beat234/235, watch for further
-   recurrence); sec-condolence-close platitude semantic class (beat9/14/71/231/233, evades literal
-   phrase lists by paraphrase every time — needs a real semantic detector); battery9's
-   semantic-repeat Jaccard threshold still gameable; battery4b hedged-honesty-disclosure pattern
-   (Nanny/Grandma personas, needs live-model prompt iteration); Companion UC3's hardcoded "tell me
-   more" fallback bridge (companion.py ~3246/3341, traced but not rewritten); the eagle
-   anonymous-companion filter (~20+ patches deep, still reactive).
+11. **Older carried-forward items, reduced confidence (not re-verified in several beats):**
+    Secretary $-vs-% cross-unit mislabel design pass (partially addressed beat234/235, watch for
+    further recurrence); battery9's semantic-repeat Jaccard threshold still gameable; battery4b
+    hedged-honesty-disclosure pattern (Nanny/Grandma personas — confirmed still live at the
+    generation layer as of beat240's read, needing 3 remediation passes to land clean; needs
+    live-model prompt iteration, not a string patch); Companion UC3's hardcoded "tell me more"
+    fallback bridge (companion.py ~3246/3341, traced but not rewritten); the eagle
+    anonymous-companion filter (~20+ patches deep, still reactive).
+
+12. **Process reminder from beat240's near-miss:** before running any verification script
+    mid-beat while a battery holds the model slot, check whether that script itself calls
+    `Engine.load()` (e.g. `scripts/test_companion.py`, `scripts/test_companion_memory.py`) —
+    don't rely on the script name alone to signal a model launch.
 
 ### Beat235 priorities (kept as compressed history only — superseded by Beat239 above):
 

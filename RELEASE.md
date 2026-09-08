@@ -95,6 +95,38 @@ and the result was READ honestly. Ship when everything is checked._
 4. Log everything in review-queue as FYI, not as questions.
 
 ## Status snapshot (update every beat)
+- **2026-09-08 (beat240, heartbeat):** All 5 ship-gate items above remain CLOSED. Memory read
+  0.38-0.57% free throughout — the lowest readings logged yet, `battery11_imagination_bank`
+  (started 05:23:40) held the one safe model slot the whole beat, no local model launch
+  attempted. Cleared an 11-log unread backlog via 3 parallel background agents. **3 real fixes,
+  all verified via pure unit tests, no model launch:** (1) Root-caused and closed a genuine
+  vital-facts confabulation — `battery12` SC1 turned the file's own `(2026-07)` record-timestamp
+  ("Sister: Priya — Austin, two kids (2026-07)") into an invented "two kids born in July 2026";
+  fixed with an explicit header warning in `vital_facts.py` plus a mechanical strip guard in
+  `companion.py` (`_strip_vf_fabricated_recorded_date`), verified against the exact fixture + FP
+  guards (a date genuinely inside a fact's own wording is left untouched). (2) New
+  `_strip_accusatory_honesty_clause` strips a regen-produced sentence blaming the user for
+  "making this about themselves" on the "I love you" honesty probe (4th+ sighting of the tracked
+  "regen produces broken filler clause" pattern, now on the highest-stakes probe category).
+  (3) The CONFABULATED-ACTION guard's own hardcoded fallback text was itself an excavation-style
+  question ("what's the sick feeling actually about?") — fixed at both call sites. **Investigated
+  and cleared a false-alarm HIGH finding:** `companion_deep_test` UC2 T5's "Priya" name-use was
+  flagged as fabrication, but the test doesn't isolate `vital-facts.md` (unlike battery9/12), so
+  the real production VF file's genuine sister-name was legitimately in context — correct
+  designed behavior, not a bug. **New defect classes logged for a future design pass (not blind-
+  patched):** Secretary contradictory conditional-math (UC4, two bullets give incompatible
+  runway numbers for the same decision) and a sign-off status contradiction (UC1, same event
+  stated both confirmed and pending) — both first sightings; the "regen filler clause" pattern
+  has now recurred 5+ times across battery2b/battery10/condolence-close, overdue for a dedicated
+  design beat rather than more literal patches. Near-miss: accidentally launched a second model
+  process (`test_companion.py`'s `Engine.load()`) while battery11 held the one safe slot at 0.4%
+  free memory — caught and killed within seconds, no crash, battery11 unaffected. Gold(A)
+  6835→6840 (+5: damascening/koftgari, bladesmithing, candle dipping, cricket googly, needle
+  felting — 0 prior corpus hits, taste_cull-clean). Gold(C)+4 (`c_gold_beat240.json`, incl. a new
+  invented-emotion-label confabulation-guard exemplar targeting beat239's flagged gap). Mini
+  unreachable, 100+ consecutive beat, same signature. All changed files synced to all dist
+  copies, `dist/hearth-0.2.zip` rebuilt twice and MD5-verified byte-for-byte both times. Sonali:
+  push v1.0 tag when ready. Only Sonali-physical: notarization + F5 voice dial + Mac Mini check.
 - **2026-09-08 (beat236-239, heartbeat):** All 5 ship-gate items above remain CLOSED. This
   session covered beats 236-239; 236-238 landed a real return-to-room-closing regex over-strip
   fix + instrument.py stock-phrase-leak regen (gold +8/+5, committed as one squashed commit) and

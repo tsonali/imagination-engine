@@ -302,7 +302,11 @@ class VitalFacts:
             "OTHER person (a sister, brother, friend, partner, etc.) — their details, "
             "like a sibling's kids or job, are never the user's own; do not say 'your "
             "kids' or otherwise attribute a listed person's facts to the user unless "
-            "the user themself is who the line describes) -----\n"
+            "the user themself is who the line describes. The trailing (YYYY-MM) at "
+            "the end of each line is WHEN THIS LINE WAS RECORDED in the file, not a "
+            "fact about its content — never state it as a birth date, hire date, or "
+            "any other event date; only use a date if it appears explicitly inside "
+            "the fact's own wording) -----\n"
             + content
             + "\n----- END VITAL FACTS -----"
         )

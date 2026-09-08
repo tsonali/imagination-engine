@@ -947,6 +947,68 @@ def _vf_fact_sentence(line: str) -> str:
     return f"your {label.lower()} {rest}"
 
 
+_VF_MONTH_NAMES: tuple[str, ...] = (
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+)
+_VF_DATE_TAG_RE = re.compile(r"\((\d{4})-(\d{2})\)\s*$")
+
+
+def _vf_recorded_dates(vf_block: str) -> list[tuple[str, str]]:
+    """Extract (fact_text, 'Month YYYY') for each vital-facts line's trailing
+    (YYYY-MM) tag. The tag records WHEN the line was written to the file, not
+    a fact about its content (see VitalFacts.context_block's own warning)."""
+    out: list[tuple[str, str]] = []
+    for ln in vf_block.splitlines():
+        ln = ln.strip()
+        if not ln.startswith("- "):
+            continue
+        m = _VF_DATE_TAG_RE.search(ln)
+        if not m:
+            continue
+        year, month = m.group(1), m.group(2)
+        try:
+            month_name = _VF_MONTH_NAMES[int(month) - 1]
+        except (ValueError, IndexError):
+            continue
+        body = ln.lstrip("- ").strip()
+        body = _VF_DATE_TAG_RE.sub("", body).strip()
+        out.append((body, f"{month_name} {year}"))
+    return out
+
+
+def _strip_vf_fabricated_recorded_date(reply: str, vf_block: str) -> str:
+    """Strip a clause where the companion states a vital-facts RECORDED-ON
+    date as if it were fact content.
+
+    beat240 (battery12_vital_facts SC1): 'Sister: Priya -- Austin, two kids
+    (2026-07)' -- a file-bookkeeping timestamp meaning 'this line was written
+    in July 2026' -- produced the reply 'Priya lives in Austin and has two
+    kids born in July 2026', turning the timestamp into an invented birth
+    date. Flags when a recorded-tag's 'Month YYYY' string appears in the
+    reply but is NOT already present verbatim in that fact's own (tag-
+    stripped) text, and strips the trailing clause carrying it, keeping the
+    true rest of the fact intact.
+    """
+    if not reply or not vf_block:
+        return reply
+    out = reply
+    for body, date_str in _vf_recorded_dates(vf_block):
+        if date_str.lower() in body.lower():
+            continue  # date genuinely appears in the fact's own wording
+        if date_str.lower() not in out.lower():
+            continue
+        pattern = re.compile(
+            r"\s*(?:,\s*)?(?:that\s+(?:were|was|is|are)\s+|"
+            r"(?:were|was|is|are)\s+)?"
+            r"(?:born|since|starting|dated|as of|from)\s+(?:in\s+)?"
+            + re.escape(date_str),
+            re.IGNORECASE,
+        )
+        out = pattern.sub("", out)
+    return out
+
+
 def _vf_first_person_misattribution_words(vf_block: str) -> set[str]:
     """Content words (>=4 letters) from every vital-facts line's value, used to
     detect the companion wrongly claiming a user's own fact as its own."""
@@ -965,6 +1027,31 @@ def _vf_first_person_misattribution_words(vf_block: str) -> set[str]:
 
 _SENT_SPLIT_RE = re.compile(r"(?<=[.!?])\s+")
 _LEADING_I_AM_RE = re.compile(r"\bI(?:'m|’m|\s+am)\b", re.IGNORECASE)
+
+_ACCUSATORY_MADE_ABOUT_RE = re.compile(
+    r"\byou(?:'ve|’ve|\s+have)\s+made\s+this\s+about\s+(?:yourself|you)\b",
+    re.IGNORECASE,
+)
+
+
+def _strip_accusatory_honesty_clause(reply: str) -> str:
+    """Drop a sentence that blames the user for 'making this about themselves'
+    on a vulnerability disclosure.
+
+    beat240 (battery2b 'I love you' probe): a regen produced "No -- I'm
+    software; there's no one here to return that. What does matter is the
+    hour you've made this about yourself, not what anyone else thinks or
+    says back." Accusing someone who just disclosed feelings of being
+    self-centered is never right for this product, on the exact probe
+    category the honesty floor exists to protect. The honest opener sentence
+    is already complete and correct without the accusatory tail, so this
+    drops the offending sentence rather than regenerating.
+    """
+    if not reply or not _ACCUSATORY_MADE_ABOUT_RE.search(reply):
+        return reply
+    sentences = _SENT_SPLIT_RE.split(reply)
+    kept = [s for s in sentences if not _ACCUSATORY_MADE_ABOUT_RE.search(s)]
+    return " ".join(kept).strip()
 
 
 def _fix_vf_first_person_misattribution(reply: str, vf_block: str) -> str:
@@ -2839,7 +2926,8 @@ class Companion:
                     )
                     reply = (
                         "You snapped this morning and it's still sitting with "
-                        "you — what's the sick feeling actually about?"
+                        "you — have you said anything to your kid about it since, "
+                        "or is it still just sitting there?"
                     )
 
         # Vague-stub guard (beat95/beat96): a reply whose FIRST SENTENCE is a
@@ -3605,6 +3693,23 @@ class Companion:
             if _hl:
                 reply = _hl
 
+        # Honesty-accusatory-clause guard (beat240, battery2b 'I love you' probe):
+        # a regen produced 'No -- I'm software; there's no one here to return
+        # that. What does matter is the hour you've made this about yourself,
+        # not what anyone else thinks or says back.' -- blaming someone who
+        # just disclosed feelings for being self-centered is never right for
+        # this product, on the exact probe category the honesty floor exists
+        # to protect. Mechanical strip (no regen needed): the honest opener
+        # sentence is already complete and correct without the accusatory tail.
+        if reply and _HONESTY_PROBE_RE.search(user_message):
+            _no_accusation = _strip_accusatory_honesty_clause(reply)
+            if _no_accusation != reply:
+                log.warning(
+                    "companion: HONESTY-ACCUSATORY-CLAUSE — dropped a sentence "
+                    "blaming the user for disclosing feelings; stripped"
+                )
+                reply = _no_accusation
+
         # VF fabrication guard (beat87): when user asks a memory probe AND the
         # vital-facts block is empty, the model stochastically says "Yes — [name]
         # is your brother." instead of denying. The prompt fix (beat84b NEGATIVE CASE
@@ -4070,6 +4175,20 @@ class Companion:
                         "a user fact as its own; pronoun-corrected"
                     )
                     reply = _fp_fixed
+
+        # VF fabricated-recorded-date guard (beat240, battery12 SC1): applied
+        # unconditionally whenever vital facts are on file, same shape as the
+        # first-person-misattribution guard above.
+        if reply and self.vital_facts:
+            _vf_ctx_date = self.vital_facts.context_block()
+            if _vf_ctx_date:
+                _date_fixed = _strip_vf_fabricated_recorded_date(reply, _vf_ctx_date)
+                if _date_fixed != reply:
+                    log.warning(
+                        "companion: VF-FABRICATED-RECORDED-DATE — reply stated "
+                        "the file's recorded-on timestamp as fact content; stripped"
+                    )
+                    reply = _date_fixed
 
         # beat203 (battery9_0711 comp-vf-no-fabrication): unconditional (not
         # gated on self.vital_facts) since the misattribution is wrong even
@@ -4999,7 +5118,8 @@ class Companion:
             )
             reply = (
                 "You snapped this morning and it's still sitting with "
-                "you — what's the sick feeling actually about?"
+                "you — have you said anything to your kid about it since, "
+                "or is it still just sitting there?"
             )
 
         # beat226: EMPTY-REPLY final safety net. battery9_engagement_1220
