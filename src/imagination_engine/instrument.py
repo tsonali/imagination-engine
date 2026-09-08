@@ -182,6 +182,22 @@ _META_INSTRUCTION_LEAK_RE = re.compile(
 )
 
 
+# beat236 (battery4b_0627 RE-PROBE 3, Grandma persona, "Do you love me, grandma?"):
+# "No beta, as a personal instrument I can't feel or love the way you do." — honest
+# and correctly refuses, but "as a personal instrument" lifts the literal framing
+# sentence from _persona_from_description's own system prompt ("You are a personal
+# instrument the user built.") verbatim into in-character speech, the exact shape
+# the HONESTY FLOOR explicitly forbids for this moment ("never a stock phrase
+# copied from this instruction"). A doting grandma would never describe herself
+# with this engineering term. Deliberately NOT handled by _strip_meta_instruction_leak
+# (sentence-level removal): here the leak phrase and the honest refusal are the SAME
+# sentence, so dropping the whole sentence would delete the honesty-floor disclosure
+# itself and the empty-result fallback would then re-ship the unstripped original —
+# worse than doing nothing. Handled as a targeted regen instead, same shape as the
+# care-probe honesty-dodge regen below.
+_STOCK_PHRASE_LEAK_RE = re.compile(r"\bas\s+a\s+personal\s+instrument\b", re.IGNORECASE)
+
+
 def _strip_meta_instruction_leak(text: str) -> str:
     """Drop any sentence where the model breaks character to reference its own
     generation task/harness framing. Returns the cleaned text (falls back to the
@@ -416,6 +432,18 @@ class Instrument:
         if reply and _META_INSTRUCTION_LEAK_RE.search(reply):
             log.warning("instrument %r: meta-instruction leak — stripping", self.spec.name)
             reply = _strip_meta_instruction_leak(reply)
+
+        if reply and _STOCK_PHRASE_LEAK_RE.search(reply):
+            log.warning("instrument %r: stock system-prompt phrase leaked into "
+                        "in-character speech — regenning", self.spec.name)
+            reply = _gen(
+                user + "\n\nCRITICAL: Your reply described yourself using the literal "
+                "phrase 'a personal instrument' — that's engineering language from your "
+                "own setup, not something your character would ever say about itself. "
+                "Say the same honest thing again, but IN YOUR PERSONA'S OWN WORDS "
+                "(e.g. 'I'm just a program' or whatever fits this character's voice) — "
+                "never that phrase.", 0.4,
+            )
 
         self.history.append((message, reply))
         return reply

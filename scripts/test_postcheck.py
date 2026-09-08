@@ -12,7 +12,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from imagination_engine.postcheck import (
     find_degeneration_start, trim_degenerate_tail, degeneration_report,
-    drop_hallucinated_he_eagle)
+    drop_hallucinated_he_eagle, check_return_to_room_closing,
+    strip_back_instruction_leaks)
 
 CLEAN_OPENING = """\
 Lie back on your bed and allow yourself to sink down beneath the weight of a cool sheet against you. Your eyelids flutter softly as they close, shielding out light for now. The only noise is raindrops pelleting steadily against tin roofing — each tap easing into a gentle rhythm that swallows up racing thoughts about work.
@@ -91,6 +92,96 @@ FP_181 = [
 for s in FP_181:
     cleaned, dropped = drop_hallucinated_he_eagle(s)
     check(f"FP kept: {s[:50]!r}...", dropped == 0 and cleaned == s)
+
+print("beat237 check_return_to_room_closing (battery11 0906_0646 honest read):")
+# True positives — genuine closings that must be detected.
+TP_237 = [
+    "The eyes can open softly whenever they feel ready.",  # modal verb between eyes/open
+    "The eyes open softly when they are ready.",
+    "whenever the eyes open when they feel like it, coming back to the room",
+    "Open your eyes whenever they feel ready.",
+    "Your eyes can open when they're ready.",  # gold-corpus phrasing, risk-checked
+    "Invite your eyes to open whenever they feel ready.",
+]
+for s in TP_237:
+    check(f"TP detected: {s[:50]!r}...", check_return_to_room_closing(s))
+
+# False negatives that must STAY false — no closing cue at all, scene just fades.
+FN_237 = [
+    "as you allow the scene to begin fading.",
+    "each beat intentional like a reminder of today's flight over the Rocky Mountains.",
+    "before you come fully forward again. Take one breath here, and then let it go.",
+]
+for s in FN_237:
+    check(f"FN stays undetected: {s[:50]!r}...", not check_return_to_room_closing(s))
+
+print("beat237 regression: verify_beat237_0907_1835.log honest read (fallback appeared to fix "
+      "the missing-closing-beat defect, but the SAME log showed 5/9 scripts still shipping with "
+      "NO cue at all, despite check_return_to_room_closing(closing) having passed right after "
+      "BACK generation). Root cause: _BACK_LEAK_PATTERNS' '^Eyes open' / '^Open ... when ready' "
+      "entries were meant to strip a bare echoed MOVE LABEL ('EYES OPEN.' with nothing else) but "
+      "matched ANY sentence starting with those words -- including the single most natural real "
+      "phrasing of the required cue -- so strip_back_instruction_leaks() (run later, on the "
+      "assembled `full` script) deleted the exact sentence the earlier check had just validated.")
+
+# A genuine, non-leaked closing sentence phrased the natural way the model itself uses
+# elsewhere in this exact log ("Invite your eyes to open whenever they feel ready." --
+# imag-eagle-wildlife-plural PASS run in verify_beat237_0907_1835.log) but starting with the
+# trigger words instead -- this is the shape that was being silently destroyed.
+LEGIT_CUE_SENTENCES = [
+    "Eyes open softly whenever you're ready, carrying this back with you into the room.",
+    "Open your eyes when you feel ready, noticing the quiet weight of the room around you.",
+]
+for s in LEGIT_CUE_SENTENCES:
+    cleaned, n = strip_back_instruction_leaks(s)
+    check(f"beat237: real cue survives stripping: {s[:55]!r}...", n == 0 and cleaned == s)
+    check(f"beat237: still a valid cue per the checker: {s[:55]!r}...",
+          check_return_to_room_closing(s))
+
+# The original intent of these two patterns (catching the model echoing the bare move LABEL
+# with no real content attached) must still work -- this is a regression guard, not a loosening.
+BARE_LABEL_LEAKS = [
+    "Eyes open.",
+    "Eyes open",
+    "Open when ready.",
+    "Open your eyes when ready.",
+]
+for s in BARE_LABEL_LEAKS:
+    cleaned, n = strip_back_instruction_leaks(s)
+    check(f"beat237: bare label leak still stripped: {s[:55]!r}", n == 1 and cleaned == "")
+
+# Real final-script tails (verbatim from verify_beat237_0907_1835.log) from 3 of the 5
+# scenarios that shipped with the cue silently deleted -- confirms the checker correctly
+# still calls these deficient (the historical bug erased the evidence of what the original
+# cue sentence said, but the resulting text is genuinely cue-less and must stay flagged),
+# and confirms the beat237 generator.py final-stage fallback (added this beat, run AFTER all
+# postprocessing on the actual `full` text) repairs each one when appended.
+REAL_FAIL_TAILS = [
+    # imag-intimacy
+    "The sound of the ceiling fan blades is more distant now. The rhythm that once held you "
+    "settles back into your room here. You carry her hand in yours — not just a touch but the "
+    "lightness when she lets go and moves on immediately, an accident while turning pages "
+    "nearby. Sit with this apartment again for a moment longer. You're sitting where nothing "
+    "has changed except everything is slightly different from before now.",
+    # imag-embodiment-eagle
+    "The cold wind presses into your feathers as you lift with every thermal current. You can "
+    "feel the chair supporting you and notice the quality of your breath: slow, deliberate "
+    "before opening eyes whenever they feel ready.",
+    # imag-eagle-companion-bird-he
+    "You're sitting with weight in whatever part of you is nearest the surface right now — "
+    "whether behind you on a seat or under you on something flat and solid like carpet, wood, "
+    "concrete. Your breath is there too: coming and going slowly in rhythm as usual.",
+]
+FALLBACK_LINE = (
+    "\n\nWhenever you're ready, let your eyes open softly, carrying this back "
+    "with you into the room."
+)
+for tail in REAL_FAIL_TAILS:
+    check(f"beat237: real defect tail still correctly FAILs: {tail[:50]!r}...",
+          not check_return_to_room_closing(tail))
+    repaired = tail.rstrip() + FALLBACK_LINE
+    check(f"beat237: generator.py fallback line repairs it: {tail[:50]!r}...",
+          check_return_to_room_closing(repaired))
 
 print(f"\n{'ALL PASS' if fails == 0 else f'{fails} FAILURES'}", flush=True)
 sys.exit(1 if fails else 0)

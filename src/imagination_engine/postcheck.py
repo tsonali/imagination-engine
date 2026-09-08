@@ -564,7 +564,13 @@ def check_return_to_room_closing(text: str, tail_words: int = 150) -> bool:
     the listener is left with."""
     tail = " ".join(text.split()[-tail_words:])
     return bool(re.search(
-        r"\bopen(?:ing)?\s+your\s+eyes\b|\beyes?\s+(?:flutter(?:ing)?\s+)?open\b|"
+        r"\bopen(?:ing)?\s+your\s+eyes\b|"
+        # beat237 (queue_0906_0646_battery11_imagination_bank.log honest read):
+        # false FAIL on "The eyes can open softly whenever they feel ready" —
+        # a modal verb ("can"/"will"/etc.) between "eyes" and "open" was not
+        # covered by the old adjacent-word pattern. 0 hits risk-checked in
+        # A_gold.jsonl for the modal group.
+        r"\beyes?\s+(?:can|will|may|might|could|should)?\s*(?:flutter(?:ing)?\s+)?open\b|"
         r"\breturn(?:ing)?\s+to\s+(?:the\s+)?room\b|"
         r"\bcome\s+back\s+to\s+(?:the\s+)?room\b|"
         r"\bwhen\s+you'?re?\s+ready\s+to\s+open\b|"
@@ -2014,11 +2020,29 @@ def fix_dropped_apostrophe_t(text: str) -> tuple[str, int]:
 
 _BACK_LEAK_PATTERNS = [
     re.compile(r"\bTwo sentences max\b", re.IGNORECASE),
-    re.compile(r"^Open (?:your eyes )?when ready\b", re.IGNORECASE),
+    # beat237 (queue verify_beat237_0907_1835 honest read): these two patterns were
+    # meant to catch the model echoing a BACK_PROMPT move LABEL verbatim as a bare
+    # heading ("EYES OPEN." / "Open when ready." with nothing else in the sentence)
+    # but were only anchored at sentence-START — that also matches a perfectly
+    # legitimate model-authored closing sentence that starts with the same words
+    # and then CONTINUES with real content ("Eyes open softly whenever you're
+    # ready, carrying this back with you into the room."), which is the single
+    # most natural phrasing of the required return-to-room/eyes-open cue. Root
+    # cause of a live regression: check_return_to_room_closing(closing) correctly
+    # saw the cue present right after BACK generation (beat236/237's check point),
+    # but strip_back_instruction_leaks() — called later on the assembled `full`
+    # script during postprocessing — then deleted the very sentence the check had
+    # just validated, so 5/9 scripts in that battery11 run shipped with NO
+    # return-to-room beat at all despite the beat236/237 check having passed at
+    # generation time. FIX: anchor both patterns to the END of the sentence too
+    # (`$`) so they only match a genuine bare label/template echo with no real
+    # content attached — a natural sentence that continues past the trigger words
+    # no longer matches and survives postprocessing intact.
+    re.compile(r"^Open (?:your eyes )?when ready[.:]?\s*$", re.IGNORECASE),
     re.compile(r"\bSoften the image\b", re.IGNORECASE),
     re.compile(r"\bCarry-back\b", re.IGNORECASE),
     re.compile(r"\bRe-room\b", re.IGNORECASE),
-    re.compile(r"^Eyes open\b", re.IGNORECASE),
+    re.compile(r"^Eyes open[.:]?\s*$", re.IGNORECASE),
     re.compile(r"\bOne final line\b", re.IGNORECASE),
     # "(3) RE-ROOM" instruction bleed: model echoes "or surface where you sit/lie down"
     re.compile(r"\bor surface where you (?:sit|lie)\b", re.IGNORECASE),

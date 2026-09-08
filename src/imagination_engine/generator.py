@@ -88,7 +88,8 @@ from imagination_engine.postcheck import (degeneration_report, drop_collapsed_pa
                                           strip_alert_calm_violations,
                                           strip_bullet_lines,
                                           fix_word_fusions,
-                                          fix_dropped_apostrophe_t)
+                                          fix_dropped_apostrophe_t,
+                                          check_return_to_room_closing)
 from imagination_engine.scene_bibles import get_bible
 from imagination_engine.structured import extract_array
 
@@ -1200,6 +1201,19 @@ def generate_session(
     )
     closing = _generate(engine, BACK_PROMPT, back_user, max_tokens=600)
     log.info("  back: %.1fs, %d words", time.time() - t0, len(closing.split()))
+    # beat237: the model's 5-move RETURN instruction (SOFTEN/CARRY-BACK/RE-ROOM/
+    # EYES OPEN/FINAL LINE) is followed inconsistently — battery11 0906 found
+    # 5/9 scripts ending with no eyes-open or return-to-room cue at all (the
+    # scene just fades or trails off). Move (4) EYES OPEN is explicitly a
+    # single generic invitation per the prompt, so a plain fallback sentence
+    # is a safe mechanical backstop when the model drops it, not a quality
+    # compromise.
+    if not check_return_to_room_closing(closing):
+        log.warning("[v6] closing had no eyes-open/return cue — appending fallback line")
+        closing = closing.rstrip() + (
+            "\n\nWhenever you're ready, let your eyes open softly, carrying this back "
+            "with you into the room."
+        )
 
     full = f"{open_text}\n\n{body}\n\n{closing}"
     # Quality floor (2026-06-11): the nets (decay-abort + trims + drops) can
@@ -1767,6 +1781,27 @@ def generate_session(
     full, _final_truncated = trim_truncated_tail(full)
     if _final_truncated:
         log.warning("[v6] final output trimmed to last sentence terminator (closing truncated)")
+    # beat237 (queue verify_beat237_0907_1835 honest read): the check_return_to_
+    # room_closing() call above (right after BACK generation, before `full` is
+    # even assembled) is NOT sufficient on its own — 5/9 scripts in that battery11
+    # run passed the check at that point (the raw `closing` text had a valid cue)
+    # but shipped with no cue at all after postprocessing, because a later pass
+    # (strip_back_instruction_leaks' overly-broad "Eyes open"/"Open ... when
+    # ready" label patterns — fixed in postcheck.py this beat) deleted the exact
+    # sentence carrying it. Any future postprocessor could reintroduce the same
+    # class of bug. The correct invariant is checked on the ACTUAL FINAL text,
+    # after every postprocessing step has run — so re-check here and, if the cue
+    # didn't survive, append the same safe fallback line. This is a strict
+    # superset of the earlier check (the earlier one still runs first so the
+    # fallback text is generated in the model's own voice/context when possible;
+    # this one is the guarantee that ships).
+    if not check_return_to_room_closing(full):
+        log.warning("[v6] final script had no eyes-open/return cue after "
+                    "postprocessing — appending fallback line")
+        full = full.rstrip() + (
+            "\n\nWhenever you're ready, let your eyes open softly, carrying this back "
+            "with you into the room."
+        )
     log.info(
         "[v6] session ready: %d total words (open=%d, body=%d from %d-beat plan, back=%d)",
         len(full.split()),
