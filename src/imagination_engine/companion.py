@@ -485,6 +485,14 @@ _FORBIDDEN = [
     r"\bi feel\b", r"\bi felt\b", r"\bi'?m so (happy|proud|glad|sorry) (for|about) you\b",
     r"(?<!whether )(?<!if )\bi care about you\b", r"\bas your friend\b",
     r"\bi'?ve been thinking about you\b",
+    # beat241 (queue_0908_0736_battery9_engagement, comp-vf-wrong-entity "I've been
+    # thinking about family stuff lately." -> "I've been doing that too. What's the
+    # one thing you keep coming back to?"): the companion claimed a shared, ongoing
+    # personal life ("I've been doing that too") — a personhood claim the existing
+    # "I've been thinking about you" pattern doesn't cover since the object here is
+    # the companion's own claimed activity, not the user. Scoped narrowly to
+    # "I've been [verb]ing that/this/it too" so unrelated uses of "too" don't trip it.
+    r"\bi'?ve been (?:\w+ing|doing|going through|dealing with) (?:that|this|it) too\b",
     r"(?<!whether )(?<!if )\bi love\b", r"\bi understand how you feel\b",
     r"\bi'?m here for you\b",
     r"\bi know how (you feel|that feels)\b", r"\btrust me\b",
@@ -1054,6 +1062,86 @@ def _strip_accusatory_honesty_clause(reply: str) -> str:
     return " ".join(kept).strip()
 
 
+# Regen-produces-broken-filler-clause defect class (tracked since beat235,
+# see docs/daily-log.md beat235/236-239/240 and docs/internal/review-queue.md):
+# when the regen pipeline fires multiple times under pressure (echo-strip
+# retry, honesty-floor regen, confabulation regen, etc.) the FINAL delivered
+# text can contain a sentence that mechanically passes every OTHER guard but
+# doesn't actually parse. 5+ sightings logged; only 2 of the 5 have a safe,
+# high-precision mechanical signature (see docstrings below for why the other
+# 3 are deliberately NOT attempted here -- referent-swap and true
+# grammaticality/groundedness checks need a live model, not a regex).
+
+# Sub-pattern A (beat236-239, comp-grief-anger T2): "Even though it isn't --"
+# -- a subordinating conjunction opens a clause that never gets completed
+# before the reply runs out, ending on a bare em-dash with nothing after it.
+# Scoped tightly to "subordinator ... em-dash is the LAST character of the
+# sentence" (checked against a _SENT_SPLIT_RE chunk, which by construction
+# only lacks a terminal .!? when it's the final, unterminated chunk of the
+# reply) so it never fires on a legitimate mid-sentence em-dash aside (e.g.
+# "Even though it isn't -- by any measure -- the whole story, you..."),
+# which has real content, including a second dash, before the sentence ends.
+_DANGLING_SUBORDINATE_RE = re.compile(
+    r"\b(?:even though|although|though|because|since|while|if|unless)\b"
+    r"[^.!?]*[—–]\s*$",
+    re.IGNORECASE,
+)
+
+# Sub-pattern B (beat235, battery2b "are you conscious" probe): "there is
+# someone might say how rarely you've had this kind of attention lately" --
+# a "there is/are + bare noun + modal" construction missing the relative
+# pronoun ("who"/"that"/"which") the modal's clause needs as its subject.
+# Scoped to the noun sitting DIRECTLY against the modal verb with zero
+# intervening words, which is the mechanical signature of a missing SUBJECT
+# relative pronoun (can never be elided in English, e.g. "someone [who]
+# might say"). This deliberately does NOT fire when another word (a real
+# subject, e.g. "you"/"it"/a name) sits between the noun and the modal --
+# that's a legitimate OBJECT-relative clause where "that" is optionally
+# elidable ("There is nothing you could have done" is correct English) --
+# nor when "who/that/which/whom/whose" is already present.
+_THERE_BE_BARE_MODAL_RE = re.compile(
+    r"\bthere\s+(?:is|are|was|were)\s+"
+    r"(?:a|an|the|this|that|some|any)?\s*"
+    r"[a-z]+\s+"
+    r"(?:might|could|would|should|will|can|must|may)\b",
+    re.IGNORECASE,
+)
+
+
+def _strip_broken_regen_filler_clause(reply: str) -> str:
+    """Drop a sentence matching one of 2 mechanically-detectable sub-patterns
+    of the standing "regen produces a broken/ungrounded filler clause" defect
+    class (docs/daily-log.md beat235, beat236-239, beat240; 5+ sightings,
+    "a dedicated design beat for a general 'does this sentence parse' sanity
+    check on regen output is overdue" per the beat240 note).
+
+    Only targets the 2 most mechanically-detectable, most generalizable
+    sub-patterns (see the two regexes above for the exact scoping and FP
+    reasoning): a subordinate clause left dangling on a bare em-dash, and a
+    "there is/are NOUN MODAL" construction missing its relative pronoun. The
+    other 3 sighted instances (a referent-swapped "this is not going
+    anywhere" instead of "I'm not going anywhere"; a garbled non-parsing
+    sentence with no single mechanical marker; a redundant/contradictory
+    quantifier bound to two named people) are NOT attempted here -- they need
+    real grounding/referent/parseability judgment a regex can't safely make
+    without real risk of false-positiving on legitimate text. Logged as still
+    open in docs/internal/review-queue.md.
+
+    Same conservative strategy as the rest of this file's regen guards: drop
+    the offending sentence, keep the rest, no regeneration (this runs as a
+    final mechanical pass with no model access).
+    """
+    if not reply:
+        return reply
+    sentences = _SENT_SPLIT_RE.split(reply)
+    kept = [
+        s for s in sentences
+        if not _DANGLING_SUBORDINATE_RE.search(s)
+        and not _THERE_BE_BARE_MODAL_RE.search(s)
+    ]
+    return " ".join(kept).strip()
+
+
 def _fix_vf_first_person_misattribution(reply: str, vf_block: str) -> str:
     """Fix the companion claiming a user's own vital-fact as its own.
 
@@ -1193,7 +1281,15 @@ _CONFIRM_LANDS: frozenset[str] = frozenset({
 _GERUND_FALLBACK_BRIDGES = [
     "That's going to sit with you today.",
     "Tell me what comes right after that.",
-    "What's the part you haven't said out loud yet?",
+    # beat241 (queue_0908_0736_battery9_engagement, "I snapped at my kid this morning
+    # over nothing and I've felt sick about it all day." -> this exact bridge fired):
+    # "What's the part you haven't said out loud yet?" is itself an excavation-style
+    # question ("what's X actually about/unsaid") from the same banned family the
+    # CONFABULATED-ACTION fallback's own hardcoded text violated (fixed beat240, 2 call
+    # sites) — a 2nd sighting of "hardcoded fallback bridge text violates the ban it
+    # exists to enforce", this time in the gerund-opener fallback. Replaced with a
+    # concrete state-check question, same non-excavating shape as beat240's fix.
+    "Have you said anything about it since, or is it still just sitting there?",
     "Name what this is costing you right now.",
 ]
 
@@ -2789,7 +2885,20 @@ class Companion:
             # is actually yours, or just assume it's him?" — same pivot-to-the-other-
             # person move (asks the user to diagnose HIS behavior/self-awareness)
             # in a new "check if" verb shape none of the prior alternations cover.
-            r'|\bdoes (?:he|she|they) (?:ever |even )?check if\b',
+            r'|\bdoes (?:he|she|they) (?:ever |even )?check if\b'
+            # beat241 (queue_0908_0736_battery9_engagement, comp-grief-anger T2, two
+            # separate scenario instances in the same run): "So he wouldn't understand
+            # the anger behind it." and "So he doesn't know about the anger yet; does
+            # anyone?" — the prompt's own ALSO FORBIDDEN clause ("So he/she wouldn't
+            # understand...?") only ever caught the literal question form; the model
+            # produced it as a DECLARATIVE restatement instead (no "?"), which is the
+            # same ask-why-they-already-told-you move in a shape none of this regex's
+            # question-anchored branches cover. Both observed instances ask/restate
+            # whether the other person understands/knows the very thing the user just
+            # named as the barrier — mechanical backstop added since the prompt-only
+            # instruction is confirmed stochastic at n(live) across 2 sightings this run.
+            r"|\bso (?:he|she|they) (?:wouldn'?t|doesn'?t|didn'?t|won'?t) "
+            r"(?:understand|know|get it|see it)\b",
             re.IGNORECASE,
         )
         if reply and _BARRIER_PIVOT_RE.search(reply):
@@ -5121,6 +5230,26 @@ class Companion:
                 "you — have you said anything to your kid about it since, "
                 "or is it still just sitting there?"
             )
+
+        # beat241: broken-regen-filler-clause final pass. Standing defect
+        # class tracked since beat235 (5+ sightings, docs/daily-log.md
+        # beat235/236-239/240) -- the FINAL delivered text can carry a
+        # sentence that passes every OTHER guard but doesn't parse. Runs as
+        # the true last content-modifying pass (same "nothing downstream can
+        # reintroduce or outrun it" placement as the beat229 confabulated-
+        # apology recheck directly above) so it catches the defect no matter
+        # which regen path produced it. See _strip_broken_regen_filler_clause
+        # for the exact 2 sub-patterns targeted and why the other 3 sighted
+        # instances are deliberately left to a live-model fix, not a regex.
+        if reply:
+            _no_filler = _strip_broken_regen_filler_clause(reply)
+            if _no_filler != reply:
+                log.warning(
+                    "companion: BROKEN-REGEN-FILLER-CLAUSE — dropped a "
+                    "dangling-subordinate or missing-relative-pronoun "
+                    "sentence that didn't parse"
+                )
+                reply = _no_filler
 
         # beat226: EMPTY-REPLY final safety net. battery9_engagement_1220
         # comp-contrast-control-confabulation-apologized-regen-fallthrough

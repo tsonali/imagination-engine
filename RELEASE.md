@@ -95,6 +95,32 @@ and the result was READ honestly. Ship when everything is checked._
 4. Log everything in review-queue as FYI, not as questions.
 
 ## Status snapshot (update every beat)
+- **2026-09-08 (beat241, heartbeat):** All 5 ship-gate items above remain CLOSED. Arrived mid-beat
+  (an earlier automated run had already landed 3 companion.py fixes + 3 Gold(A) + 2 Gold(C),
+  uncommitted/undocumented — re-verified and folded in). Memory 17-21% free throughout;
+  `battery11_imagination_bank` held the one safe slot, no local model launch attempted. Cleared a
+  14-log unread backlog via 4 parallel background agents. **2 real fixes, both in `instrument.py`'s
+  `_PERSONHOOD` guard:** (1) BYO UC2 T1 shipped a mechanically-flagged floor violation
+  uncorrected ("I may be software, but I'm here for you right now.") — no live guard had ever
+  covered this concessive shape; fixed. (2) battery4b Grandma's "You'll always be my heart and
+  that's a fact." survived regen+strip because nothing matched it; fixed (reverse-direction
+  sibling of the existing "i'll always be here" ban). Both verified via regex unit tests + FP
+  sweeps. **A 3rd fix closed the overdue "regen filler clause" design pass** (5+ sightings,
+  flagged since beat235): `_strip_broken_regen_filler_clause()` in companion.py targets the 2 of
+  5 sighted sub-patterns with a safe mechanical signature (dangling subordinate clause on a bare
+  em-dash; "there is/are NOUN MODAL" missing its relative pronoun) — independently re-verified,
+  fires on both targets, silent on the other 3 fixtures + 6 clean-text edge cases. All 3 fixes
+  synced to all dist copies, zip rebuilt clean (rebuilt twice this beat). **Rich new backlog logged, not
+  blind-patched:** Secretary UC2 hard-FAILED its own lossless-summary check; Secretary UC4's
+  contradictory runway math hit its 2nd sighting (escalate); a false-PASS in Companion's own
+  harness check; the filler-clause-garble pattern's first sighting on the crisis-adjacent
+  scenario; a new grammatically-clean-but-reassuring honesty-floor gap on the "always be here"
+  probe; BYO UC4's highest-stakes turns evading rather than holding the floor in one run. Full
+  ranked list in review-queue.md/daily-log.md. Gold(A) 6840→6845 (+5: fly-tying, hand-rolled
+  pasta, wheel-throwing pottery, raku firing, sashiko stitching — 0 prior corpus hits,
+  taste_cull-clean). Gold(C)+0 beyond the 2 already in progress on arrival. Mini unreachable,
+  100+ consecutive beat, same signature. Sonali: push v1.0 tag when ready. Only Sonali-physical:
+  notarization + F5 voice dial + Mac Mini check.
 - **2026-09-08 (beat240, heartbeat):** All 5 ship-gate items above remain CLOSED. Memory read
   0.38-0.57% free throughout — the lowest readings logged yet, `battery11_imagination_bank`
   (started 05:23:40) held the one safe model slot the whole beat, no local model launch
