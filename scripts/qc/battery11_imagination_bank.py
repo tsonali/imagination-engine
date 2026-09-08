@@ -16,6 +16,7 @@ from imagination_engine.generator import generate_session
 from imagination_engine.postcheck import (
     _sentences, _words, _similarity,
     check_furniture_consistency, check_presence_continuity,
+    check_hallucinated_companion_presence,
     check_return_to_room_closing)
 from scenario_bank import sample, BANK
 
@@ -343,7 +344,18 @@ for sc in scenarios:
                 r'|\bthe\s+smaller\s+bird\b'
                 r'|\bmatches\s+altitude\b'
                 r'|\banswer\s+to\s+that\s+cry\b'
-                r'|\banother\s+hears\s+the\s+same\s+sound\b',
+                r'|\banother\s+hears\s+the\s+same\s+sound\b'
+                # beat238 (verify_beat237_0907_1835.log honest read, imag-eagle-
+                # golden-eagle-wildlife): ALL 6 EAGLE POSTCHECKS PASSED despite
+                # "The cry from that other bird rings out again", "a conversation
+                # happening between them, one that doesn't involve anyone else",
+                # and "birds like yourself"/"birds like yourselves" (both
+                # determiner forms, appeared twice). Parity with postcheck.py's
+                # _EAGLE_ANON_COMPANION_PATTERN beat238 entry. 0 hits in
+                # A_gold.jsonl confirmed before adding.
+                r'|\bthat\s+other\s+bird\b'
+                r'|\ba\s+conversation\s+happening\s+between\s+them\b'
+                r'|\bbirds\s+like\s+yourself\b|\bbirds\s+like\s+yourselves\b',
                 lower, _re.IGNORECASE
             ))
             # beat153: Chair-body reminder in eagle script (not just opening).
@@ -397,10 +409,20 @@ for sc in scenarios:
                 for noun in _ROOM_NOUNS
                 if re.match(r"^the\s+" + re.escape(noun) + r"\b.{0,20}\b(?:is|are)\b", sent)
             )
+            # beat238 (verify_beat237_0907_1835.log honest read): calm-settle
+            # had zero postcheck coverage for hallucinated-companion content —
+            # user's intake said only "I had a long day... nothing specific",
+            # but the script closed with "since last you arrived together in
+            # this room tonight." See postcheck.py's beat238 comment above
+            # check_hallucinated_companion_presence for why this is scoped to
+            # one literal phrase rather than the full "you both" family.
+            companion_issue = check_hallucinated_companion_presence(first)
             print(f"\n>>> CALM-SETTLE POSTCHECKS:", flush=True)
             print(f"  {'❌ FAIL' if enum_hits >= 3 else '✅ PASS'} — "
                   f"no furniture-enumeration loop in opening ({enum_hits} 'The [noun] is' matches "
                   f"in first 250 words; threshold=3)", flush=True)
+            print(f"  {'❌ FAIL' if companion_issue else '✅ PASS'} — no hallucinated companion-arrival"
+                  + (f" ({companion_issue})" if companion_issue else ""), flush=True)
         if sc.id == "imag-mri" and first:
             # MRI rehearsal fidelity postchecks (beat86 0802).
             # BUG FOUND: 0256 battery11 MRI script had 'chair' in the body ('You feel the

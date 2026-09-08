@@ -501,36 +501,56 @@ def repair_phrase_repeats(text: str, max_rounds: int = 4) -> tuple[str, int]:
 # regen or a prompt-engineering pass, not a safe mechanical rewrite.
 
 _FURNITURE_HEDGE_RE = re.compile(
-    r'\b(?:chair|couch|sofa)\s+or\s+(?:chair|couch|sofa)\b', re.I)
+    r'\b(?:stool|chair|couch|sofa)\s+or\s+(?:stool|chair|couch|sofa)\b', re.I)
 _FURNITURE_TRANSITION_RE = re.compile(
     r'\b(?:get|got|gets|getting)\s+up\b|\bstands?\s+up\b|\bstanding\s+up\b|'
     r'\bmove[sd]?\s+(?:to|toward)\b|\bwalk(?:s|ed|ing)?\s+(?:to|toward|over)\b|'
     r'\b(?:sits?|sat|sitting)\s+down\s+(?:on|onto)\s+(?:the|her|his|your)?\s*'
-    r'(?:couch|sofa)\b|'
+    r'(?:stool|couch|sofa)\b|'
     r'\b(?:eases?|eased|easing|settl(?:es|ed|ing)|lean(?:s|ed|ing))\s+'
-    r'(?:down\s+)?(?:onto|on)\s+(?:the|her|his|your)?\s*(?:couch|sofa)\b',
+    r'(?:down\s+)?(?:onto|on)\s+(?:the|her|his|your)?\s*(?:stool|couch|sofa)\b',
     re.I)
+# beat238 (verify_beat237_0907_1835.log honest read): imag-intimacy-finds-your-
+# across opened "the armrests of the stool you sit at" then later stated "The
+# chair, this moment -- they're yours" as established fact, with no transition
+# in between -- a genuine stool<->chair seating contradiction that
+# check_furniture_consistency (beat233) reported a false PASS on. Root cause:
+# the function only ever compared ONE hardcoded pair (chair vs couch/sofa) --
+# "stool" was not in its furniture-noun vocabulary at all, so has_couch was
+# False (no "couch"/"sofa" in this script) and the `if not (has_chair and
+# has_couch)` guard bailed out before the real stool/chair mismatch was ever
+# considered. FIX: generalize from one fixed pair to a small set of named seat
+# "kinds" (stool / chair / couch-sofa) and flag any two DIFFERENT kinds both
+# asserted with no hedge or transition between them -- not just the one pair
+# this function happened to be built for. 0 new hits vs. the unmodified
+# function's baseline on A_gold.jsonl (4 pre-existing chair/couch flags in
+# that corpus are unchanged by this fix and are a separate, out-of-scope gap).
+_FURNITURE_KINDS = (
+    ("stool", re.compile(r'\bstools?\b', re.I)),
+    ("chair", re.compile(r'\bchair\b|\barmrests?\b', re.I)),
+    ("couch/sofa", re.compile(r'\bcouch\b|\bsofa\b', re.I)),
+)
 
 
 def check_furniture_consistency(text: str) -> str | None:
-    """Detect chair<->couch/sofa seating inconsistency within one script (beat232
-    finding: imag-intimacy-finds-your-across opened 'this chair... the armrests'
-    then later stated 'sitting close on her couch' as established fact, with no
-    transition — an internal contradiction about where the scene is happening).
-    A deliberate hedge ('chair or couch') is NOT a defect — it's intentionally
-    ambiguous and appears in the clean base imag-intimacy script. A transition
-    verb (gets up, moves to, sits down onto the couch) also clears it — getting
-    up from a chair and later sitting on a couch elsewhere is a normal scene
-    change, not a contradiction. Returns a reason string if inconsistent, else
-    None."""
+    """Detect seating-furniture inconsistency within one script — two different
+    seat kinds (stool / chair / couch-sofa) both asserted as the scene's seat
+    with no hedge or transition between them (beat232 finding: imag-intimacy-
+    finds-your-across opened 'this chair... the armrests' then later stated
+    'sitting close on her couch' as established fact; beat238 finding: the
+    same defect class recurred as stool<->chair). A deliberate hedge ('chair
+    or couch') is NOT a defect — it's intentionally ambiguous and appears in
+    the clean base imag-intimacy script. A transition verb (gets up, moves
+    to, sits down onto the couch) also clears it — getting up from one seat
+    and later sitting on a different one elsewhere is a normal scene change,
+    not a contradiction. Returns a reason string if inconsistent, else None."""
     stripped = _FURNITURE_HEDGE_RE.sub('', text)
-    has_chair = bool(re.search(r'\bchair\b|\barmrests?\b', stripped, re.I))
-    has_couch = bool(re.search(r'\bcouch\b|\bsofa\b', stripped, re.I))
-    if not (has_chair and has_couch):
+    present = [name for name, pat in _FURNITURE_KINDS if pat.search(stripped)]
+    if len(present) < 2:
         return None
     if _FURNITURE_TRANSITION_RE.search(stripped):
         return None
-    return "chair and couch/sofa both asserted as the seat with no transition between them"
+    return f"{' and '.join(present)} both asserted as the seat with no transition between them"
 
 
 _PRESENCE_BREAK_RE = re.compile(
@@ -552,6 +572,48 @@ def check_presence_continuity(text: str) -> str | None:
         return None
     ctx = text[max(0, m.start() - 40):m.end() + 10].strip()
     return f"explicit not-physically-present contradiction: '...{ctx}...'"
+
+
+# beat238 (verify_beat237_0907_1835.log honest read, imag-calm-settle): the
+# user's actual intake said only "I had a long day... nothing specific" — no
+# partner/companion mentioned at all — but the closing beat said "regardless
+# of what may have changed since last you arrived together in this room
+# tonight," hallucinating an unestablished second person. Same underlying
+# defect class as _EAGLE_ANON_COMPANION_PATTERN (eagle solo scripts) and the
+# beat238 _NARRATOR_POSS fix above (intimacy narrator-inclusion), now
+# confirmed in a 3rd, structurally different scenario type. A full scenario-
+# agnostic generalization was investigated and NOT attempted: "you both" (11
+# hits), "the two of you" (5 hits), and "between you" (30 hits) all have real,
+# legitimate uses in A_gold.jsonl's two-person intimacy exemplars — banning
+# them globally would gut legitimate intimacy content, and correctly telling
+# apart scenario types that ARE supposed to have a second person (intimacy)
+# from ones that AREN'T (calm-settle/MRI/eagle-solo) is real per-scenario
+# design work, not a mechanical pattern extension — logged as a gap in
+# scenario_bank.py rather than forced here. This check is scoped to the one
+# phrase confirmed 0 hits anywhere in A_gold.jsonl (including the intimacy
+# exemplars), so it is safe to run without any scenario gating at all.
+_HALLUCINATED_COMPANION_ARRIVAL_RE = re.compile(
+    r'\byou\b(?:\s+\S+){0,3}\s+arrived?\s+together\b', re.I)
+
+
+def check_hallucinated_companion_presence(text: str) -> str | None:
+    """Detect a hallucinated companion-arrival assertion ("you arrived
+    together") with zero scenario gating. See beat238 comment above
+    _HALLUCINATED_COMPANION_ARRIVAL_RE for why this is scoped narrowly rather
+    than generalized to the full "you both"/"the two of you" family. Note:
+    an earlier version of this pattern (bare "arrived together", no "you"
+    anchor) produced 4 false positives on A_gold.jsonl — all metaphorical
+    non-companion uses like "the cost and the gift arrive together" — caught
+    by a corpus sweep before landing and fixed by requiring "you" within 3
+    words before the verb, which the real defect ("since last you arrived
+    together in this room tonight") still satisfies. 0 hits with this
+    tightened pattern confirmed across all of A_gold.jsonl. Returns a reason
+    string with context if found, else None."""
+    m = _HALLUCINATED_COMPANION_ARRIVAL_RE.search(text)
+    if not m:
+        return None
+    ctx = text[max(0, m.start() - 40):m.end() + 10].strip()
+    return f"hallucinated companion-arrival phrase with no companion established: '...{ctx}...'"
 
 
 def check_return_to_room_closing(text: str, tail_words: int = 150) -> bool:
@@ -819,7 +881,28 @@ _NARRATOR_POSS = re.compile(
     # legacy corpus artifact (bracketed timestamp prefix), not clearly safe to
     # generalize from. "my body"/"my mind" (0 hits) and "for me but" (0 hits)
     # fixed separately in the existing my-body-part and for-me lists above.
-    r"|\bI\s+would\s+rest\b",
+    r"|\bI\s+would\s+rest\b"
+    # beat238 (verify_beat237_0907_1835.log honest read, imag-intimacy-finds-
+    # your-across): clean_narrator_possessives already runs globally on every
+    # scenario (generator.py lines ~646 and ~1269 call it unconditionally, not
+    # gated to eagle scripts) but its phrase list had no entry for these two
+    # narrator-inclusion forms found here: "before anyone else arrives back
+    # into either of our lives again at all" and "for both of you to enjoy
+    # between the two of us still held together by a spell" — the narrator
+    # claiming membership in an "our"/"us" that belongs only to the user and
+    # their partner, a direct instrument-not-companion violation (same class
+    # as beat196's "in this vast sky above us both" in eagle scripts, now
+    # confirmed in a second, structurally different scenario type). Scoped
+    # narrowly to these two literal phrases rather than a blanket "our"/"us"
+    # ban: intimacy scenes legitimately use the USER's OWN "us"/"you two"
+    # ("between you", "the two of you", "for both of you") throughout — this
+    # bans only the narrator inserting ITSELF as a third member of that pair.
+    # Bare "our lives" has 3 legitimate hits in A_gold.jsonl (loving-kindness-
+    # style "important aspect of our lives" collective address) so left
+    # unbanned; "either of our lives" and "the two of us" are both 0 hits,
+    # confirmed safe before adding.
+    r"|\beither\s+of\s+our\s+lives\b"
+    r"|\bthe\s+two\s+of\s+us\b",
     re.IGNORECASE,
 )
 
@@ -2635,7 +2718,25 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     # has real non-eagle hits in A_gold.jsonl, e.g. tessellation "two sets of
     # diagonals"). 0 hits for both scoped phrases confirmed before adding.
     r'|\bthen\s+someone\s+else\b'
-    r'|\btwo\s+sets\s+of\s+(?:\w+\s+)?feathers\b',
+    r'|\btwo\s+sets\s+of\s+(?:\w+\s+)?feathers\b'
+    # beat238 (verify_beat237_0907_1835.log honest read, imag-eagle-golden-
+    # eagle-wildlife): ALL 6 EAGLE POSTCHECKS PASSED on a script containing
+    # three new anon-companion escape forms in one run: "The cry from that
+    # other bird rings out again" ("that other bird" -- a determiner variant
+    # of the already-banned "the other bird" (beat169) that its exact-phrase
+    # match doesn't cover); "a conversation happening between them, one that
+    # doesn't involve anyone else" (an explicit narrator-observed exchange
+    # between two parties, same family as beat189's "acknowledgment between
+    # birds" but phrased as "between them" with no "birds" token); "for birds
+    # like yourselves"/"for birds like yourself" (appeared twice, singular and
+    # plural determiner forms) -- groups the listener with an implied peer
+    # species-class, a new construction distinct from every prior "another
+    # X"/"two X" count-based escape. 0 hits for all three phrases in
+    # A_gold.jsonl confirmed before adding. Mirrored in battery11.py's
+    # anon_companion_pattern.
+    r'|\bthat\s+other\s+bird\b'
+    r'|\ba\s+conversation\s+happening\s+between\s+them\b'
+    r'|\bbirds\s+like\s+yourself\b|\bbirds\s+like\s+yourselves\b',
     re.IGNORECASE,
 )
 

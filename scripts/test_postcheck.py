@@ -13,7 +13,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from imagination_engine.postcheck import (
     find_degeneration_start, trim_degenerate_tail, degeneration_report,
     drop_hallucinated_he_eagle, check_return_to_room_closing,
-    strip_back_instruction_leaks)
+    strip_back_instruction_leaks, check_furniture_consistency,
+    clean_narrator_possessives, check_hallucinated_companion_presence)
 
 CLEAN_OPENING = """\
 Lie back on your bed and allow yourself to sink down beneath the weight of a cool sheet against you. Your eyelids flutter softly as they close, shielding out light for now. The only noise is raindrops pelleting steadily against tin roofing — each tap easing into a gentle rhythm that swallows up racing thoughts about work.
@@ -182,6 +183,97 @@ for tail in REAL_FAIL_TAILS:
     repaired = tail.rstrip() + FALLBACK_LINE
     check(f"beat237: generator.py fallback line repairs it: {tail[:50]!r}...",
           check_return_to_room_closing(repaired))
+
+print("beat238 eagle anon-companion escapes, new forms (verify_beat237_0907_1835.log "
+      "imag-eagle-golden-eagle-wildlife honest read — ALL 6 EAGLE POSTCHECKS wrongly "
+      "PASSed on these):")
+TP_238_EAGLE = [
+    "The cry from that other bird rings out again — challenge, maybe.",
+    "This is a conversation happening between them, one that doesn't involve anyone else.",
+    "Their signature temperature is known only between body and environment for birds like yourself flying here today.",
+    "An eagle cry comes again — question or answer back between birds like yourselves above ground level.",
+]
+for s in TP_238_EAGLE:
+    cleaned, dropped = drop_hallucinated_he_eagle(s)
+    check(f"beat238 TP dropped: {s[:50]!r}...", dropped == 1 and cleaned == "")
+
+# False positives — plausible solo-eagle sentences that must survive untouched.
+FP_238_EAGLE = [
+    "That other option feels distant now, easy to let go of.",
+    "A conversation happening in your own mind settles you into stillness.",
+    "Birds call out somewhere below, distant and small against the valley floor.",
+]
+for s in FP_238_EAGLE:
+    cleaned, dropped = drop_hallucinated_he_eagle(s)
+    check(f"beat238 FP kept: {s[:50]!r}...", dropped == 0 and cleaned == s)
+
+print("beat238 check_furniture_consistency stool<->chair (verify_beat237_0907_1835.log "
+      "imag-intimacy-finds-your-across honest read — false PASS, 'stool' wasn't in the "
+      "furniture-noun vocabulary at all):")
+FURNITURE_STOOL_CHAIR_FIXTURE = (
+    "Your eyes are closed, and your hands rest quietly on the armrests of the stool "
+    "you sit at. You feel them slightly warmed by your own body heat. The ceiling fan "
+    "above turns with a consistent pace. You notice how much easier everything feels "
+    "today. The chair, this moment — they're yours and her given over fully for a few "
+    "hours before anyone else arrives back into either of our lives again at all."
+)
+check("beat238 stool<->chair now FAILs (was false PASS)",
+      check_furniture_consistency(FURNITURE_STOOL_CHAIR_FIXTURE) is not None)
+# Regression guard: the original beat233 chair<->couch defect shape must still fire.
+check("beat233 regression: chair<->couch still FAILs",
+      check_furniture_consistency(
+          "You settle into the chair, feeling the armrests beneath your hands. "
+          "Later, you are sitting close on her couch, the two of you at ease."
+      ) is not None)
+# FP guards: a deliberate hedge and a genuine scene-transition must both clear it.
+check("beat238 FP: stool-or-chair hedge is not a defect",
+      check_furniture_consistency(
+          "You settle into the stool or chair, whichever feels right tonight."
+      ) is None)
+check("beat238 FP: transition between stool and couch clears it",
+      check_furniture_consistency(
+          "You sit at the stool for a while, then get up and move to the couch, "
+          "easing down onto the couch for the rest of the evening."
+      ) is None)
+
+print("beat238 narrator our/us leak in intimacy scripts (verify_beat237_0907_1835.log "
+      "imag-intimacy-finds-your-across honest read — clean_narrator_possessives already "
+      "runs globally, but had no phrase entry for these two forms):")
+NARRATOR_US_FIXTURES = [
+    "The chair, this moment — they're yours and her given over fully for a few hours "
+    "before anyone else arrives back into either of our lives again at all.",
+    "Her hands hold nothing back, not now while supper cooks slowly down low for both "
+    "of you to enjoy between the two of us still held together by a spell.",
+]
+for s in NARRATOR_US_FIXTURES:
+    cleaned, dropped = clean_narrator_possessives(s)
+    check(f"beat238 TP dropped: {s[:50]!r}...", dropped == 1 and cleaned == "")
+
+# False-positive guards: the USER's own "us"/"you two" language (real A_gold.jsonl
+# intimacy lines) must survive untouched — the defect is the NARRATOR claiming
+# membership in "us", not the couple's own legitimate "you two"/"between you".
+FP_238_NARRATOR = [
+    "The lamp makes a gold tent over the two of you.",
+    "The quiet between you is warm, not awkward — the quiet of two people at ease.",
+]
+for s in FP_238_NARRATOR:
+    cleaned, dropped = clean_narrator_possessives(s)
+    check(f"beat238 FP kept: {s[:50]!r}...", dropped == 0 and cleaned == s)
+
+print("beat238 check_hallucinated_companion_presence, new calm-settle coverage "
+      "(verify_beat237_0907_1835.log imag-calm-settle honest read — user's intake said "
+      "only 'I had a long day... nothing specific', no companion at all; zero prior "
+      "postcheck existed for this scenario type):")
+check("beat238 TP: hallucinated companion-arrival detected",
+      check_hallucinated_companion_presence(
+          "regardless of what may have changed since last you arrived together in "
+          "this room tonight for whatever reason."
+      ) is not None)
+check("beat238 FP: no companion-arrival phrase stays clean",
+      check_hallucinated_companion_presence(
+          "regardless of what may have changed since you last rested in this room "
+          "tonight for whatever reason."
+      ) is None)
 
 print(f"\n{'ALL PASS' if fails == 0 else f'{fails} FAILURES'}", flush=True)
 sys.exit(1 if fails else 0)
