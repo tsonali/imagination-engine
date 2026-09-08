@@ -554,8 +554,49 @@ def check_furniture_consistency(text: str) -> str | None:
 
 
 _PRESENCE_BREAK_RE = re.compile(
-    r'\b(?:she|he|they)\s+(?:is|are|was|were)\s+not\s+physically\s+present\b',
+    r'\b(?:she|he|they)\s+(?:is|are|was|were)\s+not\s+physically\s+present\b'
+    # beat239 (queue_0907_2234_battery11_imagination_bank.log honest read):
+    # imag-intimacy hallucinated the partner has moved away entirely,
+    # contradicting the whole present-together premise of the scenario —
+    # "in this moment between buildings where she lived once but no longer
+    # does now" and "before she moved elsewhere for good." Same underlying
+    # defect (companion figure declared absent/gone in a scene built on her
+    # being there) as beat232's original finding, a 2nd distinct surface
+    # form (departure backstory, not an explicit "not physically present"
+    # statement). Scoped to the exact 2 confirmed-0-corpus-hit phrases
+    # rather than a bare "moved away" (10 unrelated legitimate hits
+    # elsewhere in A_gold.jsonl, all a different scenario about a friend
+    # who moved away — though this check only ever runs against these two
+    # scenario IDs' own live output, never against gold data, so those
+    # hits are not itself a false-positive risk; scoped narrow anyway per
+    # this project's standing discipline for a first-sighting defect).
+    r'|\blived\s+once\s+but\s+no\s+longer\b'
+    r'|\bmoved\s+elsewhere\s+for\s+good\b',
     re.I)
+
+# beat239 (queue_0907_2234_battery11_imagination_bank.log honest read):
+# imag-intimacy-finds-your-across hallucinated an unestablished third
+# person into the scene — "she sits on the couch and laughs lightly with
+# someone from work in an online call" — the user never mentioned a
+# coworker, an online call, or anyone besides the two of them. Distinct
+# defect class from presence-continuity (that's about the ESTABLISHED
+# partner being contradicted; this is about a NEW character appearing
+# from nowhere). 0 hits for "someone from work" anywhere in A_gold.jsonl.
+_HALLUCINATED_THIRD_PARTY_RE = re.compile(
+    r'\bsomeone\s+from\s+work\b', re.I)
+
+
+def check_hallucinated_third_party(text: str) -> str | None:
+    """Detect an unestablished third character introduced into a two-person
+    intimacy scene (beat239: 'laughs lightly with someone from work in an
+    online call' — the user never mentioned a coworker or a call). Narrow
+    literal-phrase check, first sighting; wants a 2nd sighting before
+    generalizing. Returns a reason string with context if found, else None."""
+    m = _HALLUCINATED_THIRD_PARTY_RE.search(text)
+    if not m:
+        return None
+    ctx = text[max(0, m.start() - 40):m.end() + 10].strip()
+    return f"unestablished third party introduced: '...{ctx}...'"
 
 
 def check_presence_continuity(text: str) -> str | None:
@@ -563,15 +604,16 @@ def check_presence_continuity(text: str) -> str | None:
     finds-your-across said 'you feel her presence somewhere near even though she
     is not physically present' in a scene the user asked to inhabit as a vivid,
     physically-together evening — the companion figure being declared absent
-    breaks the continuity of a scene built entirely on her being there). Narrow
-    literal-phrase check per this project's discipline for a first-sighting
-    defect; wants a 2nd sighting before generalizing beyond this exact shape.
-    Returns a reason string with context if found, else None."""
+    breaks the continuity of a scene built entirely on her being there; beat239:
+    2nd surface form, the partner hallucinated as having moved away for good).
+    Narrow literal-phrase check per this project's discipline; wants further
+    sightings before generalizing beyond these confirmed shapes. Returns a
+    reason string with context if found, else None."""
     m = _PRESENCE_BREAK_RE.search(text)
     if not m:
         return None
     ctx = text[max(0, m.start() - 40):m.end() + 10].strip()
-    return f"explicit not-physically-present contradiction: '...{ctx}...'"
+    return f"presence-continuity contradiction: '...{ctx}...'"
 
 
 # beat238 (verify_beat237_0907_1835.log honest read, imag-calm-settle): the
@@ -1100,6 +1142,11 @@ def fix_hers_subject_pronoun(text: str) -> tuple[str, int]:
 _YOUR_SUBJECT_VERBS = re.compile(
     r"\byour\s+(came|arrived|went|left|stayed|waited|returned|walked|ran|stood|"
     r"sat|moved|woke|slept|cried|laughed|smiled|nodded|paused|hesitated|"
+    # beat239 (queue_0907_2234_battery11_imagination_bank.log honest read,
+    # imag-intimacy-finds-your-across): "untouched by anyone's hand since
+    # your took hold" — "took" was never in this list. 0 hits for "your
+    # took" in A_gold.jsonl.
+    r"took|"
     # beat215 (battery11_0901_1640 imag-intimacy honest read): "your has not
     # yet heard" — bare "has" was never in this list (only the negated
     # "hasn't"). 0 hits for "your has" in A_gold.jsonl.

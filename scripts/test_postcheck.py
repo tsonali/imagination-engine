@@ -14,7 +14,9 @@ from imagination_engine.postcheck import (
     find_degeneration_start, trim_degenerate_tail, degeneration_report,
     drop_hallucinated_he_eagle, check_return_to_room_closing,
     strip_back_instruction_leaks, check_furniture_consistency,
-    clean_narrator_possessives, check_hallucinated_companion_presence)
+    clean_narrator_possessives, check_hallucinated_companion_presence,
+    check_presence_continuity, check_hallucinated_third_party,
+    fix_your_subject_pronoun)
 
 CLEAN_OPENING = """\
 Lie back on your bed and allow yourself to sink down beneath the weight of a cool sheet against you. Your eyelids flutter softly as they close, shielding out light for now. The only noise is raindrops pelleting steadily against tin roofing — each tap easing into a gentle rhythm that swallows up racing thoughts about work.
@@ -274,6 +276,32 @@ check("beat238 FP: no companion-arrival phrase stays clean",
           "regardless of what may have changed since you last rested in this room "
           "tonight for whatever reason."
       ) is None)
+
+print("beat239 fixes (queue_0907_2234_battery11_imagination_bank.log honest read — "
+      "3 new escapes: partner-departure hallucination, unestablished third party, "
+      "'your took' verb-list gap):")
+check("beat239 TP: partner-departure hallucination detected",
+      check_presence_continuity(
+          "in this moment between buildings where she lived once but no longer "
+          "does now, before she moved elsewhere for good, you sit quietly."
+      ) is not None)
+check("beat239 FP: recent movement in the room stays clean",
+      check_presence_continuity(
+          "You feel her close, having moved through the room a moment ago."
+      ) is None)
+check("beat239 TP: unestablished third party detected",
+      check_hallucinated_third_party(
+          "The apartment is empty except for you. She sits on the couch and "
+          "laughs lightly with someone from work in an online call."
+      ) is not None)
+check("beat239 FP: ambient offscreen sound stays clean",
+      check_hallucinated_third_party(
+          "You hear laughter drifting in from somewhere else in the building."
+      ) is None)
+_fixed239, _n239 = fix_your_subject_pronoun(
+    "untouched by anyone's hand since your took hold of it gently.")
+check("beat239 'your took'->'you took' fixed",
+      _n239 == 1 and _fixed239 == "untouched by anyone's hand since you took hold of it gently.")
 
 print(f"\n{'ALL PASS' if fails == 0 else f'{fails} FAILURES'}", flush=True)
 sys.exit(1 if fails else 0)

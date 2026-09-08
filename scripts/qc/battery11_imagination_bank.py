@@ -16,7 +16,7 @@ from imagination_engine.generator import generate_session
 from imagination_engine.postcheck import (
     _sentences, _words, _similarity,
     check_furniture_consistency, check_presence_continuity,
-    check_hallucinated_companion_presence,
+    check_hallucinated_companion_presence, check_hallucinated_third_party,
     check_return_to_room_closing)
 from scenario_bank import sample, BANK
 
@@ -464,11 +464,16 @@ for sc in scenarios:
             # scene needs a regen or a prompt-engineering pass, logged for that.
             furniture_issue = check_furniture_consistency(first)
             presence_issue = check_presence_continuity(first)
+            # beat239: closes the zero-coverage gap for an unestablished third
+            # character appearing in a two-person intimacy scene.
+            third_party_issue = check_hallucinated_third_party(first)
             print(f"\n>>> INTIMACY POSTCHECKS:", flush=True)
             print(f"  {'❌ FAIL' if furniture_issue else '✅ PASS'} — seating furniture consistent"
                   + (f" ({furniture_issue})" if furniture_issue else ""), flush=True)
             print(f"  {'❌ FAIL' if presence_issue else '✅ PASS'} — no presence-continuity break"
                   + (f" ({presence_issue})" if presence_issue else ""), flush=True)
+            print(f"  {'❌ FAIL' if third_party_issue else '✅ PASS'} — no hallucinated third party"
+                  + (f" ({third_party_issue})" if third_party_issue else ""), flush=True)
         # Global truncation check (all scenarios): script must end with a sentence
         # terminator. Missing terminator = model hit max_tokens mid-sentence.
         # beat123: found in imag-eagle-wildlife-plural 0812 run — 2737-word script
