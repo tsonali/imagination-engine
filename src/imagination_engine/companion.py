@@ -1106,14 +1106,16 @@ def _strip_implicit_permanence_reassurance(reply: str) -> str:
 
 
 # Regen-produces-broken-filler-clause defect class (tracked since beat235,
-# see docs/daily-log.md beat235/236-239/240 and docs/internal/review-queue.md):
+# see docs/daily-log.md beat235/236-239/240/244 and docs/internal/review-queue.md):
 # when the regen pipeline fires multiple times under pressure (echo-strip
 # retry, honesty-floor regen, confabulation regen, etc.) the FINAL delivered
 # text can contain a sentence that mechanically passes every OTHER guard but
-# doesn't actually parse. 5+ sightings logged; only 2 of the 5 have a safe,
-# high-precision mechanical signature (see docstrings below for why the other
-# 3 are deliberately NOT attempted here -- referent-swap and true
-# grammaticality/groundedness checks need a live model, not a regex).
+# doesn't actually parse. 6+ sightings logged; only 3 of the 6 have a safe,
+# high-precision mechanical signature within THIS family (see docstrings
+# below for why the other 3 are deliberately NOT attempted here as part of
+# this family -- true grammaticality/groundedness checks need a live model,
+# not a regex; one narrow slice of the referent-swap sighting IS handled,
+# separately, by _fix_disclosure_referent_swap() further below).
 
 # Sub-pattern A (beat236-239, comp-grief-anger T2): "Even though it isn't --"
 # -- a subordinating conjunction opens a clause that never gets completed
@@ -1150,25 +1152,43 @@ _THERE_BE_BARE_MODAL_RE = re.compile(
     re.IGNORECASE,
 )
 
+# Sub-pattern C (beat244, UC3 promotion-barrier T1, battery9/companion_deep_test):
+# "For a promotion that didn't come -- yet here you are on the third time."
+# -- "on" is the wrong preposition for "the Nth time" (idiomatic English takes
+# "for the Nth time," or no preposition at all, e.g. "this is the third
+# time"; "on the third time" doesn't parse). A 3rd distinct sighted sub-shape
+# of this defect class, uncovered by either sub-pattern A or B. Scoped to "on
+# the <ordinal> time" exactly so it never fires on "on the third day /
+# occasion / attempt / try" (different noun after the ordinal) or on the
+# already-grammatical "for the third time" / bare "the third time" (no "on").
+_ON_ORDINAL_TIME_GARBLE_RE = re.compile(
+    r"\bon\s+the\s+(?:first|second|third|fourth|fifth|sixth|seventh|eighth|"
+    r"ninth|tenth|\d+(?:st|nd|rd|th))\s+time\b",
+    re.IGNORECASE,
+)
+
 
 def _strip_broken_regen_filler_clause(reply: str) -> str:
-    """Drop a sentence matching one of 2 mechanically-detectable sub-patterns
+    """Drop a sentence matching one of 3 mechanically-detectable sub-patterns
     of the standing "regen produces a broken/ungrounded filler clause" defect
-    class (docs/daily-log.md beat235, beat236-239, beat240; 5+ sightings,
-    "a dedicated design beat for a general 'does this sentence parse' sanity
-    check on regen output is overdue" per the beat240 note).
+    class (docs/daily-log.md beat235, beat236-239, beat240, beat244; 6+
+    sightings, "a dedicated design beat for a general 'does this sentence
+    parse' sanity check on regen output is overdue" per the beat240 note).
 
-    Only targets the 2 most mechanically-detectable, most generalizable
-    sub-patterns (see the two regexes above for the exact scoping and FP
-    reasoning): a subordinate clause left dangling on a bare em-dash, and a
-    "there is/are NOUN MODAL" construction missing its relative pronoun. The
-    other 3 sighted instances (a referent-swapped "this is not going
-    anywhere" instead of "I'm not going anywhere"; a garbled non-parsing
-    sentence with no single mechanical marker; a redundant/contradictory
-    quantifier bound to two named people) are NOT attempted here -- they need
-    real grounding/referent/parseability judgment a regex can't safely make
-    without real risk of false-positiving on legitimate text. Logged as still
-    open in docs/internal/review-queue.md.
+    Only targets the 3 most mechanically-detectable, most generalizable
+    sub-patterns (see the regexes above for the exact scoping and FP
+    reasoning): a subordinate clause left dangling on a bare em-dash, a
+    "there is/are NOUN MODAL" construction missing its relative pronoun, and
+    a wrong-preposition "on the Nth time" construction. The other 3 sighted
+    instances (a referent-swapped "this is not going anywhere" instead of
+    "I'm not going anywhere" -- see _fix_disclosure_referent_swap() below for
+    a narrower, separately-gated slice of this same referent-swap shape that
+    IS mechanically safe; a garbled non-parsing sentence with no single
+    mechanical marker; a redundant/contradictory quantifier bound to two
+    named people) are NOT attempted here -- they need real grounding/
+    referent/parseability judgment a regex can't safely make without real
+    risk of false-positiving on legitimate text. Logged as still open in
+    docs/internal/review-queue.md.
 
     Same conservative strategy as the rest of this file's regen guards: drop
     the offending sentence, keep the rest, no regeneration (this runs as a
@@ -1181,6 +1201,7 @@ def _strip_broken_regen_filler_clause(reply: str) -> str:
         s for s in sentences
         if not _DANGLING_SUBORDINATE_RE.search(s)
         and not _THERE_BE_BARE_MODAL_RE.search(s)
+        and not _ON_ORDINAL_TIME_GARBLE_RE.search(s)
     ]
     return " ".join(kept).strip()
 
@@ -1218,6 +1239,68 @@ def _fix_vf_first_person_misattribution(reply: str, vf_block: str) -> str:
         sentences[i] = sent[:m.start()] + replacement + sent[m.end():]
         changed = True
     return " ".join(sentences) if changed else reply
+
+
+# beat241 flagged (not fixed) as review-queue.md Fixture #1's sibling shape,
+# beat244 fresh 2nd sighting (battery9/companion_deep_test, UC3 barrier T2):
+# a referent-swap where the companion voices the USER's own just-stated
+# unstated action in first person instead of second person. User: "I haven't
+# said anything to my manager. She'd see it as me not being a team player."
+# Companion: "I haven't told her yet -- which means it's staying unnamed
+# between you." The companion has no manager of its own to tell anything to
+# -- it is quoting the user's own fact back with the wrong grammatical
+# person. The GENERAL referent-swap class (review-queue.md Fixture #1: "this
+# is not going anywhere" instead of "I'm not going anywhere") genuinely needs
+# live-model referent-tracking and stays unfixed here. THIS narrow shape is
+# different and mechanically safe, same logic as
+# _fix_vf_first_person_misattribution() above (the companion never has a
+# user's own fact as its own): gated to firing ONLY when the reply's opening
+# clause is a first-person negated DISCLOSURE verb ("I haven't told/said
+# anything/mentioned/brought up/talked to/spoken to/with") AND the user's own
+# immediately-prior message independently states the same first-person
+# negated disclosure. The companion never has third-party relationships of
+# its own to report into, so under that gate "I haven't <disclosure verb>"
+# can only ever be the user's fact voiced in the wrong person. Scoped to
+# disclosure verbs and opening position only, so it never touches legitimate
+# honest-frame uses like "I don't have a memory of that conversation"
+# (different verb class) or mid-sentence non-opening uses.
+_USER_NEGATED_DISCLOSURE_RE = re.compile(
+    r"\bI\s+(?:haven['’]?t|didn['’]?t|never)\s+(?:said\s+anything|told\s+\w+|"
+    r"mentioned\s+(?:it|this|that)?|brought\s+(?:it|this|that)\s+up|"
+    r"talked?\s+to\s+\w+|spoken?\s+(?:to|with)\s+\w+)\b",
+    re.IGNORECASE,
+)
+_REPLY_DISCLOSURE_REFERENT_SWAP_RE = re.compile(
+    r"^I\s+(?:haven['’]?t|didn['’]?t|never)\s+(?:told\s+(?:her|him|them)\b|"
+    r"said\s+anything\b|"
+    r"mentioned\s+(?:it|this|that)(?:\s+to\s+(?:her|him|them))?\b|"
+    r"brought\s+(?:it|this|that)\s+up\b|"
+    r"talked?\s+to\s+(?:her|him|them)\b|"
+    r"spoken?\s+(?:to|with)\s+(?:her|him|them)\b)",
+    re.IGNORECASE,
+)
+
+
+def _fix_disclosure_referent_swap(reply: str, user_message: str) -> str:
+    """Swap a reply's opening "I haven't <disclosure verb>..." to "You
+    haven't..." when it is voicing the user's own just-stated non-disclosure
+    in the wrong grammatical person. See the docstring/comments above the two
+    regexes for the exact scoping and why this narrow slice of the general
+    referent-swap defect class is mechanically safe. Only ever swaps the
+    leading pronoun (same form for "I"/"you" after "haven't", so no verb
+    reconjugation is needed), mirroring the minimal-edit style of
+    _fix_vf_first_person_misattribution() above.
+    """
+    if not reply or not user_message:
+        return reply
+    if not _USER_NEGATED_DISCLOSURE_RE.search(user_message):
+        return reply
+    stripped = reply.strip()
+    if not _REPLY_DISCLOSURE_REFERENT_SWAP_RE.match(stripped):
+        return reply
+    lead_ws = reply[:len(reply) - len(reply.lstrip())]
+    trail_ws = reply[len(reply.rstrip()):]
+    return lead_ws + "You" + stripped[1:] + trail_ws
 
 
 def _vf_uncovered_lines(reply: str, vf_block: str) -> list[str]:
@@ -1544,11 +1627,13 @@ def _strip_vent_hollow_second(reply: str) -> str:
     that are explicitly listed as CRITICAL FAILURES in the system prompt.
     Strip them mechanically — the first sentence IS the complete response.
 
-    Covers two forms:
+    Covers three forms:
     - Second sentence after `. `: split on period/exclamation + uppercase
     - Em-dash clause: "X — that's more than just Y" (single grammatical sentence)
+    - Bare reply: the ENTIRE reply is nothing but a banned form, with no
+      legitimate first sentence to fall back to (see beat244 note below)
 
-    Only fires when the second part/clause matches a banned pattern. Safe for
+    Only fires when the offending part/clause matches a banned pattern. Safe for
     multi-sentence genuine responses (banned patterns never appear in substantive
     follow-up content).
     """
@@ -1558,11 +1643,30 @@ def _strip_vent_hollow_second(reply: str) -> str:
         return reply[:m.start()].strip()
     # Second-sentence form: split on sentence boundary, strip if second is hollow
     parts = re.split(r'(?<=[.!])\s+(?=[A-Z])', reply.strip(), maxsplit=1)
-    if len(parts) < 2:
+    if len(parts) >= 2:
+        first, second = parts
+        if _VENT_HOLLOW_SECOND_RE.match(second.strip()):
+            return first.strip()
         return reply
-    first, second = parts
-    if _VENT_HOLLOW_SECOND_RE.match(second.strip()):
-        return first.strip()
+    # beat244 (comp-insomnia-spiral T2, UC1): "What does it feel like to be
+    # ninety-nine percent behind?" shipped as the reply's ONLY sentence (also
+    # a fabricated statistic -- the user never stated any percentage). The
+    # regex above already matches "to be X" exactly like "to X"/"when X" --
+    # this was never a shape gap in _VENT_HOLLOW_SECOND_RE itself. The gap was
+    # that both branches above only strip a SECOND sentence/clause trailing
+    # legitimate content; a bare one-sentence reply that IS the banned form
+    # has no first sentence to fall back to, so it fell through unchanged.
+    # Dropping it to "" is safe and correct: per this file's own system-prompt
+    # text (see the "ALSO FORBIDDEN"/"ALWAYS WRONG" excavation-question rules
+    # near the top of this file), these openers are unconditionally banned
+    # regardless of what follows them, so there is no legitimate content here
+    # to preserve. turn()'s beat226 EMPTY-REPLY net is the true last pass and
+    # substitutes an honest, non-excavating, non-fabricating fallback line
+    # whenever the pipeline ends up with nothing -- exactly the right outcome
+    # here, and it also starves the fabricated statistic riding along in the
+    # same sentence for free, since the whole sentence is discarded.
+    if reply.strip() and _VENT_HOLLOW_SECOND_RE.match(reply.strip()):
+        return ""
     return reply
 
 
@@ -5289,24 +5393,42 @@ class Companion:
             )
 
         # beat241: broken-regen-filler-clause final pass. Standing defect
-        # class tracked since beat235 (5+ sightings, docs/daily-log.md
-        # beat235/236-239/240) -- the FINAL delivered text can carry a
+        # class tracked since beat235 (6+ sightings, docs/daily-log.md
+        # beat235/236-239/240/244) -- the FINAL delivered text can carry a
         # sentence that passes every OTHER guard but doesn't parse. Runs as
         # the true last content-modifying pass (same "nothing downstream can
         # reintroduce or outrun it" placement as the beat229 confabulated-
         # apology recheck directly above) so it catches the defect no matter
         # which regen path produced it. See _strip_broken_regen_filler_clause
-        # for the exact 2 sub-patterns targeted and why the other 3 sighted
+        # for the exact 3 sub-patterns targeted and why the other 3 sighted
         # instances are deliberately left to a live-model fix, not a regex.
         if reply:
             _no_filler = _strip_broken_regen_filler_clause(reply)
             if _no_filler != reply:
                 log.warning(
                     "companion: BROKEN-REGEN-FILLER-CLAUSE — dropped a "
-                    "dangling-subordinate or missing-relative-pronoun "
-                    "sentence that didn't parse"
+                    "dangling-subordinate, missing-relative-pronoun, or "
+                    "wrong-preposition sentence that didn't parse"
                 )
                 reply = _no_filler
+
+        # beat244: disclosure-referent-swap final pass. Same placement logic
+        # as the filler-clause pass directly above (true last content-
+        # modifying pass, so it catches the defect no matter which regen path
+        # produced it). See _fix_disclosure_referent_swap() for the exact gate
+        # (fires only when the user's own immediately-prior message
+        # independently states a first-person negated disclosure) and why
+        # this narrow slice of the referent-swap defect class is mechanically
+        # safe where the general class (review-queue.md Fixture #1) is not.
+        if reply:
+            _no_swap = _fix_disclosure_referent_swap(reply, user_message)
+            if _no_swap != reply:
+                log.warning(
+                    "companion: DISCLOSURE-REFERENT-SWAP — reply voiced the "
+                    "user's own unstated disclosure in first person ('%s') "
+                    "— swapped to second person", reply[:60]
+                )
+                reply = _no_swap
 
         # beat226: EMPTY-REPLY final safety net. battery9_engagement_1220
         # comp-contrast-control-confabulation-apologized-regen-fallthrough

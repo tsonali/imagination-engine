@@ -95,6 +95,35 @@ and the result was READ honestly. Ship when everything is checked._
 4. Log everything in review-queue as FYI, not as questions.
 
 ## Status snapshot (update every beat)
+- **2026-09-09 (beat244, heartbeat):** All 5 ship-gate items above remain CLOSED. Memory 0.4-1.2%
+  free throughout, `companion_deep_test` (via `qc_queue.sh`) held the one safe slot, no local
+  model launch. Cleared the 2 newest unread logs (battery11_imagination_bank, battery9_engagement)
+  via a background agent's full honest read — fresh backlog logged (hallucinated-eagle false-PASS,
+  BACK_PROMPT template leak, her→they/them plural pronoun variant, recurring therapy-frame phrasing),
+  none blind-patched. **3 real companion.py fixes, all independently re-verified by me (not just
+  trusted) via standalone regex extraction against exact quotes + FP sweeps, no model launch:**
+  (1) bare excavation-question + fabricated-statistic reply now falls through to the empty-reply
+  safety net (`_strip_vent_hollow_second()` gained a bare-reply branch — the therapy-frame regex
+  itself was already correct; the gap was no fallback path existed for a reply that IS entirely
+  the banned sentence); (2) 3rd filler-clause-garble sub-shape ("on the third time" preposition
+  garble) added to `_strip_broken_regen_filler_clause()`; (3) new `_fix_disclosure_referent_swap()`
+  closes a narrow, mechanically-safe slice of the referent-swap family (companion said "I haven't
+  told her" instead of "You haven't told her" echoing the user's own just-stated fact). Synced to
+  all 4 dist copies + zip, MD5-verified identical. **Separately found and fixed a real standalone
+  infra bug:** `scripts/taste_cull.py` has been crashing on any full-corpus run for an unknown
+  number of beats (KeyError on ~6,040 legacy-schema rows) — recent "ran taste_cull" claims were
+  only spot-checks on new rows, never full runs. Fixed; full run now clean (KEEP 6700/6957, CUT
+  257 pre-existing rows, none from this beat). **Escalated, not fixed blind:** this resurfaces a
+  training-pipeline risk the project already hit once before — `build_training_data.py` silently
+  prefers `A_taste_curated.jsonl` over `A_gold.jsonl` when present, but `honest_flywheel.sh`
+  documents itself as "no taste-cull" and never refreshes it, so the file could go stale again
+  with zero warning the moment the mini reconnects. Logged for Sonali's call in review-queue.md;
+  zero live impact so far (mini unreachable). Gold(A) 6857→6863 (+6: la mian noodle pulling,
+  wheelwright hot-tire shrink-fit, wood-turning a bowl on a lathe, silk cocoon reeling, rush-seat
+  chair weaving, dumpling pleating — 0 prior corpus hits, taste_cull-clean via the now-fixed
+  script). Mini unreachable, 100+ consecutive beat, same signature. Sonali: push v1.0 tag when
+  ready; decide the `A_taste_curated.jsonl` precedence question before trusting the mini's next
+  retrain. Only Sonali-physical: notarization + F5 voice dial + Mac Mini check.
 - **2026-09-08 (beat243, heartbeat):** All 5 ship-gate items above remain CLOSED. Memory 0.45%
   free throughout (lowest yet), `battery11_imagination_bank` held the one safe slot, no local
   model launch. Cleared a 12-log unread backlog via 4 parallel background agents. **Correction

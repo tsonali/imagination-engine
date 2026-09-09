@@ -48,7 +48,8 @@ rows = []
 for tier_file, tier in [("A_gold.jsonl","gold"), ("A_silver.jsonl","silver"),
                         ("A_qc_harvest.jsonl","silver")]:
     for r in jl(f"{A}/{tier_file}"):
-        t = re.sub(r"\[\d+(\.\d+)?\]","",r["text"]).strip()
+        # legacy rows (pre schema-standardization) store the body under "script" not "text"
+        t = re.sub(r"\[\d+(\.\d+)?\]","",r.get("text") or r.get("script") or "").strip()
         # strip provenance/frontmatter contamination (Sonali caught the va-001 leak)
         t = "\n".join(ln for ln in t.splitlines()
                       if not re.match(r'^(title|author_credit|protocol|concrete_nouns_test|'
