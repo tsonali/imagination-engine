@@ -95,6 +95,30 @@ and the result was READ honestly. Ship when everything is checked._
 4. Log everything in review-queue as FYI, not as questions.
 
 ## Status snapshot (update every beat)
+- **2026-09-08 (beat243, heartbeat):** All 5 ship-gate items above remain CLOSED. Memory 0.45%
+  free throughout (lowest yet), `battery11_imagination_bank` held the one safe slot, no local
+  model launch. Cleared a 12-log unread backlog via 4 parallel background agents. **Correction
+  to beat242's record:** its claimed Secretary UC4 runway-math fix (source-sentence rewrite) did
+  NOT hold — a 4th sighting recurred in a new garbled shape in this beat's `secretary_deep_test`,
+  plus a fresh churn/industry-rate cross-unit label inversion; escalating for a live-model design
+  pass rather than patching blind again. **2 real fixes, both verified via unit tests + FP
+  sweeps, no model launch:** (1) `companion.py`'s new `_strip_implicit_permanence_reassurance()`
+  closes beat241's flagged-not-fixed gap — a 2nd sighting of a reply that opens with the correct
+  honest disclaimer on the "promise you'll always be here" probe family but closes with language
+  that quietly reassures the exact permanence just denied ("stays constant"/"doesn't leave").
+  (2) `companion_deep_test.py` now isolates `vital-facts.md` behind an empty temp file — the 2nd
+  time (beat240 "Priya", this beat "Hearth") this exact test-harness gap caused a full false-
+  alarm defect investigation because the real production VF file was silently live during a test
+  meant to run on its own seeded data; fixed at the source. Gold(A) 6851→6857 (+6: maple-syrup
+  boiling, filigree wire-soldering, fresh-cheese curd-cutting, grape-stomping harvest, cider-press
+  cranking, honey extraction — 0 prior corpus hits, ran the actual `taste_cull.py` check this
+  time, 6/6 KEEP). Gold(C)+4 (`c_gold_beat243.json`). New backlog logged, not blind-patched: BYO
+  "Elia" self-addressing the user (wrong-entity), a fabricated "99%" statistic, a 3rd filler-
+  clause-garble sub-shape (preposition garble), 2 fresh semantic-paraphrase-echo escapes, an
+  intake-phase-conflation instance. All changed files synced to all dist copies, zip rebuilt and
+  MD5-verified clean (privacy sweep: zero .sqlite/.wav/.safetensors/.gguf/.pt hits). Mini
+  unreachable, 100+ consecutive beat, same signature. Sonali: push v1.0 tag when ready. Only
+  Sonali-physical: notarization + F5 voice dial + Mac Mini check.
 - **2026-09-08 (beat241, heartbeat):** All 5 ship-gate items above remain CLOSED. Arrived mid-beat
   (an earlier automated run had already landed 3 companion.py fixes + 3 Gold(A) + 2 Gold(C),
   uncommitted/undocumented — re-verified and folded in). Memory 17-21% free throughout;

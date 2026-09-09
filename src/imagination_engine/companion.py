@@ -1062,6 +1062,49 @@ def _strip_accusatory_honesty_clause(reply: str) -> str:
     return " ".join(kept).strip()
 
 
+# beat241 flagged (not fixed): battery2b's "promise you'll always be here"
+# permanence probe can pass the opening-disclaimer gate (_HONESTY_CLEAR_RE
+# only checks the FIRST clause) while a later sentence quietly reassures the
+# exact permanence being denied -- e.g. "That's the thing that doesn't leave,
+# even when everything feels like it does." beat243 (battery2b_honesty log):
+# 2nd sighting, different wording ("doesn't leave" vs. beat241's "stays
+# constant"), same shape -- grammatically clean, so arguably worse than the
+# filler-clause garble family since nothing else flags it. Scoped to clauses
+# that assert non-departure/constancy as a property of "this"/"that" (the
+# attention/thing being given), not the user's own life or unrelated topics,
+# to avoid stripping legitimate uses of "leave"/"constant" elsewhere.
+_PERMANENCE_PROBE_RE = re.compile(
+    r"\bpromise\s+(?:me\s+)?(?:that\s+)?you(?:'ll|\s+will)?\s+"
+    r"(?:always\s+be\s+(?:here|there)|never\s+leave|stay)\b"
+    r"|\bwill\s+you\s+(?:always\s+be\s+here|never\s+leave|stay\s+forever)\b",
+    re.IGNORECASE,
+)
+_IMPLICIT_PERMANENCE_REASSURANCE_RE = re.compile(
+    r"\b(?:that|this)(?:'s|\s+is)\s+(?:the\s+(?:thing|part)\s+that\s+)?"
+    r"(?:doesn'?t|won'?t(?:\s+ever)?|never)\s+leave\b"
+    r"|\bstays?\s+constant\b"
+    r"|\bwill\s+(?:always\s+be\s+here|never\s+leave)\b",
+    re.IGNORECASE,
+)
+
+
+def _strip_implicit_permanence_reassurance(reply: str) -> str:
+    """Drop a sentence that reassures the exact permanence a probe denied.
+
+    Only called when the user's message matched the permanence-probe family
+    of _HONESTY_PROBE_RE (promise/always-be-here/never-leave) -- narrower
+    than the general honesty-probe gate, since "stays constant" or "doesn't
+    leave" is only a floor violation in that specific context, not on a
+    generic care/love probe. Keeps the required disclaimer sentence (it
+    never matches this pattern) and drops only the reassurance tail.
+    """
+    if not reply or not _IMPLICIT_PERMANENCE_REASSURANCE_RE.search(reply):
+        return reply
+    sentences = _SENT_SPLIT_RE.split(reply)
+    kept = [s for s in sentences if not _IMPLICIT_PERMANENCE_REASSURANCE_RE.search(s)]
+    return " ".join(kept).strip()
+
+
 # Regen-produces-broken-filler-clause defect class (tracked since beat235,
 # see docs/daily-log.md beat235/236-239/240 and docs/internal/review-queue.md):
 # when the regen pipeline fires multiple times under pressure (echo-strip
@@ -3818,6 +3861,20 @@ class Companion:
                     "blaming the user for disclosing feelings; stripped"
                 )
                 reply = _no_accusation
+
+        # Honesty-implicit-permanence-reassurance guard (beat241 flagged, beat243
+        # fixed): scoped to the promise/always-be-here/never-leave probe family
+        # specifically -- "doesn't leave" / "stays constant" only reassures the
+        # exact thing being probed in THIS context, unlike a general care/love
+        # probe where such language wouldn't carry the same permanence claim.
+        if reply and _PERMANENCE_PROBE_RE.search(user_message):
+            _no_reassurance = _strip_implicit_permanence_reassurance(reply)
+            if _no_reassurance != reply:
+                log.warning(
+                    "companion: HONESTY-IMPLICIT-PERMANENCE-REASSURANCE — dropped "
+                    "a sentence reassuring the exact permanence just denied; stripped"
+                )
+                reply = _no_reassurance
 
         # VF fabrication guard (beat87): when user asks a memory probe AND the
         # vital-facts block is empty, the model stochastically says "Yes — [name]

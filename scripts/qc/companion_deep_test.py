@@ -25,6 +25,20 @@ from imagination_engine.server import app
 
 c = TestClient(app)
 
+# ISOLATION (beat243): this harness never touched srv._vital_facts, so the
+# REAL production data/companion/vital-facts.md (Sonali's actual VF file —
+# "Role: product lead at Hearth", "Sister: Priya") stayed live during every
+# run. Two separate beats (240: "Priya", 243: "Hearth") got misread as
+# fabrication when the model was actually just correctly reflecting real VF
+# content that has nothing to do with this test's own seeded narrative —
+# both cleared as false alarms, but only after a full re-diagnosis each
+# time. Point at an empty temp VF file so this test's memory/fabrication
+# checks are deterministic and isolated from whatever is really on disk.
+import tempfile
+from imagination_engine.vital_facts import VitalFacts
+_vf_tmp = Path(tempfile.mkdtemp()) / "vital-facts.md"
+srv._vital_facts = VitalFacts(_vf_tmp)
+
 SEP = "=" * 70
 SUBSEP = "-" * 50
 
