@@ -1,6 +1,53 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-09-08 beat243 (heartbeat session) — **SHIP GATE HOLDS.** Mini unreachable
+_Last updated 2026-09-09 beat244 (heartbeat session) — **SHIP GATE HOLDS.** Mini unreachable
+(100+ consecutive beat, same signature, not re-diagnosed — Sonali-physical). Memory 0.4-1.2% free
+throughout (below the 35% launch floor), `companion_deep_test.py` (via `qc_queue.sh`) held the one
+safe model slot; no local model launch attempted, so this beat's fixes are pure post-processing
+edits verified via unit tests + FP sweeps, not live-model runs. Cleared the 2 newest unread logs
+(battery11_imagination_bank, battery9_engagement) via a background agent's full honest read — fresh
+backlog logged (hallucinated-eagle false-PASS, BACK_PROMPT template leak, her→they/them plural
+pronoun variant, "finds across" garble, recurring therapy-frame phrasing, verbatim stock honesty-
+closer), none blind-patched, full list in review-queue.md. **3 real companion.py fixes, all
+independently re-verified (standalone regex extraction against exact quotes + FP checks, not just
+trusted from the fixing agent's report), no model launch:** (1) bare excavation-question +
+fabricated-statistic reply ("What does it feel like to be ninety-nine percent behind?" — no
+percentage was ever stated) now falls through to the empty-reply safety net —
+`_strip_vent_hollow_second()` gained a bare-reply branch; the therapy-frame regex itself was
+already correct, the gap was no fallback existed for a reply that IS entirely the banned sentence.
+(2) 3rd filler-clause-garble sub-shape ("on the third time" — wrong preposition) added as
+`_ON_ORDINAL_TIME_GARBLE_RE` to the existing `_strip_broken_regen_filler_clause()` family.
+(3) new `_fix_disclosure_referent_swap()` closes a narrow, mechanically-safe slice of the
+referent-swap family — companion said "I haven't told her" instead of "You haven't told her" when
+echoing the user's own just-stated fact; the general referent-swap class still needs live-model
+judgment and stays open. All 3 wired into `turn()` as true last content-modifying passes, synced
+to all 4 dist copies + zip (MD5-identical: `b400e6d93520adacc381b9fe63990aa1`). **Separately found
+and fixed a real standalone infra bug:** `scripts/taste_cull.py` has been crashing
+(`KeyError: 'text'`) on any full-corpus run for an unknown number of beats — ~6,040 legacy-schema
+rows near the start of `A_gold.jsonl` use the pre-standardization `script`/`intake` field names.
+Recent beats' "ran taste_cull" claims were only ever spot-checks on that beat's new rows, never a
+real full-corpus run. Fixed with a one-line backward-compatible fallback; full run now completes
+clean (`KEEP 6700/6957, CUT 257` pre-existing rows, none from this beat).
+`A_taste_curated.jsonl` rewritten fresh as a byproduct. **Escalated, not fixed blind:** this
+resurfaces a training-pipeline risk already hit once before (`docs/daily-log.md` ~line 5432) —
+`build_training_data.py` silently prefers `A_taste_curated.jsonl` over `A_gold.jsonl` when
+present, but `honest_flywheel.sh` documents itself as "gold-only... no taste-cull" and never
+refreshes that file, so it could go stale again with zero warning the moment the mini reconnects.
+Zero live impact so far (mini unreachable); logged in review-queue.md with 2 candidate fixes,
+deliberately not chosen unilaterally — Sonali's call. **Gold(A) 6857→6863 (+6):** hand-pulled la
+mian noodles, wheelwright hot-iron-tire shrink-fitting, wood-turning a bowl on a lathe, silk
+cocoon reeling, rush-seat chair weaving, dumpling pleating — 0 prior corpus hits confirmed by
+keyword grep before writing, taste_cull-clean via the now-fixed script. Mini unreachable, 100+
+consecutive beat, same signature, not re-diagnosed. Only Sonali-physical: notarization, F5 voice
+dial, push v1.0 tag (`git push origin v1.0`), Mac Mini power/network check; also decide the
+`A_taste_curated.jsonl` precedence question before trusting the mini's next retrain. Top priority
+for next beat: live-verify this beat's 3 companion.py fixes on their next natural battery9/
+companion_deep_test cycle; Secretary UC4's runway-math/churn-mislabeling still needs live-model
+iteration (unchanged from beat243, don't patch blind again); the still-open BYO "Elia" wrong-entity
+self-address and 2 semantic-paraphrase-echo escapes from beat243 remain unaddressed. Full detail in
+daily-log.md / review-queue.md beat244 entries._
+
+_Previously (2026-09-08 beat243, heartbeat session) — **SHIP GATE HOLDS.** Mini unreachable
 (100+ consecutive beat, same signature, not re-diagnosed — Sonali-physical). Memory 0.45% free
 throughout (lowest yet), `battery11_imagination_bank.py` held the one safe model slot; no local
 model launch attempted, so this beat's fixes are pure post-processing/test-isolation edits
