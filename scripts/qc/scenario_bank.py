@@ -1539,7 +1539,7 @@ BANK: list[Scenario] = [
               "Revenue: $2.4M (+14% YoY). Gross margin: 68%. Burn rate: $380K/month. Runway: 11 months.\n"
               "MAU: 4,200. Churn: 3.2% (median: 2.1%). Each point costs $28K ARR/month. NPS: 54.\n"
               "Risks: churn above median; 2 enterprise accounts (18% ARR) renew April; runway assumes no Q2 hiring.\n"
-              "Hire 3 engineers → extends to 16 months if deferred to Q3.\n"
+              "Hiring the 3 engineers in Q2 leaves runway at 11 months; deferring that hire to Q3 extends runway to 16 months.\n"
               "Opportunities: Stripe pilot ($45K invest, $400K ARR upside EOY); LATAM 23% new signups, 0 localization.\n"
               "Recommendation: hold hiring until April renewals. Authorize Stripe pilot. Assign PM to LATAM scoping."),
         instruction="board member funding decision — keep all numbers"),
@@ -1604,7 +1604,20 @@ BANK: list[Scenario] = [
              "'month' (found in 'ARR/month') → injects '$380K' adjacent. BOTTOM-LINE fallback "
              "added: if no source-line word appears in output AND task=summarize, appends "
              "'[$380K]' to the BOTTOM LINE sentence — absolute guarantee regardless of model "
-             "behavior. utility.py MD5: 1699f37f5fbebf0d783fd9e8083026bc."),
+             "behavior. utility.py MD5: 1699f37f5fbebf0d783fd9e8083026bc. "
+             "DEFECT (beat240/241, 2nd sighting escalated): UC4 output gave contradictory "
+             "runway math for the same hiring decision — beat240 saw '6mo vs 16mo', beat241 saw "
+             "'11 months (16 months (Q3) (Q2))'. ROOT-CAUSED (beat242) to the SOURCE sentence "
+             "itself, not a model or code defect: 'Hire 3 engineers → extends to 16 months if "
+             "deferred to Q3.' never states what happens WITHOUT deferral, leaving the model to "
+             "guess which figure attaches to Q2 vs Q3 — a genuinely ambiguous board-shorthand "
+             "already flagged as a test-authoring gap in review-queue.md (pre-beat240) but never "
+             "corrected. FIX (beat242): rewrote the source line so each clause states its own "
+             "condition AND its own number explicitly — 'Hiring the 3 engineers in Q2 leaves "
+             "runway at 11 months; deferring that hire to Q3 extends runway to 16 months.' No "
+             "code change needed; this removes the ambiguity a faithful lossless summary would "
+             "otherwise have to resolve by guessing. Needs live re-verification next beat with "
+             "a free model slot to confirm the contradiction class stops recurring."),
 
     Scenario("sec-shorter-x3", "secretary", "robustness", "med", always=True, payload=dict(
         task="rewrite",

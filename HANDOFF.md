@@ -1,6 +1,64 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-09-08 beat241 (heartbeat session) — **SHIP GATE HOLDS.** Arrived mid-beat:
+_Last updated 2026-09-08 beat242 (heartbeat session) — **SHIP GATE HOLDS.** Mini unreachable
+(100+ consecutive beat, same signature, not re-diagnosed — Sonali-physical). `battery9_engagement.py`
+held the one safe model slot the whole beat (memory 7-18% free, well below the 35% launch floor);
+no local model launch attempted, so this beat's fixes are all pure post-processing/test-source
+edits verified via unit tests against exact fixtures + full-corpus FP sweeps, not live-model runs.
+Dispatched a background agent to fully read `queue_0908_1400_battery11_imagination_bank.log`
+(9 scenarios) — verdict: **not a clean pass** despite ~35/36 mechanical PASS; 5 of 9 scenarios had
+real uncaught defects. **4 fixes landed:** (1) `postcheck.py` `_HER_SUBJECT_VERBS` gained bare
+base-form "become" (only "becomes" existed) — closes `imag-intimacy`'s "as her become familiar
+once more" escape. (2) 4 new literal your/yours pronoun-corruption entries added to
+`_INTIMACY_OBJECT_PRONOUN_SUBS` ("between your as"→"between yours as", "against your becomes"→
+"against yours becomes", "meets your after"→"meets yours after", "finding your again"→"finding
+yours again") — fresh trailing-phrase variants of the long-running your/yours family found in
+`imag-intimacy` and `imag-intimacy-finds-your-across`. (3) `_EAGLE_ANON_COMPANION_PATTERN` gained
+2 new escapes from `imag-embodiment-eagle` ("old friend whose hold you trust", "its own mission")
+— a companion-with-agency leak in fresh phrasing. All 3 verified via py_compile + `scripts/
+test_postcheck.py` (ALL PASS) + direct unit tests against the exact defect quotes + a full
+6,851-script A_gold.jsonl FP sweep (0 new hits for any of the 7 new patterns). (4) **Closed a
+standing architectural gap flagged since beat227:** `_generate_settling()` (the dedicated
+SETTLING/wind-down code path used by `imag-calm-settle`) returned its script directly with **no
+`check_return_to_room_closing()` call at all** — confirmed by reading the function to its `return
+body` — unlike the main v5/v6 immersion pipeline, which already guards this. This is why
+`imag-calm-settle` has mechanically FAILed its own closing-beat check for 15+ beats running with
+no fix landing: the check existed, it was just never wired into this specific code path. Added the
+identical check-and-fallback pattern used in `generate_session()`. Verified: the exact broken
+fixture now fails the check pre-fix and passes post-fix with the fallback line appended;
+`scripts/test_postcheck.py` still ALL PASS. **Also closed Secretary UC4's contradictory
+runway-math defect (2nd sighting, escalated in beat240/241)** — root-caused to the scenario's OWN
+source text in `scenario_bank.py` (`"Hire 3 engineers → extends to 16 months if deferred to
+Q3."`), genuinely ambiguous about which number attaches to which condition, exactly as a much
+earlier beat had already diagnosed and left unfixed. Rewrote it as two self-contained clauses
+("Hiring the 3 engineers in Q2 leaves runway at 11 months; deferring that hire to Q3 extends
+runway to 16 months.") — no code fix needed, removes the ambiguity a faithful summary would
+otherwise have to guess at. **Investigated re-wiring `trim_cycling_tail` (staged since beat230,
+explicitly left unwired by beat231 pending a better design)** — re-ran the full-corpus FP sweep
+fresh rather than trusting the old note: found the exact same 2 flagged scripts beat231 already
+read and confirmed as genuine false positives (deliberate repetitive cadence, not decay), and
+further confirmed a hypothesized "skip trim if `check_return_to_room_closing` already true" bypass
+would NOT save either FP — one of them ends with a legitimate but differently-phrased room-return
+line the closing-checker itself doesn't recognize. Correctly left unwired; beat231's conclusion
+re-confirmed with fresh evidence, not reopened or blindly forced. `postcheck.py`,
+`generator.py`, and `scenario_bank.py` synced to all dist copies (MD5-verified byte-identical),
+`dist/hearth-0.2.zip` rebuilt and spot-checked byte-for-byte for both shipped files, zero
+sqlite/wav/safetensors/gguf/pt artifacts. **Gold(A) 6845→6851 (+6):** surfboard shaping (foam-blank
+hand-planer rail work), cheese affinage-cave wheel-turning, traditional/instinctive longbow
+archery, antique cuckoo-clock escapement repair, Buddhist sand-mandala chak-pur grain-laying,
+saddle-leather two-needle stitching — all confirmed 0 prior corpus hits by keyword grep before
+writing, taste_cull-clean. **Gold(C)+5** (`c_gold_beat242.json`): anger-received (landlord deposit
+theft), redirect-drops-therapy-frame-instantly (emotional disclosure → urgent passport logistics),
+say-plain-thing-when-asked (startup idea honest assessment), playful-no-deflating-question (office
+conga-line prank), and a vital-facts opener/yield exemplar (job-search thread: one question, then
+immediate yield on redirect). Mini unreachable, 100+ consecutive beat, same signature, not
+re-diagnosed. Only Sonali-physical: notarization, F5 voice dial, push v1.0 tag
+(`git push origin v1.0`), Mac Mini power/network check. `battery9_engagement.py`
+(`queue_0908_1557_battery9_engagement.log`) was still in flight at beat close — unread, top
+priority for next beat, along with live-verifying today's 4 fixes on their next natural
+battery11/secretary_deep cycle. Full detail in daily-log.md / review-queue.md beat242 entries._
+
+_Previously (2026-09-08 beat241, heartbeat session) — **SHIP GATE HOLDS.** Arrived mid-beat:
 an earlier automated run had already landed 3 companion.py fixes (no-shared-life-claim personhood
 ban, a non-excavating gerund-fallback bridge, a declarative-restatement `_BARRIER_PIVOT_RE`
 alternation) plus 3 Gold(A) scripts and 2 Gold(C) exemplars (~10:35), uncommitted and undocumented

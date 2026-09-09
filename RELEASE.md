@@ -899,3 +899,17 @@ Forecast (not a deadline — gates still decide): beta ~Jul 18-19, public ~Jul 2
   Mini unreachable (93rd+ beat). Not fixed: imag-intimacy paraphrased repetition (needs real design
   bandwidth, not a patch); 5 carried-forward single-sighting semantic defects. Sonali: push v1.0
   tag when ready. Only Sonali-physical: notarization + F5 voice dial.
+- **2026-09-08 (beat242, heartbeat):** Honest read of `battery11_imagination_bank` (background
+  agent) found 5/9 scenarios with real defects despite ~35/36 mechanical PASS. 4 postcheck.py
+  fixes (new your/yours pronoun-corruption escapes, a new eagle anon-companion phrasing, bare
+  "her become" verb-form gap) plus a closed architectural gap: `_generate_settling()`
+  (imag-calm-settle's code path) never called `check_return_to_room_closing()` at all, explaining
+  15+ beats of the same mechanical FAIL — now fixed with the same check-and-fallback pattern the
+  main pipeline uses. Secretary UC4's 2nd-sighted contradictory runway-math defect root-caused to
+  genuinely ambiguous scenario source text in scenario_bank.py and fixed there (no code change).
+  Re-investigated the staged-since-beat230 `trim_cycling_tail` fix with a fresh FP sweep + a
+  candidate safety bypass — correctly re-confirmed it should stay unwired (the closing-checker
+  itself has a blind spot that would make the bypass unreliable). Gold(A)=6851 (+6), Gold(C)+5.
+  Mini unreachable (100th+ beat). All 3 changed files synced to all dist copies, `dist/hearth-0.2.zip`
+  rebuilt and MD5-verified byte-for-byte. Sonali: push v1.0 tag when ready. Only Sonali-physical:
+  notarization + F5 voice dial + Mac Mini check.

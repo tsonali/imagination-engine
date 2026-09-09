@@ -724,6 +724,21 @@ def _generate_settling(engine: Engine, transcript: list[dict], emit) -> str:
     body, _trunc = trim_truncated_tail(body)
     if _trunc:
         log.warning('[settling] final output trimmed to last sentence terminator (closing truncated)')
+    # beat242 (queue_0908_1400_battery11_imagination_bank.log honest read,
+    # imag-calm-settle): this path returned `body` directly with no
+    # return-to-room/eyes-open check at all — unlike the main v5/v6 pipeline's
+    # own SETTLING_PROMPT says to "trail off softly", which the model has
+    # been reading as license to end mid-scene with no room-return cue at
+    # all (the standing gap flagged since beat227). Mirrors the same
+    # check-and-fallback pattern used in generate_session() (see
+    # check_return_to_room_closing() call above) rather than inventing a
+    # second mechanism.
+    if not check_return_to_room_closing(body):
+        log.warning("[settling] closing had no eyes-open/return cue — appending fallback line")
+        body = body.rstrip() + (
+            "\n\nWhenever you're ready, let your eyes open softly, carrying this back "
+            "with you into the room."
+        )
     emit("writing_return", "Softening the close.", 3, 3, 3.0)
     log.info("[settling] session ready: %d words", len(body.split()))
     return body

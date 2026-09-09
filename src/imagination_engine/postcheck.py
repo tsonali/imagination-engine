@@ -1043,7 +1043,13 @@ _HER_SUBJECT_VERBS = re.compile(
     r"\bher\s+(enters|finds|reaches|searches|stands|turns|speaks|catches|"
     r"looks|laces|passes|breaks|stops|tells|makes|lets|comes|come|moves|sits|meets|"
     r"holds|takes|runs|walks|says|goes|sees|knows|wants|needs|leaves|starts|"
-    r"becomes|keeps|brings|gets|"
+    # beat242 (queue_0908_1400_battery11_imagination_bank.log honest read,
+    # imag-intimacy): "as her become familiar once more against you" — bare
+    # base-form "become" was never in this list (only the 3rd-person-
+    # singular "becomes" below), the same present/base-form gap beat210
+    # already found once for "come"/"comes". 0 hits for "her become" in
+    # A_gold.jsonl.
+    r"become|becomes|keeps|brings|gets|"
     # Present tense additions (beat86: found in deposition script — 'her asks', 'her has')
     r"asks|has|gives|seems|appears|does|follows|reads|checks|watches|faces|"
     # beat210 (battery11_1145 imag-intimacy honest read): "her come closer" (bare
@@ -1742,6 +1748,22 @@ def fix_reflexive_her_object(text: str) -> tuple[str, int]:
 _INTIMACY_OBJECT_PRONOUN_SUBS = (
     (re.compile(r"\bin\s+your\s+all\s+the\s+time\b", re.IGNORECASE), "in yours all the time"),
     (re.compile(r"\binto\s+your\s+as\b", re.IGNORECASE), "into yours as"),
+    # beat242 (queue_0908_1400_battery11_imagination_bank.log honest read,
+    # imag-intimacy / imag-intimacy-finds-your-across): 4 new literal
+    # instances of the standing bare-"your"-standing-in-for-"yours" family,
+    # each a fresh trailing phrase not covered by any existing entry ("into
+    # your as" above is the nearest sibling to "between your as" but the
+    # preposition differs; "meets your with equal pressure" below is the
+    # nearest sibling to "meets your after" but the trailing phrase
+    # differs; "finds your across"/"finds your for only an instant" above
+    # are the nearest siblings to the gerund "finding your again", which
+    # neither covers since both are scoped to the finite "finds" form).
+    # 0 hits for all four exact phrases in A_gold.jsonl confirmed before
+    # adding.
+    (re.compile(r"\bbetween\s+your\s+as\b", re.IGNORECASE), "between yours as"),
+    (re.compile(r"\bagainst\s+your\s+becomes\b", re.IGNORECASE), "against yours becomes"),
+    (re.compile(r"\bmeets\s+your\s+after\b", re.IGNORECASE), "meets yours after"),
+    (re.compile(r"\bfinding\s+your\s+again\b", re.IGNORECASE), "finding yours again"),
     (re.compile(r"\bleaves\s+your\s+long\s+enough\b", re.IGNORECASE), "leaves yours long enough"),
     (re.compile(r"\bguides\s+your\s+around\b", re.IGNORECASE), "guides you around"),
     (re.compile(r"\bguide\s+your\s+around\b", re.IGNORECASE), "guide you around"),
@@ -2783,7 +2805,21 @@ _EAGLE_ANON_COMPANION_PATTERN = re.compile(
     # anon_companion_pattern.
     r'|\bthat\s+other\s+bird\b'
     r'|\ba\s+conversation\s+happening\s+between\s+them\b'
-    r'|\bbirds\s+like\s+yourself\b|\bbirds\s+like\s+yourselves\b',
+    r'|\bbirds\s+like\s+yourself\b|\bbirds\s+like\s+yourselves\b'
+    # beat242 (queue_0908_1400_battery11_imagination_bank.log honest read,
+    # imag-embodiment-eagle): "an old friend whose hold you trust even at
+    # this height. Its own mission seems clear: flying lower than you but
+    # not the same target in sight." — a fresh phrasing of the companion-
+    # with-agency escape (same family as beat105's "fellow eagle"/beat134's
+    # "fellow traveler"), not covered by any existing literal phrase since
+    # "old friend" alone has legitimate non-companion uses elsewhere (a
+    # memory, a place) — scoped to the "whose hold you trust" tail so it
+    # only fires on the companion-framing use. "Its own mission" is a
+    # separate escape: an anonymous entity attributed independent agency/
+    # goals distinct from the eagle. 0 hits for either phrase in
+    # A_gold.jsonl confirmed before adding.
+    r'|\bold\s+friend\s+whose\s+hold\s+you\s+trust\b'
+    r'|\bits\s+own\s+mission\b',
     re.IGNORECASE,
 )
 
