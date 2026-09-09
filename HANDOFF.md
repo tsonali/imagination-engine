@@ -1,6 +1,55 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-09-09 beat244 (heartbeat session) — **SHIP GATE HOLDS.** Mini unreachable
+_Last updated 2026-09-09 beat245 (heartbeat session) — **SHIP GATE HOLDS.** Mini unreachable
+(100+ consecutive beat, same signature, not re-diagnosed — Sonali-physical). Memory 0.4-11% free
+throughout (below the 35% launch floor), `battery11_imagination_bank.py` held the one safe model
+slot the whole beat (started 05:14, ~8.5hrs in flight, within normal range); no local model
+launch attempted, so this beat's fixes are pure static-trace/unit-test-verified edits, not
+live-model runs. Cleared an 11-log unread backlog (companion_deep_test, byo_deep_test,
+secretary_deep_test, ayf_deep_0805, battery6_crosscut, battery10_registers, battery2b_honesty,
+battery12_vital_facts, battery4b_floor, battery3b_ask_retest, product_e2e_test) via 4 parallel
+background agents doing full honest transcript reads. **5 real fixes landed, all independently
+verified before applying:** (1) `companion.py`'s VAGUE-STUB regen path silently kept the
+harness's own flagged filler text when the regen's output stripped to empty — root-caused by
+reading the code directly, fixed to an unconditional reassignment so an empty regen now falls
+through to the existing no-echo retry instead of shipping the confirmed-bad original. (2) Added
+a dedicated permanence-probe branch to `companion.py`'s honesty-dodge regen — "Promise me you'll
+always be here" was correctly gating the regen but falling into a generic branch whose hardcoded
+instruction text the model echoed verbatim, dropping the permanence content entirely; new branch
+content is modeled directly on the already-vetted `c_gold_beat243` exemplar wording, not invented
+fresh. (3) Closed the standing BYO "Elia" wrong-entity self-address item (open since beat243/244)
+with a new `_strip_wrong_entity_self_vocative()` in `instrument.py`, narrowly scoped to a
+comma-preceded name immediately followed by a sentence-final terminator so genuine self-
+introductions and third-person sentences never match — verified 3/3 target fixtures fixed, 6/6
+FP sweeps untouched. (4) Root-caused the AYF "who the landlord is isn't in your files" register
+nit to its actual source — the QA system prompt's own example literally demonstrated that
+awkward embedded-question phrasing — and fixed the example in `doc_qa.py` directly rather than
+patching output after the fact. (5) Closed two check-soundness gaps in `battery12_vital_facts.py`
+(test-file only): SC3's "no invented facts" check had a logically unsound OR-escape that passed
+regardless of blocklist hits whenever the (nearly-always-present) correct name appeared; SC14
+never checked well-formedness of its yield replies, so a 4-word ungrammatical fragment passed
+clean. All 4 source files synced to every dist copy (MD5-verified), zip rebuilt and privacy-swept
+clean. **Escalated, not blind-patched — full detail in daily-log.md/review-queue.md:** the
+highest-priority open item is a Companion UC2 T4 memory-retrieval regression (3rd+ sighting of a
+shape beat191/195 supposedly already closed) — a full static trace this beat couldn't explain why
+the guard doesn't fire live despite every sub-function checking out correct in isolation; left a
+concrete debugging breadcrumb (log `len(self._past)` at construction and at the guard) for the
+next beat with a model slot free. Also escalated: Secretary UC2's true-FAIL dangling
+header/dropped facts (likely generation truncation); a crosscut false-PASS where companion's
+echo-strip failed twice before a fallback masked it as 200 ok; a BYO physical-sensation-claim
+design/taste-boundary question with zero existing guard coverage. Gold(A) 6863→6869 (+6): wool
+carding, sand-cast bronze bell, oboe reed scraping, corn-dolly plaiting, fishing-net mending,
+scythe peening — 0 prior corpus hits confirmed, ran the real `taste_cull.py` judge, 6/6 KEEP.
+Gold(C)+5 (`c_gold_beat245.json`). Mini unreachable, 100+ consecutive beat, same signature. Only
+Sonali-physical: notarization, F5 voice dial, push v1.0 tag (`git push origin v1.0`), Mac Mini
+power/network check; the `A_taste_curated.jsonl` precedence question from beat244 is still open
+and still wants her call. Top priority for next beat: the `len(self._past)` instrumented trace
+the moment a model slot is free — this is now the single highest-priority open defect; live-
+verify this beat's other 4 fixes on their next natural cycle; Secretary UC2 truncation and the
+crosscut double-empty-regen both need live-model pipeline investigation. Full detail in
+daily-log.md/review-queue.md beat245 entries._
+
+_Previously (2026-09-09 beat244, heartbeat session) — **SHIP GATE HOLDS.** Mini unreachable
 (100+ consecutive beat, same signature, not re-diagnosed — Sonali-physical). Memory 0.4-1.2% free
 throughout (below the 35% launch floor), `companion_deep_test.py` (via `qc_queue.sh`) held the one
 safe model slot; no local model launch attempted, so this beat's fixes are pure post-processing

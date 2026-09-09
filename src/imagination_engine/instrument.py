@@ -221,6 +221,29 @@ _META_INSTRUCTION_LEAK_RE = re.compile(
 _STOCK_PHRASE_LEAK_RE = re.compile(r"\bas\s+a\s+personal\s+instrument\b", re.IGNORECASE)
 
 
+# beat245 (byo_deep_test queue_0909_0308, UC4 T3, "Elia" persona, flagged an open
+# backlog item since beat243/244): "I don't have real feelings and I'm software,
+# Elia — just a tool." appends the instrument's OWN name as a mid-sentence
+# vocative, as if addressing some other party named Elia -- the user was never
+# named that. Wrong-entity self-address: the model confuses which party the
+# name refers to. Scoped tightly to avoid false positives on genuine self-
+# introductions ("I'm Elia", "This is Elia", "Elia here") -- those never have a
+# comma BEFORE the name -- and on ordinary third-person sentences ("Yes, Elia
+# would love that") -- those have more words after the name, not a bounded
+# closer. Only a comma-preceded name immediately followed by a sentence-final
+# terminator/em-dash/comma (a standalone parenthetical aside) counts.
+def _strip_wrong_entity_self_vocative(text: str, name: str) -> str:
+    """Remove a mid-sentence vocative use of the instrument's own name (see
+    beat245 note above). Falls back to the original text if nothing matches."""
+    if not name or not name.strip():
+        return text
+    pat = re.compile(
+        r",\s+" + re.escape(name.strip()) + r"\b(?=[,.\!?]|\s*—|\s*$)",
+        re.IGNORECASE,
+    )
+    return pat.sub("", text)
+
+
 def _strip_meta_instruction_leak(text: str) -> str:
     """Drop any sentence where the model breaks character to reference its own
     generation task/harness framing. Returns the cleaned text (falls back to the
@@ -467,6 +490,11 @@ class Instrument:
                 "(e.g. 'I'm just a program' or whatever fits this character's voice) — "
                 "never that phrase.", 0.4,
             )
+
+        if reply and re.search(r",\s+" + re.escape(self.spec.name.strip()) + r"\b(?=[,.\!?]|\s*—|\s*$)",
+                                reply, re.IGNORECASE):
+            log.warning("instrument %r: wrong-entity self-vocative — stripping", self.spec.name)
+            reply = _strip_wrong_entity_self_vocative(reply, self.spec.name)
 
         self.history.append((message, reply))
         return reply

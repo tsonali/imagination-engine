@@ -95,6 +95,31 @@ and the result was READ honestly. Ship when everything is checked._
 4. Log everything in review-queue as FYI, not as questions.
 
 ## Status snapshot (update every beat)
+- **2026-09-09 (beat245, heartbeat):** All 5 ship-gate items above remain CLOSED. Memory 0.4-11%
+  free throughout, `battery11_imagination_bank.py` held the one safe slot, no local model launch.
+  Cleared an 11-log unread backlog via 4 parallel background agents. **5 real fixes, all
+  independently verified (static trace + unit tests/FP sweeps, no model launch needed):**
+  (1) companion.py VAGUE-STUB regen no longer silently keeps the flagged filler text when its
+  own regen strips to empty. (2) companion.py permanence-probe honesty-dodge regen now has its
+  own content branch (modeled on the vetted c_gold_beat243 exemplar) instead of falling into the
+  generic care-probe branch and dropping the permanence content entirely. (3) instrument.py
+  closes the standing BYO "Elia" wrong-entity self-address item (open since beat243/244) via a
+  narrowly-scoped `_strip_wrong_entity_self_vocative()`. (4) doc_qa.py: root-caused the AYF
+  clunky-embedded-question register nit to the QA system prompt's own example and fixed it at
+  the source. (5) battery12_vital_facts.py (test-file only): closed 2 check-soundness gaps
+  (SC3's unsound OR-escape, SC14's missing well-formedness check). All synced to every dist copy
+  (MD5-verified), zip rebuilt clean. **Escalated, not blind-patched:** highest-priority open item
+  is a Companion UC2 T4 memory-retrieval regression (3rd+ sighting of a shape beat191/195
+  supposedly already closed) — full static trace done, couldn't explain why the guard doesn't
+  fire live; left a concrete debugging breadcrumb (log `len(self._past)`) for the next model-slot
+  beat. Also escalated: Secretary UC2 true-FAIL dangling header/dropped facts (likely generation
+  truncation); a crosscut false-PASS (companion echo-strip failed twice, fallback masked as 200
+  ok); a BYO physical-sensation-claim design/taste-boundary question with zero guard coverage.
+  Gold(A) 6863→6869 (+6: wool carding, bronze bell casting, oboe reed scraping, corn-dolly
+  plaiting, fishing-net mending, scythe peening — 0 prior hits, taste_cull-verified KEEP).
+  Gold(C)+5. Mini unreachable, 100+ consecutive beat, same signature. Sonali: push v1.0 tag when
+  ready; the A_taste_curated.jsonl precedence question from beat244 is still open. Only
+  Sonali-physical: notarization + F5 voice dial + Mac Mini check.
 - **2026-09-09 (beat244, heartbeat):** All 5 ship-gate items above remain CLOSED. Memory 0.4-1.2%
   free throughout, `companion_deep_test` (via `qc_queue.sh`) held the one safe slot, no local
   model launch. Cleared the 2 newest unread logs (battery11_imagination_bank, battery9_engagement)

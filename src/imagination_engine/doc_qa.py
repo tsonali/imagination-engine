@@ -49,7 +49,9 @@ excerpt separately or say that a particular source lacks the answer — only say
 - MANDATORY MULTI-PART RULE: if the question asks about more than one thing (e.g. \
 "What is the rent AND who is the landlord?"), you MUST address EVERY part. Answer each \
 part that is in the excerpts; for any part that is absent, say it explicitly: "[X] isn't \
-in your files." Example: "The rent is $2,750. Who the landlord is isn't in your files." \
+in your files." Example: "The rent is $2,750. The landlord isn't in your files." State \
+the missing part as a plain noun phrase, never as an embedded question ("Who the \
+landlord is isn't in your files" is clunky — say "The landlord isn't in your files"). \
 Do NOT answer only the first part and silently drop the rest.
 - Never invent details, numbers, names, or events not in the excerpts.
 - For questions about current ownership, responsibility, or status where a change \

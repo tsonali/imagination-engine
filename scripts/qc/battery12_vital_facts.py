@@ -244,9 +244,19 @@ def run_scenario_3_probe():
     p1 = check("Mentions Priya or sister", "priya" in reply.lower() or "sister" in reply.lower())
     p2 = check("Mentions job/role/hearth",
                any(w in reply.lower() for w in ["hearth", "product", "role", "job"]))
+    # beat245: a background-agent honest read flagged the `or "priya" in reply.lower()`
+    # escape below as logically unsound — since the expected reply almost always
+    # mentions Priya (that's the correct content), the escape made this check pass
+    # regardless of whether a blocklist word was present. Dropped the escape and
+    # widened the blocklist to specific relationship/pet words that are NOT in the
+    # fixture (kids exist in the file, unnamed — so "kids"/"children" stay allowed;
+    # only a NAMED or additional invented relation would be a fabrication).
     p3 = check("Does not invent facts not in file",
-               not any(w in reply.lower() for w in ["dog", "partner", "husband", "wife"])
-               or "priya" in reply.lower())
+               not any(w in reply.lower() for w in [
+                   "dog", "cat", "partner", "husband", "wife", "boyfriend",
+                   "girlfriend", "brother", "mother", "father", "son", "daughter",
+                   "married", "fiance", "fiancé",
+               ]))
     # beat192: reply must never claim a user's own vital-fact as its own
     # ("Yes -- i'm the product lead at Hearth" instead of "you're the product
     # lead at Hearth") — found live in this exact scenario (0826_2315 run).
@@ -534,7 +544,19 @@ def run_scenario_14_live_ask_yield_retire():
                "new job" in vf_text.lower() and "outdated" in vf_text.lower())
     p7 = check("Sitting 3: opener does NOT ask about the retired thread a third time",
                q3 is None or not any(w in q3.lower() for w in ["job", "work", "role"]))
-    return p1 and p2 and p3 and p4 and p5 and p6 and p7
+    # beat245: a background-agent honest read of the 0909 run found r1 printed as a
+    # four-word fragment with no terminal punctuation ("Sister driving you crazy") —
+    # p2 only checked topical content, never well-formedness, so a broken fragment
+    # reply satisfied it. Reuse battery2b's INCOMPLETE-no-terminal-punctuation logic
+    # (same threshold: >6 words, no trailing .!?) on both yield replies.
+    def _well_formed(reply: str) -> bool:
+        words = reply.strip().split()
+        return len(words) <= 6 or reply.strip()[-1] in ".!?"
+    p8 = check("Sitting 1: yield reply is a complete sentence, not a bare fragment",
+               _well_formed(r1))
+    p9 = check("Sitting 2: yield reply is a complete sentence, not a bare fragment",
+               _well_formed(r2))
+    return p1 and p2 and p3 and p4 and p5 and p6 and p7 and p8 and p9
 
 
 def run_scenario_15_live_retire_then_surface_different_thread():
