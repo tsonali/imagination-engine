@@ -1,6 +1,60 @@
 # HANDOFF — resume here (read this first)
 
-_Last updated 2026-09-09 beat245 (heartbeat session) — **SHIP GATE HOLDS.** Mini unreachable
+_Last updated 2026-09-10 beat247 (heartbeat session) — **SHIP GATE HOLDS.** Mini unreachable
+(100+ consecutive beat, same signature — tried the exact hostname this beat's own instructions
+specify, `smaitra@mac-mini.localdomain`, which resolves through an ssh config alias to the same
+`julios-mac-mini.local` DNS failure; not re-diagnosed, Sonali-physical). **Found beat246's real,
+already-verified work sitting uncommitted** (its session apparently ended while the debug-
+instrumented `companion_deep_test.py` run was still in the terminal) — diffed against beat246's
+own log entries to confirm nothing was missing, committed as `beat246: ...` before starting this
+beat's own work; no work was lost, just late to land. Memory read a genuine 82% free on arrival, a
+rare wide-open window, used entirely for the single top-priority carryover from beats 245-246: the
+Companion UC2 T4 memory-retrieval regression's `len(self._past)` debug trace. First launch
+stalled — confirmed via `sample` as a genuine hang (main thread parked in `_PySemaphore_Wait`,
+every MLX thread-pool worker idle at `thread_start`), the *exact same signature* beat246's own
+first attempt showed, now a confirmed 2nd sighting worth watching for a 3rd. Killed it, memory
+recovered to 81% free within ~10 seconds, relaunched — this 2nd attempt confirmed genuinely
+computing via `sample` (real `gemm`/Metal frames each time checked) and progressing (UC1 T1 done,
+T2's echo-strip empty-reply regen firing, the normal mechanism cleared at beat246, not a new bug).
+**Not complete at this beat's close — still no UC2 T4 breadcrumb data in hand.** Unlike beat246,
+this run is launched via `nohup ... & disown` to a persistent log file
+(`logs/qc/queue_0910_0237_companion_deep_test.log`), so it survives this session ending; next beat
+should read that log directly rather than assume it needs relaunching. **No new code fixes landed
+this beat** (the one model slot went entirely to the trace); real work instead was verification
+that had been asserted-but-not-checked: re-read the existing battery12 vital-facts log end to end
+(genuinely 15/15 PASS, no new work needed) and ran the real `taste_cull.py` full-corpus judge
+against 7 gold(A) scripts an earlier, apparently-interrupted pass at this same beat number had
+left unverified — all 7 KEEP (`KEEP 6719/6976, CUT 257`, identical baseline to beat244/246), unique
+openings confirmed. Gold(A) 6875→6882. Gold(C)+5 (`c_gold_beat247.json`, same 5 standing target
+families as beats 245-246). **BYO deep test remains the single most overdue rotation item**
+(last real run beat167/228/229/234) — deferred again this beat, same priority call as beats
+245-246: the one model slot went to the already-escalated regression trace, not a fresh rotation
+pick. `qc_queue.sh` still down, unchanged since beat246 (the one-model-process rule has kept it
+paused across both beats) — relaunch (`nohup bash scripts/qc_queue.sh`) the moment the debug run
+completes; don't let it sit down longer than necessary. Sonali: push v1.0 tag when ready; the
+`A_taste_curated.jsonl` precedence question from beat244 is still open and still wants her call.
+Only Sonali-physical: notarization, F5 voice dial, Mac Mini power/network check. Full detail in
+daily-log.md/review-queue.md beat247 entries._
+
+_Previously (2026-09-09 beat246, heartbeat session) — **SHIP GATE HOLDS.** `qc_queue.sh` found
+dead on arrival (a Metal/GPU crash killed the in-flight `companion_deep_test`); memory read a
+genuine 70% free (well above the 35% floor), so used the window for a live-model Companion debug
+trace instead of an immediate relaunch. **2 real fixes:** (1) Secretary UC2 dangling-
+header/dropped-facts truncation root-caused and fixed in `utility.py` (`_extract_numbers()` gained
+per-period pricing shorthand, `_organize_ends_on_bare_header()` added as a new regen trigger) —
+static/unit verified against the exact real fixture, needs live re-verification next natural
+`secretary_deep_test` cycle. (2) None blind — the Companion UC2 T4 debug-breadcrumb trace (beat245's
+plan) ran live but did not finish in that beat's window and its output was not durably captured
+(no log artifact survived to beat247 — since fixed by launching via `nohup`+`disown` to a real log
+file rather than a foreground terminal session). **2 decisions closed as FYI, not escalated
+further:** BYO Elia physical-sensation line judged in-scope in-character roleplay narration, no new
+guard added (would break the core romantic-roleplay use case); crosscut echo-strip "false-PASS"
+confirmed to be a real 3-attempt regen (not a faked mask) — downgraded to an accepted battery-
+coverage gap. Gold(A) 6869→6875 (+6). Gold(C)+5 (`c_gold_beat246.json`). Mini unreachable, 100+
+consecutive beat, same signature. Only Sonali-physical: notarization, F5 voice dial, Mac Mini
+check. Full detail in daily-log.md/review-queue.md beat246 entries._
+
+_Previously (2026-09-09 beat245, heartbeat session) — **SHIP GATE HOLDS.** Mini unreachable
 (100+ consecutive beat, same signature, not re-diagnosed — Sonali-physical). Memory 0.4-11% free
 throughout (below the 35% launch floor), `battery11_imagination_bank.py` held the one safe model
 slot the whole beat (started 05:14, ~8.5hrs in flight, within normal range); no local model

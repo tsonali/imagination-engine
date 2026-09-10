@@ -95,6 +95,27 @@ and the result was READ honestly. Ship when everything is checked._
 4. Log everything in review-queue as FYI, not as questions.
 
 ## Status snapshot (update every beat)
+- **2026-09-10 (beat247, heartbeat):** All 5 ship-gate items above remain CLOSED. Found beat246's
+  work uncommitted (session ended mid-run) — verified against its own log entries and committed
+  as `beat246: ...` before starting fresh. Memory read a genuine 82% free on arrival (rare wide
+  window), used it for the beat245/246 top-priority carryover: the Companion UC2 T4
+  `len(self._past)` debug trace. First launch stalled (2nd sighting of beat246's exact signature —
+  confirmed via `sample`: parked mutex, idle MLX threadpool); killed, memory recovered to 81%,
+  relaunched — 2nd attempt confirmed genuinely computing via `sample` (real Metal/gemm frames),
+  in progress at this beat's close, not yet complete. Unlike beat246, this run is durably logged
+  (`nohup ... & disown` to a persistent log file) so it survives the session ending — next beat
+  should read the log directly rather than relaunch blind. **No new code fixes landed this beat**
+  (the model slot went entirely to the debug trace); real verification work instead: re-confirmed
+  battery12 vital-facts still genuinely 15/15 PASS (no new work needed), ran the real
+  `taste_cull.py` full-corpus judge against 7 gold(A) scripts an earlier interrupted pass had left
+  unverified (all 7 KEEP, unique openings confirmed) — gold(A) 6875→6882. Gold(C)+5
+  (`c_gold_beat247.json`, same 5 standing target families). BYO deep test remains the most overdue
+  rotation item (deferred again — model slot committed to the higher-priority regression trace).
+  Mini unreachable, 100+ consecutive beat, same signature (tried the exact hostname this beat's
+  instructions specify; resolves through to the same known DNS failure). `qc_queue.sh` still
+  intentionally down since beat246 — relaunch the moment the debug run completes. Sonali: push
+  v1.0 tag when ready; the `A_taste_curated.jsonl` precedence question from beat244 is still open.
+  Only Sonali-physical: notarization, F5 voice dial, Mac Mini check.
 - **2026-09-09 (beat246, heartbeat):** All 5 ship-gate items above remain CLOSED. `qc_queue.sh`
   found dead on arrival (a Metal/GPU crash killed the in-flight `companion_deep_test`); memory
   read a genuine 70% free (well above the 35% floor), so used the window for a live-model
