@@ -143,13 +143,29 @@ class Engine:
         if self.draft_model is not None:
             kwargs["draft_model"] = self.draft_model
             kwargs["num_draft_tokens"] = getattr(config, "num_draft_tokens", 4)
-        for response in stream_generate(
-            self.model,
-            self.tokenizer,
-            prompt=formatted,
-            max_tokens=max_tokens or config.max_tokens,
-            sampler=sampler,
-            logits_processors=logits_processors,
-            **kwargs,
-        ):
-            yield response.text
+        # mx.clear_cache() in `finally`: mlx-lm's C++ allocator caches freed Metal
+        # buffers for reuse rather than returning them to the OS. Across the
+        # hundreds of generate calls in one long-running battery/server process
+        # (companion alone does several regen calls per turn), that cache grows
+        # unbounded and eventually exceeds what macOS will wire for the GPU,
+        # aborting the process with a std::runtime_error the caller can't catch
+        # (libc++abi terminates before Python sees it). Root-caused 2026-09-09
+        # after this exact abort (kIOGPUCommandBufferCallbackErrorOutOfMemory)
+        # recurred across ~15 battery logs from 07-11 through 09-09 despite the
+        # pre-launch memory_pressure gate in qc_queue.sh — that gate only checks
+        # system memory at battery START, not the Metal cache growing DURING a
+        # long-lived process. Releasing the cache after every full response
+        # keeps steady-state wired memory flat instead of monotonically rising.
+        try:
+            for response in stream_generate(
+                self.model,
+                self.tokenizer,
+                prompt=formatted,
+                max_tokens=max_tokens or config.max_tokens,
+                sampler=sampler,
+                logits_processors=logits_processors,
+                **kwargs,
+            ):
+                yield response.text
+        finally:
+            mx.clear_cache()

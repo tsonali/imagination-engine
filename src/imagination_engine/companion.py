@@ -2724,6 +2724,11 @@ class Companion:
         self.vital_facts = vital_facts
         # Past-conversation summaries (cross-session continuity), loaded once.
         self._past = memory.recent() if memory else []
+        log.warning(
+            "companion: DEBUG-BREADCRUMB __init__ session_key=%r memory_id=%s "
+            "len(self._past)=%d", session_key, id(memory) if memory else None,
+            len(self._past),
+        )
         # Track consecutive question-ender replies so we can break the streak.
         self._q_streak = 0
         # Track the last open-thread topic asked (for no-consecutive-repeat rule).
@@ -4090,6 +4095,11 @@ class Companion:
                 and reply
                 and (re.match(r"^(?:[Yy]ou haven'?t|[Ii] haven'?t|[Ww]e haven'?t)\b", reply.strip())
                      or _pq_already_canonical)):
+            log.warning(
+                "companion: DEBUG-BREADCRUMB PAST-QUERY-branch session_key=%r "
+                "self_id=%s len(self._past)=%d reply_start=%r",
+                self.session_key, id(self), len(self._past), reply[:40] if reply else reply,
+            )
             _vf_ctx = self.vital_facts.context_block() if self.vital_facts else ""
             _vf_hit = bool(_vf_ctx) and _vf_covers_query(user_message, _vf_ctx)
             # beat191: a query can be genuinely covered by cross-session past-conversation

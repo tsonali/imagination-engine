@@ -221,6 +221,14 @@ def _extract_numbers(text: str) -> list[str]:
     )
     # Quarter references: Q1–Q4 (planning designators that must survive verbatim)
     found += re.findall(r'\bQ[1-4]\b', text)
+    # Per-period pricing shorthand: 200/mo, 49/month, 1200/yr — a bare number is
+    # never captured by the dollar-amount pattern above without a leading '$', and
+    # this shape is common enough in business notes ("they'd pay 200/mo for SOC2")
+    # that dropping it silently defeats the lossless-organize contract (beat246,
+    # secretary_deep_test UC2: '200'/'SOC2' section vanished entirely, uncaught
+    # because '200' was never in the extracted set to check for in the first place).
+    found += re.findall(r'\d+(?:\.\d+)?(?=/\s*(?:mo|month|mos|yr|yrs|year|wk|wks|week)\b)',
+                         text, re.I)
     # Deduplicate while preserving order
     seen = set()
     unique = []
@@ -230,6 +238,26 @@ def _extract_numbers(text: str) -> list[str]:
             seen.add(norm)
             unique.append(norm)
     return unique
+
+
+def _organize_ends_on_bare_header(s: str) -> bool:
+    """True when generation likely stopped mid-structure: the last non-blank line
+    reads as a section header (short, no sentence-ending or list punctuation) with
+    no body content under it. beat246 (secretary_deep_test UC2, queue_0909_0315):
+    output ended '...Enterprise Tier Confusion' with nothing after it, silently
+    dropping the whole $200/SOC2 fact behind a real-looking header — the mandatory-
+    numbers regen loop never fired because the number wasn't even in the extracted
+    set (see _extract_numbers per-period fix above), so this catches the shape
+    directly regardless of which fact happens to be missing."""
+    lines = [ln.strip() for ln in s.splitlines() if ln.strip()]
+    if not lines:
+        return False
+    last = lines[-1]
+    if last.startswith(('-', '*', '•')) or re.match(r'^\d+[.)]', last):
+        return False  # a list item, not a header
+    if last.endswith(('.', '!', '?', ':', ',')):
+        return False  # ends in ordinary sentence punctuation, not a bare header
+    return 1 <= len(last.split()) <= 6
 
 
 _MONTH_ABBR = r'(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)'
@@ -766,7 +794,10 @@ class Assistant:
                 swaps = _label_binding_violations(bindings, out)
                 unit_swaps = _unit_schema_violations(text, out)
                 same_day = _same_day_contradiction(out)
-                if not missing and not swaps and not unit_swaps and not same_day:
+                dangling_header = (task_key == "organize"
+                                    and _organize_ends_on_bare_header(out))
+                if not missing and not swaps and not unit_swaps and not same_day \
+                        and not dangling_header:
                     break
                 task_obj = TASKS[task_key]
                 system, user = task_obj.build(
@@ -872,6 +903,14 @@ class Assistant:
                         " connector — keep each action's own date and state them as separate"
                         " items unless the source explicitly says they happen on the same day."
                     )
+                if dangling_header:
+                    extra_parts.append(
+                        "\n\nINCOMPLETE OUTPUT: your previous attempt ended on a section"
+                        " header with no content underneath it — you stopped before"
+                        " finishing. Write EVERY section completely, with real content"
+                        " under every header, before ending your response. Do not end your"
+                        " response on a bare header line."
+                    )
                 extra = "".join(extra_parts)
                 temp = 0.25 if attempt >= 2 else (0.35 if attempt == 1 else 0.4)
                 regen = "".join(self.engine.stream(
@@ -883,9 +922,15 @@ class Assistant:
                     temperature=temp,
                 )).strip()
                 recovered = [n for n in missing if n in regen]
+                regen_dangling = (task_key == "organize"
+                                   and _organize_ends_on_bare_header(regen))
                 if len(recovered) >= len(missing) // 2 + 1:
                     log.info("secretary[%s]: attempt %d regen recovered %d/%d missing numbers",
                              task_key, attempt + 1, len(recovered), len(missing))
+                    out = regen
+                elif dangling_header and not regen_dangling:
+                    log.info("secretary[%s]: attempt %d regen fixed dangling section header",
+                             task_key, attempt + 1)
                     out = regen
             # Last-resort mechanical injection: after all regen attempts, if a number is
             # STILL missing, find its sibling in the output and inject it adjacent.

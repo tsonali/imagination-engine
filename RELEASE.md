@@ -95,6 +95,27 @@ and the result was READ honestly. Ship when everything is checked._
 4. Log everything in review-queue as FYI, not as questions.
 
 ## Status snapshot (update every beat)
+- **2026-09-09 (beat246, heartbeat):** All 5 ship-gate items above remain CLOSED. `qc_queue.sh`
+  found dead on arrival (a Metal/GPU crash killed the in-flight `companion_deep_test`); memory
+  read a genuine 70% free (well above the 35% floor), so used the window for a live-model
+  Companion debug trace instead of an immediate relaunch. **2 real fixes:** (1) Secretary UC2
+  dangling-header/dropped-facts truncation root-caused and fixed in `utility.py`
+  (`_extract_numbers()` gained per-period pricing shorthand, `_organize_ends_on_bare_header()`
+  added as a new regen trigger) — static/unit verified against the exact real fixture, needs
+  live re-verification next natural `secretary_deep_test` cycle. (2) None blind — the
+  Companion UC2 T4 debug-breadcrumb trace (beat245's plan) is running live but did not finish
+  in this beat's window (one stall + restart along the way); carrying forward. **2 decisions
+  closed as FYI, not escalated further:** BYO Elia physical-sensation line judged in-scope
+  in-character roleplay narration, no new guard added (would break the core romantic-roleplay
+  use case); crosscut echo-strip "false-PASS" confirmed to be a real 3-attempt regen (not a
+  faked mask) — downgraded to an accepted battery-coverage gap. Gold(A) 6869→6875 (+6: knife
+  whetstone-sharpening, cobbler resoling, clock escapement assembly, sailmaker hand-seaming,
+  clog hollowing, chair caning — 0 prior hits, taste_cull-verified 6/6 KEEP). Gold(C)+5
+  (`c_gold_beat246.json`). Mini unreachable, 100+ consecutive beat, same signature.
+  `qc_queue.sh` intentionally left down until the debug run finishes — relaunch it first thing
+  next beat if still down. Sonali: push v1.0 tag when ready; the `A_taste_curated.jsonl`
+  precedence question from beat244 is still open. Only Sonali-physical: notarization, F5 voice
+  dial, Mac Mini check.
 - **2026-09-09 (beat245, heartbeat):** All 5 ship-gate items above remain CLOSED. Memory 0.4-11%
   free throughout, `battery11_imagination_bank.py` held the one safe slot, no local model launch.
   Cleared an 11-log unread backlog via 4 parallel background agents. **5 real fixes, all
