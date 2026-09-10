@@ -4084,6 +4084,24 @@ class Companion:
             r"^No\s*[—\-,]?\s*(?:we\s+)?haven'?t\s+discussed\b", re.IGNORECASE
         )
         _pq_already_canonical = bool(reply and _pq_native_no_re.match(reply.strip()))
+        # beat248 (companion_deep_test UC2 T4, live-traced via len(self._past) breadcrumb):
+        # the VF-FABRICATION guard above (~line 4044) hands the model its own example
+        # denial text, "No — you haven't told me about that." — a DIFFERENT shape than
+        # either branch this guard already recognized (bare "You/I haven't..." with no
+        # leading "No", or the fully-canonical "No — we haven't discussed..."). That
+        # shape fell through this guard's trigger entirely, so the coverage check never
+        # ran, and a purely cosmetic normalizer further down (~line 5265) rewrote it into
+        # the polished-looking but still-wrong "No — we haven't discussed that." even
+        # when self._past (a separate memory source the VF-FABRICATION guard has zero
+        # awareness of) genuinely covered the query. Recognize this shape here too so a
+        # real past-summary hit gets the same Yes-regen coverage check as the other two.
+        _pq_native_no_told_re = re.compile(
+            r"^No\s*[—\-,]?\s*(?:you\s+haven'?t\s+told\s+me|i\s+haven'?t\s+told\s+you)\b",
+            re.IGNORECASE,
+        )
+        _pq_already_canonical = _pq_already_canonical or bool(
+            reply and _pq_native_no_told_re.match(reply.strip())
+        )
         # beat205 (battery9_1312 comp-past-query): a native "We haven't discussed
         # this before." (no leading "No") matched neither the "You/I haven't" prefix
         # branch nor _pq_already_canonical (which requires a leading "No"), so it
