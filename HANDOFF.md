@@ -1,5 +1,16 @@
 # HANDOFF — resume here (read this first)
 
+> **⏸ PROJECT PAUSED 2026-09-10 (Sonali's directive, midday session).** The
+> `com.hearth.heartbeat` launchd job is **unloaded** — no beats fire until it is re-loaded with
+> `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.hearth.heartbeat.plist`.
+> Everything on disk was committed and pushed to GitHub at pause time: this repo
+> (`tsonali/hearth`, through beat248 wrap-up) plus new private repos `tsonali/hearth-corpus`,
+> `tsonali/hearth-voice-bakeoff`, and `tsonali/hearth-design-kit`. The beat247 nohup companion
+> debug run had already ended on its own (its log is in `logs/qc/`, untracked); `qc_queue.sh` is
+> down and `scripts/QUEUE-PAUSED` is committed. On resume: read the beat247 entry below —
+> the UC2 T4 trace log, the BYO deep-test rotation, and the `A_taste_curated.jsonl` precedence
+> question are the open threads.
+
 _Last updated 2026-09-10 beat247 (heartbeat session) — **SHIP GATE HOLDS.** Mini unreachable
 (100+ consecutive beat, same signature — tried the exact hostname this beat's own instructions
 specify, `smaitra@mac-mini.localdomain`, which resolves through an ssh config alias to the same
